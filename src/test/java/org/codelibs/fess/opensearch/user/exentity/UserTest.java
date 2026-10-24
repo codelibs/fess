@@ -41,6 +41,22 @@ public class UserTest extends UnitFessTestCase {
     }
 
     /**
+     * The ids are written with the URL-safe alphabet, so a name whose standard encoding contains
+     * '+' or '/' (a Japanese head office, an emoji) is stored with '-' or '_'. It has to decode back,
+     * as does an id that an older writer stored with the standard alphabet.
+     */
+    @Test
+    public void test_getRoleNames_decodesUrlSafeAndStandardAlphabets() {
+        final User user = new User();
+        user.setName("tester");
+        user.setRoles(new String[] { "8J-YgA==", "8J+YgA==" });
+        user.setGroups(new String[] { "5pys56S-", "5pys56S+" });
+
+        assertEquals(List.of("\uD83D\uDE00", "\uD83D\uDE00"), Arrays.asList(user.getRoleNames()));
+        assertEquals(List.of("\u672C\u793E", "\u672C\u793E"), Arrays.asList(user.getGroupNames()));
+    }
+
+    /**
      * A role stored as a name rather than an id cannot be decoded. Reading it back skips it instead
      * of throwing, so the account can still be listed and repaired; without this every read of the
      * user fails and the account can no longer log in.
