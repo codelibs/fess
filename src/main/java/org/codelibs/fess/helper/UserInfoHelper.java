@@ -78,7 +78,7 @@ public class UserInfoHelper {
     /**
      * Retrieves the user code for the current request.
      * The user code is used to uniquely identify users across sessions and requests.
-     * It checks multiple sources in order: request attribute, request parameter, cookie, user bean, or generates a new one.
+     * It checks multiple sources in order: request attribute, user bean of a logged-in session, request parameter, cookie, or generates a new one.
      *
      * @return the user code string, or null if no valid session exists
      */
@@ -87,6 +87,16 @@ public class UserInfoHelper {
             String userCode = (String) request.getAttribute(Constants.USER_CODE);
             if (StringUtil.isNotBlank(userCode)) {
                 return userCode;
+            }
+
+            // A logged-in user is the user of the session. The code of a logged-in user is the encrypted user id,
+            // so a request parameter or a cookie that carried another one would act as that user.
+            if (request.isRequestedSessionIdValid()) {
+                userCode = getUserCodeFromUserBean(request);
+                if (StringUtil.isNotBlank(userCode)) {
+                    updateUserSessionId(userCode);
+                    return userCode;
+                }
             }
 
             userCode = getUserCodeFromRequest(request);

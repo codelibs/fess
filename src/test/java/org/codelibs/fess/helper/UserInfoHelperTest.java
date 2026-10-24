@@ -313,6 +313,45 @@ public class UserInfoHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getUserCode_loggedInUserIgnoresRequestParameterAndCookie() {
+        final String[] updated = { null };
+        final UserInfoHelper userInfoHelper = new UserInfoHelper() {
+            @Override
+            protected String getUserCodeFromUserBean(final jakarta.servlet.http.HttpServletRequest request) {
+                return "loggedInUserCode12345";
+            }
+
+            @Override
+            protected String getUserCodeFromCookie(final jakarta.servlet.http.HttpServletRequest request) {
+                return "cookieUserCode123456789";
+            }
+
+            @Override
+            protected void updateUserSessionId(final String userCode) {
+                updated[0] = userCode;
+            }
+        };
+        final MockletHttpServletRequest request = getMockRequest();
+        request.getSession(true);
+        request.setParameter("userCode", "12345abcde12345ABCDE");
+        assertEquals("loggedInUserCode12345", userInfoHelper.getUserCode());
+        assertEquals("loggedInUserCode12345", updated[0]);
+    }
+
+    @Test
+    public void test_getUserCode_anonymousStillAcceptsRequestParameter() {
+        final UserInfoHelper userInfoHelper = new UserInfoHelper() {
+            @Override
+            protected String getUserCodeFromUserBean(final jakarta.servlet.http.HttpServletRequest request) {
+                return null;
+            }
+        };
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setParameter("userCode", "12345abcde12345ABCDE");
+        assertEquals("12345abcde12345ABCDE", userInfoHelper.getUserCode());
+    }
+
+    @Test
     public void test_getUserCode_withValidCookie() {
         UserInfoHelper userInfoHelper = new UserInfoHelper() {
             @Override
