@@ -32,6 +32,8 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
+import org.codelibs.fess.opensearch.log.cbean.SearchLogCB;
+import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
@@ -39,6 +41,7 @@ import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -248,6 +251,51 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertFalse(searchLogHelper.acceptClickLog(clickLog, OptionalEntity.empty()));
         assertNull(clickLog.getSearchWord());
         assertNull(clickLog.getRank());
+    }
+
+    @Test
+    public void test_processClickLogQueue_clickWithoutQueryIdIsSkippedWithoutSearchLogLookup() {
+        final List<String> lookedUp = new ArrayList<>();
+        ComponentUtil.register(new SearchLogBhv() {
+            @Override
+            public OptionalEntity<SearchLog> selectEntity(final CBCall<SearchLogCB> cbLambda) {
+                lookedUp.add("selectEntity");
+                // building the condition with a null query ID fails here, exactly as in production
+                cbLambda.callback(new SearchLogCB());
+                return OptionalEntity.empty();
+            }
+        }, SearchLogBhv.class.getCanonicalName());
+        final List<Throwable> failures = new ArrayList<>();
+        final SearchLogHelper helper = new SearchLogHelper() {
+            @Override
+            protected boolean acceptClickLog(final ClickLog clickLog, final OptionalEntity<SearchLog> searchLog) {
+                return true;
+            }
+
+            @Override
+            protected void processClickLog(final List<ClickLog> clickLogList) {
+                failures.add(new AssertionError("a click without a query ID must not be stored: " + clickLogList));
+            }
+
+            @Override
+            protected void updateClickFieldInIndex(final Map<String, Integer> clickCountMap) {
+                failures.add(new AssertionError("a click without a query ID must not be counted: " + clickCountMap));
+            }
+        };
+        final java.util.Queue<ClickLog> queue = new java.util.concurrent.ConcurrentLinkedQueue<>();
+        final ClickLog noQueryId = new ClickLog();
+        noQueryId.setDocId("doc1");
+        queue.add(noQueryId);
+        final ClickLog blankQueryId = new ClickLog();
+        blankQueryId.setDocId("doc2");
+        blankQueryId.setQueryId(" ");
+        queue.add(blankQueryId);
+
+        helper.processClickLogQueue(queue);
+
+        assertTrue(queue.isEmpty());
+        assertTrue(lookedUp.isEmpty(), "no search log lookup is possible without a query ID");
+        assertTrue(failures.isEmpty(), failures.toString());
     }
 
     @Test
