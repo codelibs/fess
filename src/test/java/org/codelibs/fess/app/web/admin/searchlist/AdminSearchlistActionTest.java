@@ -1519,6 +1519,14 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         return renderData;
     }
 
+    @Test
+    public void test_deleteall_requiresTheEditRole() throws Exception {
+        final org.codelibs.fess.annotation.Secured secured =
+                AdminSearchlistAction.class.getMethod("deleteall", org.codelibs.fess.app.web.admin.searchlist.ListForm.class)
+                        .getAnnotation(org.codelibs.fess.annotation.Secured.class);
+        assertEquals(List.of(AdminSearchlistAction.ROLE), List.of(secured.value()));
+    }
+
     private java.lang.reflect.Field findField(Class<?> clazz, String fieldName) {
         while (clazz != null) {
             try {

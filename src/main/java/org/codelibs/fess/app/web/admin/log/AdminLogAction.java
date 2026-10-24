@@ -87,7 +87,13 @@ public class AdminLogAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
-        final String filename = sanitizeFilename(decodeLogFileId(id));
+        final String filename;
+        try {
+            filename = sanitizeFilename(decodeLogFileId(id));
+        } catch (final IllegalArgumentException e) {
+            throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id), this::asIndexHtml);
+            return redirect(getClass()); // no-op
+        }
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
