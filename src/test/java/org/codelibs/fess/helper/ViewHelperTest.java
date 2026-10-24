@@ -633,16 +633,33 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals("Contact us at <strong>$support</strong> for help.", viewHelper.replaceHighlightQueries(noDigitText, noDigitQueries));
     }
 
+    private void registerRateLimitHelper() {
+        final RateLimitHelper rateLimitHelper = new RateLimitHelper();
+        rateLimitHelper.init();
+        ComponentUtil.register(rateLimitHelper, "rateLimitHelper");
+    }
+
     @Test
-    public void test_getClientIp() {
+    public void test_getClientIp_trustedProxy() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
+        registerRateLimitHelper();
 
+        // 127.0.0.1 is a trusted proxy by default
+        getMockRequest().setRemoteAddr("127.0.0.1");
         getMockRequest().addHeader("x-forwarded-for", "192.168.1.1");
         assertEquals("192.168.1.1", viewHelper.getClientIp(getMockRequest()));
+    }
 
-        getMockRequest().setRemoteAddr("127.0.0.1");
-        assertNotNull(viewHelper.getClientIp(getMockRequest()));
+    @Test
+    public void test_getClientIp_ignoresForwardingHeaderFromUntrustedPeer() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+        registerRateLimitHelper();
+
+        getMockRequest().setRemoteAddr("198.51.100.7");
+        getMockRequest().addHeader("x-forwarded-for", "203.0.113.77");
+        assertEquals("198.51.100.7", viewHelper.getClientIp(getMockRequest()));
     }
 
     @Test

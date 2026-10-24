@@ -65,6 +65,13 @@ public class ActivityHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_toLtsvField_replacesEveryLineBreak() {
+        assertEquals("a b c d e", activityHelper.toLtsvField("a\rb\nc\u0085d\u2028e"));
+        assertEquals("x y", activityHelper.toLtsvField("x\u2029y"));
+        assertEquals("x_y", activityHelper.toLtsvField("x\ty"));
+    }
+
+    @Test
     public void test_login() {
         activityHelper.useEcsFormat = false;
         activityHelper.login(OptionalThing.empty());

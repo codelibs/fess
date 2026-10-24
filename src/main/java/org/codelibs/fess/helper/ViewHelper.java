@@ -905,17 +905,15 @@ public class ViewHelper {
 
     /**
      * Gets the client IP address from the request.
-     * Checks X-Forwarded-For header before using remote address.
+     * The forwarding headers are honored only when the request comes from a trusted proxy
+     * ({@code rate.limit.trusted.proxies}), the same rule the rate limiter uses, so a caller cannot
+     * choose the address that is written to the audit and search logs.
      *
      * @param request the HTTP servlet request
      * @return the client IP address
      */
     public String getClientIp(final HttpServletRequest request) {
-        final String value = request.getHeader("x-forwarded-for");
-        if (StringUtil.isNotBlank(value)) {
-            return value;
-        }
-        return request.getRemoteAddr();
+        return ComponentUtil.getRateLimitHelper().getClientIp(request);
     }
 
     /**
