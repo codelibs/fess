@@ -36,6 +36,9 @@ public final class LogUtil {
     /** Control characters, and the Unicode line and paragraph separators that {@code \p{Cntrl}} does not cover. */
     private static final Pattern UNSAFE_PATTERN = Pattern.compile("[\\p{Cntrl}\\u0085\\u2028\\u2029]");
 
+    /** The line separators that JSON leaves as they are, unlike CR and LF, which it writes as {@code \\r} and {@code \\n}. */
+    private static final Pattern JSON_LINE_SEPARATOR_PATTERN = Pattern.compile("[\\u0085\\u2028\\u2029]");
+
     /** The {@code logger name:key} pairs already reported by {@link #warnOnce}. */
     private static final Set<String> WARNED = ConcurrentHashMap.newKeySet();
 
@@ -55,6 +58,20 @@ public final class LogUtil {
         }
         final String bounded = value.length() > MAX_LOGGED_LENGTH ? value.substring(0, MAX_LOGGED_LENGTH) + "..." : value;
         return UNSAFE_PATTERN.matcher(bounded).replaceAll("?");
+    }
+
+    /**
+     * Makes a JSON text safe to write into the application log, where it must not start a line of
+     * its own: NEL, LS and PS are replaced by their JSON escape sequences (a backslash, {@code u}
+     * and four hex digits), which mean the same inside a JSON string. Unlike {@link #sanitize} the text is neither cut nor
+     * otherwise changed, so a query dump stays complete.
+     *
+     * @param json the JSON text, or an object whose string form is JSON (may be null)
+     * @return the text to log
+     */
+    public static String escapeJsonLineSeparators(final Object json) {
+        return JSON_LINE_SEPARATOR_PATTERN.matcher(String.valueOf(json))
+                .replaceAll(m -> String.format("\\\\u%04x", (int) m.group().charAt(0)));
     }
 
     /**
