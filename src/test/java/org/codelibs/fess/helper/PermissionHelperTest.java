@@ -15,6 +15,26 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.IOException;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.UserPrincipal;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.codelibs.fess.crawler.client.fs.FileSystemClient;
+import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -386,6 +406,229 @@ public class PermissionHelperTest extends UnitFessTestCase {
     public void test_decode_encode_keepsDeny() {
         assertEquals("D1bob", permissionHelper.encode(permissionHelper.decode("D1bob")));
         assertEquals("(deny){user}bob", permissionHelper.decode(permissionHelper.encode("(deny) {user}bob")));
+    }
+
+    private static UserPrincipal user(final String name) {
+        return new UserPrincipal() {
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
+    }
+
+    private static GroupPrincipal group(final String name) {
+        return new GroupPrincipal() {
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
+    }
+
+    private static AclEntry aclEntry(final AclEntryType type, final UserPrincipal principal, final AclEntryPermission... permissions) {
+        return AclEntry.newBuilder().setType(type).setPrincipal(principal).setPermissions(permissions).build();
+    }
+
+    private static AclFileAttributeView aclView(final AclEntry... entries) {
+        return new AclFileAttributeView() {
+            @Override
+            public String name() {
+                return "acl";
+            }
+
+            @Override
+            public List<AclEntry> getAcl() throws IOException {
+                return List.of(entries);
+            }
+
+            @Override
+            public void setAcl(final List<AclEntry> acl) throws IOException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public UserPrincipal getOwner() throws IOException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void setOwner(final UserPrincipal owner) throws IOException {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    private static PosixFileAttributeView posixView(final UserPrincipal owner, final GroupPrincipal group) {
+        return new PosixFileAttributeView() {
+            @Override
+            public String name() {
+                return "posix";
+            }
+
+            @Override
+            public PosixFileAttributes readAttributes() throws IOException {
+                return new PosixFileAttributes() {
+                    @Override
+                    public UserPrincipal owner() {
+                        return owner;
+                    }
+
+                    @Override
+                    public GroupPrincipal group() {
+                        return group;
+                    }
+
+                    @Override
+                    public Set<PosixFilePermission> permissions() {
+                        return EnumSet.noneOf(PosixFilePermission.class);
+                    }
+
+                    @Override
+                    public FileTime lastModifiedTime() {
+                        return null;
+                    }
+
+                    @Override
+                    public FileTime lastAccessTime() {
+                        return null;
+                    }
+
+                    @Override
+                    public FileTime creationTime() {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isRegularFile() {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean isDirectory() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isSymbolicLink() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isOther() {
+                        return false;
+                    }
+
+                    @Override
+                    public long size() {
+                        return 0;
+                    }
+
+                    @Override
+                    public Object fileKey() {
+                        return null;
+                    }
+                };
+            }
+
+            @Override
+            public void setTimes(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime createTime)
+                    throws IOException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void setPermissions(final Set<PosixFilePermission> perms) throws IOException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void setGroup(final GroupPrincipal group) throws IOException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public UserPrincipal getOwner() throws IOException {
+                return owner;
+            }
+
+            @Override
+            public void setOwner(final UserPrincipal owner) throws IOException {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    private static ResponseData fileResponse(final Object fileAttributeView) {
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("file:/data/test.txt");
+        responseData.addMetaData(FileSystemClient.FILE_ATTRIBUTE_VIEW, fileAttributeView);
+        return responseData;
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_allowReadGroup() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.ALLOW, group("staff"), AclEntryPermission.READ_DATA));
+        assertEquals(List.of("2staff"), permissionHelper.getFileRoleTypeList(fileResponse(view)));
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_denyReadUser() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.DENY, user("bob"), AclEntryPermission.READ_DATA));
+        assertEquals(List.of("D1bob"), permissionHelper.getFileRoleTypeList(fileResponse(view)));
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_denyReadGroup() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.DENY, group("guests"), AclEntryPermission.READ_DATA));
+        assertEquals(List.of("D2guests"), permissionHelper.getFileRoleTypeList(fileResponse(view)));
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_allowWithoutReadIsIgnored() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.ALLOW, user("alice"), AclEntryPermission.WRITE_DATA));
+        assertTrue(permissionHelper.getFileRoleTypeList(fileResponse(view)).isEmpty());
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_denyWithoutReadIsIgnored() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.DENY, user("alice"), AclEntryPermission.WRITE_DATA));
+        assertTrue(permissionHelper.getFileRoleTypeList(fileResponse(view)).isEmpty());
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_auditAndAlarmAreIgnored() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.AUDIT, user("alice"), AclEntryPermission.READ_DATA),
+                aclEntry(AclEntryType.ALARM, group("staff"), AclEntryPermission.READ_DATA));
+        assertTrue(permissionHelper.getFileRoleTypeList(fileResponse(view)).isEmpty());
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_mixedEntries() {
+        final AclFileAttributeView view = aclView(aclEntry(AclEntryType.ALLOW, group("staff"), AclEntryPermission.READ_DATA),
+                aclEntry(AclEntryType.DENY, user("bob"), AclEntryPermission.READ_DATA, AclEntryPermission.WRITE_DATA),
+                aclEntry(AclEntryType.ALLOW, user("alice"), AclEntryPermission.WRITE_DATA),
+                aclEntry(AclEntryType.ALLOW, user("carol"), AclEntryPermission.READ_DATA, AclEntryPermission.WRITE_DATA));
+        assertEquals(List.of("2staff", "D1bob", "1carol"), permissionHelper.getFileRoleTypeList(fileResponse(view)));
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_posixOwnerAndGroup() {
+        assertEquals(List.of("1bob", "2staff"), permissionHelper.getFileRoleTypeList(fileResponse(posixView(user("bob"), group("staff")))));
+    }
+
+    @Test
+    public void test_getFileRoleTypeList_posixNullPrincipalsWithDebugLog() {
+        final String loggerName = PermissionHelper.class.getName();
+        final Level original = LogManager.getLogger(loggerName).getLevel();
+        Configurator.setLevel(loggerName, Level.DEBUG);
+        try {
+            assertTrue(permissionHelper.getFileRoleTypeList(fileResponse(posixView(null, null))).isEmpty());
+            assertEquals(List.of("1bob"), permissionHelper.getFileRoleTypeList(fileResponse(posixView(user("bob"), null))));
+            assertEquals(List.of("2staff"), permissionHelper.getFileRoleTypeList(fileResponse(posixView(null, group("staff")))));
+        } finally {
+            Configurator.setLevel(loggerName, original);
+        }
     }
 
 }

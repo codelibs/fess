@@ -16,6 +16,8 @@
 package org.codelibs.fess.helper;
 
 import java.io.IOException;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributeView;
@@ -282,30 +284,38 @@ public class PermissionHelper {
             try {
                 if (fileAttributeView instanceof final AclFileAttributeView aclFileAttributeView) {
                     aclFileAttributeView.getAcl().stream().forEach(acl -> {
+                        // only entries that grant or deny reading the content matter (AUDIT/ALARM and other masks are ignored)
+                        final AclEntryType type = acl.type();
+                        if (type != AclEntryType.ALLOW && type != AclEntryType.DENY
+                                || !acl.permissions().contains(AclEntryPermission.READ_DATA)) {
+                            return;
+                        }
+                        final boolean allowed = type == AclEntryType.ALLOW;
                         final UserPrincipal principal = acl.principal();
+                        if (principal == null) {
+                            return;
+                        }
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Principal: [{}] {}", principal.getClass().getName(), principal);
+                            logger.debug("Principal: [{}] {}, type:{}", principal.getClass().getName(), principal, type);
                         }
-                        if (principal instanceof final GroupPrincipal groupPrincipal) {
-                            roleTypeList.add(systemHelper.getSearchRoleByGroup(groupPrincipal.getName()));
-                        } else if (principal != null) {
-                            roleTypeList.add(systemHelper.getSearchRoleByUser(principal.getName()));
-                        }
+                        final String role = principal instanceof GroupPrincipal ? systemHelper.getSearchRoleByGroup(principal.getName())
+                                : systemHelper.getSearchRoleByUser(principal.getName());
+                        roleTypeList.add(allowed ? role : fessConfig.getRoleSearchDeniedPrefix() + role);
                     });
                 } else if (fileAttributeView instanceof final PosixFileAttributeView posixFileAttributeView) {
                     final PosixFileAttributes attributes = posixFileAttributeView.readAttributes();
                     final UserPrincipal userPrincipal = attributes.owner();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Principal: [{}] {}", userPrincipal.getClass().getName(), userPrincipal);
-                    }
                     if (userPrincipal != null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Principal: [{}] {}", userPrincipal.getClass().getName(), userPrincipal);
+                        }
                         roleTypeList.add(systemHelper.getSearchRoleByUser(userPrincipal.getName()));
                     }
                     final GroupPrincipal groupPrincipal = attributes.group();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Principal: [{}] {}", groupPrincipal.getClass().getName(), groupPrincipal);
-                    }
                     if (groupPrincipal != null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Principal: [{}] {}", groupPrincipal.getClass().getName(), groupPrincipal);
+                        }
                         roleTypeList.add(systemHelper.getSearchRoleByGroup(groupPrincipal.getName()));
                     }
                 }
