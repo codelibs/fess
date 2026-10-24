@@ -81,6 +81,11 @@ public class QueryStringBuilder {
      * Escapes special characters in a query string if escaping is enabled.
      * Replaces reserved characters with their escaped equivalents based on the Constants.RESERVED array.
      *
+     * <p>The double quote is not reserved - a pair of them is a phrase the retry wants to keep - but
+     * a quote with no partner is a phrase that never ends, which the parser rejects however
+     * everything else is escaped. When the quotes do not pair up they are escaped too: which one is
+     * the stray cannot be told.</p>
+     *
      * @param value the query string to escape
      * @return the escaped query string, or the original value if escaping is disabled
      */
@@ -93,6 +98,10 @@ public class QueryStringBuilder {
         for (final String element : Constants.RESERVED) {
             final String replacement = element.replaceAll("(.)", "\\\\$1");
             newValue = newValue.replace(element, replacement);
+        }
+        if (value.chars().filter(c -> c == '"').count() % 2 == 1) {
+            // The backslashes were escaped above, so every quote left is a live one.
+            newValue = newValue.replace("\"", "\\\"");
         }
         return newValue;
     }
@@ -124,7 +133,7 @@ public class QueryStringBuilder {
             if (values == null) {
                 // nothing
             } else if (values.length == 1) {
-                queryBuf.append(' ').append(key).append(":\"").append(values[0]).append('\"');
+                queryBuf.append(' ').append(key).append(":\"").append(escape(values[0], "\\", "\"")).append('\"');
             } else if (values.length > 1) {
                 boolean first = true;
                 queryBuf.append(" (");
@@ -134,7 +143,7 @@ public class QueryStringBuilder {
                     } else {
                         queryBuf.append(OR);
                     }
-                    queryBuf.append(key).append(":\"").append(value).append('\"');
+                    queryBuf.append(key).append(":\"").append(escape(value, "\\", "\"")).append('\"');
                 }
                 queryBuf.append(')');
             }
