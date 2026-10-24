@@ -88,6 +88,81 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
                 getQuery("\\+-&&||!(){}[]^~*?;:/", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
     }
 
+    /**
+     * A double quote with no partner is not a phrase, but the parser still reads it as the start
+     * of one and fails, and the retry that escapes the reserved characters left it alone: the
+     * retry failed the same way and the search ended on the error page. The inch mark in
+     * {@code 5" pipe} is the common way to hit it.
+     */
+    @Test
+    public void test_escape_unbalancedQuote() {
+        final Map<String, String[]> none = Collections.emptyMap();
+        assertEquals("5\\\" pipe", getQuery("5\" pipe", new String[0], none, none, true));
+        assertEquals("\\\"reset password", getQuery("\"reset password", new String[0], none, none, true));
+        assertEquals("reset password\\\"", getQuery("reset password\"", new String[0], none, none, true));
+        assertEquals("site\\:example.com \\\"reset password",
+                getQuery("site:example.com \"reset password", new String[0], none, none, true));
+        // every quote of an odd number of them, not the last one: which one is the stray cannot be told
+        assertEquals("x \\\"a\\\" \\\"b\\\" \\\"c", getQuery("x \"a\" \"b\" \"c", new String[0], none, none, true));
+        // the user's own backslash is escaped first, so the quote after it is still a live quote
+        assertEquals("\\\\\\\"x", getQuery("\\\"x", new String[0], none, none, true));
+        // not on the first run: the parser decides what a quote means there
+        assertEquals("5\" pipe", getQuery("5\" pipe", new String[0], none, none, false));
+    }
+
+    /** Quotes that pair up are a phrase the first run understood, and the retry keeps them. */
+    @Test
+    public void test_escape_balancedQuotesAreKept() {
+        final Map<String, String[]> none = Collections.emptyMap();
+        assertEquals("\"a b\" \\(c", getQuery("\"a b\" (c", new String[0], none, none, true));
+        assertEquals("\"\"", getQuery("\"\"", new String[0], none, none, true));
+        assertEquals("\"a b\"\\~", getQuery("\"a b\"~", new String[0], none, none, true));
+    }
+
+    /** Whatever the retry builds from a stray quote parses; the parser is the real one. */
+    @Test
+    public void test_escape_unbalancedQuoteParses() {
+        final org.codelibs.fess.query.parser.QueryParser parser = new org.codelibs.fess.query.parser.QueryParser();
+        parser.init();
+        final Map<String, String[]> none = Collections.emptyMap();
+        for (final String typed : new String[] { "\"reset password", "reset \"password", "5\" pipe", "x \"a\" \"b\" \"c",
+                "site:example.com \"reset password", "\"a b\" (c", "\\\"x" }) {
+            final String escaped = getQuery(typed, new String[0], none, none, true);
+            parser.parse(escaped);
+        }
+        assertTrue(parser.parse(getQuery("5\" pipe", new String[0], none, none, true)).toString().contains("5\""));
+    }
+
+    /**
+     * A facet value is placed between quotes as it is, so a quote inside it ended the value early
+     * and the query failed on both runs: the retry escapes the typed query, not the facets.
+     */
+    @Test
+    public void test_fields_quoteAndBackslashInAValueAreEscaped() {
+        final Map<String, String[]> none = Collections.emptyMap();
+        assertEquals("hello label:\"a\\\"b\"",
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { "a\"b" }), none, false));
+        assertEquals("hello label:\"a\\\\b\"",
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { "a\\b" }), none, false));
+        assertEquals("hello (label:\"a\\\"b\" OR label:\"c\")",
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { "a\"b", "c" }), none, false));
+        // and a value that needs no escape is unchanged
+        assertEquals("hello label:\"news\"",
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { "news" }), none, false));
+    }
+
+    @Test
+    public void test_fields_valueWithAQuoteParsesAndIsTheValue() {
+        final org.codelibs.fess.query.parser.QueryParser parser = new org.codelibs.fess.query.parser.QueryParser();
+        parser.init();
+        final Map<String, String[]> none = Collections.emptyMap();
+        final String query =
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { "a\"b", "c\\d" }), none, false);
+        final String parsed = parser.parse(query).toString();
+        assertTrue(parsed.contains("a\"b"), parsed);
+        assertTrue(parsed.contains("c\\d"), parsed);
+    }
+
     private String getAsQuery(final String query, final Map<String, String[]> conditions) {
         return getQuery(query, new String[0], Collections.emptyMap(), conditions, false);
     }
@@ -328,6 +403,108 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("password", new QueryStringBuilder().params(createSimpleParams("password")).relatedQuery(false).build());
         assertEquals("password sort:score",
                 new QueryStringBuilder().params(createSimpleParams("password")).sortField("score").relatedQuery(false).build());
+    }
+
+    /**
+     * A facet value comes from the request, so it must stay one value: a quote in it cannot end the
+     * value and let the rest of it be read as query syntax (a second field clause, an OR). Read
+     * from the parse tree: the value is the one phrase of the label clause, quotes and all.
+     */
+    @Test
+    public void test_fields_aValueCannotInjectQuerySyntax() {
+        final org.codelibs.fess.query.parser.QueryParser parser = new org.codelibs.fess.query.parser.QueryParser();
+        parser.init();
+        final Map<String, String[]> none = Collections.emptyMap();
+        final String injected = "x\" OR label:\"other";
+        final String query = getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { injected }), none, false);
+        assertEquals("hello label:\"x\\\" OR label:\\\"other\"", query);
+        final org.apache.lucene.search.BooleanQuery parsed = (org.apache.lucene.search.BooleanQuery) parser.parse(query);
+        // the word and the one label clause, both required: no second clause, no optional one
+        assertEquals(2, parsed.clauses().size(), parsed.toString());
+        for (final org.apache.lucene.search.BooleanClause clause : parsed.clauses()) {
+            assertTrue(clause.occur() == org.apache.lucene.search.BooleanClause.Occur.MUST, parsed.toString());
+        }
+        final org.apache.lucene.search.Query label = parsed.clauses().get(1).query();
+        assertEquals(parsed.toString(), "label", ((org.apache.lucene.search.PhraseQuery) label).getTerms()[0].field());
+        assertEquals(3, ((org.apache.lucene.search.PhraseQuery) label).getTerms().length, parsed.toString());
+        // the same through the group of several values: two label clauses, one per value, not three
+        final String group =
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { injected, "docs" }), none, false);
+        final org.apache.lucene.search.BooleanQuery groupParsed = (org.apache.lucene.search.BooleanQuery) parser.parse(group);
+        final org.apache.lucene.search.BooleanQuery inner = (org.apache.lucene.search.BooleanQuery) groupParsed.clauses().get(1).query();
+        assertEquals(2, inner.clauses().size(), groupParsed.toString());
+    }
+
+    /**
+     * The retry of a query that has related queries escapes the whole expansion, so a stray quote
+     * in the typed word must not leave the expansion unparseable. (A multi-word typed query is
+     * wrapped in quotes with its own quotes replaced by spaces, so only a single word reaches the
+     * parser with its quote.)
+     */
+    @Test
+    public void test_escape_unbalancedQuoteWithRelatedQueriesParses() {
+        registerRelatedQueries("5\"", "pipe size", "tube");
+        final org.codelibs.fess.query.parser.QueryParser parser = new org.codelibs.fess.query.parser.QueryParser();
+        parser.init();
+        final String raw = new QueryStringBuilder().params(createSimpleParams("5\"")).build();
+        try {
+            parser.parse(raw);
+            fail("the first run is expected to be rejected: " + raw);
+        } catch (final org.codelibs.fess.exception.QueryParseException e) {
+            // this is what triggers the retry
+        }
+        final String escaped = new QueryStringBuilder().params(createSimpleParams("5\"")).escape(true).build();
+        parser.parse(escaped);
+    }
+
+    /**
+     * Whatever is typed, the retry parses: any query that fails the first parse (and has no stray
+     * ex_q or facet key, which the retry does not touch) parses once escaped. A seeded random
+     * search over the characters the syntax is made of, so the guarantee is not only the handful of
+     * inputs listed above.
+     */
+    @Test
+    public void test_escape_theRetryParsesWhateverFailedTheFirstRun() {
+        final org.codelibs.fess.query.parser.QueryParser parser = new org.codelibs.fess.query.parser.QueryParser();
+        parser.init();
+        final Map<String, String[]> none = Collections.emptyMap();
+        final String alphabet = "\"\\()[]{}:*?~^+-!/&| ab\t";
+        final java.util.Random random = new java.util.Random(20261024L);
+        int firstRunFailures = 0;
+        for (int i = 0; i < 4000; i++) {
+            final StringBuilder typed = new StringBuilder();
+            for (int j = random.nextInt(12) + 1; j > 0; j--) {
+                typed.append(alphabet.charAt(random.nextInt(alphabet.length())));
+            }
+            if (typed.toString().isBlank()) {
+                continue; // a blank query is replaced by a match-all before it is ever parsed
+            }
+            final String raw = getQuery(typed.toString(), new String[0], none, none, false);
+            boolean firstRunFails = false;
+            try {
+                parser.parse(raw);
+            } catch (final org.codelibs.fess.exception.QueryParseException e) {
+                firstRunFails = true;
+                firstRunFailures++;
+            }
+            if (firstRunFails) {
+                parser.parse(getQuery(typed.toString(), new String[0], none, none, true));
+            }
+        }
+        // not vacuous: a good share of the random inputs really fail the first run
+        assertTrue(firstRunFailures > 500, "firstRunFailures=" + firstRunFailures);
+    }
+
+    /**
+     * A client that already escaped the quote of a facet value gets the backslash kept: the value
+     * is taken as it is, as it always is for the characters around it. (Before, the parser swallowed
+     * a backslash in a value, so such a client got the quote back by accident.)
+     */
+    @Test
+    public void test_fields_aValueIsTakenAsItIs() {
+        final Map<String, String[]> none = Collections.emptyMap();
+        assertEquals("hello label:\"a\\\\\\\"b\"",
+                getQuery("hello", new String[0], Collections.singletonMap("label", new String[] { "a\\\"b" }), none, false));
     }
 
     private void registerRelatedQueries(final String term, final String... relatedQueries) {

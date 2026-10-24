@@ -768,6 +768,55 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * A stray double quote fails the keyword branch on both runs unless the retry escapes it, and
+     * the vector branch embeds whatever words the retry leaves: the quote is one of them.
+     */
+    @Test
+    public void test_prepare_aStrayQuoteIsEmbeddedAfterTheEscapedRetry() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "how to cut a 5\" pipe";
+            }
+        };
+        final String raw = new QueryStringBuilder().params(params).build();
+        final String escaped = new QueryStringBuilder().params(params).escape(true).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        assertFalse(searcher.prepare(raw, params).isPresent(), "the first run cannot be parsed: " + raw);
+        assertTrue(searcher.prepare(escaped, params).isPresent(), escaped);
+        assertEquals("how to cut a 5\" pipe", searcher.embeddedQuery);
+    }
+
+    /** A facet value with a quote or a backslash narrows the vector branch by exactly that value. */
+    @Test
+    public void test_prepare_aFacetValueWithAQuoteIsOneCondition() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "opensearch cluster";
+            }
+
+            @Override
+            public java.util.Map<String, String[]> getFields() {
+                return java.util.Collections.singletonMap("label", new String[] { "a\"b", "c\\d" });
+            }
+        };
+        final String query = new QueryStringBuilder().params(params).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(query, params);
+        assertTrue(context.isPresent(), query);
+        assertEquals("opensearch cluster", searcher.embeddedQuery);
+        assertNotNull(context.get().getConditionFilter());
+        assertEquals(1, searcher.splitter.converted.size(), searcher.splitter.converted.toString());
+        assertTrue(searcher.splitter.converted.get(0).contains("a\"b") && searcher.splitter.converted.get(0).contains("c\\d"),
+                searcher.splitter.converted.toString());
+    }
+
     @Test
     public void test_prepare_escapedRetryThatChangesTheWordsEmbedsAgain() {
         ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
