@@ -180,6 +180,39 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_reportDefaultCipherKey_warnsInTheWebappProcess() {
+        assertEquals(1, defaultCipherKeyWarnings(true, "___change__me___").size());
+        assertEquals(0, defaultCipherKeyWarnings(true, "my-own-secret").size());
+    }
+
+    @Test
+    public void test_reportDefaultCipherKey_silentInJobProcesses() {
+        // The crawler, thumbnail, suggest and chunk processes boot the same container, so each of them
+        // runs init(). The thumbnail job runs every minute, so a warning there is a line a minute.
+        assertEquals(0, defaultCipherKeyWarnings(false, "___change__me___").size());
+        assertEquals(0, defaultCipherKeyWarnings(false, "").size());
+    }
+
+    private List<String> defaultCipherKeyWarnings(final boolean webapp, final String key) {
+        final SystemHelper helper = new SystemHelper() {
+            @Override
+            protected boolean isWebappProcess() {
+                return webapp;
+            }
+        };
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SystemHelper.class);
+        try {
+            helper.reportDefaultCipherKey(cipherKeyConfig(key));
+            return appender.messagesOnThisThreadAt(Level.WARN)
+                    .stream()
+                    .filter(m -> m.contains("app.cipher.key"))
+                    .collect(Collectors.toList());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_reportRetiredTikaConfig() throws Exception {
         // setUp() may have used up the once-only key when it initialized the container
         LogUtil.resetWarnOnce();

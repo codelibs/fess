@@ -77,6 +77,7 @@ import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
@@ -749,7 +750,16 @@ public class SystemHelper {
     }
 
     /**
-     * Warns when {@code app.cipher.key} has not been changed from the shipped value.
+     * Determines whether this JVM is the main webapp process, not a crawler, thumbnail, suggest or chunk process.
+     *
+     * @return true for the webapp process.
+     */
+    protected boolean isWebappProcess() {
+        return SystemUtil.isWebappProcess();
+    }
+
+    /**
+     * Warns when {@code app.cipher.key} has not been changed from the shipped value. Only the webapp process warns.
      *
      * <p>Only warns: changing the key makes the values already encrypted with the old one
      * undecryptable, so Fess does not replace it. The key itself is not logged.
@@ -757,7 +767,9 @@ public class SystemHelper {
      * @param fessConfig The configuration to check.
      */
     protected void reportDefaultCipherKey(final FessConfig fessConfig) {
-        if (isDefaultCipherKey(fessConfig)) {
+        // The crawler, thumbnail, suggest and chunk processes run init() too. The thumbnail job runs every minute, so
+        // warning there would be a line a minute for a condition the webapp has already reported at its start.
+        if (isWebappProcess() && isDefaultCipherKey(fessConfig)) {
             logger.warn("app.cipher.key is still the default value. It encrypts the passwords stored in the crawl and data store"
                     + " configurations, so anyone who can read the index or a backup can decrypt them. Set your own value in"
                     + " fess_config.properties before you start using Fess. Changing it later makes the values encrypted with the old key"

@@ -1617,10 +1617,7 @@ public class SearchEngineClient implements Client {
      * @return {@code true} when none of the known job-process markers are set
      */
     protected boolean isWebappProcess() {
-        return (!Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CRAWLER + ".process"))
-                && !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_THUMBNAIL + ".process"))
-                && !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_SUGGEST + ".process"))
-                && !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CHUNK + ".process")));
+        return SystemUtil.isWebappProcess();
     }
 
     /**
