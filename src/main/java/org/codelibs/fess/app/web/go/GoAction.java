@@ -138,25 +138,7 @@ public class GoAction extends FessSearchAction {
 
         final String targetUrl = pathMappingHelper.replaceUrl(url);
 
-        String hash;
-        final String value = decodeHash(form.hash);
-        if (value != null && targetUrl.indexOf('#') == -1) {
-            final StringBuilder buf = new StringBuilder(value.length() + 100);
-            for (final char c : value.toCharArray()) {
-                if (CharUtil.isUrlChar(c) || c == ' ') {
-                    buf.append(c);
-                } else {
-                    try {
-                        buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
-                    } catch (final UnsupportedEncodingException e) {
-                        // NOP
-                    }
-                }
-            }
-            hash = buf.toString();
-        } else {
-            hash = StringUtil.EMPTY;
-        }
+        final String hash = toFragment(form.hash, targetUrl);
 
         if (!isFileSystemPath(targetUrl)) {
             if (isValidRedirectUrl(targetUrl)) {
@@ -235,6 +217,35 @@ public class GoAction extends FessSearchAction {
             }
         }
         return systemHelper.getCurrentTimeAsLocalDateTime();
+    }
+
+    /**
+     * Builds the fragment to append to the redirect target from the {@code hash} request parameter.
+     * Only a value that starts with {@code #} is a fragment. Anything else, such as {@code .host} or
+     * {@code @host}, would be appended to a target URL without a path and change its host, so it is dropped.
+     *
+     * @param hash the {@code hash} request parameter (may be null)
+     * @param targetUrl the URL to redirect to
+     * @return the fragment (URL-safe), or an empty string if there is none to append
+     */
+    protected String toFragment(final String hash, final String targetUrl) {
+        final String value = decodeHash(hash);
+        if (value == null || !value.startsWith("#") || targetUrl.indexOf('#') != -1) {
+            return StringUtil.EMPTY;
+        }
+        final StringBuilder buf = new StringBuilder(value.length() + 100);
+        for (final char c : value.toCharArray()) {
+            if (CharUtil.isUrlChar(c) || c == ' ') {
+                buf.append(c);
+            } else {
+                try {
+                    buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                } catch (final UnsupportedEncodingException e) {
+                    // NOP
+                }
+            }
+        }
+        return buf.toString();
     }
 
     /**

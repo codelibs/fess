@@ -134,6 +134,11 @@ public class GoActionTest extends UnitFessTestCase {
             return super.decodeHash(hash);
         }
 
+        @Override
+        public String toFragment(final String hash, final String targetUrl) {
+            return super.toFragment(hash, targetUrl);
+        }
+
         // systemHelper is injected via @Resource in production; set it directly for unit tests.
         void setSystemHelper(final SystemHelper systemHelper) {
             this.systemHelper = systemHelper;
@@ -307,6 +312,23 @@ public class GoActionTest extends UnitFessTestCase {
         assertEquals("#", goAction.decodeHash("%23"));
         assertEquals("#section", goAction.decodeHash("#section"));
         assertEquals("a b", goAction.decodeHash("a%20b"));
+    }
+
+    /**
+     * Only a value that starts with {@code #} is appended to the redirect target. A value such as
+     * {@code .host} or {@code @host} would otherwise turn {@code https://intranet} into
+     * {@code https://intranet.host} or {@code https://intranet@host}.
+     */
+    @Test
+    public void test_toFragment_onlyAFragmentIsAppended() {
+        assertEquals("#section", goAction.toFragment("%23section", "https://intranet.example.com"));
+        assertEquals("#section", goAction.toFragment("#section", "https://intranet.example.com"));
+        assertEquals("", goAction.toFragment(".attacker.example", "https://intranet.example.com"));
+        assertEquals("", goAction.toFragment("@attacker.example", "https://intranet.example.com"));
+        assertEquals("", goAction.toFragment("%2eattacker.example", "https://intranet.example.com"));
+        assertEquals("", goAction.toFragment("/path", "https://intranet.example.com"));
+        assertEquals("", goAction.toFragment(null, "https://intranet.example.com"));
+        assertEquals("", goAction.toFragment("%23section", "https://intranet.example.com/a#already"));
     }
 
     /**
