@@ -3867,7 +3867,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
-     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,tk:.*,X-FESS.* <br>
+     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,tk:.*,X-FESS.*,Content-Length <br>
      * comment: Metadata fields to exclude from document content.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */

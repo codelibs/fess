@@ -1020,6 +1020,33 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isCrawlerMetadataContentIncluded_contentLength() {
+        FessProp.propMap.clear();
+        // Content-Length is the size of the file in bytes. Folded into the content, it makes a document
+        // match a search for that number. An upgraded installation keeps the excludes of the earlier
+        // version, and an administrator may have replaced them, so none of them is relied on.
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerMetadataContentExcludes() {
+                return "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,X-FESS.*";
+            }
+        };
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("Content-Length"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("application/pdf", "Content-Length"));
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("Content-Language"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isCrawlerMetadataContentIncluded_shippedExcludesListContentLength() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        assertTrue(fessConfig.getCrawlerMetadataContentExcludes().contains("Content-Length"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("Content-Length"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
     public void test_isCrawlerMetadataContentIncluded_shippedExcludes() {
         FessProp.propMap.clear();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
