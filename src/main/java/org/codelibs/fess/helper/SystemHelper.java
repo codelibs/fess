@@ -207,6 +207,8 @@ public class SystemHelper {
         reportSearchRolePrefixProblems(fessConfig);
         reportDefaultCipherKey(fessConfig);
         reportRetiredTikaConfig(ResourceUtil.getConfPath("tika.xml"));
+        // the ZIP of 15.9 and earlier shipped tika.xml in app/WEB-INF/classes, not in app/WEB-INF/conf
+        reportRetiredTikaConfig(ResourceUtil.getClassesPath("tika.xml"));
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
 
@@ -737,14 +739,15 @@ public class SystemHelper {
     }
 
     /**
-     * Warns when the {@code tika.xml} of an earlier version is still in the configuration directory.
+     * Warns when the {@code tika.xml} of an earlier version is still in the configuration directory
+     * or, for the ZIP package of 15.9 and earlier, in the classes directory.
      * Tika is configured in the code now, so the file is not read and the parsers it excludes are used.
      *
-     * @param tikaXml The path of {@code tika.xml} in the configuration directory.
+     * @param tikaXml The path of a {@code tika.xml} to look for.
      * @return true if the warning was written.
      */
     protected boolean reportRetiredTikaConfig(final Path tikaXml) {
-        return Files.exists(tikaXml) && LogUtil.warnOnce(logger, "tika.xml",
+        return Files.exists(tikaXml) && LogUtil.warnOnce(logger, "tika.xml:" + tikaXml,
                 "{} is not read any more because Tika is configured in the code, so the parsers it excludes are no longer excluded. Remove the file.",
                 tikaXml);
     }
