@@ -25,7 +25,13 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
+import org.codelibs.fesen.opensearch.common.lucene.search.function.CombineFunction;
 import org.codelibs.fesen.opensearch.index.IndexNotFoundException;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.codelibs.fesen.opensearch.transport.client.Client;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -291,6 +297,64 @@ public class SuggestHelperTest extends UnitFessTestCase {
         } catch (Exception e) {
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void test_buildDocumentSourceQuery_readsOnlyDocumentsWithARoleAndWithoutDeniedEntries() {
+        final MockFessConfig fessConfig = new MockFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexFieldRole() {
+                return "role_field";
+            }
+
+            @Override
+            public String getIndexFieldDocId() {
+                return "doc_id_field";
+            }
+
+            @Override
+            public String getRoleSearchUserPrefix() {
+                return "u";
+            }
+
+            @Override
+            public String getRoleSearchGroupPrefix() {
+                return "g";
+            }
+
+            @Override
+            public String getRoleSearchRolePrefix() {
+                return "r";
+            }
+
+            @Override
+            public String getRoleSearchDeniedPrefix() {
+                return "X";
+            }
+        };
+
+        final BoolQueryBuilder query = (BoolQueryBuilder) suggestHelper.buildDocumentSourceQuery(fessConfig);
+
+        assertEquals(1, query.filter().size());
+        assertEquals(QueryBuilders.existsQuery("role_field"), query.filter().get(0));
+        final List<String> deniedPrefixes = new ArrayList<>();
+        for (final QueryBuilder denied : query.mustNot()) {
+            final PrefixQueryBuilder prefixQuery = (PrefixQueryBuilder) denied;
+            assertEquals("role_field", prefixQuery.fieldName());
+            deniedPrefixes.add(prefixQuery.value());
+        }
+        assertEquals(List.of("Xu", "Xg", "Xr"), deniedPrefixes);
+
+        assertEquals(1, query.must().size());
+        final FunctionScoreQueryBuilder functionScore = (FunctionScoreQueryBuilder) query.must().get(0);
+        assertEquals(QueryBuilders.matchAllQuery(), functionScore.query());
+        assertEquals(CombineFunction.MULTIPLY, functionScore.boostMode());
+        assertEquals(1, functionScore.filterFunctionBuilders().length);
+        final String json = query.toString();
+        assertTrue(json, json.contains("\"random_score\""));
+        assertTrue(json, json.contains("doc_id_field"));
     }
 
     @Test
