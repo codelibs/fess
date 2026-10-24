@@ -7467,10 +7467,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Get the value for the key 'role.search.guest.permissions'. <br>
      * The value is, e.g. {role}guest <br>
      * comment: <br>
-     * Keep role.search.guest.permissions non-empty. It seeds the guest role that<br>
-     * keeps the anonymous search role set non-empty; if the resolved role set is<br>
-     * empty the role filter is skipped (fail-open), which can disable role-based<br>
-     * access control and expose documents to anonymous users.<br>
+     * Roles given to an anonymous search, comma-separated. The user-prefix guest<br>
+     * role (role.search.user.prefix + guest) is always added to them, so an empty<br>
+     * value does not leave the anonymous role set empty and the role filter is<br>
+     * still applied; it only drops the permissions configured here.<br>
      * Guest permissions for search roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
