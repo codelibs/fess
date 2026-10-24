@@ -68,6 +68,18 @@ public class RateLimitHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getClientIp_xForwardedFor_readsEveryHeaderLine() {
+        // A proxy that adds its entry as a header line of its own (HAProxy's "option forwardfor")
+        // leaves the line the client sent first. Reading only the first line would attribute the
+        // request to whatever the client wrote.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Forwarded-For", "10.9.9.9");
+        request.addHeader("X-Forwarded-For", "203.0.113.50");
+        assertEquals("203.0.113.50", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
     public void test_getClientIp_xForwardedFor_skipsOurOwnProxies() {
         // A chain made only of trusted hops says nothing about the caller, so the request falls
         // back to the address the connection actually came from.

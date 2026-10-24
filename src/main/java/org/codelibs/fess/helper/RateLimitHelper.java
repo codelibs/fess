@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,7 +101,7 @@ public class RateLimitHelper {
 
         // Only trust proxy headers if the request comes from a trusted proxy
         if (isTrustedProxy(remoteAddr)) {
-            final String xForwardedFor = request.getHeader("X-Forwarded-For");
+            final String xForwardedFor = joinForwardedFor(request);
             if (StringUtil.isNotBlank(xForwardedFor)) {
                 final String clientIp = clientIpFromForwardedFor(xForwardedFor);
                 if (clientIp != null) {
@@ -123,6 +125,25 @@ public class RateLimitHelper {
             logger.debug("Client IP from remoteAddr: ip={}", remoteAddr);
         }
         return remoteAddr;
+    }
+
+    /**
+     * Joins every X-Forwarded-For header line of the request, in the order received.
+     *
+     * <p>A proxy may add its entry as a header line of its own instead of appending to an existing one
+     * (HAProxy's {@code option forwardfor} does), and the same field sent on several lines is one
+     * comma-separated list. {@link HttpServletRequest#getHeader} returns only the first line, which is
+     * the one the client sent, so the chain has to be read from all of them.</p>
+     *
+     * @param request the HTTP request
+     * @return the lines joined by a comma, or null when the header is absent
+     */
+    protected String joinForwardedFor(final HttpServletRequest request) {
+        final Enumeration<String> lines = request.getHeaders("X-Forwarded-For");
+        if (lines == null || !lines.hasMoreElements()) {
+            return null;
+        }
+        return String.join(",", Collections.list(lines));
     }
 
     /**
