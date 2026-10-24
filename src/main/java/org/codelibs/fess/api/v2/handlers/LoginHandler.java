@@ -27,6 +27,7 @@ import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
+import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -116,7 +117,8 @@ public class LoginHandler {
      * response carries the freshly issued CSRF token and an echo of the safe
      * {@code return_to} value; failures map to v2 error codes
      * ({@link V2ErrorCode#RATE_LIMITED}, {@link V2ErrorCode#INVALID_REQUEST},
-     * {@link V2ErrorCode#AUTH_REQUIRED}, {@link V2ErrorCode#INTERNAL_ERROR}).</p>
+     * {@link V2ErrorCode#AUTH_REQUIRED}, {@link V2ErrorCode#SERVICE_UNAVAILABLE},
+     * {@link V2ErrorCode#INTERNAL_ERROR}).</p>
      *
      * @param req the incoming HTTP request
      * @param res the HTTP response to write to
@@ -286,6 +288,29 @@ public class LoginHandler {
             return;
         }
 
+        // Resolve the permissions of the bound user while a failure can still be answered. The
+        // user bean reads them lazily, and for an LDAP user that is a directory search that can
+        // fail even though the bind just succeeded, e.g. when the directory ACL lets the user read
+        // nothing but his own entry. Left to the audit write below, the failure is swallowed
+        // there and surfaces again while the payload is built, as a 500 on a session that is
+        // already bound. The result is cached by the user, so the later reads cost nothing.
+        try {
+            assist.getSavedUserBean().ifPresent(FessUserBean::getPermissions);
+        } catch (final RuntimeException e) {
+            // The credentials were accepted, so this is not a credential failure: the USER slot is
+            // not consumed, and no LOGIN_FAILURE record is written. The session the login bound
+            // is dropped, otherwise the caller keeps a cookie for a half-made login.
+            abandonLogin(req, assist);
+            if (e instanceof LdapOperationException) {
+                logger.warn("[v2/login] could not resolve the permissions of the user: username={}", loggedName, e);
+                ComponentUtil.getV2EnvelopeWriter()
+                        .writeError(res, V2ErrorCode.SERVICE_UNAVAILABLE, "directory service is unable to process the request");
+            } else {
+                ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/login");
+            }
+            return;
+        }
+
         // Mirror LoginAction.login(): write the LOGIN record to audit.log as soon as the
         // credentials are verified — before the session/CSRF work below — so the record survives
         // a later failure in that machinery.
@@ -341,6 +366,30 @@ public class LoginHandler {
             payload.put("password_change_required", true);
         }
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
+    }
+
+    /**
+     * Undoes a login that was accepted but cannot be completed: drops the user bean the login
+     * bound and invalidates the session, the same way {@link LogoutHandler} ends one. Failures are
+     * logged and swallowed so the caller still gets the answer that explains the refusal.
+     *
+     * @param req the incoming HTTP request
+     * @param assist the login assist holding the freshly bound user bean
+     */
+    private void abandonLogin(final HttpServletRequest req, final FessLoginAssist assist) {
+        try {
+            assist.logout();
+        } catch (final RuntimeException e) {
+            logger.warn("[v2/login] failed to drop the user of a login that could not be completed", e);
+        }
+        final HttpSession session = req.getSession(false);
+        if (session != null) {
+            try {
+                session.invalidate();
+            } catch (final IllegalStateException ignore) {
+                // FessLoginAssist.logout() may have already invalidated the session.
+            }
+        }
     }
 
     /**
