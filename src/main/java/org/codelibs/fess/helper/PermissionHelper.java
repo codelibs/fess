@@ -89,22 +89,25 @@ public class PermissionHelper {
         }
 
         String permission = value.trim();
-        String lower = permission.toLowerCase(Locale.ROOT);
+        final String lowerValue = permission.toLowerCase(Locale.ROOT);
         final String aclPrefix;
-        if (lower.startsWith(allowPrefix)) {
-            lower = lower.substring(allowPrefix.length());
-            permission = permission.substring(allowPrefix.length());
+        final boolean denied;
+        if (lowerValue.startsWith(allowPrefix)) {
+            permission = permission.substring(allowPrefix.length()).trim();
             aclPrefix = StringUtil.EMPTY;
-        } else if (lower.startsWith(denyPrefix)) {
-            lower = lower.substring(denyPrefix.length());
-            permission = permission.substring(denyPrefix.length());
+            denied = false;
+        } else if (lowerValue.startsWith(denyPrefix)) {
+            permission = permission.substring(denyPrefix.length()).trim();
             aclPrefix = ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix();
+            denied = true;
         } else {
             aclPrefix = StringUtil.EMPTY;
+            denied = false;
         }
         if (StringUtil.isBlank(permission)) {
             return null;
         }
+        final String lower = permission.toLowerCase(Locale.ROOT);
         if (lower.startsWith(userPrefix)) {
             if (permission.length() > userPrefix.length()) {
                 return aclPrefix + systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
@@ -123,6 +126,10 @@ public class PermissionHelper {
             }
             return null;
         }
+        if (denied) {
+            // a deny entry must name a user, group or role; never store it as a raw value
+            return null;
+        }
         return permission;
     }
 
@@ -139,32 +146,33 @@ public class PermissionHelper {
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String aclPrefix;
-        final String permission;
+        String aclPrefix = StringUtil.EMPTY;
+        String permission = value;
         final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
         if (value.startsWith(deniedPrefix)) {
-            permission = value.substring(deniedPrefix.length());
-            aclPrefix = denyPrefix;
-        } else {
-            permission = value;
-            aclPrefix = StringUtil.EMPTY;
+            // the denied prefix only counts when a user/group/role entry follows it (e.g. "Developers" is not denied)
+            final String remainder = value.substring(deniedPrefix.length());
+            if (hasTypedName(remainder, fessConfig.getRoleSearchUserPrefix())
+                    || hasTypedName(remainder, fessConfig.getRoleSearchGroupPrefix())
+                    || hasTypedName(remainder, fessConfig.getRoleSearchRolePrefix())) {
+                permission = remainder;
+                aclPrefix = denyPrefix;
+            }
         }
-        if (StringUtil.isBlank(permission)) {
-            return null;
-        }
-        if (permission.startsWith(fessConfig.getRoleSearchUserPrefix())
-                && permission.length() > fessConfig.getRoleSearchUserPrefix().length()) {
+        if (hasTypedName(permission, fessConfig.getRoleSearchUserPrefix())) {
             return aclPrefix + userPrefix + permission.substring(fessConfig.getRoleSearchUserPrefix().length());
         }
-        if (permission.startsWith(fessConfig.getRoleSearchGroupPrefix())
-                && permission.length() > fessConfig.getRoleSearchGroupPrefix().length()) {
+        if (hasTypedName(permission, fessConfig.getRoleSearchGroupPrefix())) {
             return aclPrefix + groupPrefix + permission.substring(fessConfig.getRoleSearchGroupPrefix().length());
         }
-        if (permission.startsWith(fessConfig.getRoleSearchRolePrefix())
-                && permission.length() > fessConfig.getRoleSearchRolePrefix().length()) {
+        if (hasTypedName(permission, fessConfig.getRoleSearchRolePrefix())) {
             return aclPrefix + rolePrefix + permission.substring(fessConfig.getRoleSearchRolePrefix().length());
         }
         return permission;
+    }
+
+    private boolean hasTypedName(final String permission, final String typePrefix) {
+        return permission.startsWith(typePrefix) && permission.length() > typePrefix.length();
     }
 
     /**
