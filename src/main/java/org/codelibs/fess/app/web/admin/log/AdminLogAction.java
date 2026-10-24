@@ -110,14 +110,15 @@ public class AdminLogAction extends FessAdminAction {
     /**
      * Decodes a log file ID, as handed out by {@link #getLogFileItems()}, back into the file name.
      * The ID is URL-safe Base64 ({@code -} and {@code _}); the standard alphabet ({@code +} and {@code /})
-     * is accepted as well.
+     * is accepted as well. A blank is read as {@code +}, which is what a {@code +} in a URL path
+     * turns into when the container decodes it.
      *
      * @param id the Base64 encoded filename of the log file
      * @return the decoded filename
      * @throws IllegalArgumentException if the ID is not valid Base64
      */
     public static String decodeLogFileId(final String id) {
-        return new String(Base64.getUrlDecoder().decode(id.replace('+', '-').replace('/', '_')), StandardCharsets.UTF_8);
+        return new String(Base64.getUrlDecoder().decode(id.replace('+', '-').replace(' ', '-').replace('/', '_')), StandardCharsets.UTF_8);
     }
 
     /**
