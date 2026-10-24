@@ -690,7 +690,7 @@ public class LdapManager {
     protected String updateSearchRoles(final Set<String> roleSet, final String entryDn, final String name) {
         if (StringUtil.isNotBlank(name)) {
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-            final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+            final boolean isRole = isRoleEntry(entryDn);
             // The directory variants: the name already came out of this entry's own DN, so it must
             // not be re-read as a NetBIOS-qualified "DOMAIN\name" and truncated to its tail.
             if (isRole) {
@@ -839,6 +839,41 @@ public class LdapManager {
             logger.warn("Failed to read a common name from DN: {}", entryDn, e);
         }
         return null;
+    }
+
+    /**
+     * Tells whether an entry lives in a role organizational unit, that is, whether one of its
+     * {@code ou} RDNs is exactly {@code Role} or {@code Roles} (case-insensitive).
+     *
+     * <p>The DN is parsed rather than scanned as text, so {@code OU=Roles-Requests}, an
+     * {@code OU=RoleOwners} further up the tree, and an escaped {@code ou=role} inside a CN do not
+     * make a group a role. A role is granted more than a group (for example, the admin role), so a
+     * DN that does not parse is treated as a group.
+     *
+     * @param entryDn the LDAP entry DN
+     * @return true if the entry is under an {@code OU=Role} or {@code OU=Roles}
+     */
+    protected boolean isRoleEntry(final String entryDn) {
+        try {
+            for (final Rdn rdn : new LdapName(entryDn).getRdns()) {
+                // toAttributes(), not getType()/getValue(), so every part of a multi-valued RDN is seen.
+                final Attribute ou = rdn.toAttributes().get("ou");
+                if (ou == null) {
+                    continue;
+                }
+                final NamingEnumeration<?> values = ou.getAll();
+                while (values.hasMore()) {
+                    if (values.next() instanceof final String value
+                            && ("role".equalsIgnoreCase(value) || "roles".equalsIgnoreCase(value))) {
+                        return true;
+                    }
+                }
+            }
+        } catch (final NamingException | IllegalArgumentException e) {
+            // IllegalArgumentException as in getLeafCommonName: a malformed escape is reported unchecked.
+            logger.warn("Failed to parse DN, treating it as a group: {}", entryDn, e);
+        }
+        return false;
     }
 
     /**

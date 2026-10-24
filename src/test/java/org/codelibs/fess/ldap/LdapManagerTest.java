@@ -1028,6 +1028,128 @@ public class LdapManagerTest extends UnitFessTestCase {
                 + "(member:1.2.840.113556.1.4.1941:=CN=d\\29\\28cn=\\2a,DC=example,DC=com))", captureSubRoleFilter(subRoleSet));
     }
 
+    /** Resolves the permission of an entry DN through updateSearchRoles with the given feature flags. */
+    private String searchRoleOf(final String entryDn, final boolean roleEnabled, final boolean groupEnabled) {
+        return searchRoleOf(entryDn, null, roleEnabled, groupEnabled);
+    }
+
+    /** As above, with the role name given instead of read from the DN (null reads it from the DN). */
+    private String searchRoleOf(final String entryDn, final String givenName, final boolean roleEnabled, final boolean groupEnabled) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchRoleEnabled() {
+                return roleEnabled;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchGroupEnabled() {
+                return groupEnabled;
+            }
+
+            @Override
+            public String getRoleSearchGroupPrefix() {
+                return "2";
+            }
+
+            @Override
+            public String getRoleSearchRolePrefix() {
+                return "R";
+            }
+
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return false;
+            }
+        });
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+        ldapManager.init();
+        final java.util.Set<String> roleSet = new java.util.HashSet<>();
+        final String name = givenName != null ? givenName : ldapManager.getSearchRoleName(entryDn);
+        final String type = ldapManager.updateSearchRoles(roleSet, entryDn, name);
+        // The returned type and the permission added must agree.
+        if (type == null) {
+            assertTrue(roleSet.toString(), roleSet.isEmpty());
+            return null;
+        }
+        assertEquals(1, roleSet.size());
+        final String permission = roleSet.iterator().next();
+        assertTrue(permission, permission.startsWith(type));
+        return permission;
+    }
+
+    @Test
+    public void test_updateSearchRoles_ouRoleIsARole() {
+        assertEquals("Radmin", searchRoleOf("CN=admin,OU=Role,DC=example,DC=com", true, true));
+        assertEquals("Radmin", searchRoleOf("CN=admin,OU=Roles,DC=example,DC=com", true, true));
+        // A role organizational unit may sit anywhere above the entry.
+        assertEquals("Radmin", searchRoleOf("CN=admin,OU=Sub,OU=Roles,OU=Corp,DC=example,DC=com", true, true));
+        // The attribute type and the value are both case-insensitive.
+        assertEquals("Radmin", searchRoleOf("cn=admin,ou=role,dc=example,dc=com", true, true));
+        assertEquals("Radmin", searchRoleOf("CN=admin,OU=ROLES,DC=example,DC=com", true, true));
+        assertEquals("Radmin", searchRoleOf("CN=admin,Ou=rOlE,DC=example,DC=com", true, true));
+    }
+
+    @Test
+    public void test_updateSearchRoles_otherOuIsAGroup() {
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=Groups,DC=example,DC=com", true, true));
+        // The old substring check took these for roles.
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=Roles-Requests,OU=Groups,DC=example,DC=com", true, true));
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=Groups,OU=RoleOwners,DC=example,DC=com", true, true));
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=Role Requests,DC=example,DC=com", true, true));
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=NoRole,DC=example,DC=com", true, true));
+        // "role" has to be an ou value, not the value of another attribute type.
+        assertEquals("2admin", searchRoleOf("CN=admin,CN=Role,DC=example,DC=com", true, true));
+        assertEquals("2admin", searchRoleOf("CN=admin,DC=Role,DC=example,DC=com", true, true));
+    }
+
+    @Test
+    public void test_updateSearchRoles_escapedTextInCnIsNotAnOu() {
+        // The comma is escaped, so "ou=role" is part of the CN value and not an RDN of its own.
+        assertEquals("2x,ou=role", searchRoleOf("CN=x\\,ou=role,OU=Groups,DC=example,DC=com", true, true));
+        assertEquals("2x,ou=roles", searchRoleOf("CN=x\\,ou=roles,OU=Groups,DC=example,DC=com", true, true));
+    }
+
+    @Test
+    public void test_updateSearchRoles_multiValuedRdn() {
+        assertEquals("Radmin", searchRoleOf("CN=admin+OU=Role,DC=example,DC=com", true, true));
+        assertEquals("2admin", searchRoleOf("CN=admin+OU=Roles-Requests,DC=example,DC=com", true, true));
+    }
+
+    @Test
+    public void test_updateSearchRoles_malformedDnIsAGroup() {
+        // getSearchRoleName reads no name from such a DN, so the name is given here: what matters is
+        // that a DN that does not parse falls to the less privileged class, never to a role.
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=Role,DC", "admin", true, true));
+        assertEquals("2admin", searchRoleOf("CN=admin,OU=Role\\zz,DC=example,DC=com", "admin", true, true));
+        // No role permission is produced for it even when the group feature is off.
+        assertNull(searchRoleOf("CN=admin,OU=Role,DC", "admin", true, false));
+        assertFalse(new LdapManager().isRoleEntry("CN=admin,OU=Role,DC"));
+        assertFalse(new LdapManager().isRoleEntry("OU=Role\\zz"));
+    }
+
+    @Test
+    public void test_updateSearchRoles_featureFlagsStillGate() {
+        final String roleDn = "CN=admin,OU=Role,DC=example,DC=com";
+        final String groupDn = "CN=admin,OU=Groups,DC=example,DC=com";
+        assertEquals("Radmin", searchRoleOf(roleDn, true, false));
+        assertNull(searchRoleOf(roleDn, false, true));
+        assertNull(searchRoleOf(roleDn, false, false));
+        assertEquals("2admin", searchRoleOf(groupDn, false, true));
+        assertNull(searchRoleOf(groupDn, true, false));
+        assertNull(searchRoleOf(groupDn, false, false));
+    }
+
     @Test
     public void test_updateSubRoles_marksTheUserFailedWhenTheWalkThrowsAnError() {
         // The state write is in a finally, not only in the catch, so that a Throwable that is not an
