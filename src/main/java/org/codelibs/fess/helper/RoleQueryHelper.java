@@ -33,6 +33,7 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.servlet.request.RequestManager;
@@ -229,7 +230,7 @@ public class RoleQueryHelper {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("roleSet: {}", roleSet);
+            logger.debug("roleSet: {}", roleSet.stream().map(LogUtil::sanitize).toList());
         }
 
         if (request != null) {

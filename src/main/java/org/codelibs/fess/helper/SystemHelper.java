@@ -853,7 +853,7 @@ public class SystemHelper {
     protected String buildSearchRole(final String type, final String name) {
         final String value = type + name;
         if (logger.isDebugEnabled()) {
-            logger.debug("Search Role: {}:{}={}", type, name, value);
+            logger.debug("Search Role: {}:{}={}", type, LogUtil.sanitize(name), LogUtil.sanitize(value));
         }
         return value;
     }

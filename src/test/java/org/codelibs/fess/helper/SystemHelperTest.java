@@ -44,6 +44,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
@@ -1641,6 +1642,20 @@ public class SystemHelperTest extends UnitFessTestCase {
             assertEquals(LocalDateTime.of(2026, 10, 12, 9, 0), helper.getCurrentTimeAsLocalDateTime());
         } finally {
             TimeZone.setDefault(original);
+        }
+    }
+
+    @Test
+    public void test_buildSearchRole_debugLogKeepsAPermissionNameOnOneLine() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SystemHelper.class);
+        try {
+            final String value = new SystemHelper().buildSearchRole("2", "evil\r\n2026-01-01 00:00:00,000 [main] ERROR  FORGED");
+            assertTrue(value.startsWith("2evil\r\n")); // the permission itself is untouched
+            final String rendered = String.join("\n", appender.renderedEvents());
+            assertTrue(rendered, rendered.contains("Search Role:"));
+            assertFalse(rendered, rendered.contains("\r") || rendered.contains("\n2026-01-01"));
+        } finally {
+            appender.detach();
         }
     }
 }
