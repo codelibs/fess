@@ -888,6 +888,53 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertNotNull(context);
     }
 
+    /**
+     * The clauses the keyword branch is bound by: the same literal clauses the vector branch is
+     * pinned to in SemanticChunkSearcherTest (role with its denied roles as one required bool, the
+     * virtual host as a term, both as filters), so the two branches cannot drift apart. An admin
+     * search has neither.
+     */
+    @Test
+    public void test_build_permissionClausesAreTheOnesTheVectorBranchIsPinnedTo() {
+        getMockRequest().setAttribute("userRoles", Set.of("Rguest"));
+        getMockRequest().setAttribute(FessConfig.VIRTUAL_HOST_VALUE, "vhost1");
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final QueryBuilder role = QueryBuilders.boolQuery()
+                .should(QueryBuilders.termsQuery(fessConfig.getIndexFieldRole(), Set.of("Rguest")))
+                .mustNot(QueryBuilders.termsQuery(fessConfig.getIndexFieldRole(),
+                        List.of(fessConfig.getRoleSearchDeniedPrefix() + "Rguest")));
+        final QueryBuilder virtualHost = QueryBuilders.termQuery(fessConfig.getIndexFieldVirtualHost(), "vhost1");
+
+        for (final SearchRequestType type : SearchRequestType.values()) {
+            // as SearchEngineClient's condition builder does: an admin search skips the role query itself,
+            // and QueryHelper skips the virtual host
+            final QueryContext context = queryHelper.build(type, "hello", ctx -> {
+                if (type == SearchRequestType.ADMIN_SEARCH) {
+                    ctx.skipRoleQuery();
+                }
+            });
+            final String json = context.getQueryBuilder().toString();
+            if (type == SearchRequestType.ADMIN_SEARCH) {
+                assertFalse(json.contains("\"Rguest\""), type + ": " + json);
+                assertFalse(json.contains(fessConfig.getIndexFieldVirtualHost()), type + ": " + json);
+                continue;
+            }
+            // each clause is added by wrapping what was built so far in a new bool, so the filters
+            // are collected down the chain of must clauses
+            final List<QueryBuilder> filters = new java.util.ArrayList<>();
+            collectFilters(context.getQueryBuilder(), filters);
+            assertTrue(filters.contains(role), type + ": " + json);
+            assertTrue(filters.contains(virtualHost), type + ": " + json);
+        }
+    }
+
+    private void collectFilters(final QueryBuilder query, final List<QueryBuilder> filters) {
+        if (query instanceof final BoolQueryBuilder bool) {
+            filters.addAll(bool.filter());
+            bool.must().forEach(must -> collectFilters(must, filters));
+        }
+    }
+
     @Test
     public void test_buildRoleQuery_emptyRoleSet() {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();

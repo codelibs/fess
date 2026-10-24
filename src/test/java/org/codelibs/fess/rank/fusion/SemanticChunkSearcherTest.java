@@ -51,6 +51,9 @@ import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMapping
 import org.codelibs.fesen.opensearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.codelibs.fesen.opensearch.action.search.SearchAction;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.common.xcontent.XContentHelper;
+import org.codelibs.fesen.opensearch.common.xcontent.json.JsonXContent;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.action.search.SearchResponse;
@@ -813,6 +816,370 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     // -------------------------------------------------------------------------------------
+    //                                                                            permission
+    //                                                                            ----------
+    //
+    // The role, denied-role, virtual-host and request-filter clauses are what keep a user from
+    // reading documents they may not. Both vector modes, both entry points, with and without a
+    // condition: the outer bool is what enforces them, the copy inside the knn query is what keeps
+    // the approximate search from spending its k on documents about to be discarded. A test that
+    // only greps the JSON for the role terms passes when the clause is in the wrong place (an
+    // optional should), so these read the clause's position.
+
+    private static final QueryBuilder REQUEST_FILTER = QueryBuilders.termQuery("tenant", "t1");
+
+    /** The permission clause {@code buildPermissionQuery} must produce for {@code Rguest} on {@code vhost1}. */
+    private BoolQueryBuilder expectedPermission(final boolean withRequestFilter, final boolean withRole) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final BoolQueryBuilder permission = QueryBuilders.boolQuery();
+        if (withRequestFilter) {
+            permission.filter(REQUEST_FILTER);
+        }
+        if (withRole) {
+            permission.filter(QueryBuilders.boolQuery()
+                    .should(QueryBuilders.termsQuery(fessConfig.getIndexFieldRole(), Set.of("Rguest")))
+                    .mustNot(QueryBuilders.termsQuery(fessConfig.getIndexFieldRole(),
+                            List.of(fessConfig.getRoleSearchDeniedPrefix() + "Rguest"))));
+            permission.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldVirtualHost(), "vhost1"));
+        }
+        return permission;
+    }
+
+    private StubSearchRequestParams paramsWithRequestFilter(final SearchRequestParams.SearchRequestType type) {
+        return new StubSearchRequestParams(0, 10) {
+            @Override
+            public List<QueryBuilder> getFilterQueries() {
+                return List.of(REQUEST_FILTER);
+            }
+
+            @Override
+            public SearchRequestParams.SearchRequestType getType() {
+                return type;
+            }
+        };
+    }
+
+    private static void same(final Object expected, final Object actual, final String message) {
+        org.junit.jupiter.api.Assertions.assertEquals(expected, actual, message);
+    }
+
+    private static void same(final Object expected, final Object actual) {
+        org.junit.jupiter.api.Assertions.assertEquals(expected, actual);
+    }
+
+    private static Map<String, Object> toMap(final QueryBuilder query) {
+        return XContentHelper.convertToMap(JsonXContent.jsonXContent,
+                new java.io.ByteArrayInputStream(query.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8)), false);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> asMap(final Object value) {
+        return (Map<String, Object>) value;
+    }
+
+    /** The body of the knn query of a semantic query: {@code bool.must[0] -> (function_score ->) nested -> knn}. */
+    private static Map<String, Object> knnBodyOf(final QueryBuilder semanticQuery) {
+        final Map<String, Object> bool = asMap(toMap(semanticQuery).get("bool"));
+        Map<String, Object> chunk = asMap(((List<?>) bool.get("must")).get(0));
+        if (chunk.containsKey("function_score")) {
+            chunk = asMap(asMap(chunk.get("function_score")).get("query"));
+        }
+        final Map<String, Object> knn = asMap(asMap(asMap(chunk.get("nested")).get("query")).get("knn"));
+        // keyed by the vector field
+        return asMap(knn.values().iterator().next());
+    }
+
+    /** Every semantic query the two entry points build for the same request, labelled for the failure message. */
+    private Map<String, QueryBuilder> semanticQueries(final boolean ann, final SearchRequestParams params) {
+        final Map<String, QueryBuilder> queries = new java.util.LinkedHashMap<>();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.ann = ann;
+        final Optional<QueryBuilder> subQuery = searcher.buildSubQuery("plain query", params, OptionalThing.empty());
+        assertTrue(subQuery.isPresent());
+        queries.put("buildSubQuery", subQuery.get());
+        // the search() path hands the request through the facet-stripping wrapper
+        final SemanticChunkSearcher.SemanticQueryContext context =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, ann);
+        final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
+        assertTrue(searcher.createSemanticSearchCondition(context, "plain query",
+                new SemanticChunkSearcher.SemanticSearchRequestParams(params), OptionalThing.empty()).build(builder));
+        queries.put("createSemanticSearchCondition", builder.request().source().query());
+        return queries;
+    }
+
+    @Test
+    public void test_permission_outerFilterEnforcesItInEveryModeAndEntryPoint() {
+        givenPermissionContext();
+        for (final boolean ann : new boolean[] { true, false }) {
+            for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(ann,
+                    paramsWithRequestFilter(SearchRequestParams.SearchRequestType.SEARCH)).entrySet()) {
+                final String label = (ann ? "ann/" : "exact/") + entry.getKey();
+                final BoolQueryBuilder outer = (BoolQueryBuilder) entry.getValue();
+                // enforcement is a filter of the outermost bool: request filter, role, virtual host
+                same(List.of(expectedPermission(true, true)), outer.filter(), label);
+                // and nothing else of the permission leaks into scoring or into an optional clause
+                assertTrue(outer.should().isEmpty(), label);
+                assertTrue(outer.mustNot().isEmpty(), label);
+                assertEquals(1, outer.must().size(), label);
+            }
+        }
+    }
+
+    /**
+     * The role clause is its own bool, under filter, whose only positive clause is a should. A bool
+     * with a should and no must or filter requires one of them (minimum_should_match defaults to
+     * 1); the same should next to a filter would be optional. It must never be put on the permission
+     * bool itself, which carries the virtual host and request filters as filters.
+     */
+    @Test
+    public void test_permission_roleClauseIsRequiredNotOptional() {
+        givenPermissionContext();
+        final BoolQueryBuilder permission =
+                new GuardedSearcher().buildPermissionQuery(paramsWithRequestFilter(SearchRequestParams.SearchRequestType.SEARCH));
+        assertTrue(permission.should().isEmpty(), "a should beside filters is optional: " + permission);
+        assertTrue(permission.mustNot().isEmpty(), permission.toString());
+        final BoolQueryBuilder role =
+                (BoolQueryBuilder) permission.filter().stream().filter(f -> f instanceof BoolQueryBuilder).findFirst().get();
+        assertEquals(1, role.should().size());
+        assertEquals(1, role.mustNot().size());
+        assertTrue(role.filter().isEmpty(), "a filter in the role bool makes its should optional: " + role);
+        assertTrue(role.must().isEmpty(), "a must in the role bool makes its should optional: " + role);
+        assertNull(role.minimumShouldMatch(), role.toString());
+    }
+
+    @Test
+    public void test_permission_knnFilterCarriesTheSameClauseAsTheOuterFilter() {
+        givenPermissionContext();
+        for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(true,
+                paramsWithRequestFilter(SearchRequestParams.SearchRequestType.SEARCH)).entrySet()) {
+            final Map<String, Object> knn = knnBodyOf(entry.getValue());
+            same(toMap(expectedPermission(true, true)), knn.get("filter"), entry.getKey());
+            final BoolQueryBuilder outer = (BoolQueryBuilder) entry.getValue();
+            same(toMap(outer.filter().get(0)), knn.get("filter"), entry.getKey() + ": the recall copy must be the enforced clause");
+        }
+    }
+
+    @Test
+    public void test_permission_exactModeHasNoKnnToCarryAFilter() {
+        givenPermissionContext();
+        for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(false, new StubSearchRequestParams(0, 10)).entrySet()) {
+            assertFalse(entry.getValue().toString().contains("\"knn\""), entry.getKey());
+            // so the outer filter is the only enforcement, and it is there
+            same(List.of(expectedPermission(false, true)), ((BoolQueryBuilder) entry.getValue()).filter(), entry.getKey());
+        }
+    }
+
+    @Test
+    public void test_permission_conditionsAreEnforcedOutsideAndFilteredInsideBesideThePermission() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final QueryBuilder condition = QueryBuilders.termQuery("label", "news");
+        final StubSearchRequestParams params = paramsWithRequestFilter(SearchRequestParams.SearchRequestType.SEARCH);
+        for (final boolean ann : new boolean[] { true, false }) {
+            final SemanticChunkSearcher.SemanticQueryContext context =
+                    new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, ann, condition);
+            final BoolQueryBuilder outer = (BoolQueryBuilder) searcher.buildSemanticQuery(context, params);
+            same(List.of(expectedPermission(true, true), condition), outer.filter(), "ann=" + ann);
+            if (ann) {
+                same(toMap(QueryBuilders.boolQuery().filter(expectedPermission(true, true)).filter(condition)),
+                        knnBodyOf(outer).get("filter"));
+            }
+        }
+    }
+
+    @Test
+    public void test_permission_theMinScoreCutoffDoesNotMoveTheFilter() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.ann = true;
+        searcher.minScore = Float.valueOf(0.4f);
+        final QueryBuilder query = searcher
+                .buildSubQuery("plain query", paramsWithRequestFilter(SearchRequestParams.SearchRequestType.SEARCH), OptionalThing.empty())
+                .get();
+        same(List.of(expectedPermission(true, true)), ((BoolQueryBuilder) query).filter());
+        same(toMap(expectedPermission(true, true)), knnBodyOf(query).get("filter"));
+    }
+
+    /** An admin search skips the role and the virtual host, never the request's own filters. */
+    @Test
+    public void test_permission_adminSearchKeepsTheRequestFilters() {
+        givenPermissionContext();
+        final StubSearchRequestParams params = paramsWithRequestFilter(SearchRequestParams.SearchRequestType.ADMIN_SEARCH);
+        for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(true, params).entrySet()) {
+            same(List.of(expectedPermission(true, false)), ((BoolQueryBuilder) entry.getValue()).filter(), entry.getKey());
+            same(toMap(expectedPermission(true, false)), knnBodyOf(entry.getValue()).get("filter"), entry.getKey());
+        }
+    }
+
+    /** Several roles stay one terms clause, and every denied role is spelled with the denied prefix. */
+    @Test
+    public void test_permission_severalRolesStayOneTermsClausePerSide() {
+        givenPermissionContext();
+        getMockRequest().setAttribute(USER_ROLES_ATTRIBUTE, Set.of("Ralice", "Rbob"));
+        final String prefix = ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix();
+        final BoolQueryBuilder permission = new GuardedSearcher().buildPermissionQuery(new StubSearchRequestParams(0, 10));
+        final BoolQueryBuilder role = (BoolQueryBuilder) permission.filter().get(0);
+        final String json = role.toString().replaceAll("\\s", "");
+        assertEquals(1, role.should().size(), json);
+        assertTrue(json.contains("\"Ralice\"") && json.contains("\"Rbob\""), json);
+        assertEquals(1, role.mustNot().size(), json);
+        assertTrue(json.contains("\"" + prefix + "Ralice\"") && json.contains("\"" + prefix + "Rbob\""), json);
+    }
+
+    /** What the vector branch sends for the same request must not depend on what the keyword branch is told to search. */
+    @Test
+    public void test_permission_theVectorBranchIgnoresTheQueryTextForPermission() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.ann = true;
+        final StubSearchRequestParams params = paramsWithRequestFilter(SearchRequestParams.SearchRequestType.SEARCH);
+        final Object first = toMap(searcher.buildSubQuery("plain query", params, OptionalThing.empty()).get()).get("bool");
+        final Object second = toMap(searcher.buildSubQuery("another query", params, OptionalThing.empty()).get()).get("bool");
+        same(asMap(first).get("filter"), asMap(second).get("filter"));
+    }
+
+    /** Every request type but the admin search is bound by the role clause, in both places. */
+    @Test
+    public void test_permission_everyRequestTypeButAdminSearchIsBoundByTheRole() {
+        givenPermissionContext();
+        for (final SearchRequestParams.SearchRequestType type : SearchRequestParams.SearchRequestType.values()) {
+            final boolean admin = type == SearchRequestParams.SearchRequestType.ADMIN_SEARCH;
+            final StubSearchRequestParams params = paramsWithRequestFilter(type);
+            for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(true, params).entrySet()) {
+                final String label = type + "/" + entry.getKey();
+                final BoolQueryBuilder expected = expectedPermission(true, !admin);
+                same(List.of(expected), ((BoolQueryBuilder) entry.getValue()).filter(), label);
+                same(toMap(expected), knnBodyOf(entry.getValue()).get("filter"), label);
+            }
+        }
+    }
+
+    /** With no virtual host active the role still binds, and no virtual host term is invented. */
+    @Test
+    public void test_permission_withoutAVirtualHostTheRoleStillBinds() {
+        givenPermissionContext();
+        getMockRequest().setAttribute(FessConfig.VIRTUAL_HOST_VALUE, "");
+        for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(true, new StubSearchRequestParams(0, 10)).entrySet()) {
+            final BoolQueryBuilder permission = (BoolQueryBuilder) ((BoolQueryBuilder) entry.getValue()).filter().get(0);
+            assertEquals(1, permission.filter().size(), entry.getKey() + ": " + permission);
+            assertFalse(permission.toString().contains(ComponentUtil.getFessConfig().getIndexFieldVirtualHost()), permission.toString());
+            assertTrue(permission.toString().contains("\"Rguest\""), permission.toString());
+            same(toMap(permission), knnBodyOf(entry.getValue()).get("filter"), entry.getKey());
+        }
+    }
+
+    /**
+     * An admin search with nothing else to bind it has no permission clause at all: the outer bool
+     * has no filter, and the knn query is sent with no filter rather than with an empty one. With a
+     * condition, the knn filter is that condition alone.
+     */
+    @Test
+    public void test_permission_adminSearchWithNothingToBindIt() {
+        givenPermissionContext();
+        final StubSearchRequestParams admin = new StubSearchRequestParams(0, 10) {
+            @Override
+            public SearchRequestType getType() {
+                return SearchRequestType.ADMIN_SEARCH;
+            }
+        };
+        for (final Map.Entry<String, QueryBuilder> entry : semanticQueries(true, admin).entrySet()) {
+            assertTrue(((BoolQueryBuilder) entry.getValue()).filter().isEmpty(), entry.getKey());
+            assertFalse(knnBodyOf(entry.getValue()).containsKey("filter"), entry.getKey());
+        }
+        final QueryBuilder condition = QueryBuilders.termQuery("label", "news");
+        final SemanticChunkSearcher.SemanticQueryContext context =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, condition);
+        final QueryBuilder query = new GuardedSearcher().buildSemanticQuery(context, admin);
+        same(List.of(condition), ((BoolQueryBuilder) query).filter());
+        same(toMap(condition), knnBodyOf(query).get("filter"));
+    }
+
+    /**
+     * The role is read from the request when the query is built, not remembered from an earlier
+     * one: two users on one searcher get their own clause.
+     */
+    @Test
+    public void test_permission_theRoleOfEachRequestIsUsed() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.ann = true;
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10);
+        getMockRequest().setAttribute(USER_ROLES_ATTRIBUTE, Set.of("Ralice"));
+        final String alice = searcher.buildSubQuery("plain query", params, OptionalThing.empty()).get().toString();
+        getMockRequest().setAttribute(USER_ROLES_ATTRIBUTE, Set.of("Rbob"));
+        final String bob = searcher.buildSubQuery("plain query", params, OptionalThing.empty()).get().toString();
+        assertTrue(alice.contains("\"Ralice\"") && !alice.contains("\"Rbob\""), alice);
+        assertTrue(bob.contains("\"Rbob\"") && !bob.contains("\"Ralice\""), bob);
+    }
+
+    /**
+     * Whatever the user types, the permission clause is built from the request and never from the
+     * query text: queries that try to name a role, a virtual host or "everything", that close a
+     * group early, that carry a sort or a stray quote, in the typed query, in ex_q or in a facet
+     * value, on the first run and on the escaped retry, either skip the branch or produce the same
+     * permission clause as a plain query, as the first filter of the outer bool, with no should.
+     */
+    @Test
+    public void test_permission_hostileInputNeverChangesThePermissionClause() {
+        givenPermissionContext();
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final String[] typed = { "role:Radmin reset", "-role:Rguest reset", "reset OR *:*", "reset *:*", "virtual_host:vh2 reset",
+                "reset) OR (role:Radmin", "reset sort:filename.asc", "reset \"", "reset role:* OR label:x", "DRguest Radmin", "reset\\" };
+        final String[][] extraQueries = { {}, { "role:Radmin" }, { "a OR *:*" }, { "-label:x" }, { "x \"" } };
+        final String[][] facetValues = { {}, { "a\"b" }, { "x\" OR role:\"Radmin" }, { "c\\d" } };
+        final BoolQueryBuilder expected = expectedPermission(false, true);
+        int built = 0;
+        for (final String q : typed) {
+            for (final String[] ex : extraQueries) {
+                for (final String[] fv : facetValues) {
+                    final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+                        @Override
+                        public String getQuery() {
+                            return q;
+                        }
+
+                        @Override
+                        public String[] getExtraQueries() {
+                            return ex;
+                        }
+
+                        @Override
+                        public java.util.Map<String, String[]> getFields() {
+                            return fv.length == 0 ? java.util.Collections.emptyMap() : java.util.Collections.singletonMap("label", fv);
+                        }
+                    };
+                    for (final boolean retry : new boolean[] { false, true }) {
+                        final String assembled = new QueryStringBuilder().params(params).escape(retry).build();
+                        for (final boolean ann : new boolean[] { true, false }) {
+                            final GuardedSearcher searcher = new GuardedSearcher();
+                            searcher.ann = ann;
+                            final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(assembled, params);
+                            if (!context.isPresent()) {
+                                continue; // the branch is skipped: nothing reaches the index
+                            }
+                            built++;
+                            final String label = assembled + " ann=" + ann;
+                            final BoolQueryBuilder outer = (BoolQueryBuilder) searcher.buildSemanticQuery(context.get(), params);
+                            same(expected, outer.filter().get(0), label);
+                            assertTrue(outer.should().isEmpty() && outer.mustNot().isEmpty(), label);
+                            assertEquals(1, outer.must().size(), label);
+                            assertEquals(context.get().getConditionFilter() == null ? 1 : 2, outer.filter().size(), label);
+                            if (ann) {
+                                final Object knnFilter = knnBodyOf(outer).get("filter");
+                                same(toMap(context.get().getConditionFilter() == null ? expected
+                                        : QueryBuilders.boolQuery().filter(expected).filter(context.get().getConditionFilter())), knnFilter,
+                                        label);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // the loop is not vacuous: a good share of these inputs do reach the vector branch
+        assertTrue(built > 100, "built=" + built);
+    }
+
+    // -------------------------------------------------------------------------------------
     //                                                                      mode diagnostics
     //                                                                      ----------------
 
@@ -1138,9 +1505,11 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
             return splitter;
         }
 
+        boolean ann = false;
+
         @Override
         protected boolean isKnnIndexReady() {
-            return false;
+            return ann;
         }
 
         @Override
