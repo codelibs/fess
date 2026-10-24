@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.login;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
@@ -49,6 +50,9 @@ public class LoginAction extends FessLoginAction {
     private static final Logger logger = LogManager.getLogger(LoginAction.class);
 
     private static final String INVALID_OLD_PASSWORD = "LoginAction.invalidOldPassword";
+
+    /** Joins the address and the user name in a USER-scope key; the same separator as {@code LoginHandler}. */
+    private static final String USER_SCOPE_KEY_SEP = "\u0000";
 
     // ===================================================================================
     // Attribute
@@ -94,12 +98,21 @@ public class LoginAction extends FessLoginAction {
         final String username = form.username;
         final String password = form.password;
         form.clearSecurityInfo();
+        // The same per-address and per-user allowances as /api/v2/auth/login, on the same buckets: this form
+        // checks the same credentials, so it must not be a way around the limit.
+        final LoginRateLimiter limiter = ComponentUtil.getLoginRateLimiter();
+        final String clientIp = ComponentUtil.getRateLimitHelper().getClientIp(request);
+        if (isThrottled(limiter, clientIp, username)) {
+            throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
+        }
         try {
             final HtmlResponse loginRedirect = fessLoginAssist.loginRedirect(new LocalUserCredential(username, password), op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
                 return getHtmlResponse();
             });
+            // Give back only what this attempt took: the user's own failures, and the one address slot it consumed.
+            forgiveAttempt(limiter, clientIp, username);
             if (ComponentUtil.getFessConfig().isValidAdminPassword(password)) {
                 return loginRedirect;
             }
@@ -111,9 +124,71 @@ public class LoginAction extends FessLoginAction {
                         LogUtil.sanitize(lfe.getMessage()));
             }
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
+            recordFailure(limiter, clientIp, username);
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
         }
         return redirect(getClass());
+    }
+
+    /**
+     * Takes the address slot of this attempt and checks the per-user allowance. The user slot is taken
+     * only when the credentials are rejected (see {@link #recordFailure}).
+     *
+     * @param limiter the limiter shared with the v2 login
+     * @param clientIp the client address
+     * @param username the submitted user name
+     * @return true if the attempt is refused
+     */
+    protected boolean isThrottled(final LoginRateLimiter limiter, final String clientIp, final String username) {
+        final int ipLimit = fessConfig.getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int userLimit = fessConfig.getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = fessConfig.getThemeApiLoginLockoutSecondsAsInteger();
+        if (!limiter.allow(LoginRateLimiter.Scope.IP, clientIp, ipLimit, 60)) {
+            if (limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec)) {
+                logger.warn("[login] ip rate limit exceeded; locking out for {}s: clientIp={}, limit={}/min", lockoutSec, clientIp,
+                        ipLimit);
+            }
+            return true;
+        }
+        if (!limiter.peek(LoginRateLimiter.Scope.USER, userKey(clientIp, username), userLimit, 60)) {
+            if (limiter.lockOut(LoginRateLimiter.Scope.USER, userKey(clientIp, username), lockoutSec)) {
+                logger.warn("[login] user rate limit exceeded; locking out for {}s: username={}, clientIp={}, limit={}/min", lockoutSec,
+                        LogUtil.sanitize(username), clientIp, userLimit);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Counts a rejected credential against the user.
+     *
+     * @param limiter the limiter shared with the v2 login
+     * @param clientIp the client address
+     * @param username the submitted user name
+     */
+    protected void recordFailure(final LoginRateLimiter limiter, final String clientIp, final String username) {
+        final String key = userKey(clientIp, username);
+        if (!limiter.allow(LoginRateLimiter.Scope.USER, key, fessConfig.getThemeApiLoginRateLimitPerUserPerMinuteAsInteger(), 60)) {
+            limiter.lockOut(LoginRateLimiter.Scope.USER, key, fessConfig.getThemeApiLoginLockoutSecondsAsInteger());
+        }
+    }
+
+    /**
+     * Gives back what a successful login took: the user's own failures and the one address slot the attempt
+     * consumed. The address bucket is not cleared, because it also counts the guesses made at other users.
+     *
+     * @param limiter the limiter shared with the v2 login
+     * @param clientIp the client address
+     * @param username the submitted user name
+     */
+    protected void forgiveAttempt(final LoginRateLimiter limiter, final String clientIp, final String username) {
+        limiter.clear(LoginRateLimiter.Scope.USER, userKey(clientIp, username));
+        limiter.release(LoginRateLimiter.Scope.IP, clientIp);
+    }
+
+    private static String userKey(final String clientIp, final String username) {
+        return clientIp + USER_SCOPE_KEY_SEP + username;
     }
 
     /**
