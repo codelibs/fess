@@ -20,6 +20,7 @@ import java.util.List;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.query.StructuredQuerySplitter.Split;
 import org.junit.jupiter.api.Test;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
@@ -508,6 +509,52 @@ public class StructuredQuerySplitterTest extends UnitFessTestCase {
         assertNull(new StubProcessorSplitter().split(null));
         assertNull(new StubProcessorSplitter().split(""));
         assertNull(new StubProcessorSplitter().split("   "));
+    }
+
+    /** The additional query the keyword branch appends is read for its conditions, and for nothing else. */
+    @Test
+    public void test_conditionsOf_readsConditionsOnly() {
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        // a query of conditions only is one boolean the processor converts as a whole
+        final BoolQueryBuilder excluded = (BoolQueryBuilder) splitter.conditionsOf("-label:internal", SearchRequestType.JSON);
+        assertNotNull(excluded);
+        assertEquals(List.of("-label:internal"), splitter.converted);
+        assertEquals(1, excluded.filter().size());
+
+        final StubProcessorSplitter several = new StubProcessorSplitter();
+        assertNotNull(several.conditionsOf("label:a -filetype:tmp", SearchRequestType.JSON));
+        assertEquals(1, several.converted.size());
+        assertTrue(several.converted.get(0).contains("label:a"), several.converted.get(0));
+        assertTrue(several.converted.get(0).contains("-filetype:tmp"), several.converted.get(0));
+    }
+
+    /** Words, phrases and optional or unconvertible clauses are the keyword branch's to apply, so none is read. */
+    @Test
+    public void test_conditionsOf_refusesWhatIsNotOnlyConditions() {
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        for (final String query : new String[] { "secret", "label:a secret", "\"top secret\"", "-secret", "label:a OR secret",
+                "sort:last_modified.desc", "allintitle:x", "(", "", "  ", null }) {
+            assertNull(splitter.conditionsOf(query, SearchRequestType.JSON), String.valueOf(query));
+        }
+    }
+
+    /** A clause the processor cannot express is not dropped: the caller must hear that it was not read. */
+    @Test
+    public void test_conditionsOf_refusesAClauseTheProcessorCannotConvert() {
+        final StubProcessorSplitter nothing = new StubProcessorSplitter();
+        nothing.convertToNull = true;
+        assertNull(nothing.conditionsOf("-label:internal", SearchRequestType.JSON));
+        final StubProcessorSplitter throwing = new StubProcessorSplitter();
+        throwing.convertThrows = true;
+        assertNull(throwing.conditionsOf("-label:internal", SearchRequestType.JSON));
+    }
+
+    /** The conversion sees the request type, so a tag condition means what it means in the keyword branch. */
+    @Test
+    public void test_conditionsOf_convertsWithTheRequestType() {
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        assertNotNull(splitter.conditionsOf("-label:internal", SearchRequestType.ADMIN_SEARCH));
+        assertEquals(List.of(SearchRequestType.ADMIN_SEARCH), splitter.convertedTypes);
     }
 
     private List<QueryBuilder> filterClauses(final Split split) {

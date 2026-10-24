@@ -133,6 +133,56 @@ public class StructuredQuerySplitter {
      * @return the split, or {@code null} when the query is not safe to split
      */
     public Split split(final String query, final SearchRequestType searchRequestType) {
+        final Parts parts = parts(query, searchRequestType);
+        if (parts == null) {
+            return null;
+        }
+        final String text = String.join(" ", parts.texts).trim();
+        if (StringUtil.isBlank(text)) {
+            // Conditions with no text of their own: there is nothing to embed.
+            return null;
+        }
+        return new Split(text, parts.conditionFilter.hasClauses() ? parts.conditionFilter : null);
+    }
+
+    /**
+     * Reads a query that is meant to hold conditions only, such as the additional query the
+     * keyword branch appends to every search.
+     *
+     * <p>A word in it is a requirement of the keyword branch, which the vector branch cannot
+     * apply, and embedding it would shift the search toward a word the user never typed. So
+     * anything but conditions - a word, a phrase, an optional clause, a clause that cannot be
+     * converted - yields {@code null}, and the caller leaves the vector branch out.</p>
+     *
+     * @param query the query string
+     * @param searchRequestType the type of the search request the query belongs to
+     * @return the conditions as a filter clause, or {@code null} when the query holds anything
+     *         else, or nothing
+     */
+    public QueryBuilder conditionsOf(final String query, final SearchRequestType searchRequestType) {
+        final Parts parts = parts(query, searchRequestType);
+        if (parts == null || !parts.texts.isEmpty() || !parts.conditionFilter.hasClauses()) {
+            return null;
+        }
+        return parts.conditionFilter;
+    }
+
+    /** The free text and the conditions a query was taken apart into. */
+    private static final class Parts {
+
+        final List<String> texts = new ArrayList<>();
+
+        final BoolQueryBuilder conditionFilter = QueryBuilders.boolQuery();
+    }
+
+    /**
+     * Takes a query apart into its free text and its conditions.
+     *
+     * @param query the query string
+     * @param searchRequestType the type of the search request the query belongs to
+     * @return the parts, or {@code null} when the query is not safe to split
+     */
+    private Parts parts(final String query, final SearchRequestType searchRequestType) {
         if (StringUtil.isBlank(query)) {
             return null;
         }
@@ -151,8 +201,7 @@ public class StructuredQuerySplitter {
             // The context's string rather than the raw one, because its constructor is what
             // strips those two prefixes. This is not quite the string the keyword branch parses:
             // QueryHelper appends its configured additionalQuery before building its own
-            // context, and the vector branch never sees that -- the same blind spot it has
-            // had all along, embedding the query text and applying no additionalQuery either.
+            // context. The caller reads that one separately, with conditionsOf.
             parsed = getQueryParser().parse(context.getQueryString());
         } catch (final RuntimeException e) {
             // A query that cannot be parsed fails the keyword branch too, so there is nothing
@@ -168,17 +217,11 @@ public class StructuredQuerySplitter {
         if (parsed == null) {
             return null;
         }
-        final List<String> texts = new ArrayList<>();
-        final BoolQueryBuilder conditionFilter = QueryBuilders.boolQuery();
-        if (!walk(parsed, Occur.MUST, context, texts, conditionFilter)) {
+        final Parts parts = new Parts();
+        if (!walk(parsed, Occur.MUST, context, parts.texts, parts.conditionFilter)) {
             return null;
         }
-        final String text = String.join(" ", texts).trim();
-        if (StringUtil.isBlank(text)) {
-            // Conditions with no text of their own: there is nothing to embed.
-            return null;
-        }
-        return new Split(text, conditionFilter.hasClauses() ? conditionFilter : null);
+        return parts;
     }
 
     /**
