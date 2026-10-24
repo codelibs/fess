@@ -78,7 +78,7 @@ public class PopularWordHelper {
         fessConfig = ComponentUtil.getFessConfig();
         cache = CacheBuilder.newBuilder()
                 .maximumSize(fessConfig.getSuggestPopularWordCacheSizeAsInteger().longValue())
-                .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES)
+                .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.SECONDS)
                 .build();
     }
 

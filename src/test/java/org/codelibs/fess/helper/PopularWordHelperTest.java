@@ -17,10 +17,12 @@ package org.codelibs.fess.helper;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -84,7 +86,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
                 };
                 cache = CacheBuilder.newBuilder()
                         .maximumSize(fessConfig.getSuggestPopularWordCacheSizeAsInteger().longValue())
-                        .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES)
+                        .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.SECONDS)
                         .build();
             }
         };
@@ -282,6 +284,29 @@ public class PopularWordHelperTest extends UnitFessTestCase {
 
         assertNotNull(testHelper.fessConfig);
         assertNotNull(testHelper.cache);
+    }
+
+    @Test
+    public void test_init_cacheExpireIsInSeconds() throws Exception {
+        // suggest.popular.word.cache.expire is documented in seconds
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public Integer getSuggestPopularWordCacheSizeAsInteger() {
+                return 10;
+            }
+
+            @Override
+            public Integer getSuggestPopularWordCacheExpireAsInteger() {
+                return 1;
+            }
+        });
+        final PopularWordHelper testHelper = new PopularWordHelper();
+        testHelper.init();
+
+        testHelper.cache.put("key", List.of("word"));
+        Thread.sleep(1500);
+
+        assertNull(testHelper.cache.getIfPresent("key"));
     }
 
     @Test
