@@ -16,6 +16,7 @@
 package org.codelibs.fess.util;
 
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -44,6 +45,21 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
      */
     public static String getSearchEngineHttpAddress() {
         return System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
+    }
+
+    /**
+     * Determines whether this JVM is the main webapp process, as opposed to one of the short-lived
+     * child processes (crawler, thumbnail, suggest and chunk) that also boot the same container to
+     * run a single job and exit. Each child process is started with its own
+     * {@code -Dfess.<type>.process=true} system property; the webapp process sets none of them.
+     *
+     * @return {@code true} when none of the job-process markers is set
+     */
+    public static boolean isWebappProcess() {
+        return !Stream
+                .of(Constants.EXECUTE_TYPE_CRAWLER, Constants.EXECUTE_TYPE_THUMBNAIL, Constants.EXECUTE_TYPE_SUGGEST,
+                        Constants.EXECUTE_TYPE_CHUNK)
+                .anyMatch(type -> Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + type + ".process")));
     }
 
     /**
