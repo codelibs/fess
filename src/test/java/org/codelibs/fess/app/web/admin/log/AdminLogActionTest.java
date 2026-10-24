@@ -15,12 +15,17 @@
  */
 package org.codelibs.fess.app.web.admin.log;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -329,5 +334,37 @@ public class AdminLogActionTest extends UnitFessTestCase {
         final Path logDir = newLogDir();
         Files.write(Files.createDirectories(logDir.resolve("etc")).resolve("hosts.log"), "inside".getBytes(StandardCharsets.UTF_8));
         assertEquals(logDir.resolve("etc").resolve("hosts.log"), AdminLogAction.findLogFile(logDir.toString(), "/etc/hosts.log"));
+    }
+
+    // ==================================================================================
+    //                                                                    getLogFileItems
+    //                                                                    ===============
+
+    @Test
+    public void test_getLogFileItems_listsRegularFilesOnly() throws IOException {
+        final Path dir = Files.createTempDirectory("fess-log-list");
+        try {
+            Files.writeString(dir.resolve("fess.log"), "x");
+            Files.writeString(dir.resolve("fess.log.gz"), "x");
+            Files.writeString(dir.resolve("other.txt"), "x");
+            Files.createDirectory(dir.resolve("folder.log"));
+            final String path = dir.toString();
+            ComponentUtil.register(new SystemHelper() {
+                @Override
+                public String getLogFilePath() {
+                    return path;
+                }
+            }, "systemHelper");
+
+            final List<Map<String, Object>> items = AdminLogAction.getLogFileItems();
+
+            assertEquals(2, items.size());
+            assertEquals("fess.log", items.get(0).get("name"));
+            assertEquals("fess.log.gz", items.get(1).get("name"));
+        } finally {
+            try (var walk = Files.walk(dir)) {
+                walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> p.toFile().delete());
+            }
+        }
     }
 }

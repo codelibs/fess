@@ -173,7 +173,7 @@ public class AdminLogAction extends FessAdminAction {
         if (StringUtil.isNotBlank(logFilePath)) {
             final Path logDirPath = Paths.get(logFilePath);
             try (Stream<Path> stream = Files.list(logDirPath)) {
-                stream.filter(entry -> isLogFilename(entry.getFileName().toString())).sorted().forEach(filePath -> {
+                stream.filter(AdminLogAction::isLogFile).sorted().forEach(filePath -> {
                     final Map<String, Object> map = new HashMap<>();
                     final String name = filePath.getFileName().toString();
                     map.put("id", Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
@@ -190,6 +190,10 @@ public class AdminLogAction extends FessAdminAction {
             }
         }
         return logFileItems;
+    }
+
+    private static boolean isLogFile(final Path path) {
+        return isLogFilename(path.getFileName().toString()) && Files.isRegularFile(path);
     }
 
     /**
