@@ -352,7 +352,7 @@ public class AdminSearchlistAction extends FessAdminAction {
      * @return HTML response redirecting to the list page
      */
     @Execute
-    @Secured({ ROLE, ROLE + VIEW })
+    @Secured({ ROLE })
     public HtmlResponse deleteall(final ListForm form) {
         validate(form, messages -> {}, this::asListHtml);
         verifyToken(this::asListHtml);

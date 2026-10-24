@@ -249,7 +249,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
      * @return The HTML response.
      */
     @Execute
-    @Secured({ ROLE, ROLE + VIEW })
+    @Secured({ ROLE })
     public HtmlResponse deleteall() {
         verifyToken(this::asListHtml);
         crawlingInfoService.deleteOldSessions(processHelper.getRunningSessionIdSet());
