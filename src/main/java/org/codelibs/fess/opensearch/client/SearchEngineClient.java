@@ -77,6 +77,7 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.fess.util.SearchEngineCurl;
@@ -2316,7 +2317,7 @@ public class SearchEngineClient implements Client {
 
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL: {}", searchRequestBuilder);
+                    logger.debug("Query DSL: {}", LogUtil.escapeJsonLineSeparators(searchRequestBuilder));
                 }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
@@ -2324,7 +2325,7 @@ public class SearchEngineClient implements Client {
                 // report that message to the client, and the dump carries the role filter terms,
                 // the _source allow-list, internal field names and the per-field boosts.
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Invalid query {}", searchRequestBuilder, e);
+                    logger.debug("Invalid query {}", LogUtil.escapeJsonLineSeparators(searchRequestBuilder), e);
                 }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query.", e);
@@ -2343,7 +2344,7 @@ public class SearchEngineClient implements Client {
                     throw new SearchEngineUnavailableException("The index to search is closed.", e);
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Cannot process {}", searchRequestBuilder, e);
+                    logger.debug("Cannot process {}", LogUtil.escapeJsonLineSeparators(searchRequestBuilder), e);
                 }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Failed to process the query.", e);
@@ -2416,7 +2417,7 @@ public class SearchEngineClient implements Client {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Query DSL: {}", searchRequestBuilder);
+                    logger.debug("Query DSL: {}", LogUtil.escapeJsonLineSeparators(searchRequestBuilder));
                 }
                 pitSearch(index, scrollForSearch, fessConfig.getIndexSearchTimeout(), searchRequestBuilder, response -> {
                     for (final SearchHit hit : response.getHits().getHits()) {
@@ -2431,7 +2432,7 @@ public class SearchEngineClient implements Client {
                 // Same contract as search(): the dump is for the log, the exception message is
                 // what the scroll API hands back to the caller.
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Invalid query {}", searchRequestBuilder, e);
+                    logger.debug("Invalid query {}", LogUtil.escapeJsonLineSeparators(searchRequestBuilder), e);
                 }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query.", e);

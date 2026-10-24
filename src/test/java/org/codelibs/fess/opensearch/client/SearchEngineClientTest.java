@@ -47,6 +47,7 @@ import org.codelibs.fesen.opensearch.action.search.CreatePitResponse;
 import org.codelibs.fesen.opensearch.action.search.DeletePitRequest;
 import org.codelibs.fesen.opensearch.action.search.DeletePitResponse;
 import org.codelibs.fesen.opensearch.action.search.SearchAction;
+import org.codelibs.fesen.opensearch.action.search.SearchPhaseExecutionException;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.action.search.SearchRequest;
 import org.codelibs.fesen.opensearch.action.search.SearchResponse;
@@ -59,6 +60,7 @@ import org.codelibs.fesen.opensearch.common.xcontent.json.JsonXContent;
 import org.codelibs.fesen.opensearch.core.xcontent.DeprecationHandler;
 import org.codelibs.fesen.opensearch.core.xcontent.NamedXContentRegistry;
 import org.codelibs.fesen.opensearch.core.xcontent.XContentParser;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.search.sort.FieldSortBuilder;
 import org.codelibs.fesen.opensearch.search.sort.SortBuilder;
 import org.codelibs.fesen.opensearch.search.sort.SortOrder;
@@ -250,6 +252,78 @@ public class SearchEngineClientTest extends UnitFessTestCase {
             } catch (final InvalidQueryException e) {
                 assertEquals(failure, e.getCause());
             }
+        }
+    }
+
+    /**
+     * The query dump carries the permission names of the caller, which an SSO identity provider
+     * releases, so one with a NEL, LS or PS in it must not start a line of the log: JSON leaves
+     * those three raw while it escapes CR and LF.
+     */
+    @Test
+    public void test_search_queryDslLogKeepsLineSeparatorsOfTermsOut() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            for (final RuntimeException failure : new RuntimeException[] {
+                    new SearchPhaseExecutionException("query", "all shards failed", ShardSearchFailure.EMPTY_ARRAY),
+                    new OpenSearchException("x") }) {
+                try {
+                    clientSearchFailingWith(failure).search("fess.search", builder -> {
+                        builder.setQuery(QueryBuilders.termQuery("role", "g\u2028ERROR forged\u2029x\u0085y\r\nz"));
+                        return true;
+                    }, (builder, execTime, response) -> response);
+                    fail("an engine failure must not be answered as a result");
+                } catch (final InvalidQueryException e) {
+                    // expected
+                }
+            }
+            final List<String> messages = capture.messagesAt(Level.DEBUG);
+            for (final String prefix : new String[] { "Query DSL:", "Invalid query", "Cannot process" }) {
+                assertTrue(prefix, messages.stream().anyMatch(m -> m.startsWith(prefix)));
+            }
+            assertNoLineSeparator(capture);
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_scrollSearch_queryDslLogKeepsLineSeparatorsOfTermsOut() {
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            final SearchEngineClient client = new SearchEngineClient() {
+                {
+                    this.client = this;
+                }
+
+                @Override
+                public SearchRequestBuilder prepareSearch(final String... indices) {
+                    return new SearchRequestBuilder(null, SearchAction.INSTANCE);
+                }
+
+                @Override
+                protected void pitSearch(final String index, final String keepAlive, final String searchTimeout,
+                        final SearchRequestBuilder builder, final BooleanFunction<SearchResponse> pageHandler) {
+                    // nothing to page through
+                }
+            };
+            client.scrollSearch("test", builder -> {
+                builder.setQuery(QueryBuilders.termQuery("role", "g\u2028ERROR forged\u2029x\u0085y"));
+                return true;
+            }, (final Map<String, Object> source) -> true);
+            assertTrue(capture.messagesAt(Level.DEBUG).stream().anyMatch(m -> m.startsWith("Query DSL:")));
+            assertNoLineSeparator(capture);
+        } finally {
+            capture.detach();
+        }
+    }
+
+    private void assertNoLineSeparator(final LogCapturingAppender capture) {
+        final String rendered = String.join("\n", capture.messagesAt(Level.DEBUG));
+        assertTrue(rendered, rendered.contains("ERROR forged"));
+        for (final char c : new char[] { '\u0085', '\u2028', '\u2029' }) {
+            assertFalse("U+" + Integer.toHexString(c) + " reached the log: " + rendered, rendered.indexOf(c) >= 0);
         }
     }
 

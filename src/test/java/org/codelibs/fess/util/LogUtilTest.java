@@ -60,6 +60,16 @@ public class LogUtilTest {
     }
 
     @Test
+    public void test_jsonLineSeparatorsAreEscapedAndTheRestIsKept() {
+        assertEquals("{\"a\":\"x\\u0085y\\u2028z\\u2029w\"}", LogUtil.escapeJsonLineSeparators("{\"a\":\"x\u0085y\u2028z\u2029w\"}"));
+        // CR and LF are already escaped by JSON, and the layout of the dump is not ours to change
+        assertEquals("{\n  \"a\":\"x\\r\\ny\"\n}", LogUtil.escapeJsonLineSeparators("{\n  \"a\":\"x\\r\\ny\"\n}"));
+        assertEquals("null", LogUtil.escapeJsonLineSeparators(null));
+        final String longText = "x".repeat(LogUtil.MAX_LOGGED_LENGTH * 3);
+        assertEquals(longText, LogUtil.escapeJsonLineSeparators(longText));
+    }
+
+    @Test
     public void test_nullStaysNull() {
         assertNull(LogUtil.sanitize(null));
     }
