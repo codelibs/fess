@@ -306,13 +306,18 @@ public class ActivityHelper {
      * record such as {@code action:LOGIN}. The ECS format escapes its values as JSON instead.
      *
      * @param value the key or value (may be null)
-     * @return the value with CR and LF replaced by a space and a tab by an underscore
+     * @return the value with the line breaks (CR, LF, NEL, LS and PS) replaced by a space and a tab by an underscore
      */
     protected String toLtsvField(final String value) {
         if (value == null) {
             return null;
         }
-        return value.replace('\r', ' ').replace('\n', ' ').replace('\t', '_');
+        return value.replace('\r', ' ')
+                .replace('\n', ' ')
+                .replace('\u0085', ' ')
+                .replace('\u2028', ' ')
+                .replace('\u2029', ' ')
+                .replace('\t', '_');
     }
 
     /**
