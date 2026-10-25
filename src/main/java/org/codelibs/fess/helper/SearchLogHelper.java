@@ -722,7 +722,13 @@ public class SearchLogHelper {
         final List<ClickLog> clickLogList = new ArrayList<>();
         while (!queue.isEmpty()) {
             final ClickLog clickLog = queue.poll();
-            if (clickLog != null) {
+            if (clickLog != null && StringUtil.isBlank(clickLog.getQueryId())) {
+                // The v2 click API accepts a click without a query ID, but without it the originating
+                // search log cannot be found, so there is nothing to enrich the click with.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Skipped a click log without a query ID: {}", clickLog);
+                }
+            } else if (clickLog != null) {
                 try {
                     final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
                     final OptionalEntity<SearchLog> searchLog = searchLogBhv.selectEntity(cb -> {
