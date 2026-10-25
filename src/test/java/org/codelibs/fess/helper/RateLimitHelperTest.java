@@ -15,8 +15,11 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.List;
+
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
@@ -131,6 +134,45 @@ public class RateLimitHelperTest extends UnitFessTestCase {
     }
 
     // ── M-2: reverse-proxy / trusted-proxy allowlist scenarios ──────────────
+
+    @Test
+    public void test_getClientIp_untrustedPeerWithForwardedHeader_warnsOnceWithoutTheHeaderValue() {
+        final LogCapturingAppender capture = LogCapturingAppender.attach(RateLimitHelper.class);
+        try {
+            final MockletHttpServletRequest request = getMockRequest();
+            request.setRemoteAddr("10.0.0.1");
+            request.addHeader("X-Forwarded-For", "198.51.100.77");
+            assertEquals("10.0.0.1", rateLimitHelper.getClientIp(request));
+            assertEquals("10.0.0.1", rateLimitHelper.getClientIp(request));
+
+            final List<String> warnings = capture.warnings();
+            assertEquals(1, warnings.size());
+            assertTrue(warnings.get(0).contains("10.0.0.1"));
+            assertTrue(warnings.get(0).contains("rate.limit.trusted.proxies"));
+            assertFalse(warnings.get(0).contains("198.51.100.77"));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getClientIp_noForwardedHeaderOrTrustedPeer_doesNotWarn() {
+        final LogCapturingAppender capture = LogCapturingAppender.attach(RateLimitHelper.class);
+        try {
+            final MockletHttpServletRequest direct = getMockRequest();
+            direct.setRemoteAddr("10.0.0.1");
+            rateLimitHelper.getClientIp(direct);
+
+            final MockletHttpServletRequest trusted = getMockRequest();
+            trusted.setRemoteAddr("127.0.0.1");
+            trusted.addHeader("X-Forwarded-For", "203.0.113.50");
+            assertEquals("203.0.113.50", rateLimitHelper.getClientIp(trusted));
+
+            assertTrue(capture.warnings().isEmpty());
+        } finally {
+            capture.detach();
+        }
+    }
 
     @Test
     public void test_getClientIp_noTrustedProxy_emptyXff_returnsRemoteAddr() {

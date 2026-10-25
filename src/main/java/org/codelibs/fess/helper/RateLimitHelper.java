@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -119,6 +120,13 @@ public class RateLimitHelper {
                 }
                 return clientIp;
             }
+        } else if (request.getHeader("X-Forwarded-For") != null || request.getHeader("X-Real-IP") != null) {
+            // The key is fixed: it must not come from the request, because the set of reported keys only grows.
+            LogUtil.warnOnce(logger, "untrusted-forwarded-header",
+                    "A request from {} carried X-Forwarded-For or X-Real-IP, but that address is not in rate.limit.trusted.proxies. "
+                            + "The header is ignored and every client behind that address is counted as one in the rate limits, "
+                            + "including the login limit. If it is a reverse proxy, add its address to rate.limit.trusted.proxies.",
+                    remoteAddr);
         }
 
         if (logger.isDebugEnabled()) {
