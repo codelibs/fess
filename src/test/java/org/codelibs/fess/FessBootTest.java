@@ -15,9 +15,19 @@
  */
 package org.codelibs.fess;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.catalina.Context;
+import org.apache.catalina.startup.Tomcat;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletException;
 
 public class FessBootTest extends UnitFessTestCase {
 
@@ -61,5 +71,50 @@ public class FessBootTest extends UnitFessTestCase {
         assertTrue(str.startsWith("H"));
         assertTrue(str.endsWith("o"));
         assertEquals(5, str.length());
+    }
+
+    private Tomcat startTomcat(final File baseDir, final ServletContainerInitializer... initializers) throws Exception {
+        final Tomcat tomcat = new Tomcat();
+        tomcat.setBaseDir(baseDir.getAbsolutePath());
+        tomcat.setPort(0);
+        tomcat.getConnector();
+        for (int i = 0; i < initializers.length; i++) {
+            final File docBase = new File(baseDir, "app" + i);
+            assertTrue(docBase.mkdirs());
+            final Context context = tomcat.addContext("/app" + i, docBase.getAbsolutePath());
+            context.addServletContainerInitializer(initializers[i], Set.of());
+        }
+        tomcat.start();
+        return tomcat;
+    }
+
+    @Test
+    public void test_findUnavailableContexts_failedContext() throws Exception {
+        final File baseDir = Files.createTempDirectory("fessboot").toFile();
+        final Tomcat tomcat = startTomcat(baseDir, (c, ctx) -> {
+            // the web application starts
+        }, (c, ctx) -> {
+            // what a failure of the container initialization (e.g. no search engine) does to the context
+            throw new ServletException("search engine is not available");
+        });
+        try {
+            // Tomcat itself does not fail when a web application fails to start
+            assertEquals(List.of("/app1"), FessBoot.findUnavailableContexts(tomcat.getHost()));
+        } finally {
+            tomcat.stop();
+            tomcat.destroy();
+        }
+    }
+
+    @Test
+    public void test_findUnavailableContexts_allStarted() throws Exception {
+        final File baseDir = Files.createTempDirectory("fessboot").toFile();
+        final Tomcat tomcat = startTomcat(baseDir, (c, ctx) -> {});
+        try {
+            assertTrue(FessBoot.findUnavailableContexts(tomcat.getHost()).isEmpty());
+        } finally {
+            tomcat.stop();
+            tomcat.destroy();
+        }
     }
 }

@@ -18,6 +18,8 @@ package org.codelibs.fess;
 // DO NOT DEPEND OTHER JARs
 
 import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -97,6 +99,54 @@ public class FessBoot extends TomcatBoot {
             return value;
         }
         return super.prepareWebappPath();
+    }
+
+    /**
+     * Starts Tomcat and exits the process when the web application did not start.
+     *
+     * <p>Tomcat does not fail when a web application fails to initialize (for example, when
+     * the search engine cannot be reached at startup): the context is left in the failed
+     * state, the connector stays open and every request is answered with 404. Nothing would
+     * ever start the application again, so leave it to the launcher (a service manager, a
+     * container restart policy or the operator) to notice the failure and retry.</p>
+     *
+     * @return the URI Tomcat is serving
+     */
+    @Override
+    protected URI startServer() {
+        final URI uri = super.startServer();
+        final List<String> failedContexts = findUnavailableContexts(server.getHost());
+        if (!failedContexts.isEmpty()) {
+            abortStartup(failedContexts);
+        }
+        return uri;
+    }
+
+    /**
+     * Finds the web applications of a host that are not available after Tomcat has started.
+     *
+     * @param host the host that holds the web applications
+     * @return the context paths of the web applications that are not available ("/" for the root context)
+     */
+    protected static List<String> findUnavailableContexts(final Container host) {
+        final List<String> paths = new ArrayList<>();
+        for (final Container child : host.findChildren()) {
+            if (child instanceof final Context context && !context.getState().isAvailable()) {
+                paths.add(StringUtil.isEmpty(context.getPath()) ? "/" : context.getPath());
+            }
+        }
+        return paths;
+    }
+
+    /**
+     * Reports that the web application did not start and terminates the JVM.
+     *
+     * @param contextPaths the context paths of the web applications that did not start
+     */
+    protected void abortStartup(final List<String> contextPaths) {
+        System.err.println("Fess aborted the startup because the web application " + contextPaths
+                + " failed to initialize. The cause is in logs/fess.log (see also the console output).");
+        System.exit(1);
     }
 
     /**
