@@ -11053,7 +11053,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'theme.directory.path'. <br>
      * The value is, e.g. themes <br>
-     * comment: Static theme system (see docs/superpowers/specs/2026-05-21-fess-static-theme-design.md)
+     * comment: Theme system (see docs/superpowers/specs/2026-05-21-fess-static-theme-design.md)
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThemeDirectoryPath();
@@ -11158,7 +11158,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'theme.repositories'. <br>
      * The value is, e.g. https://maven.codelibs.org/release/org/codelibs/fess/themes/ <br>
-     * comment: Repository URLs (comma separated) that static themes are downloaded from.
+     * comment: Repository URLs (comma separated) that themes are downloaded from.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThemeRepositories();
@@ -11166,7 +11166,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'theme.index.frame.ancestors'. <br>
      * The value is, e.g. 'none' <br>
-     * comment: Value of the frame-ancestors directive in the Content-Security-Policy of the static theme's HTML<br>
+     * comment: Value of the frame-ancestors directive in the Content-Security-Policy of the theme's HTML<br>
      * pages: the origins that may embed them in a frame. The default 'none' lets no page embed them.<br>
      * WebKit (Safari) applies frame-ancestors to the blob: frames that the file preview and the cache<br>
      * view of a theme use, so it shows them blank while the value is 'none'. Leave the value empty to<br>

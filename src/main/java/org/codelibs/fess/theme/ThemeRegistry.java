@@ -40,7 +40,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 
 /**
- * Registry of static themes available to the running Fess instance.
+ * Registry of themes available to the running Fess instance.
  *
  * <p>Loads themes from the directory configured via
  * {@code theme.directory.path} (default {@code themes/}). Legacy JSP themes
@@ -124,7 +124,7 @@ public class ThemeRegistry {
         }
         try (Stream<Path> entries = Files.list(base)) {
             // NOFOLLOW_LINKS: a symlinked directory could point outside the themes root,
-            // violating the sandbox invariant for static-theme assets.
+            // violating the sandbox invariant for theme assets.
             entries.filter(p -> Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS)).forEach(dir -> {
                 final String name = dir.getFileName().toString();
                 if (name.startsWith(".")) {
@@ -146,7 +146,7 @@ public class ThemeRegistry {
                 }
             });
         } catch (final Exception e) {
-            logger.warn("Failed to scan static themes at {}", base, e);
+            logger.warn("Failed to scan themes at {}", base, e);
         }
     }
 

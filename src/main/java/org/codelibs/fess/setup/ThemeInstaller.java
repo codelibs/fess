@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Installs static themes into the webapp's themes directory.
+ * Installs themes into the webapp's themes directory.
  *
  * <p>A theme is published as a ZIP whose root holds {@code theme.yml}, so unlike a plugin it is
  * extracted rather than dropped in place, and the directory it is extracted into has to be named
@@ -52,7 +52,7 @@ import java.util.stream.Stream;
  */
 public final class ThemeInstaller {
 
-    /** The manifest every static theme carries at the root of its archive. */
+    /** The manifest every theme carries at the root of its archive. */
     static final String MANIFEST = "theme.yml";
 
     private static final String STAGING_PREFIX = ".staging-";
@@ -80,7 +80,7 @@ public final class ThemeInstaller {
     }
 
     /**
-     * Returns the directory Fess loads static themes from.
+     * Returns the directory Fess loads themes from.
      *
      * @param fessHome the Fess installation directory
      * @return the themes directory
@@ -156,7 +156,7 @@ public final class ThemeInstaller {
     private static void verifyManifest(final Path content, final String name) throws SetupException {
         final Path manifest = content.resolve(MANIFEST);
         if (!Files.isRegularFile(manifest)) {
-            throw new SetupException("The archive has no " + MANIFEST + " at its root, so it is not a static theme.");
+            throw new SetupException("The archive has no " + MANIFEST + " at its root, so it is not a theme.");
         }
         final String declared = readField(manifest, "name");
         if (!name.equals(declared)) {
@@ -169,7 +169,7 @@ public final class ThemeInstaller {
     /**
      * Refuses a theme that carries a server-side page.
      *
-     * <p>A static theme is plain files served as they are. Fess answers 404 for these extensions
+     * <p>A theme is plain files served as they are. Fess answers 404 for these extensions
      * under {@code /themes/} anyway, but the admin screen's installer refuses such an archive
      * outright, and a theme installed from the command line should not end up on disk with a file
      * the admin screen would never have let in.</p>
@@ -190,7 +190,7 @@ public final class ThemeInstaller {
             throw new SetupException("Failed to read " + content, e);
         }
         if (page.isPresent()) {
-            throw new SetupException("The archive has a server-side page, which a static theme may not carry: " + page.get());
+            throw new SetupException("The archive has a server-side page, which a theme may not carry: " + page.get());
         }
     }
 

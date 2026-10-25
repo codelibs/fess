@@ -56,7 +56,7 @@ public class SsoAction extends FessLoginAction {
     private static final Logger logger = LogManager.getLogger(SsoAction.class);
 
     /**
-     * Where a restored search lands. The static theme serves it; the trailing slash is the URL the
+     * Where a restored search lands. The theme serves it; the trailing slash is the URL the
      * JSP search action had, and the theme's router treats it as {@code /search}.
      */
     private static final String SEARCH_PATH = "/search/";
@@ -94,7 +94,7 @@ public class SsoAction extends FessLoginAction {
             });
         }
         if (searchHelper.hasRequiredSearchParameters()) {
-            // The static theme answers the search pages to everyone and sends the user here itself,
+            // The theme answers the search pages to everyone and sends the user here itself,
             // carrying the query it was showing (auth.js promptLogin). Keep it as
             // FessSearchAction#redirectToLogin did for the JSP pages, so that redirectToSearchPage
             // lands on it once the login succeeds, and run the login itself on the bare /sso/:

@@ -56,7 +56,7 @@ import com.google.common.cache.LoadingCache;
 import jakarta.annotation.Resource;
 
 /**
- * Discovers static themes published in a Maven-style repository tree.
+ * Discovers themes published in a Maven-style repository tree.
  *
  * <p>A theme is published as
  * {@code <repository>/<name>/<version>/<name>-<version>.zip} with a

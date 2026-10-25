@@ -46,7 +46,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Servlet filter that serves a static theme's files directly when a static theme is
+ * Servlet filter that serves a theme's files directly when a theme is
  * active for the current virtual host.
  *
  * <p>The filter writes the response in place via {@link StaticThemeResponder} (no
@@ -65,7 +65,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p>Behavior summary:
  * <ul>
  *   <li>A request for a JSP (or similar server-side page) under {@code /themes/} is answered
- *       with 404, whatever the method or active theme: a static theme contains plain files only.</li>
+ *       with 404, whatever the method or active theme: a theme contains plain files only.</li>
  *   <li>So is a request for a file a theme keeps private ({@code theme.yml}, {@code README.md},
  *       dotfiles, anything below a dot directory such as the {@code .attic-} backups of replaced
  *       themes, ... see {@link StaticThemeResponder#isBlockedPath}) under {@code /themes/}:
@@ -76,8 +76,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *   <li>Requests other than GET and HEAD pass through unchanged.</li>
  *   <li>Requests that are neither a {@code /themes/...} asset nor an allowlisted UI path
  *       pass through unchanged (without even resolving the active theme).</li>
- *   <li>If no active static theme is resolved, pass through.</li>
- *   <li>For {@code /themes/{name}/...} that matches the active static theme's name, the filter calls
+ *   <li>If no active theme is resolved, pass through.</li>
+ *   <li>For {@code /themes/{name}/...} that matches the active theme's name, the filter calls
  *       {@link StaticThemeResponder#serveAsset} with the path after {@code {name}/}.</li>
  *   <li>For an allowlisted UI path, the filter calls {@link StaticThemeResponder#serveIndex}
  *       to serve the SPA entry HTML in place.</li>
@@ -162,7 +162,7 @@ public class StaticThemeFilter implements Filter {
         // container maps to a servlet or a file, so every decision below is taken on this path.
         final String uri = resolveRequestPath(req);
 
-        // A static theme is plain files. A JSP (or similar) page under /themes/ is never
+        // A theme is plain files. A JSP (or similar) page under /themes/ is never
         // part of one, so it is not handed to the servlet container, whatever the method or
         // active theme. The files a theme keeps private (theme.yml, README.md, dotfiles, ...) are
         // refused the same way: StaticThemeResponder never serves them, and they must not
@@ -456,7 +456,7 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getThemeRegistry();
         } catch (final Exception e) {
-            warnOnce("ThemeRegistry", "ThemeRegistry not available; static-theme routing disabled", "ThemeRegistry not available", e);
+            warnOnce("ThemeRegistry", "ThemeRegistry not available; theme routing disabled", "ThemeRegistry not available", e);
             return null;
         }
     }
@@ -468,7 +468,7 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getStaticThemeResponder();
         } catch (final Exception e) {
-            warnOnce("StaticThemeResponder", "StaticThemeResponder not available; static-theme routing disabled",
+            warnOnce("StaticThemeResponder", "StaticThemeResponder not available; theme routing disabled",
                     "StaticThemeResponder not available", e);
             return null;
         }
@@ -481,7 +481,7 @@ public class StaticThemeFilter implements Filter {
                 return h.getVirtualHostKey();
             }
         } catch (final Exception e) {
-            warnOnce("VirtualHostHelper", "VirtualHostHelper not available; using null host key for static-theme routing",
+            warnOnce("VirtualHostHelper", "VirtualHostHelper not available; using null host key for theme routing",
                     "VirtualHostHelper not available; using null host key", e);
         }
         return null;

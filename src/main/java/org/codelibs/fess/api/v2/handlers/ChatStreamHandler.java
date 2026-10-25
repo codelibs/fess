@@ -64,7 +64,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * {@code {"response": {...}}} JSON envelope used by every other v2 endpoint
  * except {@code /api/v2/documents/all} (NDJSON). Plan 4 deliberately keeps the
  * same SSE framing as v1 ({@code event:} + {@code data: <json>\n\n}) so the
- * static theme JS can share a single SSE parser across v1 and v2. The exception
+ * theme JS can share a single SSE parser across v1 and v2. The exception
  * is documented in §Risks (Risk 2).</p>
  *
  * <p>All SSE event data keys use snake_case:</p>
@@ -88,7 +88,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * {@code rag.chat.permissions} gate, body parse, rate limit, document lookup) uses {@link V2EnvelopeWriter#writeError} so the HTTP status
  * and {@code Content-Type: application/json} are correct. Only after all gates pass are
  * SSE headers set; subsequent LLM-level errors are reported via {@code event: error}
- * SSE events, consistent with v1 behaviour the static theme JS parser depends on.</p>
+ * SSE events, consistent with v1 behaviour the theme JS parser depends on.</p>
  */
 public class ChatStreamHandler {
 

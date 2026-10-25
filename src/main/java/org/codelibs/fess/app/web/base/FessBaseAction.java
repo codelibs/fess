@@ -306,7 +306,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     }
 
     /**
-     * Redirects to the application root, where the static theme serves the search page.
+     * Redirects to the application root, where the theme serves the search page.
      *
      * <p>{@link SystemHelper#getRedirectResponseToRoot(HtmlResponse)} is the hook a customized
      * system helper uses to send the user somewhere else.</p>

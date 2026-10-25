@@ -33,7 +33,7 @@ public class ThemeUploadForm {
     }
 
     /**
-     * Static-theme ZIP archive. The action enforces the {@code .zip} suffix
+     * Theme ZIP archive. The action enforces the {@code .zip} suffix
      * and the maximum compressed size before invoking the installer.
      */
     @Required

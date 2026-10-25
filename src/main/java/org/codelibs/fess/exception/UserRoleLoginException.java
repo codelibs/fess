@@ -18,7 +18,7 @@ package org.codelibs.fess.exception;
 /**
  * Thrown when a logged-in user opens an administration page their roles do not allow.
  * {@code FessAdminAction#godHandPrologue} records the denial and redirects the user to the
- * application root, where the static theme serves the search page.
+ * application root, where the theme serves the search page.
  */
 public class UserRoleLoginException extends RuntimeException {
 

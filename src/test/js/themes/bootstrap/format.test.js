@@ -252,12 +252,12 @@ describe("shared-asset header comment is theme-neutral", () => {
     readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8").split("\n");
   it("format.js line 2 names no specific theme", () => {
     const line2 = read("../../../../main/webapp/themes/bootstrap/assets/format.js")[1];
-    expect(line2).toContain("Fess static theme SPA");
+    expect(line2).toContain("Fess theme SPA");
     expect(line2).not.toContain("bootstrap");
   });
   it("markdown.js line 2 names no specific theme", () => {
     const line2 = read("../../../../main/webapp/themes/bootstrap/assets/markdown.js")[1];
-    expect(line2).toContain("Fess static theme SPA");
+    expect(line2).toContain("Fess theme SPA");
     expect(line2).not.toContain("bootstrap");
   });
 });

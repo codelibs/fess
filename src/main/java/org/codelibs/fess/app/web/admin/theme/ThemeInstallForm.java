@@ -20,7 +20,7 @@ import org.lastaflute.web.validation.Required;
 import jakarta.validation.constraints.Size;
 
 /**
- * Form for installing a published static theme by name and version.
+ * Form for installing a published theme by name and version.
  */
 public class ThemeInstallForm {
 

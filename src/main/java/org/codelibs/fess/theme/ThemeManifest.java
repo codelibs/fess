@@ -25,7 +25,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 /**
- * Parsed representation of a static theme's {@code theme.yml} manifest.
+ * Parsed representation of a theme's {@code theme.yml} manifest.
  *
  * <p>Use {@link #parse(InputStream)} to build an instance; the parser performs
  * structural and value validation and throws {@link ThemeManifestException} on

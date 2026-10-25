@@ -42,7 +42,7 @@ import jakarta.servlet.http.HttpSession;
 /**
  * Handles {@code POST /api/v2/auth/login}.
  *
- * <p>Authentication entry point for the static theme SPA. Performs a tiered set
+ * <p>Authentication entry point for the theme SPA. Performs a tiered set
  * of cheap-first gates: IP rate-limit, body parsing, presence checks,
  * per-user rate-limit, then finally credential verification via
  * {@link FessLoginAssist}. On success the response carries the freshly issued

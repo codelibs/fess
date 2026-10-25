@@ -1153,7 +1153,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
     @Test
     public void login_successWritesLoginRecordToAuditLog() throws Exception {
         // Regression: POST /api/v2/auth/login never called ActivityHelper, so a deployment that
-        // authenticates through the static-theme SPA produced NO audit.log line at all — while
+        // authenticates through the theme SPA produced NO audit.log line at all — while
         // the classic JSP flow writes one from LoginAction.login() (activityHelper.login()).
         // Assert on the rendered LTSV record rather than "some method was called", so the v2
         // record is byte-identical to the classic one.

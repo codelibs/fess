@@ -254,7 +254,7 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
 
     @Test
     public void test_install_rejectsServerSidePages() throws Exception {
-        // A static theme is plain files; a JSP (or similar) entry would be evaluated by the
+        // A theme is plain files; a JSP (or similar) entry would be evaluated by the
         // servlet container instead of served, so the whole archive is refused and nothing is
         // left behind in the themes directory.
         for (final String entryName : new String[] { "x.jsp", "sub/x.jspx", "inc/x.jspf", "X.JSP" }) {

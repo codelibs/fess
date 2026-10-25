@@ -410,7 +410,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
 
         final ActionResponse response = action.godHandPrologue(new TestActionRuntime("/admin/user/"));
 
-        // The search page is the static theme at the root now; there is no RootAction to redirect to.
+        // The search page is the theme at the root now; there is no RootAction to redirect to.
         assertTrue(response instanceof HtmlResponse);
         assertEquals("/", ((HtmlResponse) response).getRoutingPath());
         assertTrue(((HtmlResponse) response).isRedirectTo());

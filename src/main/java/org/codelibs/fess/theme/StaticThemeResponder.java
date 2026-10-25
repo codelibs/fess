@@ -38,7 +38,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Serves the HTML entry file and asset files of a resolved static theme directly to the
+ * Serves the HTML entry file and asset files of a resolved theme directly to the
  * servlet response.
  *
  * <p>This component is invoked by {@code StaticThemeFilter}, which resolves the active theme

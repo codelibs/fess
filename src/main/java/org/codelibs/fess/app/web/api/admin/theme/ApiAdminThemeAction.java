@@ -31,7 +31,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
 /**
- * API action for installing static themes published in a theme repository.
+ * API action for installing themes published in a theme repository.
  */
 public class ApiAdminThemeAction extends FessApiAdminAction {
 

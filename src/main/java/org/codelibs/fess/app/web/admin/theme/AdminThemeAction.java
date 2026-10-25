@@ -49,7 +49,7 @@ import jakarta.annotation.Resource;
  * Admin action for theme management (spec §8).
  *
  * <p>Provides list, detail inspection, upload, deletion, default-theme
- * assignment, and registry-reload flows for static themes. JSP themes are
+ * assignment, and registry-reload flows for themes. JSP themes are
  * managed via the plugin admin and are out of scope here.
  * Mutating endpoints require the {@code admin-theme} role; read-only
  * endpoints require {@code admin-theme-view}.</p>
@@ -167,7 +167,7 @@ public class AdminThemeAction extends FessAdminAction {
     }
 
     /**
-     * Handles a static-theme ZIP upload. The file extension and size guard
+     * Handles a theme ZIP upload. The file extension and size guard
      * here are pre-flight checks at the Action layer (M-1 defense in depth);
      * the installer enforces structural and size limits authoritatively.
      *
@@ -299,7 +299,7 @@ public class AdminThemeAction extends FessAdminAction {
     }
 
     /**
-     * Deletes a static theme via the installer. The installer enforces that
+     * Deletes a theme via the installer. The installer enforces that
      * the theme is not the active default and not the bundled built-in theme.
      *
      * @param form the delete form containing the theme name

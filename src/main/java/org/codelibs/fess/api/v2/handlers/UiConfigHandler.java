@@ -141,7 +141,7 @@ public class UiConfigHandler {
      * which signs the user in through the identity provider; otherwise it stays the plain flag
      * saying whether the local login link is shown.
      *
-     * <p>The link is relative so it resolves against the page's base URL, which the static theme
+     * <p>The link is relative so it resolves against the page's base URL, which the theme
      * gets from {@code <base href>}; it works under any context path.</p>
      *
      * @param loginLinkEnabled whether {@code login.link.enabled} is on
@@ -444,10 +444,10 @@ public class UiConfigHandler {
             features.put("login_link", resolveLoginLink(loginLinkEnabled, ssoEnabled));
             features.put("sso_enabled", ssoEnabled);
             // osdd_link: whether an OpenSearch description document is configured, so the
-            // static theme can render <link rel="search"> only when applicable.
+            // theme can render <link rel="search"> only when applicable.
             features.put("osdd_link", hasOpenSearchFile());
             // rag_chat_enabled: whether the RAG chat client is available and the current user may
-            // use it (rag.chat.permissions), so the static-theme SPA can gate the chat entry point.
+            // use it (rag.chat.permissions), so the theme SPA can gate the chat entry point.
             features.put("rag_chat_enabled", isRagChatAvailable() && isChatPermitted());
 
             // Server-wide supported language list, surfaced as plain JSON array of codes.
