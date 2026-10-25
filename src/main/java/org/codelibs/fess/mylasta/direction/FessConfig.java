@@ -1858,7 +1858,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. upgrade */
     String ONLINE_HELP_NAME_UPGRADE = "online.help.name.upgrade";
 
-    /** The key of the configuration. e.g. sereq */
+    /** The key of the configuration. e.g. esreq */
     String ONLINE_HELP_NAME_SEREQ = "online.help.name.sereq";
 
     /** The key of the configuration. e.g. accesstoken */
@@ -9445,7 +9445,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'online.help.name.sereq'. <br>
-     * The value is, e.g. sereq <br>
+     * The value is, e.g. esreq <br>
      * comment: Online help key for search request.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -16036,7 +16036,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_CRAWLINGINFO, "crawlinginfo");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_BACKUP, "backup");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_UPGRADE, "upgrade");
-            defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEREQ, "sereq");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEREQ, "esreq");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ACCESSTOKEN, "accesstoken");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SUGGEST, "suggest");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEARCHLOG, "searchlog");
