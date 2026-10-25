@@ -26,7 +26,7 @@ ${fe:html(true)}
             <div class="row">
                 <div class="col-md-12">
                     <la:info id="msg" message="true">
-                        <div class="alert alert-success">${msg}</div>
+                        <div class="alert alert-success" role="status">${msg}</div>
                     </la:info>
                     <la:errors property="_global"/>
                 </div>
