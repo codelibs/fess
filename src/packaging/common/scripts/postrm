@@ -18,6 +18,14 @@ REMOVE_DIRS=false
 REMOVE_SERVICE=false
 REMOVE_USER_AND_GROUP=false
 
+# Cleans up after the removal of tika.xml (see preinst) on purge, and undoes it
+# when the upgrade is aborted. The arguments of the rpm scripts are numbers.
+case "$1" in
+    purge|abort-install|abort-upgrade)
+        dpkg-maintscript-helper rm_conffile ${packaging.fess.conf.dir}/tika.xml 15.10.0~ -- "$@"
+    ;;
+esac
+
 case "$1" in
 
     # Debian ####################################################
