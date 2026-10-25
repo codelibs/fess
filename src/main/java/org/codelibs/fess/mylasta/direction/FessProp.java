@@ -2249,7 +2249,8 @@ public interface FessProp {
         if (isLdapIgnoreNetbiosName()) {
             final String[] values = name.split("\\\\");
             if (values.length == 0) {
-                return null;
+                // the name consists only of backslashes, so there is no part to extract
+                return name;
             }
             if (values.length == 1) {
                 return values[0];

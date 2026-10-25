@@ -788,6 +788,25 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_createSearchRole_nameWithoutNamePartIsNotTurnedIntoNull() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+        });
+
+        // a name made only of backslashes has no part after the (empty) NetBIOS prefix
+        assertEquals("R\\", systemHelper.createSearchRole("R", "\\"));
+        assertEquals("R\\\\", systemHelper.createSearchRole("R", "\\\\"));
+        // names that do have a part keep their canonical form
+        assertEquals("Raaa", systemHelper.createSearchRole("R", "aaa\\"));
+        assertEquals("Rbbb", systemHelper.createSearchRole("R", "aaa\\bbb"));
+    }
+
+    @Test
     public void test_normalizeConfigPath() {
         assertEquals("", systemHelper.normalizeConfigPath(""));
         assertEquals("", systemHelper.normalizeConfigPath("#hash"));
