@@ -15,7 +15,11 @@
  */
 package org.codelibs.fess.ds.callback;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -120,6 +124,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
+        // scripts may give a string, an array or a script engine object
+        for (final String field : new String[] { fessConfig.getIndexFieldRole(), fessConfig.getIndexFieldVirtualHost() }) {
+            final List<String> list = toStringList(field, dataMap.get(field));
+            if (list != null) {
+                dataMap.put(field, list);
+            }
+        }
         dataMap.put(fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
 
         final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
@@ -170,6 +181,41 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.debug("Total documents added: {}", documentSize.get());
         }
 
+    }
+
+    /**
+     * Converts a field value to a list of strings. A string becomes a single element list,
+     * a collection, an array or a script engine array (a map keyed by index) becomes a list of its values.
+     *
+     * @param field the field name
+     * @param value the field value
+     * @return the list of strings, or null if the value is null
+     * @throws DataStoreException if the value type is not supported
+     */
+    protected static List<String> toStringList(final String field, final Object value) {
+        if (value == null) {
+            return null;
+        }
+        final Collection<?> values;
+        if (value instanceof final String str) {
+            values = List.of(str);
+        } else if (value instanceof final Collection<?> collection) {
+            values = collection;
+        } else if (value instanceof final Object[] array) {
+            values = Arrays.asList(array);
+        } else if (value instanceof final Map<?, ?> map) {
+            values = map.values();
+        } else {
+            throw new DataStoreException(
+                    "Unsupported type for " + field + ": " + value.getClass().getName() + ". Use a string or an array.");
+        }
+        final List<String> list = new ArrayList<>(values.size());
+        for (final Object element : values) {
+            if (element != null) {
+                list.add(element.toString());
+            }
+        }
+        return list;
     }
 
     /**
