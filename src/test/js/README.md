@@ -1,7 +1,7 @@
 # Bundled bootstrap theme — JavaScript unit tests
 
 Executable unit tests for the JavaScript that ships with the bundled `bootstrap`
-static theme (`src/main/webapp/themes/bootstrap/assets/*.js`).
+theme (`src/main/webapp/themes/bootstrap/assets/*.js`).
 
 ## Why this exists
 

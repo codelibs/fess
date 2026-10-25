@@ -153,10 +153,10 @@
     SECURITY (C-1 / PR #3136): staticThemeFilter MUST come AFTER httpHeaderSecurity,
     rateLimitFilter, loadControlFilter, and corsFilter on the REQUEST dispatch.
 
-    staticThemeFilter intercepts GET requests for an active static theme and serves the
+    staticThemeFilter intercepts GET requests for an active theme and serves the
     theme's asset/index response directly (via StaticThemeResponder), writing the response and
     returning WITHOUT calling chain.doFilter(). Filters mapped later in the chain
-    therefore do NOT run on static-theme responses, so any security filter required to
+    therefore do NOT run on theme responses, so any security filter required to
     apply to those responses must be ordered before this mapping. This preserves the
     behavior of the security filters on the REQUEST chain (rate-limiting per-request,
     HSTS/clickjacking headers, CORS, load shedding). Do not move staticThemeFilter

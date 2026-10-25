@@ -340,7 +340,7 @@ public class SsoActionTest extends UnitFessTestCase {
 
     @Test
     public void test_redirectToSearchPage_keepsEveryValueInOrder() {
-        // The static theme restores filters from repeated parameters, so a multi-valued one must
+        // The theme restores filters from repeated parameters, so a multi-valued one must
         // come back as repeated name=value pairs in the order they were stored.
         final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "a b" }),
                 new RequestParameter("ex_q", new String[] { "label:x", "label:y" }));

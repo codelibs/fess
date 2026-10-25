@@ -899,16 +899,16 @@ public final class ComponentUtil {
     }
 
     /**
-     * Gets the static theme responder component.
-     * @return The static theme responder (shared singleton).
+     * Gets the theme responder component.
+     * @return The theme responder (shared singleton).
      */
     public static StaticThemeResponder getStaticThemeResponder() {
         return getComponent(STATIC_THEME_RESPONDER);
     }
 
     /**
-     * Gets the static theme installer component.
-     * @return The static theme installer (shared singleton).
+     * Gets the theme installer component.
+     * @return The theme installer (shared singleton).
      */
     public static StaticThemeInstaller getStaticThemeInstaller() {
         return getComponent(STATIC_THEME_INSTALLER);

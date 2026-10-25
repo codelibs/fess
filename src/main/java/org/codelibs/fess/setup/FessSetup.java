@@ -44,7 +44,7 @@ public final class FessSetup {
     /** The definition holding where Fess plugins come from and go, rather than a download. */
     private static final String PLUGIN_COMPONENT = "plugin";
 
-    /** The definition holding where static themes come from and go, rather than a download. */
+    /** The definition holding where themes come from and go, rather than a download. */
     private static final String THEME_COMPONENT = "theme";
 
     /** What an artifact name and version may be made of, which is a Maven coordinate. */
@@ -91,7 +91,7 @@ public final class FessSetup {
                   machine, for a server with no route to the Internet.
 
               install theme <name>[:<version>]... [--version <version>] [--repository <url>] [--dest <dir>]
-                  Install static themes, for example docuforge or voicebox.
+                  Install themes, for example docuforge or voicebox.
                   A theme's version is the Fess line it targets, so a name with no version
                   resolves to the theme built for this Fess. The archive is checked against
                   the SHA-1 the Maven repository publishes and extracted into the themes
@@ -102,7 +102,7 @@ public final class FessSetup {
                   Delete installed Fess plugins.
 
               remove theme <name>... [--dest <dir>]
-                  Delete installed static themes, keeping each as a backup.
+                  Delete installed themes, keeping each as a backup.
 
               list
                   Show the components this build knows how to install.
@@ -112,7 +112,7 @@ public final class FessSetup {
                   A development build lists the snapshot repository too.
 
               list themes [--repository <url>] [--dest <dir>]
-                  Show the static themes published for this version, and which are installed.
+                  Show the themes published for this version, and which are installed.
                   The names come from theme-index.txt, which the deploy publishes beside the
                   themes; when that cannot be read, the installed themes are still shown and a
                   theme can be installed by naming it.
@@ -411,7 +411,7 @@ public final class FessSetup {
         if (!PluginRepository.isPlugin(spec.artifactId())) {
             throw new SetupException(spec.artifactId() + " is not a plugin Fess loads; install plugin takes "
                     + PluginRepository.describePluginPrefixes()
-                    + ". For a static theme use `fess-setup install theme <name>`; run `fess-setup list plugins` to see what is published.");
+                    + ". For a theme use `fess-setup install theme <name>`; run `fess-setup list plugins` to see what is published.");
         }
         return spec;
     }
@@ -478,7 +478,7 @@ public final class FessSetup {
     }
 
     /**
-     * Installs static themes into the webapp's themes directory.
+     * Installs themes into the webapp's themes directory.
      *
      * <p>A theme's version is the Fess line it targets, so the same major.minor narrowing that
      * picks a plugin picks the theme built for this Fess, and a name with no version needs no
@@ -616,7 +616,7 @@ public final class FessSetup {
     }
 
     /**
-     * Deletes installed static themes, keeping each as a backup.
+     * Deletes installed themes, keeping each as a backup.
      *
      * @param args the command line
      * @param definitions the setup definition
@@ -1037,7 +1037,7 @@ public final class FessSetup {
     }
 
     /**
-     * Returns the directory Fess loads static themes from, which {@code --dest} overrides.
+     * Returns the directory Fess loads themes from, which {@code --dest} overrides.
      *
      * @param definition the theme definition
      * @param options the command line options

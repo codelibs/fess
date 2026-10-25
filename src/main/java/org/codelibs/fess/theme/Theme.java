@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Immutable value object describing a registered static theme.
+ * Immutable value object describing a registered theme.
  *
  * <p>A {@code Theme} is backed by a {@code theme.yml} manifest under the
  * configured themes directory. The {@link #getManifest() manifest} may be

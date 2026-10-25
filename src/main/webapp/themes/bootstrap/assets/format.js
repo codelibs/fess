@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Common formatting utilities for the Fess static theme SPA.
+// Common formatting utilities for the Fess theme SPA.
 // Importing is DOM-free; calling is not. Only formatFileSize / formatDate /
 // escapeHtml are pure — sanitizeHtml, sanitizeAdminHtml, renderHighlightedSnippet
 // and renderSnippetText parse via document, and isSafeHref needs window.location.
@@ -388,7 +388,7 @@ function sanitizeNode(node, allowedTags, admin = false) {
         } else if (/^https?:\/\//i.test(attr.value.trim())) {
           node.setAttribute("target", "_blank");
           // nofollow matches the legacy JSP chat link policy (js/chat.js rel hook);
-          // noopener/noreferrer are the static theme's added hardening. parity-r3.
+          // noopener/noreferrer are the theme's added hardening. parity-r3.
           node.setAttribute("rel", "nofollow noopener noreferrer");
         }
       }

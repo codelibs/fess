@@ -1,4 +1,4 @@
-/* Bootstrap static theme — overrides on top of /css/bootstrap.min.css */
+/* Bootstrap theme — overrides on top of /css/bootstrap.min.css */
 :root { --fess-card-radius: 0.5rem; }
 /* Offset for fixed-top navbar (GAP A). JS (app.js) refines this to the live header
    height + 1em gap (JSP parity); these are fallbacks (≈3.5rem navbar + 1rem gap). */

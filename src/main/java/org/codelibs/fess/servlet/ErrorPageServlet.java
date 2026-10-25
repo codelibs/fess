@@ -343,7 +343,7 @@ public class ErrorPageServlet extends HttpServlet {
     }
 
     /**
-     * Overrides the static theme responder lookup for tests.
+     * Overrides the theme responder lookup for tests.
      *
      * @param responder the responder to use, or null to fall back to the container
      */

@@ -33,7 +33,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Base class of the non-admin actions Fess still serves itself: login, logout, SSO, the document
  * redirect, thumbnails and the OpenSearch description. The search screens are served by the
- * static theme; this class only holds what these actions share, such as the login requirement.
+ * theme; this class only holds what these actions share, such as the login requirement.
  */
 public abstract class FessSearchAction extends FessBaseAction {
 

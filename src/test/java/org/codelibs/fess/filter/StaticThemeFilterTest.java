@@ -100,9 +100,9 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_doFilter_answersServerSidePageUnderThemesWith404() throws Exception {
-        // A static theme is plain files, so a JSP under /themes/ must never reach the
+        // A theme is plain files, so a JSP under /themes/ must never reach the
         // container's JSP servlet: not for the active theme, not for another theme, not for
-        // any method, and not when no static theme is active.
+        // any method, and not when no theme is active.
         final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         for (final Theme active : new Theme[] { staticTheme, null }) {
             for (final String method : new String[] { "GET", "HEAD", "POST" }) {
@@ -407,7 +407,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_servesIndexForRootPath() throws Exception {
-        // Regression: GET "/" with an active static theme (default spaFallback) must be
+        // Regression: GET "/" with an active theme (default spaFallback) must be
         // served in place (serveIndex), NOT redirected/forwarded. This was the originally
         // reported bug -- the root path must keep its URI and render the SPA entry.
         final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
@@ -505,7 +505,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_servesIndexForErrorHelpProfileAndChatPaths() throws Exception {
-        // /error/*, /help, /profile and /chat are SPA routes when a static theme is active.
+        // /error/*, /help, /profile and /chat are SPA routes when a theme is active.
         // The SPA reads the pathname and renders the appropriate error, help, profile or chat page.
         final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
@@ -709,7 +709,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     @Test
     public void test_passesThroughUnlistedUiPath() throws Exception {
         // Key allowlist behavior: an arbitrary, non-allowlisted UI path must pass through
-        // to the standard Fess routes even when a static theme is active and spaFallback
+        // to the standard Fess routes even when a theme is active and spaFallback
         // is on. Only the allowlisted SPA paths (/, /search, /help, /error, /profile,
         // /cache, /chat) are served as the SPA entry; everything else (e.g. /foo, /bar)
         // is a Fess route.
@@ -758,7 +758,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_servesIndexForCachePath() throws Exception {
-        // /cache/?docId=abc is now an SPA route when a static theme is active.
+        // /cache/?docId=abc is now an SPA route when a theme is active.
         // It must be served as the SPA index, not passed through to the legacy
         // CacheAction. The /api/v2/cache/ REST endpoint is unaffected because /api/
         // is not an allowlisted UI path and therefore passes through to Fess.

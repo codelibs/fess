@@ -41,7 +41,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Regression coverage for the bundled {@code bootstrap} static theme.
+ * Regression coverage for the bundled {@code bootstrap} theme.
  *
  * <p>These assertions run directly against the source tree (no servlet
  * container), so they verify the bundled artifact remains coherent even when

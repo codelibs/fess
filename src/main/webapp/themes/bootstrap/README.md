@@ -1,7 +1,7 @@
-# Bootstrap — Fess Reference Static Theme
+# Bootstrap — Fess Reference Theme
 
 This directory is the **canonical reference implementation** for a Fess
-static theme. It is bundled with the Fess WAR and ships in the RPM/DEB
+theme. It is bundled with the Fess WAR and ships in the RPM/DEB
 packages. Activate it by setting `theme.default=bootstrap` in the admin
 UI (`/admin/theme/`) or by binding it to a virtual host.
 
@@ -43,7 +43,7 @@ English is the fallback for a locale that is not in the list.
 
 ## API endpoints consumed
 
-All under `/api/v2`. See the Fess static-theme API reference doc for
+All under `/api/v2`. See the Fess theme API reference doc for
 the full schema. The wrapper in `assets/api.js` is the single source
 of truth — third-party themes are encouraged to start by copying it.
 

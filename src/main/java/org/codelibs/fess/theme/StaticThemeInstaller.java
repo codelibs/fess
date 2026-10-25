@@ -48,7 +48,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 
 /**
- * Installs static themes from uploaded ZIP archives.
+ * Installs themes from uploaded ZIP archives.
  *
  * <p>The installer enforces security guards against ZipSlip, oversized
  * extractions, excessive entry counts, and compression-ratio bombs. Successful
@@ -162,7 +162,7 @@ public class StaticThemeInstaller {
 
     /**
      * File extensions of server-side pages the servlet container would evaluate rather than
-     * serve as files. A static theme is plain files only, so these are refused at install time
+     * serve as files. A theme is plain files only, so these are refused at install time
      * and never served from {@code /themes/}.
      */
     private static final List<String> SERVER_SIDE_EXTENSIONS = List.of(".jsp", ".jspx", ".jspf");
@@ -378,7 +378,7 @@ public class StaticThemeInstaller {
                 themeRegistry.reload();
             }
             if (logger.isInfoEnabled()) {
-                logger.info("Installed static theme name={} target={}", m.getName(), target);
+                logger.info("Installed theme name={} target={}", m.getName(), target);
             }
             cleanupOldAtticDirs(themesDir);
         } catch (final InstallException ex) {
@@ -391,7 +391,7 @@ public class StaticThemeInstaller {
     }
 
     /**
-     * Removes the static-theme directory atomically.
+     * Removes the theme directory atomically.
      *
      * <p>Refuses when (a) the name fails the spec §4.2 regex
      * ({@code ^[a-z0-9][a-z0-9_-]{0,63}$}), (b) the theme is
@@ -444,7 +444,7 @@ public class StaticThemeInstaller {
             themeRegistry.reload();
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Deleted static theme name={} attic={}", name, attic);
+            logger.info("Deleted theme name={} attic={}", name, attic);
         }
         cleanupOldAtticDirs(themesDir);
     }
@@ -491,8 +491,7 @@ public class StaticThemeInstaller {
                     continue;
                 }
                 if (isServerSidePage(name)) {
-                    throw new InstallException(InstallException.Code.EXTRACT_FAILED,
-                            "Server-side page not allowed in a static theme: " + name);
+                    throw new InstallException(InstallException.Code.EXTRACT_FAILED, "Server-side page not allowed in a theme: " + name);
                 }
                 final Path parent = resolved.getParent();
                 if (parent != null) {

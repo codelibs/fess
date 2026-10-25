@@ -47,7 +47,7 @@ import org.junit.jupiter.api.io.TempDir;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * Covers installing a static theme from a repository: what is fetched, what is checked before
+ * Covers installing a theme from a repository: what is fetched, what is checked before
  * anything installed is touched, and what is left behind when a step fails.
  */
 public class ThemeInstallerTest {
@@ -218,7 +218,7 @@ public class ThemeInstallerTest {
 
     @Test
     public void test_install_archiveWithAServerSidePage_isRefused() throws Exception {
-        // A static theme is plain files. The admin screen's installer refuses an archive with a
+        // A theme is plain files. The admin screen's installer refuses an archive with a
         // JSP (or similar) entry, so installing from the command line must refuse it too, and
         // before anything reaches the themes directory.
         final List<String> entryNames = List.of("assets/p.jsp", "x.jspx", "inc/x.jspf", "assets/P.JSP");
