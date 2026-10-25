@@ -224,6 +224,12 @@ public class SystemHelperTest extends UnitFessTestCase {
             assertTrue(systemHelper.reportRetiredTikaConfig(tikaXml));
             // reported once
             assertFalse(systemHelper.reportRetiredTikaConfig(tikaXml));
+            // another directory (the classes directory of the ZIP package of 15.9) is reported on its own
+            final Path other = Files.createDirectory(dir.resolve("classes")).resolve("tika.xml");
+            assertFalse(systemHelper.reportRetiredTikaConfig(other));
+            Files.writeString(other, "<properties/>");
+            assertTrue(systemHelper.reportRetiredTikaConfig(other));
+            assertFalse(systemHelper.reportRetiredTikaConfig(other));
         } finally {
             FileUtils.deleteQuietly(dir.toFile());
         }
