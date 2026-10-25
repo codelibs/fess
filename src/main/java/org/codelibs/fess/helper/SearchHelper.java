@@ -430,6 +430,7 @@ public class SearchHelper {
 
     /**
      * Retrieves a single document by its document ID, constrained by extra filter clauses.
+     * Like a search, the lookup is limited to the roles of the caller and to the virtual host of the request.
      *
      * @param docId The document ID to retrieve
      * @param fields Array of field names to include in the result
@@ -448,6 +449,7 @@ public class SearchHelper {
             if (!roleSet.isEmpty()) {
                 queryHelper.buildRoleQuery(roleSet, boolQuery);
             }
+            queryHelper.buildVirtualHostQuery(ComponentUtil.getVirtualHostHelper().getVirtualHostKey(), boolQuery);
             if (filterQueries != null) {
                 filterQueries.forEach(boolQuery::filter);
             }
@@ -475,6 +477,8 @@ public class SearchHelper {
 
     /**
      * Retrieves multiple documents by their document IDs, constrained by extra filter clauses.
+     * Like a search, the lookup is limited to the roles of the caller and to the virtual host of the request,
+     * except for an admin search, which has neither.
      *
      * @param docIds Array of document IDs to retrieve
      * @param fields Array of field names to include in the results
@@ -495,6 +499,7 @@ public class SearchHelper {
                 if (!roleSet.isEmpty()) {
                     queryHelper.buildRoleQuery(roleSet, boolQuery);
                 }
+                queryHelper.buildVirtualHostQuery(ComponentUtil.getVirtualHostHelper().getVirtualHostKey(), boolQuery);
             }
             if (filterQueries != null) {
                 filterQueries.forEach(boolQuery::filter);

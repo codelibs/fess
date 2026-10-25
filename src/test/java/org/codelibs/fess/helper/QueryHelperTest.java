@@ -928,6 +928,23 @@ public class QueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_buildVirtualHostQuery_addsTermFilter() {
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        queryHelper.buildVirtualHostQuery("vhost1", boolQuery);
+        assertEquals(List.of(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), "vhost1")),
+                boolQuery.filter());
+    }
+
+    @Test
+    public void test_buildVirtualHostQuery_blankKeyAddsNothing() {
+        for (final String key : new String[] { null, "", " " }) {
+            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            queryHelper.buildVirtualHostQuery(key, boolQuery);
+            assertTrue(boolQuery.filter().isEmpty());
+        }
+    }
+
     private void collectFilters(final QueryBuilder query, final List<QueryBuilder> filters) {
         if (query instanceof final BoolQueryBuilder bool) {
             filters.addAll(bool.filter());

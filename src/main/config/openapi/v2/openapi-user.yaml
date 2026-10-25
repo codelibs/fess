@@ -2708,7 +2708,8 @@ components:
                   type: string
                   description: |-
                     Cached document body for the requested document. The
-                    document is fetched role-filtered via
+                    document is fetched role-filtered and limited to the
+                    virtual host of the request via
                     `getDocumentByDocId(userBean)`, so a caller only receives
                     content they are authorized to see. The fetch field set
                     (`getCacheResponseFields()`) contains no ACL or internal
