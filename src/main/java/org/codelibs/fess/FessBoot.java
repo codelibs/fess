@@ -33,7 +33,6 @@ import org.apache.tomcat.util.http.CookieProcessorBase;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
 import org.codelibs.fess.tomcat.webresources.FessWebResourceRoot;
 import org.dbflute.tomcat.TomcatBoot;
@@ -132,7 +131,7 @@ public class FessBoot extends TomcatBoot {
         final List<String> paths = new ArrayList<>();
         for (final Container child : host.findChildren()) {
             if (child instanceof final Context context && !context.getState().isAvailable()) {
-                paths.add(StringUtil.isEmpty(context.getPath()) ? "/" : context.getPath());
+                paths.add(context.getPath() == null || context.getPath().isEmpty() ? "/" : context.getPath());
             }
         }
         return paths;
@@ -244,7 +243,7 @@ public class FessBoot extends TomcatBoot {
         if (value != null && !"/".equals(value)) {
             return value;
         }
-        return StringUtil.EMPTY;
+        return "";
     }
 
     /**
@@ -265,7 +264,7 @@ public class FessBoot extends TomcatBoot {
         super.setupWebappContext();
         String contextPath = getContextPath();
         if (contextPath.length() > 0 && contextPath.endsWith("/")) {
-            contextPath = contextPath.replaceAll("/+$", StringUtil.EMPTY);
+            contextPath = contextPath.replaceAll("/+$", "");
         }
         final Context context = (Context) server.getHost().findChild(contextPath);
         if (context != null) {

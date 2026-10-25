@@ -117,4 +117,13 @@ public class FessBootTest extends UnitFessTestCase {
             tomcat.destroy();
         }
     }
+
+    // The launcher starts with only lib/classes on its class path (bin/fess.in.sh), so it must not use the core library.
+    @Test
+    public void test_doesNotReferenceCoreLibrary() throws Exception {
+        try (final java.io.InputStream in = FessBoot.class.getResourceAsStream("FessBoot.class")) {
+            final String constants = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
+            assertFalse(constants.contains("org/codelibs/core/"));
+        }
+    }
 }
