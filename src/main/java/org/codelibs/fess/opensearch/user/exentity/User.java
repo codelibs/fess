@@ -83,7 +83,9 @@ public class User extends BsUser implements FessUser {
      */
     private String decode(final String value) {
         try {
-            return new String(Base64.getDecoder().decode(value), Constants.CHARSET_UTF_8);
+            // The admin screens and the LDAP login write the id with the URL-safe alphabet ('-' and '_'),
+            // and an id written by a standard encoder ('+' and '/') must stay readable.
+            return new String(Base64.getUrlDecoder().decode(value.replace('+', '-').replace('/', '_')), Constants.CHARSET_UTF_8);
         } catch (final IllegalArgumentException e) {
             logger.warn("Skipped an unreadable role or group id on user {}: {} is not a Base64-encoded name. "
                     + "Reassign the roles and groups of this user to repair it.", name, value);
