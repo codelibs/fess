@@ -235,6 +235,40 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_reportRetiredTikaConfig_onlyInTheWebappProcess() throws Exception {
+        LogUtil.resetWarnOnce();
+        final Path dir = Files.createTempDirectory("fess_conf");
+        try {
+            final Path tikaXml = dir.resolve("tika.xml");
+            Files.writeString(tikaXml, "<properties/>");
+            // the crawler, thumbnail, suggest and chunk processes run init() too, but stay silent
+            assertEquals(0, retiredTikaWarnings(false, tikaXml).size());
+            // the silent run did not use up the once-only key
+            assertEquals(1, retiredTikaWarnings(true, tikaXml).size());
+            assertEquals(0, retiredTikaWarnings(true, tikaXml).size());
+        } finally {
+            LogUtil.resetWarnOnce();
+            FileUtils.deleteQuietly(dir.toFile());
+        }
+    }
+
+    private List<String> retiredTikaWarnings(final boolean webapp, final Path tikaXml) {
+        final SystemHelper helper = new SystemHelper() {
+            @Override
+            protected boolean isWebappProcess() {
+                return webapp;
+            }
+        };
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SystemHelper.class);
+        try {
+            helper.reportRetiredTikaConfig(tikaXml);
+            return appender.messagesOnThisThreadAt(Level.WARN).stream().filter(m -> m.contains("tika.xml")).collect(Collectors.toList());
+        } finally {
+            appender.detach();
+        }
+    }
+
     private FessConfig cipherKeyConfig(final String key) {
         return new FessConfig.SimpleImpl() {
             @Override
