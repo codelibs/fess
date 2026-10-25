@@ -631,4 +631,13 @@ public class PermissionHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_encode_ignoresIdeographicSpaceAroundPrefixes() {
+        // U+3000 is not removed by String#trim; a deny entry typed with it must not be dropped
+        assertEquals("D1guest", permissionHelper.encode("(deny)\u3000{user}guest"));
+        assertEquals("DRguest", permissionHelper.encode("\u3000(deny)\u3000{role}guest\u3000"));
+        assertEquals("2guest", permissionHelper.encode("(allow)\u3000{group}guest"));
+        assertNull(permissionHelper.encode("(deny)\u3000"));
+    }
+
 }

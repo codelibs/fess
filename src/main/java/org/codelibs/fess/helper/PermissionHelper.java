@@ -90,16 +90,16 @@ public class PermissionHelper {
             return null;
         }
 
-        String permission = value.trim();
+        String permission = value.strip();
         final String lowerValue = permission.toLowerCase(Locale.ROOT);
         final String aclPrefix;
         final boolean denied;
         if (lowerValue.startsWith(allowPrefix)) {
-            permission = permission.substring(allowPrefix.length()).trim();
+            permission = permission.substring(allowPrefix.length()).strip();
             aclPrefix = StringUtil.EMPTY;
             denied = false;
         } else if (lowerValue.startsWith(denyPrefix)) {
-            permission = permission.substring(denyPrefix.length()).trim();
+            permission = permission.substring(denyPrefix.length()).strip();
             aclPrefix = ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix();
             denied = true;
         } else {
