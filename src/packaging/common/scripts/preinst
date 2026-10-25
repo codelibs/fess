@@ -51,6 +51,13 @@ case "$1" in
             fi
         fi
 
+        # tika.xml is not part of the package since 15.10 (Tika is configured in
+        # the code). It was a conffile in 15.9, so dpkg would keep it as an
+        # obsolete conffile. Remove it when the operator has not edited it, and
+        # keep it as tika.xml.dpkg-bak when they have. This comes after the
+        # clean-up above, which has already removed an unedited copy of 15.8.
+        dpkg-maintscript-helper rm_conffile ${packaging.fess.conf.dir}/tika.xml 15.10.0~ -- "$@"
+
         # Create fess group if not existing
         if ! getent group "$FESS_GROUP" > /dev/null 2>&1 ; then
             echo -n "Creating $FESS_GROUP group..."

@@ -29,6 +29,9 @@ case "$1" in
     # Debian ####################################################
     configure)
 
+        # Finishes the removal of tika.xml that preinst started
+        dpkg-maintscript-helper rm_conffile ${packaging.fess.conf.dir}/tika.xml 15.10.0~ -- "$@"
+
         # If $1=configure and $2 is set, this is an upgrade
         if [ -n "$2" ]; then
             IS_UPGRADE=true
