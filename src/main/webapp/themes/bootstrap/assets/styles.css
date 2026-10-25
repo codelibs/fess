@@ -58,6 +58,7 @@ body { padding-top: 4.5rem; }
 #searchOptions.show .container { right: 0; }
 @media (prefers-reduced-motion: reduce) {
   .result-card { transition: none; }
+  #searchOptions .container { transition: none; }
 }
 /* JSP parity (error/*.jsp wrap content in <div class="text-center">): centre the
    error view's heading, body, and actions. error-detail keeps its left-aligned
