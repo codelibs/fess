@@ -742,12 +742,15 @@ public class SystemHelper {
      * Warns when the {@code tika.xml} of an earlier version is still in the configuration directory
      * or, for the ZIP package of 15.9 and earlier, in the classes directory.
      * Tika is configured in the code now, so the file is not read and the parsers it excludes are used.
+     * Only the webapp process warns.
      *
      * @param tikaXml The path of a {@code tika.xml} to look for.
      * @return true if the warning was written.
      */
     protected boolean reportRetiredTikaConfig(final Path tikaXml) {
-        return Files.exists(tikaXml) && LogUtil.warnOnce(logger, "tika.xml:" + tikaXml,
+        // The crawler, thumbnail, suggest and chunk processes run init() too, and the once-only key is per JVM, so each
+        // of them would write the line again; the webapp has already reported it at its start.
+        return isWebappProcess() && Files.exists(tikaXml) && LogUtil.warnOnce(logger, "tika.xml:" + tikaXml,
                 "{} is not read any more because Tika is configured in the code, so the parsers it excludes are no longer excluded. Remove the file.",
                 tikaXml);
     }
