@@ -39,7 +39,7 @@ ${fe:html(true)}
 						<c:set var="ph_new_password">
 							<la:message key="labels.login.placeholder_new_password" />
 						</c:set>
-						<la:password property="password" class="form-control"
+						<la:password autocomplete="new-password" property="password" class="form-control"
 							placeholder="${ph_new_password}" />
 						<div class="input-group-append">
 							<span class="input-group-text">
@@ -51,7 +51,7 @@ ${fe:html(true)}
 						<c:set var="ph_confirm_password">
 							<la:message key="labels.login.placeholder_confirm_new_password" />
 						</c:set>
-						<la:password property="confirmPassword" class="form-control"
+						<la:password autocomplete="new-password" property="confirmPassword" class="form-control"
 							placeholder="${ph_confirm_password}" />
 						<div class="input-group-append">
 							<span class="input-group-text">
