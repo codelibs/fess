@@ -40,8 +40,10 @@ ${fe:html(true)}
 						<c:set var="ph_username">
 							<la:message key="labels.login.placeholder_username" />
 						</c:set>
+						<label for="username" class="sr-only">${ph_username}</label>
 						<la:text property="username" styleId="username"
-							class="form-control" placeholder="${ph_username}" />
+							class="form-control" placeholder="${ph_username}"
+							autocomplete="username" />
 						<div class="input-group-append">
 							<span class="input-group-text">
 								<i class="fa fa-user fa-fw" aria-hidden="true"></i>
@@ -52,8 +54,10 @@ ${fe:html(true)}
 						<c:set var="ph_password">
 							<la:message key="labels.login.placeholder_password" />
 						</c:set>
-						<la:password property="password" class="form-control"
-							placeholder="${ph_password}" />
+						<label for="password" class="sr-only">${ph_password}</label>
+						<la:password property="password" styleId="password"
+							class="form-control" placeholder="${ph_password}"
+							autocomplete="current-password" />
 						<div class="input-group-append">
 							<span class="input-group-text">
 								<i class="fa fa-lock fa-fw" aria-hidden="true"></i>

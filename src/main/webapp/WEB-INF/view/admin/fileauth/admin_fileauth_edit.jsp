@@ -47,7 +47,7 @@ ${fe:html(true)}
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-success">${msg}</div>
+                                        <div class="alert alert-success" role="status">${msg}</div>
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
@@ -93,7 +93,7 @@ ${fe:html(true)}
                                             key="labels.file_auth_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="password"/>
-                                        <la:password styleId="password" property="password" styleClass="form-control"/>
+                                        <la:password autocomplete="new-password" styleId="password" property="password" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">

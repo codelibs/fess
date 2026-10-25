@@ -26,7 +26,7 @@ public class FessMessages extends FessLabels {
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
 
-    /** The key of the message: &lt;ul class="has-error"&gt; */
+    /** The key of the message: &lt;ul class="has-error" role="alert"&gt; */
     public static final String ERRORS_HEADER = "{errors.header}";
 
     /** The key of the message: &lt;/ul&gt; */
@@ -668,7 +668,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.header' with parameters.
      * <pre>
-     * message: &lt;ul class="has-error"&gt;
+     * message: &lt;ul class="has-error" role="alert"&gt;
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)

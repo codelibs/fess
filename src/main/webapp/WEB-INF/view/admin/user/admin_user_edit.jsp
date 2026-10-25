@@ -45,7 +45,7 @@ ${fe:html(true)}
                             <div class="card-body">
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-success">${msg}</div>
+                                        <div class="alert alert-success" role="status">${msg}</div>
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
@@ -68,7 +68,7 @@ ${fe:html(true)}
                                             key="labels.user_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="password"/>
-                                        <la:password styleId="password" property="password" styleClass="form-control"/>
+                                        <la:password autocomplete="new-password" styleId="password" property="password" styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -76,7 +76,7 @@ ${fe:html(true)}
                                             key="labels.user_confirm_password"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="confirmPassword"/>
-                                        <la:password styleId="confirmPassword" property="confirmPassword"
+                                        <la:password autocomplete="new-password" styleId="confirmPassword" property="confirmPassword"
                                                      styleClass="form-control"/>
                                     </div>
                                 </div>
