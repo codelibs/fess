@@ -338,6 +338,14 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getHelpLink_searchRequestScreen() {
+        // the guide of the search request screen is published as esreq-guide, not sereq-guide
+        getMockRequest().setLocale(Locale.JAPANESE);
+        assertEquals("https://fess.codelibs.org/ja/98.76/admin/esreq-guide.html",
+                systemHelper.getHelpLink(ComponentUtil.getFessConfig().getOnlineHelpNameSereq()));
+    }
+
+    @Test
     public void test_setForceStop() {
         assertFalse(systemHelper.isForceStop());
         systemHelper.setForceStop(true);
