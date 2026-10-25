@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.RateLimitHelper;
@@ -1351,6 +1352,91 @@ public class LoginHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void login_directoryFailureWhileResolvingPermissionsAnswers503AndUndoesTheLogin() throws Exception {
+        // The bind succeeded but the permissions are read lazily, and for an LDAP user that is a
+        // directory search which can fail (e.g. the ACL lets the user read only his own entry).
+        // That used to escape handle() as a 500 on top of a session that was already bound.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        final PermissionFailingLoginAssist assist = new PermissionFailingLoginAssist(
+                new LdapOperationException("Failed to search dc=example with (cn=alice)", new RuntimeException("No Such Object")));
+        ComponentUtil.setFessLoginAssist(assist);
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final StubRequestWithSession req = new StubRequestWithSession("POST", "/api/v2/auth/login");
+        req.withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}");
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(rl).handle(req, res);
+
+        assertEquals(503, res.status, res.body());
+        assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+        assertFalse(res.body().contains("csrf_token"), res.body());
+        assertFalse(res.body().contains("No Such Object"), "the directory detail must not reach the wire: " + res.body());
+        assertTrue(assist.loggedOut, "the user the login bound must be dropped");
+        assertTrue(req.invalidated, "the session of the half-made login must be invalidated");
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(), audit,
+                "no LOGIN record for a login that was not completed, and no LOGIN_FAILURE for accepted credentials: " + audit);
+        // Not a credential failure: the USER slot was not consumed, so the next attempt is not throttled.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        for (int i = 0; i < userLimit + 2; i++) {
+            final CapturingResponse again = new CapturingResponse();
+            new LoginHandler(rl).handle(new StubRequestWithSession("POST", "/api/v2/auth/login")
+                    .withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}"), again);
+            assertEquals(503, again.status, "attempt " + i + ": " + again.body());
+        }
+    }
+
+    @Test
+    public void login_otherFailureWhileResolvingPermissionsStillUndoesTheLogin() throws Exception {
+        // Not a directory problem, so it keeps the generic internal-error answer, but the bound
+        // session is dropped all the same.
+        final PermissionFailingLoginAssist assist = new PermissionFailingLoginAssist(new IllegalStateException("boom"));
+        ComponentUtil.setFessLoginAssist(assist);
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final StubRequestWithSession req = new StubRequestWithSession("POST", "/api/v2/auth/login");
+        req.withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}");
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(req, res);
+
+        assertEquals(500, res.status, res.body());
+        assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+        assertTrue(assist.loggedOut, "the user the login bound must be dropped");
+        assertTrue(req.invalidated, "the session of the half-made login must be invalidated");
+    }
+
+    /**
+     * Accepts every credential and binds a user whose permissions cannot be resolved, failing with
+     * the given exception.
+     */
+    private static class PermissionFailingLoginAssist extends StubLoginAssist {
+        private final RuntimeException failure;
+        boolean loggedOut;
+
+        PermissionFailingLoginAssist(final RuntimeException failure) {
+            super("alice", false);
+            this.failure = failure;
+        }
+
+        @Override
+        public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+            bindUser(new StubFessUser("alice") {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String[] getPermissions() {
+                    throw failure;
+                }
+            });
+        }
+
+        @Override
+        public void logout() {
+            loggedOut = true;
+            super.logout();
+        }
+    }
+
     /**
      * Builds an {@link ActivityHelper} that renders real LTSV records into {@code sink} instead
      * of writing to the audit logger. {@code time}/{@code ip} are stripped so the expectation is
@@ -1419,6 +1505,10 @@ public class LoginHandlerTest extends UnitFessTestCase {
             bound = new FessUserBean(new StubFessUser(userId));
         }
 
+        void bindUser(final FessUser user) {
+            bound = new FessUserBean(user);
+        }
+
         @Override
         public OptionalThing<FessUserBean> getSavedUserBean() {
             return bound == null ? OptionalThing.empty() : OptionalThing.of(bound);
@@ -1466,6 +1556,8 @@ public class LoginHandlerTest extends UnitFessTestCase {
      * branch (session rotation plus CSRF issue/rotate) can run to completion.
      */
     private static class StubRequestWithSession extends StubRequest {
+        boolean invalidated;
+
         private final HttpSession session = new HttpSession() {
             private final Map<String, Object> attributes = new HashMap<>();
 
@@ -1521,6 +1613,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
 
             @Override
             public void invalidate() {
+                invalidated = true;
                 attributes.clear();
             }
 
