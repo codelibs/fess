@@ -265,6 +265,11 @@ public class AdminLogActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_decodeLogFileId_plusDecodedToBlankByThePathIsAccepted() {
+        assertEquals("fess~~.log", AdminLogAction.decodeLogFileId("ZmVzc35 LmxvZw=="));
+    }
+
+    @Test
     public void test_decodeLogFileId_invalidIdThrows() {
         for (final String id : new String[] { "a", "not base64!", "@@@@" }) {
             Assertions.assertThrows(IllegalArgumentException.class, () -> AdminLogAction.decodeLogFileId(id), id);
