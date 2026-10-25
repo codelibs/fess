@@ -23,9 +23,13 @@ function matchLocale(tag) {
   if (primary === "zh") {
     return subtags.some(s => s === "hant" || s === "tw" || s === "hk" || s === "mo") ? "zh-TW" : "zh-CN";
   }
-  // Primary-subtag match (e.g. "ja-JP" → "ja", "de-AT" → "de").
+  // Primary-subtag match (e.g. "ja-JP" → "ja", "de-AT" → "de"). A bundle that carries a region
+  // ("pt-BR") answers its bare language and the other regions ("pt", "pt-PT").
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === primary) return s;
+  }
+  for (const s of SUPPORTED) {
+    if (s.toLowerCase().split("-")[0] === primary) return s;
   }
   return null;
 }

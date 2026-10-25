@@ -37,6 +37,8 @@ describe("pickLocale", () => {
     ["de-AT", "de"],       // primary-subtag match
     ["pt-BR", "pt-BR"],    // case-insensitive exact match
     ["PT-br", "pt-BR"],    // exact match, differing case
+    ["pt", "pt-BR"],       // the only Portuguese bundle answers the bare language
+    ["pt-PT", "pt-BR"],    // ...and the other region
     ["zh-CN", "zh-CN"],    // exact match
     ["en-US", "en"],       // primary-subtag match
     ["xx", "en"],          // no match → English fallback
