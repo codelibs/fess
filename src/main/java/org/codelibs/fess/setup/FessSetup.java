@@ -109,6 +109,8 @@ public final class FessSetup {
 
               list plugins [--repository <url>] [--dest <dir>]
                   Show the Fess plugins published for this version, and which are installed.
+                  A plugin with no build for this Fess line is marked "(no build for <line>)":
+                  the repository still lists it, but install plugin would be refused.
                   A development build lists the snapshot repository too.
 
               list themes [--repository <url>] [--dest <dir>]
@@ -249,9 +251,25 @@ public final class FessSetup {
                 out.println("warning: " + e.getMessage());
             }
         }
+        // The repository index lists every plugin it ever published, including ones that stopped
+        // being released for this line (or were moved into the core). Without a Fess version
+        // there is no line to check against, so nothing is marked.
+        String product = null;
+        try {
+            product = FessPluginInstaller.productVersion(fessVersion());
+        } catch (final SetupException e) {
+            // Not running from the distribution jar: list the names unmarked.
+        }
         for (final String name : published) {
             final String versions = installedVersions(directory, name);
-            out.println(versions == null ? "  " + name : "  " + name + "  (installed: " + versions + ")");
+            final StringBuilder line = new StringBuilder("  ").append(name);
+            if (versions != null) {
+                line.append("  (installed: ").append(versions).append(')');
+            }
+            if (product != null && hasNoBuild(sources, name, product, developmentBuild())) {
+                line.append("  (no build for ").append(product).append(')');
+            }
+            out.println(line);
         }
 
         // A plugin built locally, or one published somewhere else, is installed but not listed
@@ -964,6 +982,51 @@ public final class FessSetup {
     static String resolveVersion(final PluginSources sources, final String artifactId, final String productVersion,
             final boolean development) throws SetupException {
         final List<String> problems = new ArrayList<>();
+        final List<String> versions = publishedVersions(sources, artifactId, development, problems);
+        if (versions.isEmpty()) {
+            throw new SetupException("Failed to read the published versions of " + artifactId + ": " + String.join("; ", problems));
+        }
+        return PluginRepository.selectVersion(versions, productVersion, development);
+    }
+
+    /**
+     * Reports whether a plugin is published but has no build for a given Fess line.
+     *
+     * <p>This is the case {@code install plugin} refuses with "No release matches". A plugin
+     * whose metadata cannot be read is not reported: that is a failure to find out, and calling
+     * it "no build" would claim something the listing does not know.</p>
+     *
+     * @param sources where plugins are published
+     * @param artifactId the plugin name
+     * @param productVersion the major.minor that Fess accepts, for example {@code 15.9}
+     * @param development whether this is a snapshot build of Fess
+     * @return true when the repository publishes versions of the plugin and none fits
+     */
+    static boolean hasNoBuild(final PluginSources sources, final String artifactId, final String productVersion,
+            final boolean development) {
+        final List<String> versions = publishedVersions(sources, artifactId, development, new ArrayList<>());
+        if (versions.isEmpty()) {
+            return false;
+        }
+        try {
+            PluginRepository.selectVersion(versions, productVersion, development);
+            return false;
+        } catch (final SetupException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Reads every version of a plugin from the repositories this Fess consults.
+     *
+     * @param sources where plugins are published
+     * @param artifactId the plugin name
+     * @param development whether the snapshot repository is read as well
+     * @param problems collects the reason a repository returned nothing
+     * @return the versions, empty when none could be read
+     */
+    private static List<String> publishedVersions(final PluginSources sources, final String artifactId, final boolean development,
+            final List<String> problems) {
         final List<String> versions = new ArrayList<>();
         if (sources.hasRelease()) {
             versions.addAll(readVersions(sources.release(), artifactId, problems));
@@ -977,10 +1040,7 @@ public final class FessSetup {
                 problems.add("no snapshot repository is configured");
             }
         }
-        if (versions.isEmpty()) {
-            throw new SetupException("Failed to read the published versions of " + artifactId + ": " + String.join("; ", problems));
-        }
-        return PluginRepository.selectVersion(versions, productVersion, development);
+        return versions;
     }
 
     /**

@@ -143,4 +143,23 @@ public class FileRepositoryTest {
         assertTrue(out().contains("  fess-ds-git"), out());
         assertFalse(out().contains("fess-parent"), out());
     }
+
+    @Test
+    public void test_hasNoBuild_isTrueOnlyWhenNoPublishedVersionFitsTheLine() throws Exception {
+        final Path older = Files.createDirectories(group.resolve("fess-webapp-semantic-search"));
+        Files.writeString(older.resolve("maven-metadata.xml"),
+                METADATA.replace("fess-ds-git", "fess-webapp-semantic-search").replace("15.9.0", "15.8.0").replace("15.9.1", "15.8.1"));
+        final PluginSources sources = FessSetup.pluginSources(null, java.util.Map.of("repository", repositoryUrl()));
+
+        assertFalse(FessSetup.hasNoBuild(sources, "fess-ds-git", "15.9", false));
+        assertTrue(FessSetup.hasNoBuild(sources, "fess-ds-git", "15.10", false));
+        assertTrue(FessSetup.hasNoBuild(sources, "fess-webapp-semantic-search", "15.9", false));
+    }
+
+    @Test
+    public void test_hasNoBuild_isFalseWhenTheMetadataCannotBeRead() {
+        final PluginSources sources = FessSetup.pluginSources(null, java.util.Map.of("repository", repositoryUrl()));
+
+        assertFalse(FessSetup.hasNoBuild(sources, "fess-ds-unpublished", "15.10", false));
+    }
 }
