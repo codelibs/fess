@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.login;
 
+import java.util.Locale;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -187,8 +189,9 @@ public class LoginAction extends FessLoginAction {
         limiter.release(LoginRateLimiter.Scope.IP, clientIp);
     }
 
+    /** Must stay the key of {@code LoginHandler#userScopeKey}: both logins share one limiter. */
     private static String userKey(final String clientIp, final String username) {
-        return clientIp + USER_SCOPE_KEY_SEP + username;
+        return clientIp + USER_SCOPE_KEY_SEP + username.toLowerCase(Locale.ROOT);
     }
 
     /**

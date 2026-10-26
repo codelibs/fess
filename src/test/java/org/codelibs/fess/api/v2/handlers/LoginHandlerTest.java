@@ -439,6 +439,40 @@ public class LoginHandlerTest extends UnitFessTestCase {
                         + "credential verification even though the client retried meanwhile: " + after.body());
     }
 
+    // ── The USER bucket does not tell spellings of one name apart ────────────────
+
+    @Test
+    public void login_userGateAppliesToEveryCaseSpellingOfTheName() throws Exception {
+        // A directory compares an account name without regard to case, so "Alice" and "alice" are one
+        // account there. Each spelling used to get a bucket of its own, which let a client raise the
+        // guesses it could make at one account from the per-user allowance towards the per-address one.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        try {
+            final LoginHandler handler = new LoginHandler(rl);
+            final String ip = "198.51.100.40";
+            // credential verification writes LOGIN_FAILURE and the USER gate does not, which is what
+            // tells a request refused at the gate from one that reached the password check
+            final List<String> audit = new ArrayList<>();
+            ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+            ComponentUtil.setFessLoginAssist(new StubLoginAssist("alice", true));
+            for (int i = 0; i < userLimit; i++) {
+                handler.handle(loginPost(ip, "alice"), new CapturingResponse());
+            }
+            assertEquals(userLimit, audit.size());
+
+            for (final String spelling : new String[] { "Alice", "ALICE", "aLiCe" }) {
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(loginPost(ip, spelling), res);
+                assertEquals(401, res.status, res.body());
+            }
+
+            assertEquals(userLimit, audit.size(), "no other spelling may reach the password check once the name is locked: " + audit);
+        } finally {
+            rl.destroy();
+        }
+    }
+
     // ── Release: once the window elapses the client can actually log in again ────
 
     @Test

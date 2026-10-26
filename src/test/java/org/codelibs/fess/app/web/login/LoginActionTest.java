@@ -89,6 +89,20 @@ public class LoginActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_theUserAllowanceIgnoresTheCaseOfTheName() {
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        for (int i = 0; i < userLimit; i++) {
+            assertFalse(action.isThrottled(limiter, "198.51.100.6", "alice"));
+            action.recordFailure(limiter, "198.51.100.6", "alice");
+        }
+        assertTrue(action.isThrottled(limiter, "198.51.100.6", "Alice"));
+        assertTrue(action.isThrottled(limiter, "198.51.100.6", "ALICE"));
+        // the same bucket as the v2 login uses for the name
+        assertTrue(action.isThrottled(limiter, "198.51.100.6", "aLiCe"));
+        assertFalse(action.isThrottled(limiter, "198.51.100.7", "Alice"));
+    }
+
+    @Test
     public void test_aCorrectLoginUnderTheLimitStillPasses() {
         assertFalse(action.isThrottled(limiter, "198.51.100.5", "alice"));
         action.forgiveAttempt(limiter, "198.51.100.5", "alice");
