@@ -118,6 +118,9 @@ public class SsoAction extends FessLoginAction {
                 } else {
                     logger.warn("Failed to process SSO login.", e);
                 }
+                // No credential was resolved, so the record has no user. Nothing of the exception goes
+                // into it: its message can carry text the caller sent, and the endpoint is anonymous.
+                activityHelper.loginFailure(OptionalThing.empty());
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             } else if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process SSO login.", e);
