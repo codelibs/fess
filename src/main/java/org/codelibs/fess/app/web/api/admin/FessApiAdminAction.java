@@ -87,6 +87,20 @@ public abstract class FessApiAdminAction extends FessApiAction {
     }
 
     /**
+     * Records a request that the access token check turned away as {@code ACCESS_DENIED}.
+     * <p>
+     * The user is {@code -} because a rejected request has no session to name, and only the request
+     * path is written: neither the access token nor its parameter ever reaches the audit log.
+     * </p>
+     *
+     * @param runtime the action runtime context of the rejected request
+     */
+    @Override
+    protected void onAccessDenied(final ActionRuntime runtime) {
+        activityHelper.accessDenied(getUserBean(), runtime.getRequestPath());
+    }
+
+    /**
      * Records the request in the audit log before the action runs, as the admin screens do.
      * <p>
      * This runs only after {@link #godHandPrologue(ActionRuntime)} has accepted the access token,

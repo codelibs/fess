@@ -69,14 +69,18 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_godHandPrologue_recordsNothingForARejectedToken() {
+    public void test_godHandPrologue_recordsAccessDeniedForARejectedToken() {
         final List<Map<String, String>> capturedLogs = new ArrayList<>();
         ComponentUtil.register(new SystemHelper(), "systemHelper"); // ApiResult reads the product version
         final FessApiAdminAction action = createAction(capturedLogs, OptionalThing.empty(), false);
 
-        assertNotNull(action.godHandPrologue(new TestActionRuntime("/api/admin/labeltype/setting", "post$setting")));
+        final ActionResponse response = action.godHandPrologue(new TestActionRuntime("/api/admin/labeltype/setting", "post$setting"));
 
-        assertEquals(0, capturedLogs.size());
+        assertEquals(Integer.valueOf(401), ((JsonResponse<?>) response).getHttpStatus().get());
+        assertEquals(1, capturedLogs.size());
+        assertEquals("ACCESS_DENIED", capturedLogs.get(0).get("action"));
+        assertEquals("-", capturedLogs.get(0).get("user"));
+        assertEquals("/api/admin/labeltype/setting", capturedLogs.get(0).get("path"));
     }
 
     @Test
@@ -155,6 +159,11 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
                 log.put("execute", execute);
                 capturedLogs.add(log);
             }
+
+            @Override
+            public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+                // not under test here
+            }
         };
         return new FessApiAdminAction() {
             {
@@ -201,6 +210,15 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
                 log.put("user", user.map(FessUserBean::getUserId).orElse("-"));
                 log.put("path", path);
                 log.put("execute", execute);
+                capturedLogs.add(log);
+            }
+
+            @Override
+            public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+                final Map<String, String> log = new LinkedHashMap<>();
+                log.put("action", "ACCESS_DENIED");
+                log.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+                log.put("path", path);
                 capturedLogs.add(log);
             }
         };

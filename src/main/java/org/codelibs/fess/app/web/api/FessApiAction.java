@@ -92,11 +92,22 @@ public abstract class FessApiAction extends FessBaseAction {
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         if (!isAccessAllowed()) {
+            onAccessDenied(runtime);
             return asJson(new ApiErrorResponse().message(getMessage(messages -> messages.addErrorsUnauthorizedRequest(GLOBAL)))
                     .status(Status.UNAUTHORIZED)
                     .result()).httpStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
         return super.godHandPrologue(runtime);
+    }
+
+    /**
+     * Called when {@link #isAccessAllowed()} rejects a request, before the HTTP 401 is answered.
+     * Does nothing by default; an API that keeps an audit trail of rejected calls overrides it.
+     *
+     * @param runtime the action runtime context of the rejected request
+     */
+    protected void onAccessDenied(final ActionRuntime runtime) {
+        // nothing to do by default
     }
 
     /**
