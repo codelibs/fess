@@ -215,6 +215,7 @@ public class LoginAction extends FessLoginAction {
         final String username = getUserBean().get().getUserId();
         try {
             userService.changePassword(username, form.password);
+            activityHelper.passwordChanged(getUserBean(), username);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
         } catch (final Exception e) {
             logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);

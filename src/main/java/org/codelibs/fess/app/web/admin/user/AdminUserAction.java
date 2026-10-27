@@ -308,6 +308,9 @@ public class AdminUserAction extends FessAdminAction {
         getUser(form).ifPresent(entity -> {
             try {
                 userService.store(entity);
+                if (StringUtil.isNotBlank(form.password)) {
+                    activityHelper.passwordChanged(getUserBean(), entity.getName());
+                }
                 logger.info("Updated user: {}", entity.getName());
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
