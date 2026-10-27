@@ -18,12 +18,16 @@ package org.codelibs.fess.app.web.sso;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.RequestParameter;
+import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 
 import org.apache.logging.log4j.Level;
+import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoProcessException;
 import org.codelibs.fess.exception.SsoStateException;
@@ -237,6 +241,81 @@ public class SsoActionTest extends UnitFessTestCase {
         assertEquals(List.of(), action.redirectTargets);
     }
 
+    // ===================================================================================
+    //                                                                        audit record
+    //                                                                        ============
+
+    @Test
+    public void test_index_rejectedLoginWritesOneAuditRecordWithoutAnythingTheCallerSent() {
+        for (final SsoLoginException failure : List.of(new SsoStateException("realm=EVIL\naction:LOGIN\tuser:admin"),
+                new SsoLoginException("token from attacker\naction:LOGIN"))) {
+            final List<String> audit = new CopyOnWriteArrayList<>();
+            registerSsoManagerFailing(failure, true);
+            final TestableSsoAction action = new TestableSsoAction();
+            action.anonymous(new CopyOnWriteArrayList<>(), false);
+            action.audit(audit);
+
+            action.index();
+
+            assertEquals(failure.getClass().getSimpleName(), List.of("action:LOGIN_FAILURE"), audit);
+            assertEquals(List.of(LoginAction.class), action.redirectTargets);
+        }
+    }
+
+    @Test
+    public void test_index_noAuditRecordWhenSsoIsNotAvailable() {
+        final List<String> audit = new CopyOnWriteArrayList<>();
+        registerSsoManagerFailing(new SsoStateException("not configured"), false);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.audit(audit);
+
+        action.index();
+
+        assertEquals(List.of(), audit);
+    }
+
+    @Test
+    public void test_index_noAuditRecordForAnUnauthenticatedHitOrAChallenge() {
+        // A plain hit has no credential to reject, and a SPNEGO 401 challenge is the first leg of a
+        // handshake that is still running.
+        for (final LoginCredential credential : new LoginCredential[] { null, new ActionResponseCredential(() -> REDIRECT_TO_LOGIN) }) {
+            final List<String> audit = new CopyOnWriteArrayList<>();
+            ComponentUtil.register(new SsoManager() {
+                @Override
+                public LoginCredential getLoginCredential() {
+                    return credential;
+                }
+
+                @Override
+                public boolean available() {
+                    return true;
+                }
+            }, "ssoManager");
+            final TestableSsoAction action = new TestableSsoAction();
+            action.anonymous(new CopyOnWriteArrayList<>(), false);
+            action.audit(audit);
+
+            action.index();
+
+            assertEquals(List.of(), audit);
+        }
+    }
+
+    private static void registerSsoManagerFailing(final SsoLoginException failure, final boolean available) {
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public LoginCredential getLoginCredential() {
+                throw failure;
+            }
+
+            @Override
+            public boolean available() {
+                return available;
+            }
+        }, "ssoManager");
+    }
+
     private static void registerSsoManagerRecording(final List<String> calls) {
         ComponentUtil.register(new SsoManager() {
             @Override
@@ -442,6 +521,28 @@ public class SsoActionTest extends UnitFessTestCase {
                 @Override
                 public OptionalThing<FessUserBean> getSavedUserBean() {
                     return OptionalThing.of(new FessUserBean(null));
+                }
+            };
+        }
+
+        /** The real audit formatting, with the lines it prints collected instead of logged. */
+        void audit(final List<String> lines) {
+            activityHelper = new ActivityHelper() {
+                @Override
+                protected void printByLtsv(final java.util.Map<String, String> valueMap) {
+                    valueMap.remove("time");
+                    valueMap.remove("ip");
+                    super.printByLtsv(valueMap);
+                }
+
+                @Override
+                protected String getClientIp() {
+                    return "-";
+                }
+
+                @Override
+                protected void printLog(final String message) {
+                    lines.add(message);
                 }
             };
         }
