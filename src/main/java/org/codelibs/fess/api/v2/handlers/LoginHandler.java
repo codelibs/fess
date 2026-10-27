@@ -17,6 +17,7 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -490,12 +491,18 @@ public class LoginHandler {
      * here in the handler — {@code LoginRateLimiter.Scope.USER} keeps its plain-key contract
      * (also used by PasswordChangeHandler with a bare userId).
      *
+     *
+     * <p>The name is lower-cased, and only here: a directory compares an account name without regard
+     * to case, so a client that varies the case of one name would otherwise get a bucket per spelling.
+     * What is authenticated, logged and stored is still the name as typed. {@code LoginAction} builds
+     * the same key.</p>
+     *
      * @param clientIp resolved client IP (see {@link #resolveClientIp})
      * @param username submitted username
-     * @return composite key {@code clientIp + NUL + username}
+     * @return composite key {@code clientIp + NUL + lower-cased username}
      */
     String userScopeKey(final String clientIp, final String username) {
-        return clientIp + USER_SCOPE_KEY_SEP + username;
+        return clientIp + USER_SCOPE_KEY_SEP + username.toLowerCase(Locale.ROOT);
     }
 
     /**
