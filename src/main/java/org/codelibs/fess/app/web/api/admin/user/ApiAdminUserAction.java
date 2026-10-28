@@ -159,6 +159,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         });
         try {
             userService.store(entity);
+            if (StringUtil.isNotBlank(body.password)) {
+                activityHelper.passwordChanged(getUserBean(), entity.getName());
+            }
         } catch (final Exception e) {
             logger.warn("Failed to update user: id={}, username={}, error={}", body.id, body.name, e.getMessage(), e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

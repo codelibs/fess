@@ -280,6 +280,29 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    // ===== Password Changed Audit Log Tests =====
+
+    @Test
+    public void test_passwordChanged() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.passwordChanged(createUser("admin", new String[0]), "alice");
+        assertEquals("action:UPDATE_PASSWORD\tuser:admin\ttarget:alice", localLogMsg.get());
+
+        activityHelper.passwordChanged(OptionalThing.empty(), "alice");
+        assertEquals("action:UPDATE_PASSWORD\tuser:-\ttarget:alice", localLogMsg.get());
+
+        activityHelper.passwordChanged(OptionalThing.empty(), null);
+        assertEquals("action:UPDATE_PASSWORD\tuser:-\ttarget:-", localLogMsg.get());
+    }
+
+    @Test
+    public void test_passwordChanged_ecs() {
+        activityHelper.useEcsFormat = true;
+        activityHelper.passwordChanged(createUser("admin", new String[0]), "alice");
+        assertTrue(localLogMsg.get().contains("\"labels.action\":\"UPDATE_PASSWORD\""), localLogMsg.get());
+        assertTrue(localLogMsg.get().contains("\"labels.target\":\"alice\""), localLogMsg.get());
+    }
+
     // ===== Access Denied Audit Log Tests =====
 
     @Test

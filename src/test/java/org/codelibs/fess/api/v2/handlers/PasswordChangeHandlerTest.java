@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -78,6 +80,9 @@ import jakarta.servlet.http.Part;
  */
 public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
+    /** The LTSV audit records the handler wrote during the current test. */
+    private final List<String> audit = new ArrayList<>();
+
     /**
      * Registers an anonymous-returning stub so that
      * {@code ComponentUtil.getComponent(FessLoginAssist.class)} succeeds and
@@ -92,6 +97,25 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         registerAnonymousLoginAssist();
+        audit.clear();
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            protected void printByLtsv(final Map<String, String> valueMap) {
+                valueMap.remove("time");
+                valueMap.remove("ip");
+                super.printByLtsv(valueMap);
+            }
+
+            @Override
+            protected void printLog(final String message) {
+                audit.add(message);
+            }
+
+            @Override
+            protected String getClientIp() {
+                return "";
+            }
+        }, "activityHelper");
     }
 
     /** Registers a stub that always reports "no user in session" (anonymous). */
@@ -205,6 +229,66 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "{\"current_password\":\"WRONG\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"), res);
             assertEquals(401, res.status);
             assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
+    public void passwordChange_successWritesAnAuditRecordWithoutThePassword() throws Exception {
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(new TrackingStubSession())
+                    .withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertEquals(List.of("action:UPDATE_PASSWORD\tuser:alice\ttarget:alice"), audit);
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
+    public void passwordChange_weakPasswordWritesNoAuditRecord() throws Exception {
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return "errors.password_length";
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(
+                    new StubRequest("POST", "/api/v2/auth/password").withSession(new TrackingStubSession())
+                            .withJsonBody("{\"current_password\":\"secret-current\",\"new_password\":\"x\",\"confirm_password\":\"x\"}"),
+                    res);
+
+            assertFalse(changedCalled[0]);
+            assertTrue(audit.isEmpty(), audit.toString());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.setFessLoginAssist(new FessLoginAssist());

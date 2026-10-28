@@ -207,6 +207,20 @@ public class ActivityHelper {
     }
 
     /**
+     * Log the password changed activity.
+     * Only the names are written, never a password or its hash.
+     * @param user The user who changed the password.
+     * @param target The name of the user whose password was changed.
+     */
+    public void passwordChanged(final OptionalThing<FessUserBean> user, final String target) {
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.UPDATE_PASSWORD.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("target", target != null ? target : "-");
+        log(valueMap);
+    }
+
+    /**
      * Log the script execution activity.
      * @param scriptType The type of script (e.g., "groovy").
      * @param script The script content.
@@ -385,6 +399,10 @@ public class ActivityHelper {
          * The update permission action.
          */
         UPDATE_PERMISSION,
+        /**
+         * The update password action.
+         */
+        UPDATE_PASSWORD,
         /**
          * The script execution action.
          */

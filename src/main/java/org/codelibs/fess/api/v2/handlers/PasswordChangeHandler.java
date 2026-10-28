@@ -306,6 +306,7 @@ public class PasswordChangeHandler {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password changePassword");
             return;
         }
+        ComponentUtil.getActivityHelper().passwordChanged(userBean, userId);
         // C-3: successful change resets the per-user bucket so any earlier failed attempts
         // in the same window are forgiven — mirrors LoginHandler's MJ-5 reset.
         if (rate != null) {
