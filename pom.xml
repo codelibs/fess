@@ -137,6 +137,24 @@
 							<includeScope>provided</includeScope>
 							<outputDirectory>${project.build.directory}/tomcat-lib</outputDirectory>
 							<includes>**/*</includes>
+							<!-- Fess starts one HTTP/1.1 connector and authenticates in its own filters, so the
+							     protocols, realms, servlets and valves below are never loaded. Dropping them
+							     keeps their code out of the distribution. -->
+							<excludes>org/apache/coyote/ajp/**,
+								org/apache/coyote/http2/**,
+								org/apache/tomcat/jni/**,
+								org/apache/catalina/valves/rewrite/**,
+								org/apache/catalina/realm/DataSourceRealm*,
+								org/apache/catalina/realm/JAAS*,
+								org/apache/catalina/realm/JNDIRealm*,
+								org/apache/catalina/servlets/CGIServlet*,
+								org/apache/catalina/servlets/Webdav*,
+								org/apache/catalina/servlets/DataSourcePropertyStore*,
+								org/apache/catalina/authenticator/DigestAuthenticator*,
+								org/apache/catalina/authenticator/FormAuthenticator*,
+								org/apache/catalina/authenticator/SpnegoAuthenticator*,
+								org/apache/catalina/manager/**,
+								org/apache/catalina/users/**</excludes>
 							<overWriteReleases>true</overWriteReleases>
 							<overWriteSnapshots>true</overWriteSnapshots>
 						</configuration>
