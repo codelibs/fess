@@ -188,7 +188,35 @@ public class ActivityHelper {
         valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
         valueMap.put("path", path);
         valueMap.put("execute", execute);
+        putRequestDetails(valueMap);
         log(valueMap);
+    }
+
+    /**
+     * Adds the HTTP method and the {@code id} parameter of the current request to an access record.
+     * <p>
+     * The admin screens send the target of an update or a delete in the form body, so the request
+     * path alone does not say which entry was changed. Only the {@code id} parameter is read, never
+     * the whole form, which carries passwords and keys. A multipart request is left alone so that
+     * reading a parameter does not parse an upload ahead of the action.
+     * </p>
+     * @param valueMap The value map of the access record.
+     */
+    protected void putRequestDetails(final Map<String, String> valueMap) {
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
+            final String method = req.getMethod();
+            if (StringUtil.isNotBlank(method)) {
+                valueMap.put("method", method);
+            }
+            final String contentType = req.getContentType();
+            if (contentType != null && contentType.regionMatches(true, 0, "multipart/", 0, "multipart/".length())) {
+                return;
+            }
+            final String id = req.getParameter("id");
+            if (StringUtil.isNotBlank(id)) {
+                valueMap.put("id", id);
+            }
+        });
     }
 
     /**

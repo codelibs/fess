@@ -141,13 +141,41 @@ public class ActivityHelperTest extends UnitFessTestCase {
     public void test_access() {
         activityHelper.useEcsFormat = false;
         activityHelper.access(OptionalThing.empty(), "/", "aaa");
-        assertEquals("action:ACCESS\tuser:-\tpath:/\texecute:aaa", localLogMsg.get());
+        assertEquals("action:ACCESS\tuser:-\tpath:/\texecute:aaa\tmethod:POST", localLogMsg.get());
 
         activityHelper.access(createUser("testuser", new String[0]), "/aaa", "bbb");
-        assertEquals("action:ACCESS\tuser:testuser\tpath:/aaa\texecute:bbb", localLogMsg.get());
+        assertEquals("action:ACCESS\tuser:testuser\tpath:/aaa\texecute:bbb\tmethod:POST", localLogMsg.get());
 
         activityHelper.access(createUser("testuser", new String[] { "111", "222" }), "/aaa/bbb", "ccc");
-        assertEquals("action:ACCESS\tuser:testuser\tpath:/aaa/bbb\texecute:ccc", localLogMsg.get());
+        assertEquals("action:ACCESS\tuser:testuser\tpath:/aaa/bbb\texecute:ccc\tmethod:POST", localLogMsg.get());
+    }
+
+    @Test
+    public void test_access_recordsTheIdParameterOnly() {
+        activityHelper.useEcsFormat = false;
+        getMockRequest().setParameter("id", "abc123");
+        getMockRequest().setParameter("password", "secret");
+        getMockRequest().setParameter("name", "alice");
+        activityHelper.access(createUser("admin", new String[0]), "/admin/user/delete", "delete");
+        assertEquals("action:ACCESS\tuser:admin\tpath:/admin/user/delete\texecute:delete\tmethod:POST\tid:abc123", localLogMsg.get());
+    }
+
+    @Test
+    public void test_access_idCannotStartANewRecord() {
+        activityHelper.useEcsFormat = false;
+        getMockRequest().setParameter("id", "a\naction:LOGIN\tuser:x");
+        activityHelper.access(OptionalThing.empty(), "/admin/user/delete", "delete");
+        assertEquals("action:ACCESS\tuser:-\tpath:/admin/user/delete\texecute:delete\tmethod:POST\tid:a action:LOGIN_user:x",
+                localLogMsg.get());
+    }
+
+    @Test
+    public void test_access_skipsTheIdOfAMultipartRequest() {
+        activityHelper.useEcsFormat = false;
+        getMockRequest().setContentType("multipart/form-data; boundary=x");
+        getMockRequest().setParameter("id", "abc123");
+        activityHelper.access(OptionalThing.empty(), "/admin/backup/upload", "upload");
+        assertEquals("action:ACCESS\tuser:-\tpath:/admin/backup/upload\texecute:upload\tmethod:POST", localLogMsg.get());
     }
 
     @Test
@@ -228,17 +256,17 @@ public class ActivityHelperTest extends UnitFessTestCase {
         activityHelper.useEcsFormat = true;
         activityHelper.access(OptionalThing.empty(), "/", "aaa");
         assertEquals(
-                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS\",\"labels.user\":\"-\",\"labels.path\":\"\\/\",\"labels.execute\":\"aaa\"}",
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS\",\"labels.user\":\"-\",\"labels.path\":\"\\/\",\"labels.execute\":\"aaa\",\"labels.method\":\"POST\"}",
                 localLogMsg.get());
 
         activityHelper.access(createUser("testuser", new String[0]), "/aaa", "bbb");
         assertEquals(
-                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS\",\"labels.user\":\"testuser\",\"labels.path\":\"\\/aaa\",\"labels.execute\":\"bbb\"}",
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS\",\"labels.user\":\"testuser\",\"labels.path\":\"\\/aaa\",\"labels.execute\":\"bbb\",\"labels.method\":\"POST\"}",
                 localLogMsg.get());
 
         activityHelper.access(createUser("testuser", new String[] { "111", "222" }), "/aaa/bbb", "ccc");
         assertEquals(
-                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS\",\"labels.user\":\"testuser\",\"labels.path\":\"\\/aaa\\/bbb\",\"labels.execute\":\"ccc\"}",
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS\",\"labels.user\":\"testuser\",\"labels.path\":\"\\/aaa\\/bbb\",\"labels.execute\":\"ccc\",\"labels.method\":\"POST\"}",
                 localLogMsg.get());
     }
 
