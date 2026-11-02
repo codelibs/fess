@@ -264,7 +264,7 @@ public class TermQueryCommand extends QueryCommand {
         final DefaultQueryBuilder defaultQuery =
                 buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
-        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength && !containsCjk(text)) {
+        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength && (fessConfig.isQueryBoostFuzzyCjkEnabled() || !containsCjk(text))) {
             defaultQuery.add(QueryBuilders.matchQuery(fessConfig.getIndexFieldTitle(), text)
                     .operator(Operator.AND)
                     .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())

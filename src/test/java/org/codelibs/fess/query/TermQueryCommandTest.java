@@ -45,6 +45,8 @@ public class TermQueryCommandTest extends QueryTestBase {
         queryCommand.register();
     }
 
+    private boolean fuzzyCjkEnabled;
+
     private void setQueryType(final String queryType) {
         // Re-create the base FessConfig with the new query type
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -389,6 +391,11 @@ public class TermQueryCommandTest extends QueryTestBase {
             }
 
             @Override
+            public boolean isQueryBoostFuzzyCjkEnabled() {
+                return fuzzyCjkEnabled;
+            }
+
+            @Override
             public String getQueryBoostFuzzyTitlePrefixLength() {
                 return baseConfig.getQueryBoostFuzzyTitlePrefixLength();
             }
@@ -510,6 +517,22 @@ public class TermQueryCommandTest extends QueryTestBase {
             final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
             final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString();
             assertFalse(text, json.contains("fuzziness"));
+        }
+    }
+
+    @Test
+    public void test_convertDefaultTermQuery_fuzzyForCjkWhenEnabled() throws Exception {
+        setQueryType("bool");
+        fuzzyCjkEnabled = true;
+        try {
+            for (final String text : new String[] { "検索エンジン", "Fess検索" }) {
+                final QueryContext queryContext = new QueryContext(text, false);
+                final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+                final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString();
+                assertTrue(text, json.contains("\"fuzziness\""));
+            }
+        } finally {
+            fuzzyCjkEnabled = false;
         }
     }
 

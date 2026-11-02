@@ -1204,6 +1204,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 4 */
     String QUERY_BOOST_FUZZY_MIN_LENGTH = "query.boost.fuzzy.min.length";
 
+    /** The key of the configuration. e.g. false */
+    String QUERY_BOOST_FUZZY_CJK_ENABLED = "query.boost.fuzzy.cjk.enabled";
+
     /** The key of the configuration. e.g. 0.01 */
     String QUERY_BOOST_FUZZY_TITLE = "query.boost.fuzzy.title";
 
@@ -6496,6 +6499,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryBoostFuzzyMinLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.cjk.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to add the fuzzy clause for text containing Han, Hiragana, Katakana or Hangul characters.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyCjkEnabled();
+
+    /**
+     * Is the property for the key 'query.boost.fuzzy.cjk.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to add the fuzzy clause for text containing Han, Hiragana, Katakana or Hangul characters.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryBoostFuzzyCjkEnabled();
 
     /**
      * Get the value for the key 'query.boost.fuzzy.title'. <br>
@@ -13199,6 +13218,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_BOOST_FUZZY_MIN_LENGTH);
         }
 
+        public String getQueryBoostFuzzyCjkEnabled() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_CJK_ENABLED);
+        }
+
+        public boolean isQueryBoostFuzzyCjkEnabled() {
+            return is(FessConfig.QUERY_BOOST_FUZZY_CJK_ENABLED);
+        }
+
         public String getQueryBoostFuzzyTitle() {
             return get(FessConfig.QUERY_BOOST_FUZZY_TITLE);
         }
@@ -15821,6 +15848,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_important_content, "-1.0");
             defaultMap.put(FessConfig.QUERY_BOOST_important_content_LANG, "-1.0");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_MIN_LENGTH, "4");
+            defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CJK_ENABLED, "false");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE, "0.01");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_FUZZINESS, "AUTO");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_TITLE_EXPANSIONS, "10");

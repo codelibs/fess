@@ -134,6 +134,11 @@ public class QueryHelperTest extends UnitFessTestCase {
             public String getQueryDefaultQueryType() {
                 return queryType;
             }
+
+            @Override
+            public boolean isQueryBoostFuzzyCjkEnabled() {
+                return fessConfig.isQueryBoostFuzzyCjkEnabled();
+            }
         });
     }
 
