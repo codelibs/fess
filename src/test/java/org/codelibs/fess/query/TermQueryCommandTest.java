@@ -45,6 +45,8 @@ public class TermQueryCommandTest extends QueryTestBase {
         queryCommand.register();
     }
 
+    private boolean fuzzyCjkEnabled;
+
     private void setQueryType(final String queryType) {
         // Re-create the base FessConfig with the new query type
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -389,6 +391,11 @@ public class TermQueryCommandTest extends QueryTestBase {
             }
 
             @Override
+            public boolean isQueryBoostFuzzyCjkEnabled() {
+                return fuzzyCjkEnabled;
+            }
+
+            @Override
             public String getQueryBoostFuzzyTitlePrefixLength() {
                 return baseConfig.getQueryBoostFuzzyTitlePrefixLength();
             }
@@ -463,7 +470,7 @@ public class TermQueryCommandTest extends QueryTestBase {
                 "{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}", //
                 "content:aaa");
         assertQueryBuilder(DefaultQueryBuilder.class,
-                "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
+                "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"match\":{\"title\":{\"query\":\"xxx:aaa\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.01}}},{\"match\":{\"content\":{\"query\":\"xxx:aaa\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
                 "xxx:aaa");
         assertQueryBuilder(WildcardQueryBuilder.class, //
                 "{\"wildcard\":{\"url\":{\"wildcard\":\"*aaa*\",\"boost\":1.0}}}", //
@@ -488,6 +495,56 @@ public class TermQueryCommandTest extends QueryTestBase {
     }
 
     @Test
+    public void test_convertDefaultTermQuery_fuzzyUsesAnalyzedMatch() throws Exception {
+        setQueryType("bool");
+        for (final String text : new String[] { "Fbian", "onbording", "Servers" }) {
+            final QueryContext queryContext = new QueryContext(text, false);
+            final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+            final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString().replaceAll("[\\s\\n]", "");
+            assertTrue(text,
+                    json.contains("{\"match\":{\"title\":{\"query\":\"" + text + "\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\""));
+            assertTrue(text,
+                    json.contains("{\"match\":{\"content\":{\"query\":\"" + text + "\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\""));
+            assertFalse(text, json.contains("\"fuzzy\""));
+        }
+    }
+
+    @Test
+    public void test_convertDefaultTermQuery_noFuzzyForCjk() throws Exception {
+        setQueryType("bool");
+        for (final String text : new String[] { "検索エンジン", "搜索引擎", "검색엔진", "Fess検索" }) {
+            final QueryContext queryContext = new QueryContext(text, false);
+            final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+            final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString();
+            assertFalse(text, json.contains("fuzziness"));
+        }
+    }
+
+    @Test
+    public void test_convertDefaultTermQuery_fuzzyForCjkWhenEnabled() throws Exception {
+        setQueryType("bool");
+        fuzzyCjkEnabled = true;
+        try {
+            for (final String text : new String[] { "検索エンジン", "Fess検索" }) {
+                final QueryContext queryContext = new QueryContext(text, false);
+                final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+                final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString();
+                assertTrue(text, json.contains("\"fuzziness\""));
+            }
+        } finally {
+            fuzzyCjkEnabled = false;
+        }
+    }
+
+    @Test
+    public void test_convertDefaultTermQuery_noFuzzyBelowMinLength() throws Exception {
+        setQueryType("bool");
+        final QueryContext queryContext = new QueryContext("abc", false);
+        final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+        assertFalse(queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString().contains("fuzziness"));
+    }
+
+    @Test
     public void test_convertTermQuery_dismax() throws Exception {
         setQueryType("dismax");
         assertQueryBuilder(DefaultQueryBuilder.class,
@@ -500,7 +557,7 @@ public class TermQueryCommandTest extends QueryTestBase {
                 "{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}", //
                 "content:aaa");
         assertQueryBuilder(DefaultQueryBuilder.class,
-                "{\"dis_max\":{\"tie_breaker\":0.1,\"queries\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"boost\":1.0}}",
+                "{\"dis_max\":{\"tie_breaker\":0.1,\"queries\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"match\":{\"title\":{\"query\":\"xxx:aaa\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.01}}},{\"match\":{\"content\":{\"query\":\"xxx:aaa\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}],\"boost\":1.0}}",
                 "xxx:aaa");
         assertQueryBuilder(WildcardQueryBuilder.class, //
                 "{\"wildcard\":{\"url\":{\"wildcard\":\"*aaa*\",\"boost\":1.0}}}", //
