@@ -50,6 +50,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.common.unit.Fuzziness;
+import org.codelibs.fesen.opensearch.index.query.Operator;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -208,13 +210,13 @@ public class QueryHelperTest extends UnitFessTestCase {
     public void test_build_boost() {
         setQueryType("bool");
         assertQueryContext(
-                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":5.0}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"fuzzy\":{\"title\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":5.0}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match\":{\"title\":{\"query\":\"QUERY1\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.01}}},{\"match\":{\"content\":{\"query\":\"QUERY1\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("QUERY1")), //
                 Set.of("QUERY1"), //
                 buildQuery("QUERY1^10"));
 
         assertQueryContext(
-                "{\"function_score\":{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":5.0}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"fuzzy\":{\"title\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":2.5}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.25}}},{\"fuzzy\":{\"title\":{\"value\":\"QUERY2\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"QUERY2\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                "{\"function_score\":{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":5.0}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match\":{\"title\":{\"query\":\"QUERY1\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.01}}},{\"match\":{\"content\":{\"query\":\"QUERY1\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":2.5}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.25}}},{\"match\":{\"title\":{\"query\":\"QUERY2\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.01}}},{\"match\":{\"content\":{\"query\":\"QUERY2\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("QUERY1", "QUERY2")), //
                 Set.of("QUERY1", "QUERY2"), //
                 buildQuery("QUERY1^10 QUERY2^5"));
@@ -328,7 +330,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     public void test_build_escape() {
         setQueryType("bool");
         assertQueryContext(
-                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"aaa:bbb\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"aaa:bbb\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"match\":{\"title\":{\"query\":\"aaa:bbb\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.01}}},{\"match\":{\"content\":{\"query\":\"aaa:bbb\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("aaa:bbb")), //
                 Set.of("aaa:bbb"), //
                 buildQuery("aaa\\:bbb"));
@@ -348,10 +350,10 @@ public class QueryHelperTest extends UnitFessTestCase {
         setQueryType("bool");
         // an unquoted word of fuzzy.min.length or more gets the implicit fuzzy clauses ...
         final String unquoted = buildQuery("fessword").getQueryBuilder().toString();
-        assertTrue(unquoted.contains("\"fuzzy\""));
+        assertTrue(unquoted.contains("\"fuzziness\""));
         // ... a quoted one is an exact phrase, with the same match_phrase clauses and no fuzzy clause
         final String quoted = buildQuery("\"fessword\"").getQueryBuilder().toString();
-        assertFalse(quoted.contains("\"fuzzy\""));
+        assertFalse(quoted.contains("\"fuzziness\""));
         assertTrue(quoted.contains("\"match_phrase\""));
     }
 
@@ -562,15 +564,39 @@ public class QueryHelperTest extends UnitFessTestCase {
                     .tieBreaker(0.1f)//
                     .add(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))//
                     .add(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost))//
-                    .add(QueryBuilders.fuzzyQuery("title", query).boost(0.01f).maxExpansions(10))//
-                    .add(QueryBuilders.fuzzyQuery("content", query).boost(0.005f).maxExpansions(10))//
+                    .add(QueryBuilders.matchQuery("title", query)
+                            .operator(Operator.AND)
+                            .boost(0.01f)
+                            .fuzziness(Fuzziness.AUTO)
+                            .prefixLength(0)
+                            .maxExpansions(10)
+                            .fuzzyTranspositions(true))//
+                    .add(QueryBuilders.matchQuery("content", query)
+                            .operator(Operator.AND)
+                            .boost(0.005f)
+                            .fuzziness(Fuzziness.AUTO)
+                            .prefixLength(0)
+                            .maxExpansions(10)
+                            .fuzzyTranspositions(true))//
             ;
         }
         return QueryBuilders.boolQuery()//
                 .should(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))//
                 .should(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost))//
-                .should(QueryBuilders.fuzzyQuery("title", query).boost(0.01f).maxExpansions(10))//
-                .should(QueryBuilders.fuzzyQuery("content", query).boost(0.005f).maxExpansions(10))//
+                .should(QueryBuilders.matchQuery("title", query)
+                        .operator(Operator.AND)
+                        .boost(0.01f)
+                        .fuzziness(Fuzziness.AUTO)
+                        .prefixLength(0)
+                        .maxExpansions(10)
+                        .fuzzyTranspositions(true))//
+                .should(QueryBuilders.matchQuery("content", query)
+                        .operator(Operator.AND)
+                        .boost(0.005f)
+                        .fuzziness(Fuzziness.AUTO)
+                        .prefixLength(0)
+                        .maxExpansions(10)
+                        .fuzzyTranspositions(true))//
         ;
     }
 
@@ -642,9 +668,9 @@ public class QueryHelperTest extends UnitFessTestCase {
         // and none of the function score, permission or virtual host wrapping build() adds
         assertEquals("{\"bool\":{\"should\":[" //
                 + "{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}," //
-                + "{\"fuzzy\":{\"content\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}," //
+                + "{\"match\":{\"content\":{\"query\":\"QUERY1\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}," //
                 + "{\"match_phrase\":{\"content\":{\"query\":\"QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}," //
-                + "{\"fuzzy\":{\"content\":{\"value\":\"QUERY2\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}]," //
+                + "{\"match\":{\"content\":{\"query\":\"QUERY2\",\"operator\":\"AND\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"fuzzy_transpositions\":true,\"lenient\":false,\"zero_terms_query\":\"NONE\",\"auto_generate_synonyms_phrase_query\":true,\"boost\":0.005}}}]," //
                 + "\"adjust_pure_negative\":true,\"boost\":1.0}}", //
                 toJson(queryHelper.buildHighlightQuery("QUERY1 QUERY2 -QUERY3")));
 

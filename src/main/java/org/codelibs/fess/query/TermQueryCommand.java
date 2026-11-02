@@ -34,6 +34,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.codelibs.fesen.opensearch.common.unit.Fuzziness;
+import org.codelibs.fesen.opensearch.index.query.Operator;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.search.sort.SortOrder;
@@ -263,21 +264,39 @@ public class TermQueryCommand extends QueryCommand {
         final DefaultQueryBuilder defaultQuery =
                 buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
-        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength) {
-            defaultQuery.add(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)
+        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength && !containsCjk(text)) {
+            defaultQuery.add(QueryBuilders.matchQuery(fessConfig.getIndexFieldTitle(), text)
+                    .operator(Operator.AND)
                     .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())
                     .prefixLength(fessConfig.getQueryBoostFuzzyTitlePrefixLengthAsInteger())
-                    .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyTitleTranspositions()))
+                    .fuzzyTranspositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyTitleTranspositions()))
                     .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyTitleFuzziness()))
                     .maxExpansions(fessConfig.getQueryBoostFuzzyTitleExpansionsAsInteger()));
-            defaultQuery.add(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldContent(), text)
+            defaultQuery.add(QueryBuilders.matchQuery(fessConfig.getIndexFieldContent(), text)
+                    .operator(Operator.AND)
                     .prefixLength(fessConfig.getQueryBoostFuzzyContentPrefixLengthAsInteger())
-                    .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyContentTranspositions()))
+                    .fuzzyTranspositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyContentTranspositions()))
                     .boost(fessConfig.getQueryBoostFuzzyContentAsDecimal().floatValue())
                     .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyContentFuzziness()))
                     .maxExpansions(fessConfig.getQueryBoostFuzzyContentExpansionsAsInteger()));
         }
         return defaultQuery;
+    }
+
+    /**
+     * Returns whether the text contains a Han, Hiragana, Katakana or Hangul character.
+     * The analyzer splits such text into two-character tokens, which a fuzzy match cannot
+     * tolerate typos in (AUTO allows no edit for two characters), so no fuzzy clause is added for it.
+     *
+     * @param text the query text
+     * @return true if the text contains a CJK character
+     */
+    protected boolean containsCjk(final String text) {
+        return text.codePoints().anyMatch(cp -> {
+            final Character.UnicodeScript script = Character.UnicodeScript.of(cp);
+            return script == Character.UnicodeScript.HAN || script == Character.UnicodeScript.HIRAGANA
+                    || script == Character.UnicodeScript.KATAKANA || script == Character.UnicodeScript.HANGUL;
+        });
     }
 
     /**
