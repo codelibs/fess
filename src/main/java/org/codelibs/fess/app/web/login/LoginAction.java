@@ -27,7 +27,6 @@ import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
-import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -81,10 +80,7 @@ public class LoginAction extends FessLoginAction {
         if (form != null) {
             form.clearSecurityInfo();
         }
-        return asHtml(path_AdminLogin_IndexJsp).renderWith(data -> {
-            RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
-            saveToken();
-        });
+        return asHtml(path_AdminLogin_IndexJsp).renderWith(data -> saveToken());
     }
 
     /**
