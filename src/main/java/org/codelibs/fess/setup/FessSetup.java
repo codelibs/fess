@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.setup;
 
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -22,6 +23,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -129,6 +131,18 @@ public final class FessSetup {
                   Report on the installation: the engine, its plugins, and the installed
                   plugins. Exit 0 when everything is in order, 1 when something is wrong.
 
+              init [--admin-password <password>] [--cipher-key <key>] [--config <file>] [--force]
+                  Set the initial password of the admin user (index.user.initial_password) and the
+                  cipher key (app.cipher.key) in fess_config.properties, which ship as admin and
+                  ___change__me___. Run it once, before Fess starts for the first time.
+                  The password is asked for when --admin-password is not given; a password on the
+                  command line is visible to other users of the machine. A random cipher key is
+                  generated when --cipher-key is not given; it must be 16, 24 or 32 characters.
+                  --config names the file, by default app/WEB-INF/classes/fess_config.properties
+                  under this Fess (/etc/fess/fess_config.properties for an RPM or DEB package).
+                  A cipher key that is no longer the shipped one is replaced only with --force:
+                  values Fess saved under the old key could not be read afterwards.
+
             On a plugin or theme command, --dest names the plugins or themes directory to use
             in place of the one under this Fess.
             """;
@@ -166,6 +180,7 @@ public final class FessSetup {
             case "remove" -> remove(args, definitions, out, err);
             case "upgrade" -> upgrade(args, definitions, out, err);
             case "check" -> check(parseOptions(args, 1), definitions, out, err);
+            case "init" -> init(args, out, err);
             default -> {
                 err.println(USAGE);
                 yield EXIT_USAGE;
@@ -178,6 +193,72 @@ public final class FessSetup {
             err.println("error: failed to read the setup definition: " + e.getMessage());
             return EXIT_FAILED;
         }
+    }
+
+    /**
+     * Sets the initial admin password and the cipher key in {@code fess_config.properties}.
+     *
+     * @param args the command line
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 on success, 2 on a usage error
+     * @throws SetupException if the values or the file cannot be used
+     */
+    private static int init(final String[] args, final PrintStream out, final PrintStream err) throws SetupException {
+        String password = null;
+        String key = null;
+        Path config = null;
+        boolean force = false;
+        for (int i = 1; i < args.length; i++) {
+            switch (args[i]) {
+            case "--admin-password", "--cipher-key", "--config" -> {
+                if (i + 1 >= args.length) {
+                    err.println("error: " + args[i] + " needs a value");
+                    return EXIT_USAGE;
+                }
+                final String value = args[++i];
+                switch (args[i - 1]) {
+                case "--admin-password" -> password = value;
+                case "--cipher-key" -> key = value;
+                default -> config = Path.of(value);
+                }
+            }
+            case "--force" -> force = true;
+            default -> {
+                err.println("error: unexpected argument " + args[i]);
+                err.println(USAGE);
+                return EXIT_USAGE;
+            }
+            }
+        }
+        if (password == null) {
+            final Console console = System.console();
+            if (console == null) {
+                err.println("error: there is no terminal to ask for the password; pass --admin-password");
+                return EXIT_USAGE;
+            }
+            final char[] first = console.readPassword("Password of the admin user: ");
+            final char[] second = console.readPassword("Password again: ");
+            if (first == null || !Arrays.equals(first, second)) {
+                err.println("error: the two passwords differ");
+                return EXIT_USAGE;
+            }
+            password = new String(first);
+        }
+        final boolean generated = key == null;
+        if (generated) {
+            key = ConfigInitializer.generateCipherKey();
+        }
+        if (config == null) {
+            config = ConfigInitializer.defaultConfig(Path.of(fessHome()));
+        }
+        ConfigInitializer.initialize(config, password, key, force);
+        out.println("Updated " + config);
+        out.println("  " + ConfigInitializer.PASSWORD_KEY + ": set");
+        out.println("  " + ConfigInitializer.CIPHER_KEY + ": set" + (generated ? " (generated)" : ""));
+        out.println("The password is read when Fess creates the user index, at its first start; it changes nothing afterwards.");
+        out.println("Keep the cipher key: values Fess saves under it cannot be read under another one.");
+        return EXIT_OK;
     }
 
     /**
