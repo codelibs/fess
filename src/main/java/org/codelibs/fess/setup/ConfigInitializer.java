@@ -57,6 +57,9 @@ public final class ConfigInitializer {
     /** The length of a generated cipher key. */
     private static final int GENERATED_KEY_LENGTH = 32;
 
+    /** The length of a generated admin password. */
+    private static final int GENERATED_PASSWORD_LENGTH = 16;
+
     private static final String KEY_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     private ConfigInitializer() {
@@ -78,12 +81,25 @@ public final class ConfigInitializer {
      * @return a random key of the length AES-256 takes
      */
     public static String generateCipherKey() {
+        return randomString(GENERATED_KEY_LENGTH);
+    }
+
+    /**
+     * Generates an initial password for the {@code admin} user.
+     *
+     * @return a random alphanumeric password
+     */
+    public static String generatePassword() {
+        return randomString(GENERATED_PASSWORD_LENGTH);
+    }
+
+    private static String randomString(final int length) {
         final SecureRandom random = new SecureRandom();
-        final StringBuilder key = new StringBuilder(GENERATED_KEY_LENGTH);
-        for (int i = 0; i < GENERATED_KEY_LENGTH; i++) {
-            key.append(KEY_CHARS.charAt(random.nextInt(KEY_CHARS.length())));
+        final StringBuilder value = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            value.append(KEY_CHARS.charAt(random.nextInt(KEY_CHARS.length())));
         }
-        return key.toString();
+        return value.toString();
     }
 
     /**

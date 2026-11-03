@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.setup;
 
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -23,7 +22,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -135,9 +133,10 @@ public final class FessSetup {
                   Set the initial password of the admin user (index.user.initial_password) and the
                   cipher key (app.cipher.key) in fess_config.properties, which ship as admin and
                   ___change__me___. Run it once, before Fess starts for the first time.
-                  The password is asked for when --admin-password is not given; a password on the
-                  command line is visible to other users of the machine. A random cipher key is
-                  generated when --cipher-key is not given; it must be 16, 24 or 32 characters.
+                  A random password is generated when --admin-password is not given, and shown
+                  once; a password on the command line is visible to other users of the machine.
+                  A random cipher key is generated when --cipher-key is not given; a key you
+                  give must be 16, 24 or 32 characters.
                   --config names the file, by default app/WEB-INF/classes/fess_config.properties
                   under this Fess (/etc/fess/fess_config.properties for an RPM or DEB package).
                   A cipher key that is no longer the shipped one is replaced only with --force:
@@ -231,22 +230,12 @@ public final class FessSetup {
             }
             }
         }
-        if (password == null) {
-            final Console console = System.console();
-            if (console == null) {
-                err.println("error: there is no terminal to ask for the password; pass --admin-password");
-                return EXIT_USAGE;
-            }
-            final char[] first = console.readPassword("Password of the admin user: ");
-            final char[] second = console.readPassword("Password again: ");
-            if (first == null || !Arrays.equals(first, second)) {
-                err.println("error: the two passwords differ");
-                return EXIT_USAGE;
-            }
-            password = new String(first);
+        final boolean passwordGenerated = password == null;
+        if (passwordGenerated) {
+            password = ConfigInitializer.generatePassword();
         }
-        final boolean generated = key == null;
-        if (generated) {
+        final boolean keyGenerated = key == null;
+        if (keyGenerated) {
             key = ConfigInitializer.generateCipherKey();
         }
         if (config == null) {
@@ -254,8 +243,12 @@ public final class FessSetup {
         }
         ConfigInitializer.initialize(config, password, key, force);
         out.println("Updated " + config);
-        out.println("  " + ConfigInitializer.PASSWORD_KEY + ": set");
-        out.println("  " + ConfigInitializer.CIPHER_KEY + ": set" + (generated ? " (generated)" : ""));
+        out.println("  " + ConfigInitializer.PASSWORD_KEY + ": set" + (passwordGenerated ? " (generated)" : ""));
+        out.println("  " + ConfigInitializer.CIPHER_KEY + ": set" + (keyGenerated ? " (generated)" : ""));
+        if (passwordGenerated) {
+            out.println("Password of the admin user: " + password);
+            out.println("This is the only time it is shown; it is also in the file above.");
+        }
         out.println("The password is read when Fess creates the user index, at its first start; it changes nothing afterwards.");
         out.println("Keep the cipher key: values Fess saves under it cannot be read under another one.");
         return EXIT_OK;

@@ -154,6 +154,7 @@ public class ConfigInitializerTest {
         assertEquals(0, FessSetup.run(new String[] { "init", "--admin-password", "s3cret-pass", "--config", file.toString() }, o, e));
         final String text = Files.readString(file);
         assertTrue(text.contains("index.user.initial_password=s3cret-pass\n"));
+        assertFalse(out.toString(StandardCharsets.UTF_8).contains("Password of the admin user"));
         assertFalse(text.contains("___change__me___"));
         assertTrue(out.toString(StandardCharsets.UTF_8).contains("(generated)"));
         assertFalse(out.toString(StandardCharsets.UTF_8).contains("s3cret-pass"));
@@ -174,5 +175,24 @@ public class ConfigInitializerTest {
         assertEquals(2, FessSetup.run(new String[] { "init", "--config", file.toString(), "--admin-password" }, o, e));
         assertEquals(2, FessSetup.run(new String[] { "init", "--unknown" }, o, e));
         assertEquals(SHIPPED, Files.readString(file));
+    }
+
+    @Test
+    public void test_initCommandGeneratesThePasswordAndShowsItOnce() throws Exception {
+        final Path file = config(SHIPPED);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintStream o = new PrintStream(out, true, StandardCharsets.UTF_8);
+        final PrintStream e = new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8);
+
+        assertEquals(0, FessSetup.run(new String[] { "init", "--config", file.toString() }, o, e));
+        final String password = Files.readAllLines(file)
+                .stream()
+                .filter(line -> line.startsWith("index.user.initial_password="))
+                .findFirst()
+                .get()
+                .substring("index.user.initial_password=".length());
+        assertEquals(16, password.length());
+        assertNotEquals("admin", password);
+        assertTrue(out.toString(StandardCharsets.UTF_8).contains("Password of the admin user: " + password));
     }
 }
