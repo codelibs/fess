@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -435,7 +434,12 @@ public class PluginHelper {
      */
     public void deleteInstalledArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
-        final Path jarPath = Paths.get(ResourceUtil.getPluginPath().toString(), fileName);
+        final Path pluginPath = ResourceUtil.getPluginPath().toAbsolutePath().normalize();
+        final Path jarPath = pluginPath.resolve(fileName).normalize();
+        // The name and the version are request parameters: only a file directly under the plugin directory may be deleted.
+        if (!pluginPath.equals(jarPath.getParent())) {
+            throw new PluginException(fileName + " is not a plugin file name.");
+        }
         if (!Files.exists(jarPath)) {
             throw new PluginException(fileName + " does not exist.");
         }
