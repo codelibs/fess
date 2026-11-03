@@ -22,7 +22,6 @@ ${fe:html(true)}
 					alt="<la:message key="labels.header_brand_name" />" />
 			</a>
 		</div>
-		<div class="notification">${notification}</div>
 		<div class="card">
 			<div class="card-body login-card-body">
 				<p class="login-box-msg">
