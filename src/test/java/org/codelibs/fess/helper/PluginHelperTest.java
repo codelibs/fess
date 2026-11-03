@@ -439,6 +439,22 @@ public class PluginHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_deleteInstalledArtifact_outsidePluginDir() {
+        PluginHelper testHelper = new PluginHelper();
+        final Artifact[] artifacts = { new Artifact("../lib/test", "1.0.0"), new Artifact("test", "../1.0.0"),
+                new Artifact("sub/test", "1.0.0"), new Artifact("/tmp/test", "1.0.0") };
+
+        for (final Artifact artifact : artifacts) {
+            try {
+                testHelper.deleteInstalledArtifact(artifact);
+                fail("Expected PluginException: " + artifact.getFileName());
+            } catch (PluginException e) {
+                assertTrue(e.getMessage(), e.getMessage().contains("is not a plugin file name"));
+            }
+        }
+    }
+
+    @Test
     public void test_getArtifactFromFileName_withUrl() {
         Artifact artifact =
                 pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "test-plugin-1.0.0.jar", "http://test.com/test.jar");
