@@ -1596,4 +1596,34 @@ public class FessPropTest extends UnitFessTestCase {
             ComponentUtil.getSystemProperties().remove(Constants.RESULT_COLLAPSED_PROPERTY);
         }
     }
+
+    @Test
+    public void test_themeSettings_parsedFilteredAndFollowsTheProperty() {
+        FessProp.propMap.clear();
+        final String lf = String.valueOf((char) 10);
+        final String eq = String.valueOf((char) 61);
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        try {
+            assertEquals(org.codelibs.core.lang.StringUtil.EMPTY, fessConfig.getThemeSettings());
+            assertTrue(fessConfig.getThemeSettingsMap().isEmpty(), "an absent setting must serve nothing");
+            fessConfig.setThemeSettings("a" + eq + "1" + lf + "b" + eq + " two ");
+            assertEquals(Arrays.asList("a", "b"), new java.util.ArrayList<>(fessConfig.getThemeSettingsMap().keySet()));
+            assertEquals("two", fessConfig.getThemeSettingsMap().get("b"));
+            assertSame(fessConfig.getThemeSettingsMap(), fessConfig.getThemeSettingsMap());
+            // A hand edit or a backup import runs no setter: invalid lines are dropped when read.
+            ComponentUtil.getSystemProperties()
+                    .setProperty(Constants.THEME_SETTINGS_PROPERTY, "bad line" + lf + "c" + eq + "3" + lf + "constructor" + eq + "x");
+            assertEquals(Arrays.asList("c"), new java.util.ArrayList<>(fessConfig.getThemeSettingsMap().keySet()));
+            ComponentUtil.getSystemProperties().setProperty(Constants.THEME_SETTINGS_PROPERTY, "bad line");
+            assertTrue(fessConfig.getThemeSettingsMap().isEmpty());
+            fessConfig.setThemeSettings("d" + eq + "4");
+            assertEquals("4", fessConfig.getThemeSettingsMap().get("d"));
+            fessConfig.setThemeSettings(null);
+            assertTrue(fessConfig.getThemeSettingsMap().isEmpty());
+            assertNull(ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+        } finally {
+            fessConfig.setThemeSettings(null);
+            FessProp.propMap.clear();
+        }
+    }
 }

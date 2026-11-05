@@ -432,6 +432,13 @@ public class EditForm {
     @Size(max = 3000)
     public String notificationAdvanceSearch;
 
+    /**
+     * Theme settings ({@code theme.settings}): key=value lines, one per line, that are passed to the active
+     * theme. Fess does not interpret them.
+     */
+    @Size(max = 110000)
+    public String themeSettings;
+
     /** Slack webhook URLs for notifications. */
     @Size(max = 10000)
     public String slackWebhookUrls;

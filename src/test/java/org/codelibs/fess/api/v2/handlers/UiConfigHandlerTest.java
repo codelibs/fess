@@ -1547,4 +1547,89 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             throw new UnsupportedOperationException();
         }
     }
+
+    @Test
+    public void test_themeSettings_absentSettingServesAnEmptyObject() throws Exception {
+        final String body = handleWithRoots(null, false, OptionalThing.empty());
+        assertTrue(body.contains(THEME_SETTINGS_EMPTY), body);
+    }
+
+    @Test
+    public void test_themeSettings_settingsAreServedWhenLoginIsNotRequired() throws Exception {
+        final String body = handleWithRoots(ROOTS_VALUE, false, OptionalThing.empty());
+        assertTrue(body.contains(THEME_SETTINGS_ROOTS), body);
+    }
+
+    @Test
+    public void test_themeSettings_anonymousCallerGetsNoSettingsWhenLoginIsRequired() throws Exception {
+        final String body = handleWithRoots(ROOTS_VALUE, true, OptionalThing.empty());
+        assertTrue(body.contains(THEME_SETTINGS_EMPTY), body);
+        assertTrue(body.contains(LOGIN_REQUIRED_TRUE), body);
+        assertFalse(body.contains("two"), body);
+    }
+
+    @Test
+    public void test_themeSettings_loggedInCallerGetsSettingsWhenLoginIsRequired() throws Exception {
+        final String body = handleWithRoots(ROOTS_VALUE, true, loggedInUser());
+        assertTrue(body.contains(THEME_SETTINGS_ROOTS), body);
+    }
+
+    @Test
+    public void test_themeSettings_invalidStoredEntriesAreDroppedWhenRead() throws Exception {
+        final String body = handleWithRoots(BAD_ROOTS_VALUE, false, OptionalThing.empty());
+        assertTrue(body.contains(THEME_SETTINGS_ONE_ROOT), body);
+    }
+
+    private static final String LF = String.valueOf((char) 10);
+    private static final String EQ = String.valueOf((char) 61);
+    private static final String Q = String.valueOf((char) 34);
+
+    private static final String ROOTS_VALUE = "a" + EQ + "1" + LF + "b" + EQ + "two";
+
+    private static final String BAD_ROOTS_VALUE = "bad line" + LF + "c" + EQ + "3" + LF + "constructor" + EQ + "x";
+
+    private static final String THEME_SETTINGS = Q + "theme_settings" + Q + ":";
+
+    private static final String THEME_SETTINGS_EMPTY = THEME_SETTINGS + "{}";
+
+    private static final String LOGIN_REQUIRED_TRUE = Q + "login_required" + Q + ":true";
+
+    private static final String THEME_SETTINGS_ROOTS =
+            THEME_SETTINGS + "{" + Q + "a" + Q + ":" + Q + "1" + Q + "," + Q + "b" + Q + ":" + Q + "two" + Q + "}";
+
+    private static final String THEME_SETTINGS_ONE_ROOT = THEME_SETTINGS + "{" + Q + "c" + Q + ":" + Q + "3" + Q + "}";
+
+    private static final String USER_NAME = "carol";
+
+    private static final String USER_ROLE = "staff";
+
+    private OptionalThing<FessUserBean> loggedInUser() {
+        return OptionalThing.of(new FessUserBean(new StubFessUser(USER_NAME, USER_ROLE)));
+    }
+
+    private String handleWithRoots(final String roots, final boolean loginRequired, final OptionalThing<FessUserBean> user)
+            throws Exception {
+        final org.codelibs.core.misc.DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        FessProp.propMap.clear();
+        if (roots != null) {
+            systemProperties.setProperty(Constants.THEME_SETTINGS_PROPERTY, roots);
+        }
+        systemProperties.setProperty(Constants.LOGIN_REQUIRED_PROPERTY, Boolean.toString(loginRequired));
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final UiConfigHandler handler = new UiConfigHandler() {
+                @Override
+                protected OptionalThing<FessUserBean> getSavedUserBean() {
+                    return user;
+                }
+            };
+            handler.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            return res.body();
+        } finally {
+            systemProperties.remove(Constants.THEME_SETTINGS_PROPERTY);
+            systemProperties.remove(Constants.LOGIN_REQUIRED_PROPERTY);
+            FessProp.propMap.clear();
+        }
+    }
 }

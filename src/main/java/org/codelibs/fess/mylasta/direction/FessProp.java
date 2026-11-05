@@ -57,6 +57,7 @@ import org.codelibs.fess.ldap.LdapUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ThemeSettingsUtil;
 import org.codelibs.fess.util.JvmUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
@@ -153,6 +154,8 @@ public interface FessProp {
     String RAG_CHAT_PERMISSION_SET = "ragChatPermissionSet";
 
     String RAG_CHAT_LABEL_VALUE_LIST = "ragChatLabelValueList";
+
+    String THEME_SETTINGS_MAP = "themeSettingsMap";
 
     String VIRTUAL_HOST_VALUES = "virtualHostValues";
 
@@ -891,6 +894,37 @@ public interface FessProp {
 
     default String getNotificationSearchTop() {
         return getSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
+    }
+
+    /**
+     * Stores the theme settings ({@code theme.settings}): key=value lines passed to the active theme.
+     * A null value removes the property.
+     *
+     * @param value the settings, one key=value per line
+     */
+    default void setThemeSettings(final String value) {
+        setSystemProperty(Constants.THEME_SETTINGS_PROPERTY, value);
+    }
+
+    /**
+     * Returns the raw {@code theme.settings} value, which may hold lines that a hand edit or a
+     * backup import left unchecked; use {@link #getThemeSettingsMap()} to serve it.
+     *
+     * @return the settings, one key=value per line; empty when none is set
+     */
+    default String getThemeSettings() {
+        return getSystemProperty(Constants.THEME_SETTINGS_PROPERTY, StringUtil.EMPTY);
+    }
+
+    /**
+     * Returns the theme settings to serve, parsed from {@code theme.settings}. Lines that fail the
+     * save-time rules are dropped here too, because a hand-edited system.properties or a backup
+     * import runs no setter.
+     *
+     * @return the valid settings in order; empty when none is set
+     */
+    default Map<String, String> getThemeSettingsMap() {
+        return getParsedSystemPropertyValue(THEME_SETTINGS_MAP, getThemeSettings(), ThemeSettingsUtil::sanitize);
     }
 
     default void setUserAgentName(final String value) {

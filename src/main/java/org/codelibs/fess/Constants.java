@@ -699,6 +699,13 @@ public class Constants extends CoreLibConstants {
     public static final String NOTIFICATION_ADVANCE_SEARCH = "notification.advance.search";
 
     // ============================================================
+    // Static Theme Configuration
+    // ============================================================
+
+    /** System property key of the theme settings: key=value lines passed to the active theme. */
+    public static final String THEME_SETTINGS_PROPERTY = "theme.settings";
+
+    // ============================================================
     // Storage Configuration
     // ============================================================
 

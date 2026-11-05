@@ -383,4 +383,60 @@ public class ApiAdminGeneralActionTest extends UnitFessTestCase {
         statusField.setAccessible(true);
         assertEquals(ApiResult.Status.OK.getId(), ((Integer) statusField.get(apiResponse)).intValue());
     }
+
+    // ===================================================================================
+    //                                                             Theme settings
+    //                                                       ========================
+
+    @Test
+    public void test_putIndex_themeSettings_invalidEntryIsRejected() throws Exception {
+        final ApiAdminGeneralAction action = createInjectedAction();
+        final EditBody body = newStorableBody();
+        body.themeSettings = "a" + EQ + "1" + LF + "no separator";
+        assertValidationError(() -> action.put$index(body)).handle(data -> data.requiredMessageOf(PROPERTY, MESSAGE_KEY));
+        assertNull(ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+    }
+
+    @Test
+    public void test_putIndex_themeSettings_validValueIsStoredNormalized() throws Exception {
+        final ApiAdminGeneralAction action = createInjectedAction();
+        final EditBody body = newStorableBody();
+        body.themeSettings = SP + "a" + EQ + "1" + SP + LF + "b" + EQ + "x" + LF + "a" + EQ + "2";
+        assertOkResponse(action.put$index(body));
+        assertEquals("a" + EQ + "2" + LF + "b" + EQ + "x",
+                ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+    }
+
+    @Test
+    public void test_putIndex_themeSettings_blankValueRemovesTheProperty() throws Exception {
+        ComponentUtil.getFessConfig().setThemeSettings("a" + EQ + "1");
+        final ApiAdminGeneralAction action = createInjectedAction();
+        final EditBody body = newStorableBody();
+        body.themeSettings = LF;
+        assertOkResponse(action.put$index(body));
+        assertNull(ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+    }
+
+    @Test
+    public void test_putIndex_themeSettings_omittedValueKeepsTheStoredOne() throws Exception {
+        ComponentUtil.getFessConfig().setThemeSettings("a" + EQ + "1");
+        final ApiAdminGeneralAction action = createInjectedAction();
+        assertOkResponse(action.put$index(newStorableBody()));
+        assertEquals("a" + EQ + "1", ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+    }
+
+    @Test
+    public void test_putIndex_themeSettings_badStoredValueDoesNotBlockAnUnrelatedUpdate() throws Exception {
+        // A hand-edited system.properties can hold what the save would have refused.
+        ComponentUtil.getSystemProperties().setProperty(Constants.THEME_SETTINGS_PROPERTY, "bad line" + LF + "c" + EQ + "3");
+        final ApiAdminGeneralAction action = createInjectedAction();
+        assertOkResponse(action.put$index(newStorableBody()));
+        assertEquals("c" + EQ + "3", ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+    }
+
+    private static final String LF = String.valueOf((char) 10);
+    private static final String EQ = String.valueOf((char) 61);
+    private static final String PROPERTY = "themeSettings";
+    private static final String SP = String.valueOf((char) 32);
+    private static final String MESSAGE_KEY = "errors.invalid_theme_settings";
 }

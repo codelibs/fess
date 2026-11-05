@@ -3576,6 +3576,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Advanced Search Page */
     public static final String LABELS_notification_advance_search = "{labels.notification_advance_search}";
 
+    /** The key of the message: Theme Settings */
+    public static final String LABELS_theme_settings = "{labels.theme_settings}";
+
+    /** The key of the message: Settings passed to the theme, one key=value per line. Keys may contain letters, digits, underscore, dot and hyphen; at most 100 lines and 1000 characters per value. Fess does not interpret them: the theme defines the keys. The values are visible to the users of the search UI, so do not enter secrets. */
+    public static final String LABELS_theme_settings_help = "{labels.theme_settings_help}";
+
     /** The key of the message: Security Authentication */
     public static final String LABELS_ldap_security_authentication = "{labels.ldap_security_authentication}";
 

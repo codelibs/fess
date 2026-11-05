@@ -91,6 +91,10 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
             if (AdminGeneralAction.isSpnegoNtlmPromptUnsupported(newBody)) {
                 messages.addErrorsSpnegoPromptNtlmRequiresBasic("spnegoPromptNtlm");
             }
+            // Only what the request carries: the stored value is already filtered, and a bad entry in it must not block an unrelated update.
+            if (AdminGeneralAction.isThemeSettingsInvalid(body)) {
+                messages.addErrorsInvalidThemeSettings(AdminGeneralAction.THEME_SETTINGS_FIELD);
+            }
         });
         AdminGeneralAction.updateConfig(fessConfig, newBody);
         return asJson(new ApiResponse().status(Status.OK).result());
