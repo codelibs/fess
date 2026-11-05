@@ -144,6 +144,60 @@ public final class CredentialUrlUtil {
     }
 
     /**
+     * Removes the userinfo (user:password@ or user@) from the authority of an absolute URL of the
+     * form scheme://userinfo@host..., and returns everything else unchanged. For a report that is
+     * passed around, such as a CSV download, where {@link #maskCredentialInUrl(String)} is the wrong
+     * tool: it leaves a userinfo without a colon, and it rewrites credential-looking query
+     * parameters too.
+     *
+     * <p>Only a URL with a real scheme followed by "://" is touched. A value without one (a data
+     * store's configId:name, a bare path, a protocol-relative reference) is returned as it is, as is
+     * a URL whose only at sign is in the path, query or fragment. The scan is a single pass over
+     * delimiters, with no backtracking, so a very long value costs time linear in its length.</p>
+     *
+     * @param url the URL (may be {@code null})
+     * @return the URL without the userinfo, the URL itself when it has none, or {@code null} for
+     *         {@code null}
+     */
+    public static String removeUserInfo(final String url) {
+        if (url == null) {
+            return null;
+        }
+        final int schemeEnd = url.indexOf(SCHEME_SEPARATOR);
+        if (schemeEnd <= 0 || !isScheme(url, schemeEnd)) {
+            return url;
+        }
+        final int authorityStart = schemeEnd + SCHEME_SEPARATOR.length();
+        int authorityEnd = url.length();
+        for (int i = authorityStart; i < authorityEnd; i++) {
+            final char c = url.charAt(i);
+            if (c == '/' || c == '?' || c == '#') {
+                authorityEnd = i;
+                break;
+            }
+        }
+        final int at = url.lastIndexOf('@', authorityEnd - 1);
+        if (at < authorityStart) {
+            return url;
+        }
+        return url.substring(0, authorityStart) + url.substring(at + 1);
+    }
+
+    private static boolean isScheme(final String url, final int end) {
+        if (!Character.isLetter(url.charAt(0)) || url.charAt(0) > 127) {
+            return false;
+        }
+        for (int i = 1; i < end; i++) {
+            final char c = url.charAt(i);
+            final boolean letterOrDigit = c < 128 && Character.isLetterOrDigit(c);
+            if (!letterOrDigit && c != '+' && c != '-' && c != '.') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns whether {@code [0, end)} of {@code url} could be a URI scheme, i.e. holds no
      * character that would place it in a path, query or fragment instead.
      *

@@ -40,6 +40,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.CsvUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
@@ -158,6 +159,7 @@ public class FailureUrlService {
      * header row followed by one row per failure URL. The paging of the pager is ignored and the number
      * of rows is not limited, so the rows are read with a cursor and written one by one. The point in
      * time of the cursor is released when the write fails, for example when the client has gone.
+     * The userinfo of a URL (user:password@) is removed, since the file is passed around.
      * The writer is flushed but not closed.
      *
      * @param pager the pager containing the filter criteria
@@ -185,7 +187,7 @@ public class FailureUrlService {
         try {
             csvWriter
                     .writeValues(Stream
-                            .of(entity.getUrl(), entity.getErrorName(), entity.getErrorCount(),
+                            .of(CredentialUrlUtil.removeUserInfo(entity.getUrl()), entity.getErrorName(), entity.getErrorCount(),
                                     entity.getLastAccessTime() != null ? FessFunctions.formatDate(new Date(entity.getLastAccessTime()))
                                             : null,
                                     entity.getHttpStatusCode(), entity.getMimeType(), entity.getContentLength())
