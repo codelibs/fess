@@ -21,9 +21,11 @@ import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.exception.MaxLengthExceededException;
 import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
 import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
+import org.codelibs.fess.entity.FailureUrlDetails;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
@@ -45,8 +47,53 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
     private static final Logger logger = LogManager.getLogger(CrawlerLogHelper.class);
 
+    /** The details of the document whose crawling failed, from the crawler thread to the failure URL. */
+    private static final ThreadLocal<PendingDetails> pendingDetails = new ThreadLocal<>();
+
+    private record PendingDetails(String url, FailureUrlDetails details) {
+    }
+
+    /**
+     * Remembers what the crawler thread knows about the document whose response it could not process,
+     * for the failure URL that the crawler thread stores next on the same thread. The values are
+     * dropped when the crawling of the URL starts or ends, or when they are used.
+     *
+     * @param url the URL that is being crawled
+     * @param details the details of its response
+     */
+    public static void rememberFailureDetails(final String url, final FailureUrlDetails details) {
+        if (details == null) {
+            pendingDetails.remove();
+        } else {
+            pendingDetails.set(new PendingDetails(url, details));
+        }
+    }
+
+    /**
+     * Forgets the details that were remembered on this thread.
+     */
+    public static void clearFailureDetails() {
+        pendingDetails.remove();
+    }
+
+    /**
+     * Takes the details that were remembered on this thread for the URL, and forgets them.
+     *
+     * @param url the URL of the failure
+     * @return the details, or null when none were remembered for the URL
+     */
+    public static FailureUrlDetails takeFailureDetails(final String url) {
+        final PendingDetails pending = pendingDetails.get();
+        pendingDetails.remove();
+        return pending != null && pending.url().equals(url) ? pending.details() : null;
+    }
+
     @Override
     public void log(final LogType key, final Object... objs) {
+        if (key == LogType.START_CRAWLING || key == LogType.CLEANUP_CRAWLING) {
+            // the thread is pooled: details of one URL must not reach the failure of the next
+            clearFailureDetails();
+        }
         if (!ComponentUtil.available()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("container was destroyed.");
@@ -194,8 +241,13 @@ public class CrawlerLogHelper extends LogHelperImpl {
         final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
         final String url = urlQueue.getUrl();
 
+        FailureUrlDetails details = takeFailureDetails(url);
+        if (details == null && e instanceof MaxLengthExceededException) {
+            // the client rejected the document before it returned a response: the size is only in the message
+            details = FailureUrlDetails.ofMaxLengthMessage(e.getMessage());
+        }
         final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
-        return failureUrlService.store(crawlingConfig, errorName, url, e);
+        return failureUrlService.store(crawlingConfig, errorName, url, e, details);
     }
 
     /**

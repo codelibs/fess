@@ -42,8 +42,9 @@ public class FailureUrl extends BsFailureUrl {
 
     @Override
     public String toString() {
-        return "FailureUrl [configId=" + configId + ", errorCount=" + errorCount + ", errorLog=" + errorLog + ", errorName=" + errorName
-                + ", lastAccessTime=" + lastAccessTime + ", threadName=" + threadName + ", url=" + url + ", docMeta=" + docMeta + "]";
+        return "FailureUrl [configId=" + configId + ", contentLength=" + contentLength + ", errorCount=" + errorCount + ", errorLog="
+                + errorLog + ", errorName=" + errorName + ", httpStatusCode=" + httpStatusCode + ", lastAccessTime=" + lastAccessTime
+                + ", mimeType=" + mimeType + ", threadName=" + threadName + ", url=" + url + ", docMeta=" + docMeta + "]";
     }
 
 }

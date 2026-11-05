@@ -28,16 +28,21 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.crawler.client.CrawlerClient;
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.entity.UrlQueueImpl;
+import org.codelibs.fess.crawler.exception.ChildUrlsException;
+import org.codelibs.fess.crawler.exception.MaxLengthExceededException;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.transformer.FessXpathTransformer;
+import org.codelibs.fess.entity.FailureUrlDetails;
+import org.codelibs.fess.helper.CrawlerLogHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DocumentHelper;
@@ -50,6 +55,8 @@ import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
+import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -551,6 +558,78 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_processResponse_failureRemembersTheResponseDetailsOnce() {
+        final CrawlEnvironment env = setUpFailingEnvironment(new MaxLengthExceededException("too large"));
+        final ResponseData responseData = headResponse(200, null);
+        responseData.setContentLength(5000L);
+        responseData.setMimeType("Application/PDF; charset=UTF-8");
+        try {
+            env.thread.processResponse(urlQueue(PAGE_URL), responseData);
+            fail("the failure is rethrown");
+        } catch (final MaxLengthExceededException e) {
+            assertEquals("too large", e.getMessage());
+        }
+        final FailureUrlDetails details = CrawlerLogHelper.takeFailureDetails(PAGE_URL);
+        assertEquals(Long.valueOf(5000L), details.contentLength());
+        assertEquals("application/pdf", details.mimeType());
+        assertEquals(Integer.valueOf(200), details.httpStatusCode());
+        // taking them forgets them
+        assertNull(CrawlerLogHelper.takeFailureDetails(PAGE_URL));
+    }
+
+    @Test
+    public void test_processResponse_detailsOfAnotherUrlAreNotTaken() {
+        final CrawlEnvironment env = setUpFailingEnvironment(new MaxLengthExceededException("too large"));
+        final ResponseData responseData = headResponse(200, null);
+        responseData.setContentLength(5000L);
+        try {
+            env.thread.processResponse(urlQueue(PAGE_URL), responseData);
+            fail("the failure is rethrown");
+        } catch (final MaxLengthExceededException e) {
+            // expected
+        }
+        assertNull(CrawlerLogHelper.takeFailureDetails("https://example.com/other.html"));
+        // and the attempt forgot them
+        assertNull(CrawlerLogHelper.takeFailureDetails(PAGE_URL));
+    }
+
+    @Test
+    public void test_processResponse_childUrlsAreNotAFailure() {
+        final CrawlEnvironment env = setUpFailingEnvironment(new ChildUrlsException(Set.of(), "folder"));
+        final ResponseData responseData = headResponse(200, null);
+        responseData.setContentLength(5000L);
+        try {
+            env.thread.processResponse(urlQueue(PAGE_URL), responseData);
+            fail("the exception is rethrown");
+        } catch (final ChildUrlsException e) {
+            // expected
+        }
+        assertNull(CrawlerLogHelper.takeFailureDetails(PAGE_URL));
+    }
+
+    @Test
+    public void test_processResponse_failureStatusStoresTheResponseDetails() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final List<FailureUrlDetails> stored = new ArrayList<>();
+        ComponentUtil.register(new FailureUrlService() {
+            @Override
+            public FailureUrl store(final CrawlingConfig config, final String errorName, final String url, final Throwable e,
+                    final FailureUrlDetails details) {
+                stored.add(details);
+                return null;
+            }
+        }, FailureUrlService.class.getCanonicalName());
+        final ResponseData responseData = headResponse(404, null);
+        responseData.setContentLength(120L);
+        responseData.setMimeType("text/html");
+        env.thread.processResponse(urlQueue(PAGE_URL), responseData);
+        assertEquals(1, stored.size());
+        assertEquals(Long.valueOf(120L), stored.get(0).contentLength());
+        assertEquals("text/html", stored.get(0).mimeType());
+        assertEquals(Integer.valueOf(404), stored.get(0).httpStatusCode());
+    }
+
+    @Test
     public void test_processResponse_304WithoutPendingStateGoesToTheRule() {
         final CrawlEnvironment env = setUpCrawlEnvironment(null);
         final RecordingCrawlerThread crawlerThread = env.thread;
@@ -861,6 +940,49 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urlQueue.setWeight(1.0f);
         urlQueue.setDepth(0);
         return urlQueue;
+    }
+
+    private static class FailingRuleManager implements RuleManager {
+        private final RuntimeException failure;
+
+        FailingRuleManager(final RuntimeException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        public Rule getRule(final ResponseData responseData) {
+            throw failure;
+        }
+
+        @Override
+        public void addRule(final Rule rule) {
+            // nothing
+        }
+
+        @Override
+        public void addRule(final int index, final Rule rule) {
+            // nothing
+        }
+
+        @Override
+        public boolean removeRule(final Rule rule) {
+            return false;
+        }
+
+        @Override
+        public boolean hasRule(final Rule rule) {
+            return false;
+        }
+    }
+
+    private CrawlEnvironment setUpFailingEnvironment(final RuntimeException failure) {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final CrawlerContext crawlerContext = new CrawlerContext();
+        crawlerContext.setSessionId(env.sessionId);
+        crawlerContext.setRuleManager(new FailingRuleManager(failure));
+        env.thread.setCrawlerContext(crawlerContext);
+        CrawlerLogHelper.clearFailureDetails();
+        return env;
     }
 
     private static class CrawlEnvironment {

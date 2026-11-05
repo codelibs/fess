@@ -74,10 +74,13 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
         try {
             final RESULT result = entityType.newInstance();
             result.setConfigId(DfTypeUtil.toString(source.get("configId")));
+            result.setContentLength(DfTypeUtil.toLong(source.get("contentLength")));
             result.setErrorCount(DfTypeUtil.toInteger(source.get("errorCount")));
             result.setErrorLog(DfTypeUtil.toString(source.get("errorLog")));
             result.setErrorName(DfTypeUtil.toString(source.get("errorName")));
+            result.setHttpStatusCode(DfTypeUtil.toInteger(source.get("httpStatusCode")));
             result.setLastAccessTime(DfTypeUtil.toLong(source.get("lastAccessTime")));
+            result.setMimeType(DfTypeUtil.toString(source.get("mimeType")));
             result.setThreadName(DfTypeUtil.toString(source.get("threadName")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
             return updateEntity(source, result);

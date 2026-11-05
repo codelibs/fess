@@ -410,6 +410,186 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setContentLength_Equal(Long contentLength) {
+        setContentLength_Term(contentLength, null);
+    }
+
+    public void setContentLength_Equal(Long contentLength, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setContentLength_Term(contentLength, opLambda);
+    }
+
+    public void setContentLength_Term(Long contentLength) {
+        setContentLength_Term(contentLength, null);
+    }
+
+    public void setContentLength_Term(Long contentLength, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("contentLength", contentLength);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_NotEqual(Long contentLength) {
+        setContentLength_NotTerm(contentLength, null);
+    }
+
+    public void setContentLength_NotTerm(Long contentLength) {
+        setContentLength_NotTerm(contentLength, null);
+    }
+
+    public void setContentLength_NotEqual(Long contentLength, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setContentLength_NotTerm(contentLength, opLambda);
+    }
+
+    public void setContentLength_NotTerm(Long contentLength, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setContentLength_Term(contentLength), opLambda);
+    }
+
+    public void setContentLength_Terms(Collection<Long> contentLengthList) {
+        setContentLength_Terms(contentLengthList, null);
+    }
+
+    public void setContentLength_Terms(Collection<Long> contentLengthList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("contentLength", contentLengthList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_InScope(Collection<Long> contentLengthList) {
+        setContentLength_Terms(contentLengthList, null);
+    }
+
+    public void setContentLength_InScope(Collection<Long> contentLengthList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setContentLength_Terms(contentLengthList, opLambda);
+    }
+
+    public void setContentLength_Match(Long contentLength) {
+        setContentLength_Match(contentLength, null);
+    }
+
+    public void setContentLength_Match(Long contentLength, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("contentLength", contentLength);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_MatchPhrase(Long contentLength) {
+        setContentLength_MatchPhrase(contentLength, null);
+    }
+
+    public void setContentLength_MatchPhrase(Long contentLength, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("contentLength", contentLength);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_MatchPhrasePrefix(Long contentLength) {
+        setContentLength_MatchPhrasePrefix(contentLength, null);
+    }
+
+    public void setContentLength_MatchPhrasePrefix(Long contentLength, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("contentLength", contentLength);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Fuzzy(Long contentLength) {
+        setContentLength_Fuzzy(contentLength, null);
+    }
+
+    public void setContentLength_Fuzzy(Long contentLength, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("contentLength", contentLength);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_GreaterThan(Long contentLength) {
+        setContentLength_GreaterThan(contentLength, null);
+    }
+
+    public void setContentLength_GreaterThan(Long contentLength, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = contentLength;
+        RangeQueryBuilder builder = regRangeQ("contentLength", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_LessThan(Long contentLength) {
+        setContentLength_LessThan(contentLength, null);
+    }
+
+    public void setContentLength_LessThan(Long contentLength, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = contentLength;
+        RangeQueryBuilder builder = regRangeQ("contentLength", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_GreaterEqual(Long contentLength) {
+        setContentLength_GreaterEqual(contentLength, null);
+    }
+
+    public void setContentLength_GreaterEqual(Long contentLength, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = contentLength;
+        RangeQueryBuilder builder = regRangeQ("contentLength", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_LessEqual(Long contentLength) {
+        setContentLength_LessEqual(contentLength, null);
+    }
+
+    public void setContentLength_LessEqual(Long contentLength, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = contentLength;
+        RangeQueryBuilder builder = regRangeQ("contentLength", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Exists() {
+        setContentLength_Exists(null);
+    }
+
+    public void setContentLength_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setContentLength_CommonTerms(Long contentLength) {
+        setContentLength_CommonTerms(contentLength, null);
+    }
+
+    @Deprecated
+    public void setContentLength_CommonTerms(Long contentLength, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("contentLength", contentLength);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsFailureUrlCQ addOrderBy_ContentLength_Asc() {
+        regOBA("contentLength");
+        return this;
+    }
+
+    public BsFailureUrlCQ addOrderBy_ContentLength_Desc() {
+        regOBD("contentLength");
+        return this;
+    }
+
     public void setErrorCount_Equal(Integer errorCount) {
         setErrorCount_Term(errorCount, null);
     }
@@ -1038,6 +1218,186 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setHttpStatusCode_Equal(Integer httpStatusCode) {
+        setHttpStatusCode_Term(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_Equal(Integer httpStatusCode, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setHttpStatusCode_Term(httpStatusCode, opLambda);
+    }
+
+    public void setHttpStatusCode_Term(Integer httpStatusCode) {
+        setHttpStatusCode_Term(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_Term(Integer httpStatusCode, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("httpStatusCode", httpStatusCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_NotEqual(Integer httpStatusCode) {
+        setHttpStatusCode_NotTerm(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_NotTerm(Integer httpStatusCode) {
+        setHttpStatusCode_NotTerm(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_NotEqual(Integer httpStatusCode, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setHttpStatusCode_NotTerm(httpStatusCode, opLambda);
+    }
+
+    public void setHttpStatusCode_NotTerm(Integer httpStatusCode, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setHttpStatusCode_Term(httpStatusCode), opLambda);
+    }
+
+    public void setHttpStatusCode_Terms(Collection<Integer> httpStatusCodeList) {
+        setHttpStatusCode_Terms(httpStatusCodeList, null);
+    }
+
+    public void setHttpStatusCode_Terms(Collection<Integer> httpStatusCodeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("httpStatusCode", httpStatusCodeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_InScope(Collection<Integer> httpStatusCodeList) {
+        setHttpStatusCode_Terms(httpStatusCodeList, null);
+    }
+
+    public void setHttpStatusCode_InScope(Collection<Integer> httpStatusCodeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setHttpStatusCode_Terms(httpStatusCodeList, opLambda);
+    }
+
+    public void setHttpStatusCode_Match(Integer httpStatusCode) {
+        setHttpStatusCode_Match(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_Match(Integer httpStatusCode, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("httpStatusCode", httpStatusCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_MatchPhrase(Integer httpStatusCode) {
+        setHttpStatusCode_MatchPhrase(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_MatchPhrase(Integer httpStatusCode, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("httpStatusCode", httpStatusCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_MatchPhrasePrefix(Integer httpStatusCode) {
+        setHttpStatusCode_MatchPhrasePrefix(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_MatchPhrasePrefix(Integer httpStatusCode, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("httpStatusCode", httpStatusCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Fuzzy(Integer httpStatusCode) {
+        setHttpStatusCode_Fuzzy(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_Fuzzy(Integer httpStatusCode, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("httpStatusCode", httpStatusCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_GreaterThan(Integer httpStatusCode) {
+        setHttpStatusCode_GreaterThan(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_GreaterThan(Integer httpStatusCode, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = httpStatusCode;
+        RangeQueryBuilder builder = regRangeQ("httpStatusCode", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_LessThan(Integer httpStatusCode) {
+        setHttpStatusCode_LessThan(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_LessThan(Integer httpStatusCode, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = httpStatusCode;
+        RangeQueryBuilder builder = regRangeQ("httpStatusCode", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_GreaterEqual(Integer httpStatusCode) {
+        setHttpStatusCode_GreaterEqual(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_GreaterEqual(Integer httpStatusCode, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = httpStatusCode;
+        RangeQueryBuilder builder = regRangeQ("httpStatusCode", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_LessEqual(Integer httpStatusCode) {
+        setHttpStatusCode_LessEqual(httpStatusCode, null);
+    }
+
+    public void setHttpStatusCode_LessEqual(Integer httpStatusCode, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = httpStatusCode;
+        RangeQueryBuilder builder = regRangeQ("httpStatusCode", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Exists() {
+        setHttpStatusCode_Exists(null);
+    }
+
+    public void setHttpStatusCode_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setHttpStatusCode_CommonTerms(Integer httpStatusCode) {
+        setHttpStatusCode_CommonTerms(httpStatusCode, null);
+    }
+
+    @Deprecated
+    public void setHttpStatusCode_CommonTerms(Integer httpStatusCode, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("httpStatusCode", httpStatusCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsFailureUrlCQ addOrderBy_HttpStatusCode_Asc() {
+        regOBA("httpStatusCode");
+        return this;
+    }
+
+    public BsFailureUrlCQ addOrderBy_HttpStatusCode_Desc() {
+        regOBD("httpStatusCode");
+        return this;
+    }
+
     public void setLastAccessTime_Equal(Long lastAccessTime) {
         setLastAccessTime_Term(lastAccessTime, null);
     }
@@ -1215,6 +1575,230 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public BsFailureUrlCQ addOrderBy_LastAccessTime_Desc() {
         regOBD("lastAccessTime");
+        return this;
+    }
+
+    public void setMimeType_Equal(String mimeType) {
+        setMimeType_Term(mimeType, null);
+    }
+
+    public void setMimeType_Equal(String mimeType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setMimeType_Term(mimeType, opLambda);
+    }
+
+    public void setMimeType_Term(String mimeType) {
+        setMimeType_Term(mimeType, null);
+    }
+
+    public void setMimeType_Term(String mimeType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_NotEqual(String mimeType) {
+        setMimeType_NotTerm(mimeType, null);
+    }
+
+    public void setMimeType_NotTerm(String mimeType) {
+        setMimeType_NotTerm(mimeType, null);
+    }
+
+    public void setMimeType_NotEqual(String mimeType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setMimeType_NotTerm(mimeType, opLambda);
+    }
+
+    public void setMimeType_NotTerm(String mimeType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setMimeType_Term(mimeType), opLambda);
+    }
+
+    public void setMimeType_Terms(Collection<String> mimeTypeList) {
+        setMimeType_Terms(mimeTypeList, null);
+    }
+
+    public void setMimeType_Terms(Collection<String> mimeTypeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("mimeType", mimeTypeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_InScope(Collection<String> mimeTypeList) {
+        setMimeType_Terms(mimeTypeList, null);
+    }
+
+    public void setMimeType_InScope(Collection<String> mimeTypeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setMimeType_Terms(mimeTypeList, opLambda);
+    }
+
+    public void setMimeType_Match(String mimeType) {
+        setMimeType_Match(mimeType, null);
+    }
+
+    public void setMimeType_Match(String mimeType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_MatchPhrase(String mimeType) {
+        setMimeType_MatchPhrase(mimeType, null);
+    }
+
+    public void setMimeType_MatchPhrase(String mimeType, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_MatchPhrasePrefix(String mimeType) {
+        setMimeType_MatchPhrasePrefix(mimeType, null);
+    }
+
+    public void setMimeType_MatchPhrasePrefix(String mimeType, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Fuzzy(String mimeType) {
+        setMimeType_Fuzzy(mimeType, null);
+    }
+
+    public void setMimeType_Fuzzy(String mimeType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Prefix(String mimeType) {
+        setMimeType_Prefix(mimeType, null);
+    }
+
+    public void setMimeType_Prefix(String mimeType, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Wildcard(String mimeType) {
+        setMimeType_Wildcard(mimeType, null);
+    }
+
+    public void setMimeType_Wildcard(String mimeType, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Regexp(String mimeType) {
+        setMimeType_Regexp(mimeType, null);
+    }
+
+    public void setMimeType_Regexp(String mimeType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_SpanTerm(String mimeType) {
+        setMimeType_SpanTerm("mimeType", null);
+    }
+
+    public void setMimeType_SpanTerm(String mimeType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_GreaterThan(String mimeType) {
+        setMimeType_GreaterThan(mimeType, null);
+    }
+
+    public void setMimeType_GreaterThan(String mimeType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = mimeType;
+        RangeQueryBuilder builder = regRangeQ("mimeType", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_LessThan(String mimeType) {
+        setMimeType_LessThan(mimeType, null);
+    }
+
+    public void setMimeType_LessThan(String mimeType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = mimeType;
+        RangeQueryBuilder builder = regRangeQ("mimeType", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_GreaterEqual(String mimeType) {
+        setMimeType_GreaterEqual(mimeType, null);
+    }
+
+    public void setMimeType_GreaterEqual(String mimeType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = mimeType;
+        RangeQueryBuilder builder = regRangeQ("mimeType", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_LessEqual(String mimeType) {
+        setMimeType_LessEqual(mimeType, null);
+    }
+
+    public void setMimeType_LessEqual(String mimeType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = mimeType;
+        RangeQueryBuilder builder = regRangeQ("mimeType", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Exists() {
+        setMimeType_Exists(null);
+    }
+
+    public void setMimeType_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("mimeType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setMimeType_CommonTerms(String mimeType) {
+        setMimeType_CommonTerms(mimeType, null);
+    }
+
+    @Deprecated
+    public void setMimeType_CommonTerms(String mimeType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("mimeType", mimeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsFailureUrlCQ addOrderBy_MimeType_Asc() {
+        regOBA("mimeType");
+        return this;
+    }
+
+    public BsFailureUrlCQ addOrderBy_MimeType_Desc() {
+        regOBD("mimeType");
         return this;
     }
 

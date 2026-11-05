@@ -7,6 +7,9 @@
           "configId" : {
             "type" : "keyword"
           },
+          "contentLength" : {
+            "type" : "long"
+          },
           "errorCount" : {
             "type" : "integer"
           },
@@ -16,8 +19,14 @@
           "errorName" : {
             "type" : "keyword"
           },
+          "httpStatusCode" : {
+            "type" : "integer"
+          },
           "lastAccessTime" : {
             "type" : "long"
+          },
+          "mimeType" : {
+            "type" : "keyword"
           },
           "threadName" : {
             "type" : "keyword"

@@ -237,6 +237,233 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setContentLength_Avg() {
+        setContentLength_Avg(null);
+    }
+
+    public void setContentLength_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setContentLength_Avg("contentLength", opLambda);
+    }
+
+    public void setContentLength_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Max() {
+        setContentLength_Max(null);
+    }
+
+    public void setContentLength_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setContentLength_Max("contentLength", opLambda);
+    }
+
+    public void setContentLength_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Min() {
+        setContentLength_Min(null);
+    }
+
+    public void setContentLength_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setContentLength_Min("contentLength", opLambda);
+    }
+
+    public void setContentLength_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Sum() {
+        setContentLength_Sum(null);
+    }
+
+    public void setContentLength_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setContentLength_Sum("contentLength", opLambda);
+    }
+
+    public void setContentLength_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_ExtendedStats() {
+        setContentLength_ExtendedStats(null);
+    }
+
+    public void setContentLength_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setContentLength_ExtendedStats("contentLength", opLambda);
+    }
+
+    public void setContentLength_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Stats() {
+        setContentLength_Stats(null);
+    }
+
+    public void setContentLength_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setContentLength_Stats("contentLength", opLambda);
+    }
+
+    public void setContentLength_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Percentiles() {
+        setContentLength_Percentiles(null);
+    }
+
+    public void setContentLength_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setContentLength_Percentiles("contentLength", opLambda);
+    }
+
+    public void setContentLength_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_PercentileRanks(double[] values) {
+        setContentLength_PercentileRanks(values, null);
+    }
+
+    public void setContentLength_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setContentLength_PercentileRanks("contentLength", values, opLambda);
+    }
+
+    public void setContentLength_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "contentLength", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Histogram() {
+        setContentLength_Histogram(null);
+    }
+
+    public void setContentLength_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setContentLength_Histogram("contentLength", opLambda, null);
+    }
+
+    public void setContentLength_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setContentLength_Histogram("contentLength", opLambda, aggsLambda);
+    }
+
+    public void setContentLength_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setContentLength_Range() {
+        setContentLength_Range(null);
+    }
+
+    public void setContentLength_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setContentLength_Range("contentLength", opLambda, null);
+    }
+
+    public void setContentLength_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setContentLength_Range("contentLength", opLambda, aggsLambda);
+    }
+
+    public void setContentLength_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setContentLength_Count() {
+        setContentLength_Count(null);
+    }
+
+    public void setContentLength_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setContentLength_Count("contentLength", opLambda);
+    }
+
+    public void setContentLength_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Cardinality() {
+        setContentLength_Cardinality(null);
+    }
+
+    public void setContentLength_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setContentLength_Cardinality("contentLength", opLambda);
+    }
+
+    public void setContentLength_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setContentLength_Missing() {
+        setContentLength_Missing(null);
+    }
+
+    public void setContentLength_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setContentLength_Missing("contentLength", opLambda, null);
+    }
+
+    public void setContentLength_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setContentLength_Missing("contentLength", opLambda, aggsLambda);
+    }
+
+    public void setContentLength_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "contentLength");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setErrorCount_Avg() {
         setErrorCount_Avg(null);
     }
@@ -726,6 +953,234 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setHttpStatusCode_Avg() {
+        setHttpStatusCode_Avg(null);
+    }
+
+    public void setHttpStatusCode_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        setHttpStatusCode_Avg("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Max() {
+        setHttpStatusCode_Max(null);
+    }
+
+    public void setHttpStatusCode_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        setHttpStatusCode_Max("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Min() {
+        setHttpStatusCode_Min(null);
+    }
+
+    public void setHttpStatusCode_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        setHttpStatusCode_Min("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Sum() {
+        setHttpStatusCode_Sum(null);
+    }
+
+    public void setHttpStatusCode_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        setHttpStatusCode_Sum("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_ExtendedStats() {
+        setHttpStatusCode_ExtendedStats(null);
+    }
+
+    public void setHttpStatusCode_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        setHttpStatusCode_ExtendedStats("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Stats() {
+        setHttpStatusCode_Stats(null);
+    }
+
+    public void setHttpStatusCode_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        setHttpStatusCode_Stats("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Percentiles() {
+        setHttpStatusCode_Percentiles(null);
+    }
+
+    public void setHttpStatusCode_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        setHttpStatusCode_Percentiles("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_PercentileRanks(double[] values) {
+        setHttpStatusCode_PercentileRanks(values, null);
+    }
+
+    public void setHttpStatusCode_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        setHttpStatusCode_PercentileRanks("httpStatusCode", values, opLambda);
+    }
+
+    public void setHttpStatusCode_PercentileRanks(String name, double[] values,
+            ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "httpStatusCode", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Histogram() {
+        setHttpStatusCode_Histogram(null);
+    }
+
+    public void setHttpStatusCode_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        setHttpStatusCode_Histogram("httpStatusCode", opLambda, null);
+    }
+
+    public void setHttpStatusCode_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setHttpStatusCode_Histogram("httpStatusCode", opLambda, aggsLambda);
+    }
+
+    public void setHttpStatusCode_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setHttpStatusCode_Range() {
+        setHttpStatusCode_Range(null);
+    }
+
+    public void setHttpStatusCode_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        setHttpStatusCode_Range("httpStatusCode", opLambda, null);
+    }
+
+    public void setHttpStatusCode_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setHttpStatusCode_Range("httpStatusCode", opLambda, aggsLambda);
+    }
+
+    public void setHttpStatusCode_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setHttpStatusCode_Count() {
+        setHttpStatusCode_Count(null);
+    }
+
+    public void setHttpStatusCode_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setHttpStatusCode_Count("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Cardinality() {
+        setHttpStatusCode_Cardinality(null);
+    }
+
+    public void setHttpStatusCode_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setHttpStatusCode_Cardinality("httpStatusCode", opLambda);
+    }
+
+    public void setHttpStatusCode_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHttpStatusCode_Missing() {
+        setHttpStatusCode_Missing(null);
+    }
+
+    public void setHttpStatusCode_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setHttpStatusCode_Missing("httpStatusCode", opLambda, null);
+    }
+
+    public void setHttpStatusCode_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setHttpStatusCode_Missing("httpStatusCode", opLambda, aggsLambda);
+    }
+
+    public void setHttpStatusCode_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "httpStatusCode");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setLastAccessTime_Avg() {
         setLastAccessTime_Avg(null);
     }
@@ -944,6 +1399,137 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
     public void setLastAccessTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
         MissingAggregationBuilder builder = regMissingA(name, "lastAccessTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setMimeType_Terms() {
+        setMimeType_Terms(null);
+    }
+
+    public void setMimeType_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setMimeType_Terms("mimeType", opLambda, null);
+    }
+
+    public void setMimeType_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setMimeType_Terms("mimeType", opLambda, aggsLambda);
+    }
+
+    public void setMimeType_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "mimeType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setMimeType_SignificantTerms() {
+        setMimeType_SignificantTerms(null);
+    }
+
+    public void setMimeType_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setMimeType_SignificantTerms("mimeType", opLambda, null);
+    }
+
+    public void setMimeType_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setMimeType_SignificantTerms("mimeType", opLambda, aggsLambda);
+    }
+
+    public void setMimeType_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "mimeType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setMimeType_IpRange() {
+        setMimeType_IpRange(null);
+    }
+
+    public void setMimeType_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setMimeType_IpRange("mimeType", opLambda, null);
+    }
+
+    public void setMimeType_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setMimeType_IpRange("mimeType", opLambda, aggsLambda);
+    }
+
+    public void setMimeType_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "mimeType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            FailureUrlCA ca = new FailureUrlCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setMimeType_Count() {
+        setMimeType_Count(null);
+    }
+
+    public void setMimeType_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setMimeType_Count("mimeType", opLambda);
+    }
+
+    public void setMimeType_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "mimeType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Cardinality() {
+        setMimeType_Cardinality(null);
+    }
+
+    public void setMimeType_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setMimeType_Cardinality("mimeType", opLambda);
+    }
+
+    public void setMimeType_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "mimeType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMimeType_Missing() {
+        setMimeType_Missing(null);
+    }
+
+    public void setMimeType_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setMimeType_Missing("mimeType", opLambda, null);
+    }
+
+    public void setMimeType_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        setMimeType_Missing("mimeType", opLambda, aggsLambda);
+    }
+
+    public void setMimeType_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "mimeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

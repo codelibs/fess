@@ -1814,6 +1814,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: File Crawl Config */
     public static final String LABELS_failure_url_file_config_name = "{labels.failure_url_file_config_name}";
 
+    /** The key of the message: Download CSV */
+    public static final String LABELS_failure_url_download_csv = "{labels.failure_url_download_csv}";
+
+    /** The key of the message: Size (bytes) */
+    public static final String LABELS_failure_url_content_length = "{labels.failure_url_content_length}";
+
+    /** The key of the message: MIME Type */
+    public static final String LABELS_failure_url_mime_type = "{labels.failure_url_mime_type}";
+
+    /** The key of the message: HTTP Status */
+    public static final String LABELS_failure_url_http_status_code = "{labels.failure_url_http_status_code}";
+
     /** The key of the message: System Info */
     public static final String LABELS_system_info_configuration = "{labels.system_info_configuration}";
 

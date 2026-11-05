@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.failureurl;
 
+import java.time.format.DateTimeFormatter;
+
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.FailureUrlPager;
@@ -23,6 +25,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -45,6 +48,8 @@ public class AdminFailureurlAction extends FessAdminAction {
      * Role name for failure URL administration.
      */
     public static final String ROLE = "admin-failureurl";
+
+    private static final DateTimeFormatter FILE_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     // ===================================================================================
     //                                                                           Attribute
@@ -154,6 +159,24 @@ public class AdminFailureurlAction extends FessAdminAction {
 
         // restore from pager
         copyBeanToBean(failureUrlPager, form, op -> op.include("url", "errorCountMin", "errorCountMax", "errorName"));
+    }
+
+    /**
+     * Downloads the failure URLs that match the search criteria as CSV, the latest failure first. The
+     * criteria come from the submitted form, not from the pager of the session, and the paging is
+     * ignored. The stack trace of the failures is not part of the file.
+     *
+     * @param form the search form containing the filter criteria
+     * @return the CSV file, or the list page when the criteria are not valid
+     */
+    @Execute
+    @Secured({ ROLE, ROLE + VIEW })
+    public ActionResponse download(final SearchForm form) {
+        validate(form, messages -> {}, this::asListHtml);
+        final FailureUrlPager pager = new FailureUrlPager();
+        copyBeanToBean(form, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        return asCsvStream("failureurl_" + systemHelper.getCurrentTimeAsLocalDateTime().format(FILE_TIMESTAMP) + ".csv",
+                writer -> failureUrlService.exportCsv(pager, writer));
     }
 
     // -----------------------------------------------------

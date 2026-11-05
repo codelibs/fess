@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.failureurl;
 
+import jakarta.validation.constraints.Pattern;
+
 /**
  * The search form for Failure URL.
  */
@@ -34,11 +36,13 @@ public class SearchForm {
     /**
      * The minimum error count field for filtering failure URLs.
      */
+    @Pattern(regexp = "^$|^[0-9]{1,9}$")
     public String errorCountMin;
 
     /**
      * The maximum error count field for filtering failure URLs.
      */
+    @Pattern(regexp = "^$|^[0-9]{1,9}$")
     public String errorCountMax;
 
     /**
