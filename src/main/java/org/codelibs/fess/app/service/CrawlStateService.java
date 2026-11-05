@@ -30,9 +30,6 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fesen.opensearch.action.get.GetResponse;
-import org.codelibs.fesen.opensearch.action.search.SearchResponse;
-import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
-import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fess.entity.CrawlProgress;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.DataConfigBhv;
@@ -454,6 +451,8 @@ public class CrawlStateService {
      */
     protected List<WebConfig> selectWebConfigs(final int max) {
         return ComponentUtil.getComponent(WebConfigBhv.class).selectList(cb -> {
+            cb.specify().columnName();
+            cb.specify().columnMetadata();
             cb.query().matchAll();
             cb.query().addOrderBy_Available_Desc();
             cb.query().addOrderBy_SortOrder_Asc();
@@ -470,6 +469,8 @@ public class CrawlStateService {
      */
     protected List<FileConfig> selectFileConfigs(final int max) {
         return ComponentUtil.getComponent(FileConfigBhv.class).selectList(cb -> {
+            cb.specify().columnName();
+            cb.specify().columnMetadata();
             cb.query().matchAll();
             cb.query().addOrderBy_Available_Desc();
             cb.query().addOrderBy_SortOrder_Asc();
@@ -486,6 +487,8 @@ public class CrawlStateService {
      */
     protected List<DataConfig> selectDataConfigs(final int max) {
         return ComponentUtil.getComponent(DataConfigBhv.class).selectList(cb -> {
+            cb.specify().columnName();
+            cb.specify().columnMetadata();
             cb.query().matchAll();
             cb.query().addOrderBy_Available_Desc();
             cb.query().addOrderBy_SortOrder_Asc();
@@ -517,59 +520,6 @@ public class CrawlStateService {
         // Only whole numbers that fit a long: longValue() of a larger or fractional number is not what was stored.
         return metadata.get(key) instanceof final Integer number ? number.longValue()
                 : metadata.get(key) instanceof final Long number ? number.longValue() : 0L;
-    }
-
-    /**
-     * Counts the documents of the document index that a crawl of a data store configuration has indexed
-     * in a session. A data store creates no access result to count, as the web and file crawls do.
-     *
-     * @param configId the crawl configuration ID
-     * @param segment the session ID the documents are indexed with
-     * @return the number of documents, or -1 if the count failed
-     */
-    public long countDocuments(final String configId, final String segment) {
-        return countDocuments(configId, segment, RESULT_TIMEOUT);
-    }
-
-    /**
-     * Counts the documents of the document index that a crawl of a data store configuration has indexed
-     * in a session, waiting for the search engine for at most the given time.
-     *
-     * @param configId the crawl configuration ID
-     * @param segment the session ID the documents are indexed with
-     * @param timeout how long the request may wait for the search engine
-     * @return the number of documents, or -1 if the count failed
-     */
-    public long countDocuments(final String configId, final String segment, final String timeout) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final QueryBuilder query = QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configId))
-                .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), segment));
-        try {
-            return count(fessConfig.getIndexDocumentUpdateIndex(), query, timeout);
-        } catch (final Exception e) {
-            reportFailure("count", "Failed to count the documents of a crawl: configId={}", configId, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Counts the documents of an index that match a query.
-     *
-     * @param index the index name
-     * @param query the query
-     * @param timeout how long the request may wait for the search engine
-     * @return the number of documents
-     */
-    protected long count(final String index, final QueryBuilder query, final String timeout) {
-        final SearchResponse response = ComponentUtil.getSearchEngineClient()
-                .prepareSearch(index)
-                .setSize(0)
-                .setTrackTotalHits(true)
-                .setQuery(query)
-                .execute()
-                .actionGet(timeout);
-        return response.getHits().getTotalHits().value();
     }
 
     // ===================================================================================
