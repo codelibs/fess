@@ -158,4 +158,63 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
         assertEquals("Invalid URL configured in a.b.url: Expected scheme name",
                 CredentialUrlUtil.invalidUrlException("a.b.url", new IllegalArgumentException("m", noIndex)).getMessage());
     }
+
+    @Test
+    public void test_removeUserInfo_stripsTheCredentialOfAnAuthority() throws Exception {
+        assertEquals("http://host/a", CredentialUrlUtil.removeUserInfo("http://user:pass@host/a"));
+        assertEquals("smb://host/share/a.txt", CredentialUrlUtil.removeUserInfo("smb://user:pass@host/share/a.txt"));
+        // a userinfo without a password is a credential too, and so is one with an empty name
+        assertEquals("ftp://host:21/a", CredentialUrlUtil.removeUserInfo("ftp://user@host:21/a"));
+        assertEquals("http://host/", CredentialUrlUtil.removeUserInfo("http://:pass@host/"));
+        // the password may hold an at sign, a colon, or a space that the masking rule does not match
+        assertEquals("http://host/a", CredentialUrlUtil.removeUserInfo("http://user:p@ss:w rd@host/a"));
+        assertEquals("HTTPS://host?x=1", CredentialUrlUtil.removeUserInfo("HTTPS://user:pass@host?x=1"));
+        assertEquals("http://host#f", CredentialUrlUtil.removeUserInfo("http://user:pass@host#f"));
+        assertEquals("http://host", CredentialUrlUtil.removeUserInfo("http://user:pass@host"));
+    }
+
+    @Test
+    public void test_removeUserInfo_leavesWhatHasNoUserInfo() throws Exception {
+        assertNull(CredentialUrlUtil.removeUserInfo(null));
+        assertEquals("", CredentialUrlUtil.removeUserInfo(""));
+        assertEquals("http://host/a", CredentialUrlUtil.removeUserInfo("http://host/a"));
+        assertEquals("http://host:8080/a", CredentialUrlUtil.removeUserInfo("http://host:8080/a"));
+        // an at sign in the path, the query or the fragment is not a userinfo
+        assertEquals("http://host/a@b", CredentialUrlUtil.removeUserInfo("http://host/a@b"));
+        assertEquals("http://host/a?mail=x@y.com", CredentialUrlUtil.removeUserInfo("http://host/a?mail=x@y.com"));
+        assertEquals("http://host?mail=x@y.com", CredentialUrlUtil.removeUserInfo("http://host?mail=x@y.com"));
+        assertEquals("http://host#x@y", CredentialUrlUtil.removeUserInfo("http://host#x@y"));
+        // the credential-looking query parameters are not this method's business
+        assertEquals("http://host/a?token=abc", CredentialUrlUtil.removeUserInfo("http://host/a?token=abc"));
+    }
+
+    @Test
+    public void test_removeUserInfo_leavesWhatIsNotAnAbsoluteUrl() throws Exception {
+        // a data store failure: configId:name, where the name may hold an at sign
+        assertEquals("12:me@example", CredentialUrlUtil.removeUserInfo("12:me@example"));
+        assertEquals("user:pass@host", CredentialUrlUtil.removeUserInfo("user:pass@host"));
+        assertEquals("//user:pass@host/a", CredentialUrlUtil.removeUserInfo("//user:pass@host/a"));
+        assertEquals("/srv/a@b/c", CredentialUrlUtil.removeUserInfo("/srv/a@b/c"));
+        assertEquals("@", CredentialUrlUtil.removeUserInfo("@"));
+        // file URLs have an empty or a host authority, no userinfo
+        assertEquals("file:///srv/docs/a@b.txt", CredentialUrlUtil.removeUserInfo("file:///srv/docs/a@b.txt"));
+        assertEquals("file://server/share/a.txt", CredentialUrlUtil.removeUserInfo("file://server/share/a.txt"));
+        // not a scheme before the separator: the text is not an authority
+        assertEquals("a b://user:pass@host", CredentialUrlUtil.removeUserInfo("a b://user:pass@host"));
+        assertEquals("1http://user:pass@host", CredentialUrlUtil.removeUserInfo("1http://user:pass@host"));
+        assertEquals("/p://user:pass@host", CredentialUrlUtil.removeUserInfo("/p://user:pass@host"));
+        assertEquals("://user:pass@host", CredentialUrlUtil.removeUserInfo("://user:pass@host"));
+    }
+
+    @Test
+    public void test_removeUserInfo_isLinearOnLongInput() throws Exception {
+        final String longName = "u".repeat(2_000_000);
+        assertEquals("http://host/", CredentialUrlUtil.removeUserInfo("http://" + longName + ":" + longName + "@host/"));
+        final String manyAt = "http://" + "@".repeat(2_000_000) + "host/a";
+        assertEquals("http://host/a", CredentialUrlUtil.removeUserInfo(manyAt));
+        final String noAuthority = "a".repeat(2_000_000);
+        assertEquals(noAuthority, CredentialUrlUtil.removeUserInfo(noAuthority));
+        final String manySeparators = "a:/".repeat(1_000_000);
+        assertEquals(manySeparators, CredentialUrlUtil.removeUserInfo(manySeparators));
+    }
 }

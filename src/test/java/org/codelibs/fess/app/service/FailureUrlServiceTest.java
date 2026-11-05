@@ -284,4 +284,19 @@ public class FailureUrlServiceTest extends UnitFessTestCase {
         assertTrue(released[0]);
     }
 
+    @Test
+    public void test_exportCsv_removesTheUserInfoOfTheUrl() throws Exception {
+        final StubBhv bhv = new StubBhv();
+        bhv.rows.add(row("smb://admin:s3cret@host/share/a.pdf", "x.Error"));
+        bhv.rows.add(row("http://user@host/a?mail=x@y.com", "x.Error"));
+        bhv.rows.add(row("12:me@example", "x.Error"));
+        final StringWriter out = new StringWriter();
+        service(bhv).exportCsv(new FailureUrlPager(), out);
+        final List<List<String>> rows = parse(out.toString());
+        assertEquals("smb://host/share/a.pdf", rows.get(1).get(0));
+        assertEquals("http://host/a?mail=x@y.com", rows.get(2).get(0));
+        assertEquals("12:me@example", rows.get(3).get(0));
+        assertFalse(out.toString().contains("s3cret"));
+        assertFalse(out.toString().contains("admin"));
+    }
 }
