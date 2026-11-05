@@ -18,7 +18,11 @@ package org.codelibs.fess.app.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UncheckedIOException;
+import java.io.Writer;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +30,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
+import org.codelibs.fess.entity.FailureUrlDetails;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -33,9 +38,13 @@ import org.codelibs.fess.opensearch.config.cbean.FailureUrlCB;
 import org.codelibs.fess.opensearch.config.exbhv.FailureUrlBhv;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
+import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CsvUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+
+import com.orangesignal.csv.CsvWriter;
 
 import jakarta.annotation.Resource;
 
@@ -55,6 +64,10 @@ public class FailureUrlService {
     public FailureUrlService() {
         // Default constructor
     }
+
+    /** The columns of the CSV export. The stack trace is not exported: it is long and not meant to be passed around. */
+    protected static final List<String> CSV_COLUMNS =
+            List.of("url", "errorName", "errorCount", "lastAccessTime", "httpStatusCode", "mimeType", "contentLength");
 
     /** Behavior class for FailureUrl entity operations */
     @Resource
@@ -141,6 +154,49 @@ public class FailureUrlService {
     }
 
     /**
+     * Writes the failure URLs that match the criteria of the pager as CSV, the latest failure first: a
+     * header row followed by one row per failure URL. The paging of the pager is ignored and the number
+     * of rows is not limited, so the rows are read with a cursor and written one by one. The point in
+     * time of the cursor is released when the write fails, for example when the client has gone.
+     * The writer is flushed but not closed.
+     *
+     * @param pager the pager containing the filter criteria
+     * @param writer the writer to write the CSV to
+     * @throws IOException if writing fails
+     */
+    public void exportCsv(final FailureUrlPager pager, final Writer writer) throws IOException {
+        // not closed: that would close the writer of the caller
+        @SuppressWarnings("resource")
+        final CsvWriter csvWriter = new CsvWriter(writer, CsvUtil.createCsvConfig());
+        csvWriter.writeValues(CSV_COLUMNS);
+        try {
+            failureUrlBhv.selectCursor(cb -> {
+                cb.query().addOrderBy_LastAccessTime_Desc();
+                buildSearchCondition(pager, cb);
+            }, entity -> writeRow(csvWriter, entity));
+            csvWriter.flush();
+        } catch (final UncheckedIOException e) {
+            // thrown by the cursor handler, which cannot throw a checked exception
+            throw e.getCause();
+        }
+    }
+
+    private void writeRow(final CsvWriter csvWriter, final FailureUrl entity) {
+        try {
+            csvWriter
+                    .writeValues(Stream
+                            .of(entity.getUrl(), entity.getErrorName(), entity.getErrorCount(),
+                                    entity.getLastAccessTime() != null ? FessFunctions.formatDate(new Date(entity.getLastAccessTime()))
+                                            : null,
+                                    entity.getHttpStatusCode(), entity.getMimeType(), entity.getContentLength())
+                            .map(CsvUtil::toCell)
+                            .toList());
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
      * Deletes all failure URLs that match the criteria specified in the pager.
      *
      * @param failureUrlPager the pager containing deletion criteria
@@ -198,11 +254,28 @@ public class FailureUrlService {
      * @return the stored or updated FailureUrl entity, or null if the exception should be ignored
      */
     public FailureUrl store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
+        return store(crawlingConfig, errorName, url, e, null);
+    }
+
+    /**
+     * Stores a new failure URL or updates an existing one with error information and what is known
+     * about the document. Every detail is assigned on every call, null included, so that the details
+     * of an earlier failure of the same URL do not stay on the record when this failure has none.
+     *
+     * @param crawlingConfig the crawling configuration associated with the failure
+     * @param errorName the name/type of the error that occurred
+     * @param url the URL that failed to be crawled
+     * @param e the exception that caused the failure
+     * @param details the size, MIME type and HTTP status of the document, or null when none is known
+     * @return the stored or updated FailureUrl entity, or null if the exception should be ignored
+     */
+    public FailureUrl store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e,
+            final FailureUrlDetails details) {
         if (e instanceof ContainerNotAvailableException) {
             return null;
         }
 
-        final FailureUrlBhv bhv = ComponentUtil.getComponent(FailureUrlBhv.class);
+        final FailureUrlBhv bhv = getFailureUrlBhv();
         final FailureUrl failureUrl = bhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {
@@ -225,11 +298,23 @@ public class FailureUrlService {
         failureUrl.setErrorLog(getStackTrace(e));
         failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         failureUrl.setThreadName(Thread.currentThread().getName());
+        failureUrl.setContentLength(details != null ? details.contentLength() : null);
+        failureUrl.setMimeType(details != null ? details.mimeType() : null);
+        failureUrl.setHttpStatusCode(details != null ? details.httpStatusCode() : null);
 
         bhv.insertOrUpdate(failureUrl, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
         return failureUrl;
+    }
+
+    /**
+     * Returns the behavior used to store a failure URL.
+     *
+     * @return the failure URL behavior
+     */
+    protected FailureUrlBhv getFailureUrlBhv() {
+        return ComponentUtil.getComponent(FailureUrlBhv.class);
     }
 
     /**

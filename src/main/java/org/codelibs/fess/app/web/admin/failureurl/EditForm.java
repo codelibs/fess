@@ -109,6 +109,21 @@ public class EditForm {
     public String lastAccessTime;
 
     /**
+     * The size in bytes of the document, when the crawler knew it.
+     */
+    public String contentLength;
+
+    /**
+     * The MIME type of the document, when the crawler knew it.
+     */
+    public String mimeType;
+
+    /**
+     * The HTTP status code of the response, when there was one.
+     */
+    public String httpStatusCode;
+
+    /**
      * The configuration ID associated with this failure URL.
      * Links the failure to a specific crawling configuration.
      */
@@ -137,6 +152,9 @@ public class EditForm {
         errorLog = null;
         errorCount = null;
         lastAccessTime = null;
+        contentLength = null;
+        mimeType = null;
+        httpStatusCode = null;
         configId = null;
     }
 

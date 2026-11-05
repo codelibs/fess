@@ -95,6 +95,18 @@ ${fe:html(true)}
                                             <td>${f:h(errorName)}<la:hidden property="errorName"/></td>
                                         </tr>
                                         <tr>
+                                            <th><la:message key="labels.failure_url_http_status_code"/></th>
+                                            <td>${f:h(httpStatusCode)}</td>
+                                        </tr>
+                                        <tr>
+                                            <th><la:message key="labels.failure_url_mime_type"/></th>
+                                            <td>${f:h(mimeType)}</td>
+                                        </tr>
+                                        <tr>
+                                            <th><la:message key="labels.failure_url_content_length"/></th>
+                                            <td>${f:h(contentLength)}</td>
+                                        </tr>
+                                        <tr>
                                             <th><la:message key="labels.failure_url_error_log"/></th>
                                             <td>${f:br(f:nbsp(f:h(errorLog)))}
                                                 <la:hidden

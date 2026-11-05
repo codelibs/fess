@@ -93,6 +93,11 @@ ${fe:html(true)}
                                                 value="<la:message key="labels.crud_button_reset" />">
                                             <la:message key="labels.crud_button_reset"/>
                                         </button>
+                                        <button type="submit" class="btn btn-default" name="download"
+                                                value="<la:message key="labels.failure_url_download_csv" />">
+                                            <i class="fa fa-download" aria-hidden="true"></i>
+                                            <la:message key="labels.failure_url_download_csv"/>
+                                        </button>
                                     </div>
                                 </div>
                             </la:form>
@@ -115,6 +120,12 @@ ${fe:html(true)}
                                                     <th><la:message key="labels.failure_url_url"/></th>
                                                     <th><la:message
                                                             key="labels.failure_url_search_error_name"/></th>
+                                                    <th style="width: 12%"><la:message
+                                                            key="labels.failure_url_mime_type"/></th>
+                                                    <th style="width: 8%"><la:message
+                                                            key="labels.failure_url_http_status_code"/></th>
+                                                    <th style="width: 10%"><la:message
+                                                            key="labels.failure_url_content_length"/></th>
                                                     <th style="width: 15%"><la:message
                                                             key="labels.failure_url_last_access_time"/></th>
                                                 </tr>
@@ -125,6 +136,9 @@ ${fe:html(true)}
                                                     <tr data-href="${contextPath}/admin/failureurl/details/4/${f:u(data.id)}" role="button" tabindex="0">
                                                         <td>${f:h(data.url)}</td>
                                                         <td>${f:h(data.errorName)}</td>
+                                                        <td>${f:h(data.mimeType)}</td>
+                                                        <td>${f:h(data.httpStatusCode)}</td>
+                                                        <td>${f:h(data.contentLength)}</td>
                                                         <td><fmt:formatDate
                                                                 value="${fe:date(data.lastAccessTime)}"
                                                                 pattern="yyyy-MM-dd'T'HH:mm:ss"/></td>

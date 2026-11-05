@@ -20,6 +20,15 @@
       },
       "configId": {
         "type": "keyword"
+      },
+      "contentLength": {
+        "type": "long"
+      },
+      "mimeType": {
+        "type": "keyword"
+      },
+      "httpStatusCode": {
+        "type": "integer"
       }
     }
 }

@@ -40,6 +40,9 @@ public class BsFailureUrl extends EsAbstractEntity {
     /** configId */
     protected String configId;
 
+    /** contentLength */
+    protected Long contentLength;
+
     /** errorCount */
     protected Integer errorCount;
 
@@ -49,8 +52,14 @@ public class BsFailureUrl extends EsAbstractEntity {
     /** errorName */
     protected String errorName;
 
+    /** httpStatusCode */
+    protected Integer httpStatusCode;
+
     /** lastAccessTime */
     protected Long lastAccessTime;
+
+    /** mimeType */
+    protected String mimeType;
 
     /** threadName */
     protected String threadName;
@@ -82,6 +91,9 @@ public class BsFailureUrl extends EsAbstractEntity {
         if (configId != null) {
             addFieldToSource(sourceMap, "configId", configId);
         }
+        if (contentLength != null) {
+            addFieldToSource(sourceMap, "contentLength", contentLength);
+        }
         if (errorCount != null) {
             addFieldToSource(sourceMap, "errorCount", errorCount);
         }
@@ -91,8 +103,14 @@ public class BsFailureUrl extends EsAbstractEntity {
         if (errorName != null) {
             addFieldToSource(sourceMap, "errorName", errorName);
         }
+        if (httpStatusCode != null) {
+            addFieldToSource(sourceMap, "httpStatusCode", httpStatusCode);
+        }
         if (lastAccessTime != null) {
             addFieldToSource(sourceMap, "lastAccessTime", lastAccessTime);
+        }
+        if (mimeType != null) {
+            addFieldToSource(sourceMap, "mimeType", mimeType);
         }
         if (threadName != null) {
             addFieldToSource(sourceMap, "threadName", threadName);
@@ -114,10 +132,13 @@ public class BsFailureUrl extends EsAbstractEntity {
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(configId);
+        sb.append(dm).append(contentLength);
         sb.append(dm).append(errorCount);
         sb.append(dm).append(errorLog);
         sb.append(dm).append(errorName);
+        sb.append(dm).append(httpStatusCode);
         sb.append(dm).append(lastAccessTime);
+        sb.append(dm).append(mimeType);
         sb.append(dm).append(threadName);
         sb.append(dm).append(url);
         if (sb.length() > dm.length()) {
@@ -138,6 +159,16 @@ public class BsFailureUrl extends EsAbstractEntity {
     public void setConfigId(String value) {
         registerModifiedProperty("configId");
         this.configId = value;
+    }
+
+    public Long getContentLength() {
+        checkSpecifiedProperty("contentLength");
+        return contentLength;
+    }
+
+    public void setContentLength(Long value) {
+        registerModifiedProperty("contentLength");
+        this.contentLength = value;
     }
 
     public Integer getErrorCount() {
@@ -170,6 +201,16 @@ public class BsFailureUrl extends EsAbstractEntity {
         this.errorName = value;
     }
 
+    public Integer getHttpStatusCode() {
+        checkSpecifiedProperty("httpStatusCode");
+        return httpStatusCode;
+    }
+
+    public void setHttpStatusCode(Integer value) {
+        registerModifiedProperty("httpStatusCode");
+        this.httpStatusCode = value;
+    }
+
     public Long getLastAccessTime() {
         checkSpecifiedProperty("lastAccessTime");
         return lastAccessTime;
@@ -178,6 +219,16 @@ public class BsFailureUrl extends EsAbstractEntity {
     public void setLastAccessTime(Long value) {
         registerModifiedProperty("lastAccessTime");
         this.lastAccessTime = value;
+    }
+
+    public String getMimeType() {
+        checkSpecifiedProperty("mimeType");
+        return convertEmptyToNull(mimeType);
+    }
+
+    public void setMimeType(String value) {
+        registerModifiedProperty("mimeType");
+        this.mimeType = value;
     }
 
     public String getThreadName() {

@@ -81,14 +81,20 @@ public class FailureUrlDbm extends AbstractDBMeta {
     {
         setupEpg(_epgMap, et -> ((FailureUrl) et).getConfigId(), (et, vl) -> ((FailureUrl) et).setConfigId(DfTypeUtil.toString(vl)),
                 "configId");
+        setupEpg(_epgMap, et -> ((FailureUrl) et).getContentLength(), (et, vl) -> ((FailureUrl) et).setContentLength(DfTypeUtil.toLong(vl)),
+                "contentLength");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getErrorCount(), (et, vl) -> ((FailureUrl) et).setErrorCount(DfTypeUtil.toInteger(vl)),
                 "errorCount");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getErrorLog(), (et, vl) -> ((FailureUrl) et).setErrorLog(DfTypeUtil.toString(vl)),
                 "errorLog");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getErrorName(), (et, vl) -> ((FailureUrl) et).setErrorName(DfTypeUtil.toString(vl)),
                 "errorName");
+        setupEpg(_epgMap, et -> ((FailureUrl) et).getHttpStatusCode(),
+                (et, vl) -> ((FailureUrl) et).setHttpStatusCode(DfTypeUtil.toInteger(vl)), "httpStatusCode");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getLastAccessTime(),
                 (et, vl) -> ((FailureUrl) et).setLastAccessTime(DfTypeUtil.toLong(vl)), "lastAccessTime");
+        setupEpg(_epgMap, et -> ((FailureUrl) et).getMimeType(), (et, vl) -> ((FailureUrl) et).setMimeType(DfTypeUtil.toString(vl)),
+                "mimeType");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getThreadName(), (et, vl) -> ((FailureUrl) et).setThreadName(DfTypeUtil.toString(vl)),
                 "threadName");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getUrl(), (et, vl) -> ((FailureUrl) et).setUrl(DfTypeUtil.toString(vl)), "url");
@@ -130,14 +136,20 @@ public class FailureUrlDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnConfigId = cci("configId", "configId", null, null, String.class, "configId", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnContentLength = cci("contentLength", "contentLength", null, null, Long.class, "contentLength", null,
+            false, false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorCount = cci("errorCount", "errorCount", null, null, Integer.class, "errorCount", null, false,
             false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorLog = cci("errorLog", "errorLog", null, null, String.class, "errorLog", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorName = cci("errorName", "errorName", null, null, String.class, "errorName", null, false, false,
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnHttpStatusCode = cci("httpStatusCode", "httpStatusCode", null, null, Integer.class, "httpStatusCode",
+            null, false, false, false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLastAccessTime = cci("lastAccessTime", "lastAccessTime", null, null, Long.class, "lastAccessTime",
             null, false, false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnMimeType = cci("mimeType", "mimeType", null, null, String.class, "mimeType", null, false, false,
+            false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnThreadName = cci("threadName", "threadName", null, null, String.class, "threadName", null, false,
             false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
@@ -145,6 +157,10 @@ public class FailureUrlDbm extends AbstractDBMeta {
 
     public ColumnInfo columnConfigId() {
         return _columnConfigId;
+    }
+
+    public ColumnInfo columnContentLength() {
+        return _columnContentLength;
     }
 
     public ColumnInfo columnErrorCount() {
@@ -159,8 +175,16 @@ public class FailureUrlDbm extends AbstractDBMeta {
         return _columnErrorName;
     }
 
+    public ColumnInfo columnHttpStatusCode() {
+        return _columnHttpStatusCode;
+    }
+
     public ColumnInfo columnLastAccessTime() {
         return _columnLastAccessTime;
+    }
+
+    public ColumnInfo columnMimeType() {
+        return _columnMimeType;
     }
 
     public ColumnInfo columnThreadName() {
@@ -174,10 +198,13 @@ public class FailureUrlDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnConfigId());
+        ls.add(columnContentLength());
         ls.add(columnErrorCount());
         ls.add(columnErrorLog());
         ls.add(columnErrorName());
+        ls.add(columnHttpStatusCode());
         ls.add(columnLastAccessTime());
+        ls.add(columnMimeType());
         ls.add(columnThreadName());
         ls.add(columnUrl());
         return ls;

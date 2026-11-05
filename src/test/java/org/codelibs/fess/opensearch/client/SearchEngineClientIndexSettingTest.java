@@ -409,6 +409,24 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_addMissingProperties_addsTheFailureUrlDetailFieldsToAnOldIndex() throws Exception {
+        final PutRecordingClient client = new PutRecordingClient();
+        // an index created before the size, MIME type and HTTP status were recorded
+        final Map<String, Object> existing = readBundledProperties("fess_indices/fess_config.failure_url/failure_url.json");
+        existing.remove("contentLength");
+        existing.remove("mimeType");
+        existing.remove("httpStatusCode");
+
+        client.addMissingProperties("fess_config.failure_url", "failure_url", "fess_config.failure_url", toMappingMetadata(existing));
+
+        assertEquals(1, client.putSources.size());
+        final Map<String, Object> put = new ObjectMapper().readValue(client.putSources.get(0), new TypeReference<Map<String, Object>>() {
+        });
+        assertEquals(Map.of("properties", Map.of("contentLength", Map.of("type", "long"), "mimeType", Map.of("type", "keyword"),
+                "httpStatusCode", Map.of("type", "integer"))), put);
+    }
+
+    @Test
     public void test_addMissingProperties_noPutWhenNothingIsMissing() throws Exception {
         final PutRecordingClient client = new PutRecordingClient();
         final Map<String, Object> existing = readBundledProperties(SEARCH_LOG_MAPPING);

@@ -44,9 +44,12 @@ import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.crawler.log.LogType;
+import org.codelibs.fess.entity.FailureUrlDetails;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.exception.ContentNotFoundException;
+import org.codelibs.fess.helper.CrawlerLogHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
@@ -498,7 +501,16 @@ public class FessCrawlerThread extends CrawlerThread {
             }
         }
 
-        super.processResponse(urlQueue, responseData);
+        try {
+            super.processResponse(urlQueue, responseData);
+        } catch (final ChildUrlsException e) {
+            // not a failure: the children of a folder or a sitemap
+            throw e;
+        } catch (final RuntimeException e) {
+            // CrawlerThread does not hand the response to the log of the failure, which is written on this thread
+            CrawlerLogHelper.rememberFailureDetails(urlQueue.getUrl(), FailureUrlDetails.of(responseData));
+            throw e;
+        }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isCrawlerFailureUrlStatusCodes(responseData.getHttpStatusCode())) {
@@ -508,7 +520,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
             final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
             failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url,
-                    new ContentNotFoundException(urlQueue.getParentUrl(), url));
+                    new ContentNotFoundException(urlQueue.getParentUrl(), url), FailureUrlDetails.of(responseData));
         }
     }
 

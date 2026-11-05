@@ -180,6 +180,10 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
             doColumn("configId");
         }
 
+        public void columnContentLength() {
+            doColumn("contentLength");
+        }
+
         public void columnErrorCount() {
             doColumn("errorCount");
         }
@@ -192,8 +196,16 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
             doColumn("errorName");
         }
 
+        public void columnHttpStatusCode() {
+            doColumn("httpStatusCode");
+        }
+
         public void columnLastAccessTime() {
             doColumn("lastAccessTime");
+        }
+
+        public void columnMimeType() {
+            doColumn("mimeType");
         }
 
         public void columnThreadName() {
