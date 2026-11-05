@@ -466,6 +466,78 @@ paths:
         '500': { $ref: '#/components/responses/InternalServerError' }
         '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
+  /documents/{docId}/similar:
+    parameters:
+      - { $ref: '#/components/parameters/DocId' }
+    get:
+      tags: [search]
+      summary: Documents whose content resembles a document
+      description: |-
+        Returns the documents that have the same content signature as the
+        given document, that is, the same or nearly the same content, so that a
+        client can offer a "similar documents" link next to a hit. The signature
+        (`content_minhash_bits`) is computed by the search engine when a
+        document is indexed. It is the grouping behind the admin duplicate
+        report and the `sdh` search parameter and `similar_docs_*` fields, but
+        this endpoint does not need result collapsing.
+
+        The signature is compared as a whole, so a document whose content was
+        edited enough to change the signature is **not** returned: this finds
+        copies and near-identical documents, not documents that are merely on
+        the same topic. A document with no content or without any word, and
+        any document when the search engine runs without the CodeLibs plugins,
+        has no similar documents (`200` with an empty `data`).
+
+        The given document has to be visible to the caller. A document that does
+        not exist and a document that is hidden by the caller's roles are
+        answered the same way (`not_found`, 404). The same role and virtual host
+        filters and the additional query of the query helper as `GET /search` apply to the
+        given document and to the similar documents, so only
+        documents the caller can see are returned. The given document, and any
+        other document with the same URL, is never part of the result.
+
+        There is a single page of at most 20 documents (`num`, bounded by
+        `paging.search.page.max.size`); there is no `start` or `offset`. The
+        documents are ordered by URL and then document ID, since they all match
+        equally. Each document is converted as a hit of `GET /search` is and has
+        the same fields, including `tags` (the tags the caller can see, while
+        `user.tag.enabled`), and the same whitelist applies
+        (`query.additional.api.response.fields` extends it). There is no query
+        to highlight, so `content_description` is the (HTML-escaped) digest
+        rather than a highlighted passage, and there is no `score`, since the
+        documents are not ranked. The envelope has the metadata of a search
+        result that applies here, under the same names: `exec_time`,
+        `query_time`, `page_size`, `record_count` (all documents with the
+        signature, counted up to `query.track.total.hits`, not only the page),
+        `record_count_relation`, `partial`, `timed_out` and `shard_failed`.
+        Requests are limited per minute
+        (`api.search.similar.rate.limit.per.minute`) per logged-in user, or per
+        client IP for a guest.
+      operationId: similarDocumentsV2
+      parameters:
+        - name: num
+          in: query
+          description: |-
+            Number of documents. Values `<= 0` produce `invalid_request`;
+            values above 20 (or above `paging.search.page.max.size`) are
+            silently clamped, which the response `page_size` shows.
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 20, default: 10 }
+      responses:
+        '200':
+          description: Similar documents returned (possibly none).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimilarDocumentsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
+
   /suggest-words:
     get:
       tags: [suggest]
@@ -1809,6 +1881,32 @@ components:
         owner: { type: string, description: User who owns the tag. }
         mine: { type: boolean, description: Whether the caller owns the tag. }
         shared: { type: boolean, description: Whether every logged-in user sees the tag. }
+
+    SimilarDocumentsResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - { $ref: '#/components/schemas/EnvelopeMeta' }
+            - type: object
+              properties:
+                doc_id: { type: string, description: The document the result is similar to. }
+                exec_time: { type: string, description: 'Elapsed time in seconds, as a decimal string.' }
+                query_time: { type: integer, format: int64 }
+                page_size: { type: integer, description: Number of documents asked for, after clamping. }
+                record_count: { type: integer, format: int64, description: Number of documents with the signature, not only those in `data`. }
+                record_count_relation:
+                  type: string
+                  enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL_TO]
+                partial: { type: boolean }
+                timed_out: { type: boolean }
+                shard_failed: { type: boolean }
+                data:
+                  type: array
+                  description: The documents with the same content signature, ordered by URL and then document ID.
+                  items:
+                    $ref: '#/components/schemas/SearchHit'
 
     # --- Suggest / labels / popular ---------------------------------
     SuggestWordsResponse:

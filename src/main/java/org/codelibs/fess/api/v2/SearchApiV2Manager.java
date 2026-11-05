@@ -46,6 +46,7 @@ import org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHistoryHandler;
+import org.codelibs.fess.api.v2.handlers.SimilarDocumentsHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.TagsHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
@@ -95,6 +96,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code GET /api/v2/documents/export} (CSV/JSON download of the matching documents). */
     @Resource
     protected ExportSearchHandler exportSearchHandler;
+
+    /** Handles {@code GET /api/v2/documents/{id}/similar} (documents whose content resembles a document). */
+    @Resource
+    protected SimilarDocumentsHandler similarDocumentsHandler;
 
     /** Handles {@code GET /api/v2/documents/{id}/favorite} (read favorite state). */
     @Resource
@@ -312,11 +317,15 @@ public class SearchApiV2Manager extends BaseApiManager {
                 }
                 return;
             }
-            // "/documents/{docId}/tags" and "/documents/{docId}/tags/{tagId}". The doc id and the tag
-            // id are single non-empty segments; anything else under /documents/ falls through to the
-            // not_found arm below.
+            // "/documents/{docId}/similar", "/documents/{docId}/tags" and "/documents/{docId}/tags/{tagId}".
+            // The doc id and the tag id are single non-empty segments; anything else under /documents/
+            // falls through to the not_found arm below.
             if (sub.startsWith("/documents/")) {
                 final String[] segments = sub.substring("/documents/".length()).split("/", -1);
+                if (segments.length == 2 && !segments[0].isEmpty() && "similar".equals(segments[1])) {
+                    similarDocumentsHandler.handle(request, response, segments[0]);
+                    return;
+                }
                 if ((segments.length == 2 || segments.length == 3) && !segments[0].isEmpty() && "tags".equals(segments[1])
                         && (segments.length == 2 || !segments[2].isEmpty())) {
                     documentTagsHandler.handle(request, response, segments[0], segments.length == 3 ? segments[2] : null);

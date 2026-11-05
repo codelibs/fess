@@ -128,6 +128,14 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_similarDocuments_isRejectedForAnonymousWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        final CapturingResponse res = process("/api/v2/documents/abc123/similar");
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+    }
+
+    @Test
     public void test_indexDerivedEndpoints_areRejectedForAnonymousWhenLoginRequired() throws Exception {
         setLoginRequired(true);
         for (final String path : new String[] { "/api/v2/labels", "/api/v2/popular-words", "/api/v2/suggest-words",
@@ -185,8 +193,8 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
     @Test
     public void test_tokenEndpoints_passTheGateWithValidAccessTokenWhenLoginRequired() throws Exception {
         setLoginRequired(true);
-        for (final String path : new String[] { "/api/v2/documents/all", "/api/v2/documents/export", "/api/v2/suggest-words",
-                "/api/v2/labels", "/api/v2/popular-words" }) {
+        for (final String path : new String[] { "/api/v2/documents/all", "/api/v2/documents/export", "/api/v2/documents/abc123/similar",
+                "/api/v2/suggest-words", "/api/v2/labels", "/api/v2/popular-words" }) {
             final CapturingResponse res = processWithTokens(path, "Bearer " + VALID_TOKEN);
             // The handler needs a search engine the unit container does not provide, so it may
             // still fail -- but never with the authentication decision.
