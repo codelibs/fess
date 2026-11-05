@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.service;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,9 @@ import org.apache.logging.log4j.Level;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fess.app.service.CrawlStateService.ConfigMetadata;
 import org.codelibs.fess.entity.CrawlProgress;
+import org.codelibs.fess.opensearch.config.exentity.DataConfig;
+import org.codelibs.fess.opensearch.config.exentity.FileConfig;
+import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -60,6 +64,20 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
 
     private final List<String> fetched = new ArrayList<>();
 
+    /** The timeouts the requests were given, in order. */
+    private final List<String> timeouts = new ArrayList<>();
+
+    /** The tasks the service handed to its writer thread, not yet run. */
+    private final List<Runnable> queued = new ArrayList<>();
+
+    private List<WebConfig> webConfigs;
+
+    private List<FileConfig> fileConfigs;
+
+    private List<DataConfig> dataConfigs;
+
+    private final List<Integer> selectedMax = new ArrayList<>();
+
     /** What the configuration holds in its metadata field before the crawler writes. */
     private String existingMetadata;
 
@@ -72,6 +90,8 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
     private List<ConfigMetadata> configs;
 
     private boolean listFails;
+
+    private boolean realList;
 
     private long counted;
 
@@ -87,14 +107,22 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         LogUtil.resetWarnOnce();
+        CrawlStateService.reset();
         stored.clear();
         fetched.clear();
+        timeouts.clear();
+        queued.clear();
+        selectedMax.clear();
+        webConfigs = new ArrayList<>();
+        fileConfigs = new ArrayList<>();
+        dataConfigs = new ArrayList<>();
         existingMetadata = null;
         fetchFails = false;
         storeFails = false;
         configIndex = "fess_config";
         configs = new ArrayList<>();
         listFails = false;
+        realList = false;
         counted = 321;
         countedQuery = null;
         countedIndex = null;
@@ -105,6 +133,21 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
             @Override
             public String getIndexConfigIndex() {
                 return configIndex;
+            }
+
+            @Override
+            public Integer getPageWebConfigMaxFetchSizeAsInteger() {
+                return 2;
+            }
+
+            @Override
+            public Integer getPageFileConfigMaxFetchSizeAsInteger() {
+                return 2;
+            }
+
+            @Override
+            public Integer getPageDataConfigMaxFetchSizeAsInteger() {
+                return 2;
             }
 
             @Override
@@ -124,8 +167,9 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
         });
         service = new CrawlStateService() {
             @Override
-            protected String fetchMetadata(final String index, final String id) {
+            protected String fetchMetadata(final String index, final String id, final String timeout) {
                 fetched.add(index + "/" + id);
+                timeouts.add(timeout);
                 if (fetchFails) {
                     throw new IllegalStateException("search engine is down");
                 }
@@ -133,7 +177,8 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
             }
 
             @Override
-            protected void storeMetadata(final String index, final String id, final String metadata) {
+            protected void storeMetadata(final String index, final String id, final String metadata, final String timeout) {
+                timeouts.add(timeout);
                 if (storeFails) {
                     throw new IllegalStateException("search engine is down");
                 }
@@ -142,6 +187,9 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
 
             @Override
             protected List<ConfigMetadata> listConfigMetadata() {
+                if (realList) {
+                    return super.listConfigMetadata();
+                }
                 if (listFails) {
                     throw new IllegalStateException("search engine is down");
                 }
@@ -149,7 +197,31 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
             }
 
             @Override
-            protected long count(final String index, final QueryBuilder query) {
+            protected void execute(final Runnable task) {
+                queued.add(task);
+            }
+
+            @Override
+            protected List<WebConfig> selectWebConfigs(final int max) {
+                selectedMax.add(max);
+                return webConfigs;
+            }
+
+            @Override
+            protected List<FileConfig> selectFileConfigs(final int max) {
+                selectedMax.add(max);
+                return fileConfigs;
+            }
+
+            @Override
+            protected List<DataConfig> selectDataConfigs(final int max) {
+                selectedMax.add(max);
+                return dataConfigs;
+            }
+
+            @Override
+            protected long count(final String index, final QueryBuilder query, final String timeout) {
+                timeouts.add(timeout);
                 if (countFails) {
                     throw new IllegalStateException("search engine is down");
                 }
@@ -162,6 +234,7 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
+        CrawlStateService.reset();
         LogUtil.resetWarnOnce();
         super.tearDown(testInfo);
     }
@@ -302,17 +375,6 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_write_metadataIsCapped() {
-        // a stored value that is within the cap, to which the progress keys do not fit
-        existingMetadata = "{\"other\":\"" + "x".repeat(CrawlStateService.MAX_METADATA_LENGTH - 30) + "\"}";
-        assertTrue(existingMetadata.length() < CrawlStateService.MAX_METADATA_LENGTH);
-
-        service.saveProgress("W1", 1, 1000);
-
-        assertEquals(0, stored.size());
-    }
-
-    @Test
     public void test_write_failedReadIsNotFollowedByAWrite() {
         existingMetadata = "{\"lastCount\":61}";
         fetchFails = true;
@@ -429,5 +491,226 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
     public void test_countDocuments_failureIsMinusOne() {
         countFails = true;
         assertEquals(-1L, service.countDocuments("D1", "s"));
+    }
+
+    // ===================================================================================
+    //                                                                      Hardening
+    //                                                                      =========
+
+    @Test
+    public void test_timeouts_progressIsShortAndTheResultIsLonger() {
+        service.saveProgress("W1", 1, 1000);
+        // the read of the stored metadata and the write
+        assertEquals(List.of(CrawlStateService.PROGRESS_TIMEOUT, CrawlStateService.PROGRESS_TIMEOUT), timeouts);
+
+        timeouts.clear();
+        service.saveCompleted("W1", 5);
+        assertEquals(List.of(CrawlStateService.RESULT_TIMEOUT), timeouts);
+
+        timeouts.clear();
+        service.endProgress("F2");
+        assertEquals(List.of(CrawlStateService.RESULT_TIMEOUT, CrawlStateService.RESULT_TIMEOUT), timeouts);
+        assertTrue(CrawlStateService.PROGRESS_TIMEOUT.length() <= 2);
+    }
+
+    @Test
+    public void test_saveProgressAsync_doesNothingOnTheCallingThread() {
+        final AtomicInteger counted = new AtomicInteger();
+        service.saveProgressAsync("W1", () -> {
+            counted.incrementAndGet();
+            return 7;
+        }, 1000);
+
+        // neither the count nor a request to the search engine has happened yet
+        assertEquals(0, counted.get());
+        assertEquals(0, fetched.size());
+        assertEquals(0, stored.size());
+        assertEquals(1, queued.size());
+
+        queued.get(0).run();
+        assertEquals(1, counted.get());
+        assertEquals(7L, number(stored.get(0).map(), "progressCount"));
+    }
+
+    @Test
+    public void test_saveProgressAsync_dropsAWriteWhileTheLastOneIsPending() {
+        service.saveProgressAsync("W1", () -> 1, 1000);
+        service.saveProgressAsync("W1", () -> 2, 1000);
+        service.saveProgressAsync("W1", () -> 3, 1000);
+        // another configuration has its own slot
+        service.saveProgressAsync("F1", () -> 4, 1000);
+        assertEquals(2, queued.size());
+
+        queued.get(0).run();
+        assertEquals(1L, number(stored.get(0).map(), "progressCount"));
+        // once the write is done the next one is accepted
+        service.saveProgressAsync("W1", () -> 5, 1000);
+        assertEquals(3, queued.size());
+    }
+
+    @Test
+    public void test_saveProgressAsync_aWriteQueuedBeforeTheEndDoesNotFollowIt() {
+        service.saveProgressAsync("W1", () -> 3, 1000);
+        service.saveCompleted("W1", 61);
+        assertEquals(1, stored.size());
+
+        queued.get(0).run();
+        // the late progress would have set progressExpiredTime again and shown a finished crawl as running
+        assertEquals(1, stored.size());
+        assertEquals(0L, number(stored.get(0).map(), "progressExpiredTime"));
+
+        // and nothing is queued for a crawl that has ended
+        service.saveProgressAsync("W1", () -> 4, 1000);
+        assertEquals(1, queued.size());
+    }
+
+    @Test
+    public void test_saveProgressAsync_unknownOrFailingCountWritesNothingAndFreesTheSlot() {
+        service.saveProgressAsync("W1", () -> -1, 1000);
+        queued.get(0).run();
+        assertEquals(0, stored.size());
+
+        service.saveProgressAsync("W1", () -> {
+            throw new IllegalStateException("search engine is down");
+        }, 1000);
+        queued.get(1).run();
+        assertEquals(0, stored.size());
+
+        service.saveProgressAsync("W1", () -> 2, 1000);
+        assertEquals(3, queued.size());
+        service.saveProgressAsync("bad id", () -> 2, 1000);
+        assertEquals(3, queued.size());
+    }
+
+    @Test
+    public void test_write_tooLongMetadataLosesTheKeysItDoesNotKnow() {
+        // a number under a key of its own, so that only the key marks it as a stray
+        existingMetadata = "{\"lastCount\":61,\"" + "k".repeat(CrawlStateService.MAX_METADATA_LENGTH - 40) + "\":1}";
+        assertTrue(existingMetadata.length() < CrawlStateService.MAX_METADATA_LENGTH);
+
+        service.saveProgress("W1", 1, 1000);
+
+        // the write that does not fit is not given up: the stray key goes, the known keys stay
+        assertEquals(1, stored.size());
+        final Map<String, Object> map = stored.get(0).map();
+        assertEquals(4, map.size());
+        assertEquals(61L, number(map, "lastCount"));
+        assertEquals(1L, number(map, "progressCount"));
+        assertTrue(stored.get(0).json.length() <= CrawlStateService.MAX_METADATA_LENGTH);
+
+        // and the next write does not bring it back
+        service.endProgress("W1");
+        assertEquals(4, stored.get(1).map().size());
+    }
+
+    @Test
+    public void test_write_tooLongMetadataLosesAKnownKeyThatIsNotANumber() {
+        existingMetadata = "{\"lastCount\":\"" + "x".repeat(CrawlStateService.MAX_METADATA_LENGTH - 40) + "\"}";
+
+        service.saveProgress("W1", 1, 1000);
+
+        assertEquals(1, stored.size());
+        assertFalse(stored.get(0).map().containsKey("lastCount"));
+        assertEquals(1L, number(stored.get(0).map(), "progressCount"));
+    }
+
+    @Test
+    public void test_getRunningProgress_doesNotTrustAFarAwayExpiry() {
+        final long now = System.currentTimeMillis();
+        configs.add(new ConfigMetadata("W1", "Forever", "{\"progressCount\":5,\"progressExpiredTime\":" + Long.MAX_VALUE + "}"));
+        configs.add(new ConfigMetadata("W2", "Two days",
+                "{\"progressCount\":5,\"progressExpiredTime\":" + (now + 2 * 24 * 3600 * 1000L) + "}"));
+        configs.add(new ConfigMetadata("W3", "Huge", "{\"progressCount\":5,\"progressExpiredTime\":99999999999999999999999}"));
+        configs.add(new ConfigMetadata("W4", "Fraction", "{\"progressCount\":5,\"progressExpiredTime\":" + (now + 20000) + ".5}"));
+        configs.add(new ConfigMetadata("W5", "Soon", "{\"progressCount\":5,\"progressExpiredTime\":" + (now + 20000) + "}"));
+
+        final List<CrawlProgress> list = service.getRunningProgress();
+
+        assertEquals(1, list.size());
+        assertEquals("Soon", list.get(0).getName());
+    }
+
+    @Test
+    public void test_getRunningProgress_negativeCountsAreIgnored() {
+        configs.add(new ConfigMetadata("W1", "Negative", running(-5, -10L, 1, 20000)));
+        configs.add(new ConfigMetadata("W2", "Overflow", running(Long.MAX_VALUE, 1L, 1, 20000)));
+
+        final List<CrawlProgress> list = service.getRunningProgress();
+
+        assertEquals(2, list.size());
+        assertEquals(0L, list.get(0).getCount());
+        assertNull(list.get(0).getPercent());
+        assertEquals(Integer.valueOf(99), list.get(1).getPercent());
+    }
+
+    @Test
+    public void test_listConfigMetadata_readsEachTypeUpToItsCap() {
+        final WebConfig web = new WebConfig();
+        web.setId("1");
+        web.setName("web");
+        web.setMetadata("{}");
+        webConfigs.add(web);
+        final FileConfig file = new FileConfig();
+        file.setId("2");
+        file.setName("file");
+        fileConfigs.add(file);
+        final DataConfig data = new DataConfig();
+        data.setId("3");
+        data.setName("data");
+        dataConfigs.add(data);
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(CrawlStateService.class);
+        try {
+            realList = true;
+            final List<ConfigMetadata> list = service.listConfigMetadata();
+            assertEquals(List.of("W1", "F2", "D3"), list.stream().map(ConfigMetadata::configId).toList());
+            assertEquals(List.of(2, 2, 2), selectedMax);
+            // under the cap, nothing to say
+            assertEquals(0, appender.eventsAt(Level.WARN).size());
+
+            // a type that reaches its cap is reported once, and not as a crawl that is skipped
+            final WebConfig more = new WebConfig();
+            more.setId("4");
+            webConfigs.add(more);
+            service.listConfigMetadata();
+            service.listConfigMetadata();
+            assertEquals(1, appender.eventsAt(Level.WARN).size());
+            assertTrue(appender.messagesAt(Level.WARN).get(0).contains("page.web.config.max.fetch.size"));
+            assertFalse(appender.messagesAt(Level.WARN).get(0).contains("not crawled"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_state_isSharedByEveryInstance() {
+        // the container makes a new service for every lookup, and the crawl loop and the data store threads each get one
+        final CrawlStateService other = new CrawlStateService() {
+            @Override
+            protected String fetchMetadata(final String index, final String id, final String timeout) {
+                return existingMetadata;
+            }
+
+            @Override
+            protected void storeMetadata(final String index, final String id, final String metadata, final String timeout) {
+                stored.add(new Stored(index, id, metadata));
+            }
+        };
+
+        service.saveProgressAsync("W1", () -> 1, 1000);
+        // the same configuration is pending for the other instance too
+        other.saveProgressAsync("W1", () -> 2, 1000);
+        assertEquals(1, queued.size());
+
+        // the end seen by one instance holds back the queued write of the other
+        other.saveCompleted("W1", 61);
+        assertEquals(1, stored.size());
+        queued.get(0).run();
+        assertEquals(1, stored.size());
+
+        // a progress written directly is held back the same way
+        other.endProgress("F9");
+        service.saveProgress("F9", 3, 1000);
+        assertEquals(2, stored.size());
     }
 }

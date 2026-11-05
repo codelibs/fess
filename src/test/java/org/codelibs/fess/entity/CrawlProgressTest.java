@@ -17,6 +17,7 @@ package org.codelibs.fess.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -63,5 +64,29 @@ public class CrawlProgressTest {
         assertEquals(7L, progress.getCount());
         assertEquals(70L, progress.getLastCount());
         assertEquals(1234L, progress.getUpdatedTime());
+    }
+
+    @Test
+    public void test_calculatePercent_doesNotOverflow() {
+        // count * 100 wraps to a negative number here, and the page would render width:-N%
+        assertEquals(Integer.valueOf(99), CrawlProgress.calculatePercent(Long.MAX_VALUE, 1));
+        assertEquals(Integer.valueOf(99), CrawlProgress.calculatePercent(Long.MAX_VALUE / 50, 1));
+        assertEquals(Integer.valueOf(2), CrawlProgress.calculatePercent(Long.MAX_VALUE / 50, Long.MAX_VALUE));
+        assertEquals(Integer.valueOf(50), CrawlProgress.calculatePercent(Long.MAX_VALUE / 2, Long.MAX_VALUE));
+        for (final long count : new long[] { 0, 1, 99, 100, 1L << 40, Long.MAX_VALUE / 100, Long.MAX_VALUE / 99, Long.MAX_VALUE }) {
+            for (final long last : new long[] { 1, 100, 1L << 50, Long.MAX_VALUE }) {
+                final int percent = CrawlProgress.calculatePercent(count, last);
+                assertTrue(percent >= 0 && percent <= CrawlProgress.MAX_RUNNING_PERCENT, count + "/" + last);
+            }
+        }
+    }
+
+    @Test
+    public void test_negativeCountsAreTakenAsZero() {
+        final CrawlProgress progress = new CrawlProgress("W1", "site", -5, -10, 0L);
+        assertEquals(0L, progress.getCount());
+        assertEquals(0L, progress.getLastCount());
+        assertNull(progress.getPercent());
+        assertEquals(Integer.valueOf(0), new CrawlProgress("W1", "site", -5, 100, 0L).getPercent());
     }
 }

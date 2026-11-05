@@ -577,7 +577,8 @@ public class WebFsIndexHelper {
                 try {
                     final CrawlingConfig crawlingConfig = getCrawlingConfig(sid);
                     if (crawlingConfig != null) {
-                        getCrawlStateService().saveProgress(crawlingConfig.getConfigId(), getAccessResultCount(sid),
+                        // the count and the write happen on the writer thread: this loop must not wait for the search engine
+                        getCrawlStateService().saveProgressAsync(crawlingConfig.getConfigId(), () -> getAccessResultCount(sid),
                                 CrawlStateService.getProgressTtl(crawlingExecutionInterval));
                     }
                 } catch (final Exception e) {
