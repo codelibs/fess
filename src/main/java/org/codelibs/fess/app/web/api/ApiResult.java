@@ -555,6 +555,49 @@ public class ApiResult {
     }
 
     /**
+     * Represents an API response for the progress of the running crawls.
+     * @param <T> the type of the progress entries
+     */
+    public static class ApiProgressResponse<T> extends ApiResponse {
+        /** The progress of the running crawls. */
+        protected List<T> progress;
+
+        /** The number of the running crawls. */
+        protected long total = 0;
+
+        /**
+         * Default constructor for ApiProgressResponse.
+         */
+        public ApiProgressResponse() {
+        }
+
+        /**
+         * Sets the progress of the running crawls.
+         * @param progress The progress entries.
+         * @return This ApiProgressResponse instance.
+         */
+        public ApiProgressResponse<T> progress(final List<T> progress) {
+            this.progress = progress;
+            return this;
+        }
+
+        /**
+         * Sets the number of the running crawls.
+         * @param total The number of the running crawls.
+         * @return This ApiProgressResponse instance.
+         */
+        public ApiProgressResponse<T> total(final long total) {
+            this.total = total;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    /**
      * Represents an API response containing a list of log files.
      */
     public static class ApiLogFilesResponse extends ApiResponse {

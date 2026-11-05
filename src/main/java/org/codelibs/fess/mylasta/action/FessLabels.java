@@ -1457,6 +1457,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Thread Dump */
     public static final String LABELS_crawling_info_thread_dump = "{labels.crawling_info_thread_dump}";
 
+    /** The key of the message: Running Crawls */
+    public static final String LABELS_crawling_info_running_title = "{labels.crawling_info_running_title}";
+
+    /** The key of the message: Crawl Configuration */
+    public static final String LABELS_crawling_info_running_config = "{labels.crawling_info_running_config}";
+
+    /** The key of the message: Processed Documents */
+    public static final String LABELS_crawling_info_running_count = "{labels.crawling_info_running_count}";
+
+    /** The key of the message: Progress */
+    public static final String LABELS_crawling_info_running_progress = "{labels.crawling_info_running_progress}";
+
     /** The key of the message: Crawler Start Time */
     public static final String LABELS_crawling_info_CrawlerStartTime = "{labels.crawling_info_CrawlerStartTime}";
 

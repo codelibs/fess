@@ -66,6 +66,10 @@
       "description" : {
         "type": "text",
         "analyzer": "standard_analyzer"
+      },
+      "metadata": {
+        "type": "text",
+        "index": false
       }
     }
 }

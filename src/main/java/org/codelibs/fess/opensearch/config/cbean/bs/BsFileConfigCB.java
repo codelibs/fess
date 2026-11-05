@@ -228,6 +228,10 @@ public class BsFileConfigCB extends EsAbstractConditionBean {
             doColumn("maxAccessCount");
         }
 
+        public void columnMetadata() {
+            doColumn("metadata");
+        }
+
         public void columnName() {
             doColumn("name");
         }

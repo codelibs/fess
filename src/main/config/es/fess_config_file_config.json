@@ -43,6 +43,10 @@
           "maxAccessCount" : {
             "type" : "long"
           },
+          "metadata" : {
+            "type" : "text",
+            "index" : false
+          },
           "name" : {
             "type" : "keyword"
           },
