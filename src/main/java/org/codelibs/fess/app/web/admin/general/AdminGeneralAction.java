@@ -37,6 +37,7 @@ import org.codelibs.fess.llm.LlmClientManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.TestmailPostcard;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ThemeSettingsUtil;
 import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -67,6 +68,9 @@ public class AdminGeneralAction extends FessAdminAction {
      * literal is the identifier and there is no constant for it elsewhere.
      */
     private static final String SSO_TYPE_SPNEGO = "spnego";
+
+    /** The form property that carries the theme settings. */
+    public static final String THEME_SETTINGS_FIELD = "themeSettings";
 
     private static final Logger logger = LogManager.getLogger(AdminGeneralAction.class);
 
@@ -166,6 +170,9 @@ public class AdminGeneralAction extends FessAdminAction {
             if (isSpnegoNtlmPromptUnsupported(form)) {
                 messages.addErrorsSpnegoPromptNtlmRequiresBasic("spnegoPromptNtlm");
             }
+            if (isThemeSettingsInvalid(form)) {
+                messages.addErrorsInvalidThemeSettings(THEME_SETTINGS_FIELD);
+            }
         }, () -> asHtml(path_AdminGeneral_AdminGeneralJsp));
         verifyToken(() -> asHtml(path_AdminGeneral_AdminGeneralJsp));
 
@@ -231,6 +238,8 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setNotificationLogin(form.notificationLogin);
         fessConfig.setNotificationSearchTop(form.notificationSearchTop);
         fessConfig.setNotificationAdvanceSearch(form.notificationAdvanceSearch);
+        // A blank value is stored as null, which removes the property.
+        fessConfig.setThemeSettings(ThemeSettingsUtil.toStoredValue(form.themeSettings));
         fessConfig.setSlackWebhookUrls(form.slackWebhookUrls);
         fessConfig.setGoogleChatWebhookUrls(form.googleChatWebhookUrls);
         fessConfig.setLogNotificationEnabled(isCheckboxEnabled(form.logNotificationEnabled));
@@ -398,6 +407,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.notificationLogin = fessConfig.getNotificationLogin();
         form.notificationSearchTop = fessConfig.getNotificationSearchTop();
         form.notificationAdvanceSearch = fessConfig.getNotificationAdvanceSearch();
+        form.themeSettings = ThemeSettingsUtil.toText(fessConfig.getThemeSettingsMap());
         form.slackWebhookUrls = fessConfig.getSlackWebhookUrls();
         form.googleChatWebhookUrls = fessConfig.getGoogleChatWebhookUrls();
         form.logNotificationEnabled = fessConfig.isLogNotificationEnabled() ? Constants.TRUE : Constants.FALSE;
@@ -613,6 +623,18 @@ public class AdminGeneralAction extends FessAdminAction {
             return false;
         }
         return !isCheckboxEnabled(form.spnegoAllowBasic) && isCheckboxEnabled(form.spnegoPromptNtlm);
+    }
+
+    /**
+     * Checks whether the submitted theme settings cannot be saved: a line that is not a valid key=value,
+     * or too many entries.
+     * See {@link ThemeSettingsUtil}.
+     *
+     * @param form the form holding the settings to be stored
+     * @return true if the value must be rejected
+     */
+    public static boolean isThemeSettingsInvalid(final EditForm form) {
+        return !ThemeSettingsUtil.isAcceptable(form.themeSettings);
     }
 
     /**

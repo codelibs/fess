@@ -407,6 +407,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Prompt NTLM requires Basic Auth to be enabled. */
     public static final String ERRORS_spnego_prompt_ntlm_requires_basic = "{errors.spnego_prompt_ntlm_requires_basic}";
 
+    /** The key of the message: Enter at most 100 lines in the form key=value. A key may contain only letters, digits, underscore, dot and hyphen (up to 64 characters). A value may have up to 1000 characters and no control characters. */
+    public static final String ERRORS_invalid_theme_settings = "{errors.invalid_theme_settings}";
+
     /** The key of the message: Failed to upload theme: {0} */
     public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
 
@@ -2503,6 +2506,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsSpnegoPromptNtlmRequiresBasic(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_spnego_prompt_ntlm_requires_basic));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_theme_settings' with parameters.
+     * <pre>
+     * message: Enter at most 100 lines in the form key=value. A key may contain only letters, digits, underscore, dot and hyphen (up to 64 characters). A value may have up to 1000 characters and no control characters.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidThemeSettings(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_theme_settings));
         return this;
     }
 

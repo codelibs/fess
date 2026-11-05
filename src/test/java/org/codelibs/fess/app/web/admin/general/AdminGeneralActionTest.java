@@ -407,4 +407,53 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
         form.purgeSuggestSearchLogDay = 0;
         return form;
     }
+
+    @Test
+    public void test_updateConfig_themeSettings_normalizedAndBlankRemovesTheProperty() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EditForm form = createEditForm();
+        form.themeSettings = SP + "a" + SP + EQ + SP + "1" + SP + LF + "b" + EQ + "x" + LF + "a" + EQ + "2" + LF;
+        AdminGeneralAction.updateConfig(fessConfig, form);
+        assertEquals("a" + EQ + "2" + LF + "b" + EQ + "x",
+                ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+        assertEquals("2", fessConfig.getThemeSettingsMap().get("a"));
+        final EditForm reloaded = new EditForm();
+        AdminGeneralAction.updateForm(fessConfig, reloaded);
+        assertEquals("a" + EQ + "2" + LF + "b" + EQ + "x", reloaded.themeSettings);
+        // A blank text field arrives as null, which removes the property instead of storing an empty value.
+        reloaded.themeSettings = null;
+        AdminGeneralAction.updateConfig(fessConfig, reloaded);
+        assertNull(ComponentUtil.getSystemProperties().getProperty(Constants.THEME_SETTINGS_PROPERTY));
+        assertTrue(fessConfig.getThemeSettingsMap().isEmpty());
+    }
+
+    @Test
+    public void test_isThemeSettingsInvalid() {
+        assertFalse(AdminGeneralAction.isThemeSettingsInvalid(createEditForm()));
+        assertFalse(invalidSettings(LF));
+        assertFalse(invalidSettings("a" + EQ + "1" + LF + "flag" + EQ));
+        assertTrue(invalidSettings("no separator"));
+        assertTrue(invalidSettings("constructor" + EQ + "x"));
+        assertTrue(invalidSettings("a" + EQ + "1" + LF + "bad key" + EQ + "2"));
+        assertTrue(invalidSettings(lines(101)));
+        assertFalse(invalidSettings(lines(100)));
+    }
+
+    private static final String LF = String.valueOf((char) 10);
+
+    private static final String SP = String.valueOf((char) 32);
+
+    private static final String EQ = String.valueOf((char) 61);
+
+    private boolean invalidSettings(final String value) {
+        final EditForm form = createEditForm();
+        form.themeSettings = value;
+        return AdminGeneralAction.isThemeSettingsInvalid(form);
+    }
+
+    private static String lines(final int count) {
+        return java.util.stream.IntStream.range(0, count)
+                .mapToObj(i -> "k" + i + EQ + "v")
+                .collect(java.util.stream.Collectors.joining(LF));
+    }
 }

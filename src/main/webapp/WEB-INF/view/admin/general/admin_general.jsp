@@ -221,6 +221,19 @@ ${fe:html(true)}
                                         </la:select>
                                     </div>
                                 </div>
+                                <%-- Theme Settings --%>
+                                <div class="form-group row">
+                                    <label for="themeSettings"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.theme_settings"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="themeSettings"/>
+                                        <la:textarea styleId="themeSettings" property="themeSettings" rows="4"
+                                                     styleClass="form-control"/>
+                                        <small class="form-text text-muted"><la:message
+                                                key="labels.theme_settings_help"/></small>
+                                    </div>
+                                </div>
                                     <%-- Crawler --%>
                                 <h4><la:message key="labels.general_menu_crawler"/></h4>
                                 <div class="form-group row">
