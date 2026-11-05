@@ -21,12 +21,14 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
+import org.codelibs.fess.app.service.CrawlStateService;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiLogResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.entity.CrawlProgress;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfo;
 import org.lastaflute.web.Execute;
@@ -54,6 +56,9 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     @Resource
     private CrawlingInfoService crawlingInfoService;
 
+    @Resource
+    private CrawlStateService crawlStateService;
+
     /** Helper for managing crawling processes and session information */
     @Resource
     protected ProcessHelper processHelper;
@@ -79,6 +84,19 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
                 .total(pager.getAllRecordCount())
                 .status(ApiResult.Status.OK)
                 .result());
+    }
+
+    /**
+     * Retrieves the progress of the running crawls. The percentage is relative to the number of documents of the
+     * previous completed crawl of the same crawl configuration, and is omitted when there is none.
+     *
+     * @return JSON response containing the running crawls
+     */
+    // GET /api/admin/crawlinginfo/progress
+    @Execute
+    public JsonResponse<ApiResult> get$progress() {
+        final List<CrawlProgress> list = crawlStateService.getRunningProgress();
+        return asJson(new ApiResult.ApiProgressResponse<CrawlProgress>().progress(list).total(list.size()).status(Status.OK).result());
     }
 
     /**

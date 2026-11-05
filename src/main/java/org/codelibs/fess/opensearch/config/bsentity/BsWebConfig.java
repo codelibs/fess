@@ -76,6 +76,9 @@ public class BsWebConfig extends EsAbstractEntity {
     /** maxAccessCount */
     protected Long maxAccessCount;
 
+    /** metadata */
+    protected String metadata;
+
     /** name */
     protected String name;
 
@@ -166,6 +169,9 @@ public class BsWebConfig extends EsAbstractEntity {
         if (maxAccessCount != null) {
             addFieldToSource(sourceMap, "maxAccessCount", maxAccessCount);
         }
+        if (metadata != null) {
+            addFieldToSource(sourceMap, "metadata", metadata);
+        }
         if (name != null) {
             addFieldToSource(sourceMap, "name", name);
         }
@@ -222,6 +228,7 @@ public class BsWebConfig extends EsAbstractEntity {
         sb.append(dm).append(includedUrls);
         sb.append(dm).append(intervalTime);
         sb.append(dm).append(maxAccessCount);
+        sb.append(dm).append(metadata);
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
         sb.append(dm).append(permissions);
@@ -370,6 +377,16 @@ public class BsWebConfig extends EsAbstractEntity {
     public void setMaxAccessCount(Long value) {
         registerModifiedProperty("maxAccessCount");
         this.maxAccessCount = value;
+    }
+
+    public String getMetadata() {
+        checkSpecifiedProperty("metadata");
+        return convertEmptyToNull(metadata);
+    }
+
+    public void setMetadata(String value) {
+        registerModifiedProperty("metadata");
+        this.metadata = value;
     }
 
     public String getName() {

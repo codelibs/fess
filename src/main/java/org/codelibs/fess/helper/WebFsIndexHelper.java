@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.CrawlStateService;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.CrawlerStatus;
@@ -41,6 +42,7 @@ import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
@@ -98,6 +100,11 @@ public class WebFsIndexHelper {
     protected final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<>());
 
     /**
+     * Time the progress of the running crawls was last written to the crawl state.
+     */
+    private long lastProgressTime = 0;
+
+    /**
      * Initiates crawling for specified web and file configurations.
      *
      * @param sessionId The session ID for this crawling operation
@@ -148,6 +155,7 @@ public class WebFsIndexHelper {
 
         final List<String> sessionIdList = new ArrayList<>();
         crawlerList.clear();
+        lastProgressTime = 0;
         final List<String> crawlerStatusList = new ArrayList<>();
         // Web
         for (final WebConfig webConfig : webConfigList) {
@@ -458,6 +466,8 @@ public class WebFsIndexHelper {
                     break;
                 }
 
+                saveProgress(crawlerStatusList);
+
                 if (activeCrawlerNum < multiprocessCrawlingCount) {
                     // start crawling
                     crawlerList.get(startedCrawlerNum).execute();
@@ -475,6 +485,7 @@ public class WebFsIndexHelper {
                         crawlerList.get(i).awaitTermination();
                         crawlerStatusList.set(i, Constants.DONE);
                         final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
+                        saveCrawlResult(sid);
                         indexUpdater.addFinishedSessionId(sid);
                         activeCrawlerNum--;
                     }
@@ -488,9 +499,11 @@ public class WebFsIndexHelper {
                 for (int i = 0; i < crawlerList.size(); i++) {
                     final Crawler crawler = crawlerList.get(i);
                     crawler.awaitTermination(crawlingExecutionInterval);
+                    saveProgress(crawlerStatusList);
                     if (crawler.getCrawlerContext().getStatus() == CrawlerStatus.DONE && !Constants.DONE.equals(crawlerStatusList.get(i))) {
                         crawlerStatusList.set(i, Constants.DONE);
                         final String sid = crawler.getCrawlerContext().getSessionId();
+                        saveCrawlResult(sid);
                         indexUpdater.addFinishedSessionId(sid);
                         try {
                             crawler.close();
@@ -543,6 +556,88 @@ public class WebFsIndexHelper {
             ComponentUtil.getCrawlingConfigHelper().remove(sid);
             deleteCrawlData(sid);
         }
+    }
+
+    /**
+     * Writes the number of documents the running crawls have processed to the crawl state, at most once
+     * per crawling execution interval. The count is the number of access results of the crawl, which is
+     * also what the previous completed crawl is compared by.
+     *
+     * @param crawlerStatusList The statuses of the crawlers, in the order of the crawler list
+     */
+    protected void saveProgress(final List<String> crawlerStatusList) {
+        final long now = System.currentTimeMillis();
+        if (now - lastProgressTime < crawlingExecutionInterval) {
+            return;
+        }
+        lastProgressTime = now;
+        for (int i = 0; i < crawlerList.size() && i < crawlerStatusList.size(); i++) {
+            if (Constants.RUNNING.equals(crawlerStatusList.get(i))) {
+                final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
+                try {
+                    final CrawlingConfig crawlingConfig = getCrawlingConfig(sid);
+                    if (crawlingConfig != null) {
+                        getCrawlStateService().saveProgress(crawlingConfig.getConfigId(), getAccessResultCount(sid),
+                                CrawlStateService.getProgressTtl(crawlingExecutionInterval));
+                    }
+                } catch (final Exception e) {
+                    logger.debug("Failed to save the progress of a crawl: sessionId={}", sid, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Writes the result of a finished crawl to the crawl state. This is called before the session is
+     * handed to the index updater, because the index updater deletes the access results of a finished
+     * session, and their number is the count the next crawl is compared with. A crawl that was stopped
+     * does not replace that count.
+     *
+     * @param sid The session ID of the finished crawl
+     */
+    protected void saveCrawlResult(final String sid) {
+        try {
+            final CrawlingConfig crawlingConfig = getCrawlingConfig(sid);
+            if (crawlingConfig == null) {
+                return;
+            }
+            if (ComponentUtil.getSystemHelper().isForceStop()) {
+                getCrawlStateService().endProgress(crawlingConfig.getConfigId());
+            } else {
+                getCrawlStateService().saveCompleted(crawlingConfig.getConfigId(), getAccessResultCount(sid));
+            }
+        } catch (final Exception e) {
+            logger.debug("Failed to save the result of a crawl: sessionId={}", sid, e);
+        }
+    }
+
+    /**
+     * Gets the crawl configuration a crawler session was started for.
+     *
+     * @param sid The session ID of the crawler
+     * @return The crawl configuration, or null if there is none
+     */
+    protected CrawlingConfig getCrawlingConfig(final String sid) {
+        return ComponentUtil.getCrawlingConfigHelper().get(sid);
+    }
+
+    /**
+     * Gets the service of the crawl state.
+     *
+     * @return The crawl state service
+     */
+    protected CrawlStateService getCrawlStateService() {
+        return ComponentUtil.getComponent(CrawlStateService.class);
+    }
+
+    /**
+     * Counts the access results a crawl has stored.
+     *
+     * @param sid The session ID of the crawl
+     * @return The number of access results
+     */
+    protected int getAccessResultCount(final String sid) {
+        return ComponentUtil.getComponent(OpenSearchDataService.class).getCount(sid);
     }
 
     /**

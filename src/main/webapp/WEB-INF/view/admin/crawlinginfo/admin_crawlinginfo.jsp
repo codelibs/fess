@@ -49,6 +49,42 @@ ${fe:html(true)}
                                 </la:info>
                                 <la:errors/>
                             </div>
+                            <%-- Running crawls --%>
+                            <c:if test="${not empty runningCrawls}">
+                                <div class="row top10">
+                                    <div class="col-sm-12">
+                                        <h4><la:message key="labels.crawling_info_running_title"/></h4>
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.crawling_info_running_title" />">
+                                            <thead>
+                                            <tr>
+                                                <th><la:message key="labels.crawling_info_running_config"/></th>
+                                                <th><la:message key="labels.crawling_info_running_count"/></th>
+                                                <th><la:message key="labels.crawling_info_running_progress"/></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <c:forEach var="crawl" items="${runningCrawls}">
+                                                <tr>
+                                                    <td>${f:h(crawl.name)}</td>
+                                                    <td>${crawl.count}</td>
+                                                    <td>
+                                                        <c:if test="${crawl.percent != null}">
+                                                            <div class="progress">
+                                                                <div class="progress-bar" role="progressbar"
+                                                                     style="width: ${crawl.percent}%"
+                                                                     aria-valuenow="${crawl.percent}" aria-valuemin="0"
+                                                                     aria-valuemax="100">${crawl.percent}%</div>
+                                                            </div>
+                                                        </c:if>
+                                                        <c:if test="${crawl.percent == null}">-</c:if>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </c:if>
                             <div class="row">
                                 <div class="col-sm-12">
                                     <la:form styleClass="form-inline"

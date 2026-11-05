@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
+import org.codelibs.fess.app.service.CrawlStateService;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -56,6 +57,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     private CrawlingInfoService crawlingInfoService;
     @Resource
     private CrawlingInfoPager crawlingInfoPager;
+    @Resource
+    private CrawlStateService crawlStateService;
     /** The process helper. */
     @Resource
     protected ProcessHelper processHelper;
@@ -155,6 +158,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
      */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
+        RenderDataUtil.register(data, "runningCrawls", crawlStateService.getRunningProgress());
 
         // restore from pager
         copyBeanToBean(crawlingInfoPager, form, op -> op.include("sessionId"));
@@ -272,6 +276,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             RenderDataUtil.register(data, "crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
+            RenderDataUtil.register(data, "runningCrawls", crawlStateService.getRunningProgress());
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(crawlingInfoPager, form, op -> op.include("id"));

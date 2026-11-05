@@ -208,6 +208,10 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
             doColumn("handlerScript");
         }
 
+        public void columnMetadata() {
+            doColumn("metadata");
+        }
+
         public void columnName() {
             doColumn("name");
         }

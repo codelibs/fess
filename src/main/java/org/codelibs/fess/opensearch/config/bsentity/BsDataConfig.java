@@ -61,6 +61,9 @@ public class BsDataConfig extends EsAbstractEntity {
     /** handlerScript */
     protected String handlerScript;
 
+    /** metadata */
+    protected String metadata;
+
     /** name */
     protected String name;
 
@@ -124,6 +127,9 @@ public class BsDataConfig extends EsAbstractEntity {
         if (handlerScript != null) {
             addFieldToSource(sourceMap, "handlerScript", handlerScript);
         }
+        if (metadata != null) {
+            addFieldToSource(sourceMap, "metadata", metadata);
+        }
         if (name != null) {
             addFieldToSource(sourceMap, "name", name);
         }
@@ -163,6 +169,7 @@ public class BsDataConfig extends EsAbstractEntity {
         sb.append(dm).append(handlerName);
         sb.append(dm).append(handlerParameter);
         sb.append(dm).append(handlerScript);
+        sb.append(dm).append(metadata);
         sb.append(dm).append(name);
         sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
@@ -257,6 +264,16 @@ public class BsDataConfig extends EsAbstractEntity {
     public void setHandlerScript(String value) {
         registerModifiedProperty("handlerScript");
         this.handlerScript = value;
+    }
+
+    public String getMetadata() {
+        checkSpecifiedProperty("metadata");
+        return convertEmptyToNull(metadata);
+    }
+
+    public void setMetadata(String value) {
+        registerModifiedProperty("metadata");
+        this.metadata = value;
     }
 
     public String getName() {

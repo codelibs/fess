@@ -28,6 +28,10 @@
           "handlerScript" : {
             "type" : "keyword"
           },
+          "metadata" : {
+            "type" : "text",
+            "index" : false
+          },
           "name" : {
             "type" : "keyword"
           },

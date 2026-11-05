@@ -86,6 +86,7 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
             result.setIncludedPaths(DfTypeUtil.toString(source.get("includedPaths")));
             result.setIntervalTime(DfTypeUtil.toInteger(source.get("intervalTime")));
             result.setMaxAccessCount(DfTypeUtil.toLong(source.get("maxAccessCount")));
+            result.setMetadata(DfTypeUtil.toString(source.get("metadata")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setNumOfThread(DfTypeUtil.toInteger(source.get("numOfThread")));
             result.setPaths(DfTypeUtil.toString(source.get("paths")));
