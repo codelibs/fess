@@ -35,12 +35,10 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
 
     private boolean stopped;
 
-    private boolean countFails;
+    private long progressInterval;
 
     /** False for a service that has only queued the write, as the real one does. */
     private boolean runSuppliers;
-
-    private int countCalls;
 
     private WebFsIndexHelper helper;
 
@@ -53,9 +51,8 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
         super.setUp(testInfo);
         calls.clear();
         stopped = false;
-        countFails = false;
+        progressInterval = 10000L;
         runSuppliers = true;
-        countCalls = 0;
         final CrawlStateService crawlStateService = new CrawlStateService() {
             @Override
             public void saveProgressAsync(final String configId, final LongSupplier count, final long ttl) {
@@ -94,12 +91,8 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
             }
 
             @Override
-            protected int getAccessResultCount(final String sid) {
-                countCalls++;
-                if (countFails) {
-                    throw new IllegalStateException("search engine is down");
-                }
-                return sid1.equals(sid) ? 7 : 11;
+            protected long getProgressInterval() {
+                return progressInterval;
             }
         };
         sid1 = "test-0";
@@ -118,9 +111,17 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
         return crawler;
     }
 
+    private Crawler crawler(final String sessionId, final int accessCount) {
+        final Crawler crawler = crawler(sessionId);
+        for (int i = 0; i < accessCount; i++) {
+            crawler.getCrawlerContext().incrementAndGetAccessCount();
+        }
+        return crawler;
+    }
+
     @Test
     public void test_saveCrawlResult_savesTheCountOfTheSession() {
-        helper.saveCrawlResult(sid1);
+        helper.saveCrawlResult(sid1, 7);
         assertEquals(1, calls.size());
         assertEquals("completed:W1:7", calls.get(0));
     }
@@ -128,70 +129,89 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
     @Test
     public void test_saveCrawlResult_stoppedCrawlKeepsThePreviousCount() {
         stopped = true;
-        helper.saveCrawlResult(sid1);
+        helper.saveCrawlResult(sid1, 7);
         assertEquals(1, calls.size());
         assertEquals("end:W1", calls.get(0));
     }
 
     @Test
-    public void test_saveCrawlResult_unknownSessionAndFailureAreIgnored() {
-        helper.saveCrawlResult("unknown");
-        assertEquals(0, calls.size());
-
-        countFails = true;
-        helper.saveCrawlResult(sid1);
+    public void test_saveCrawlResult_unknownSessionIsIgnored() {
+        helper.saveCrawlResult("unknown", 7);
         assertEquals(0, calls.size());
     }
 
     @Test
     public void test_saveProgress_runningCrawlsOnly() {
-        helper.crawlerList.add(crawler(sid1));
-        helper.crawlerList.add(crawler(sid2));
-        helper.crawlerList.add(crawler("unknown"));
+        helper.crawlerList.add(crawler(sid1, 7));
+        helper.crawlerList.add(crawler(sid2, 11));
+        helper.crawlerList.add(crawler("unknown", 3));
         final List<String> statuses = List.of(Constants.RUNNING, Constants.DONE, Constants.RUNNING);
 
         helper.saveProgress(statuses);
 
         // the finished crawl and the crawl without a stored configuration are not written
         assertEquals(1, calls.size());
-        assertEquals("progress:W1:7:" + CrawlStateService.getProgressTtl(Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL), calls.get(0));
+        assertEquals("progress:W1:7:" + CrawlStateService.getProgressTtl(progressInterval), calls.get(0));
     }
 
     @Test
-    public void test_saveProgress_writesOncePerInterval() {
-        helper.crawlerList.add(crawler(sid1));
+    public void test_saveProgress_readsTheLiveAccessCount() {
+        final Crawler crawler = crawler(sid1, 7);
+        helper.crawlerList.add(crawler);
+        // the service reads the count when it writes, so the value is the one at that time
+        runSuppliers = false;
+        helper.saveProgress(List.of(Constants.RUNNING));
+        assertEquals(List.of("queued:W1"), calls);
+
+        runSuppliers = true;
+        helper.setCrawlingExecutionInterval(0L);
+        progressInterval = 0L;
+        crawler.getCrawlerContext().incrementAndGetAccessCount();
+        helper.saveProgress(List.of(Constants.RUNNING));
+        assertEquals("progress:W1:8:" + CrawlStateService.getProgressTtl(0L), calls.get(1));
+    }
+
+    @Test
+    public void test_saveProgress_ttlFollowsTheSlowerOfTheWriteAndTheLoop() {
+        helper.crawlerList.add(crawler(sid1, 7));
+        // the loop that renews the progress runs once per crawling execution interval at best
+        helper.setCrawlingExecutionInterval(60000L);
+        progressInterval = 10000L;
+
+        helper.saveProgress(List.of(Constants.RUNNING));
+
+        assertEquals("progress:W1:7:" + CrawlStateService.getProgressTtl(60000L), calls.get(0));
+    }
+
+    @Test
+    public void test_saveProgress_writesOncePerProgressInterval() {
+        helper.crawlerList.add(crawler(sid1, 7));
         final List<String> statuses = List.of(Constants.RUNNING);
 
-        helper.setCrawlingExecutionInterval(60000L);
+        progressInterval = 60000L;
         helper.saveProgress(statuses);
         helper.saveProgress(statuses);
         helper.saveProgress(statuses);
         assertEquals(1, calls.size());
 
-        // the loops that renew the progress run once per crawler, so a short interval writes each time
+        // the crawling execution interval does not decide how often it is written
         helper.setCrawlingExecutionInterval(0L);
+        helper.saveProgress(statuses);
+        assertEquals(1, calls.size());
+
+        progressInterval = 0L;
         helper.saveProgress(statuses);
         helper.saveProgress(statuses);
         assertEquals(3, calls.size());
     }
 
     @Test
-    public void test_saveProgress_doesNotCountOrWriteOnTheLoopThread() {
-        helper.crawlerList.add(crawler(sid1));
+    public void test_saveProgress_doesNotWriteOnTheLoopThread() {
+        helper.crawlerList.add(crawler(sid1, 7));
         runSuppliers = false;
 
         helper.saveProgress(List.of(Constants.RUNNING));
 
-        // the count is a request to the search engine too: it is left to the writer thread
         assertEquals(List.of("queued:W1"), calls);
-        assertEquals(0, countCalls);
-    }
-
-    @Test
-    public void test_saveProgress_failureDoesNotReachTheCrawl() {
-        helper.crawlerList.add(crawler(sid1));
-        countFails = true;
-        helper.saveProgress(List.of(Constants.RUNNING));
-        assertEquals(0, calls.size());
     }
 }

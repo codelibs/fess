@@ -164,6 +164,16 @@ public class CrawlConfigMetadataTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_progressCounterIsRuntimeStateOnly() {
+        final DataConfig data = new DataConfig();
+        data.getProgressCounter().set(5);
+        // it is not written to the index with the configuration
+        assertEquals(new DataConfig().toSource(), data.toSource());
+        // every entity has its own counter, as every crawl loads its own configurations
+        assertEquals(0L, new DataConfig().getProgressCounter().get());
+    }
+
+    @Test
     public void test_noFormOrBodyCarriesTheMetadata() {
         final Class<?>[] classes = { org.codelibs.fess.app.web.admin.webconfig.CreateForm.class,
                 org.codelibs.fess.app.web.admin.webconfig.EditForm.class, org.codelibs.fess.app.web.admin.fileconfig.CreateForm.class,
@@ -178,6 +188,7 @@ public class CrawlConfigMetadataTest extends UnitFessTestCase {
             for (Class<?> c = clazz; c != null && c != Object.class; c = c.getSuperclass()) {
                 for (final Field field : c.getDeclaredFields()) {
                     assertFalse(clazz.getName() + "." + field.getName(), "metadata".equalsIgnoreCase(field.getName()));
+                    assertFalse(clazz.getName() + "." + field.getName(), "progressCounter".equalsIgnoreCase(field.getName()));
                 }
             }
         }

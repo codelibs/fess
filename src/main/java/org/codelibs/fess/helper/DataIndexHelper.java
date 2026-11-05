@@ -28,6 +28,7 @@ import org.codelibs.fess.app.service.CrawlStateService;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
+import org.codelibs.fess.ds.callback.CountingIndexUpdateCallback;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -197,7 +198,7 @@ public class DataIndexHelper {
                 break;
             }
 
-            saveProgress(sessionId, dataCrawlingThreadStatusList);
+            saveProgress(dataCrawlingThreadStatusList);
 
             if (activeCrawlerNum < multiprocessCrawlingCount) {
                 // start crawling
@@ -225,7 +226,7 @@ public class DataIndexHelper {
             finishedAll = true;
             for (int i = 0; i < dataCrawlingThreadList.size(); i++) {
                 dataCrawlingThreadList.get(i).awaitTermination(crawlingExecutionInterval);
-                saveProgress(sessionId, dataCrawlingThreadStatusList);
+                saveProgress(dataCrawlingThreadStatusList);
                 if (!dataCrawlingThreadList.get(i).isRunning() && Constants.RUNNING.equals(dataCrawlingThreadStatusList.get(i))) {
                     dataCrawlingThreadStatusList.set(i, Constants.DONE);
                 }
@@ -257,33 +258,41 @@ public class DataIndexHelper {
     }
 
     /**
-     * Writes the number of documents the running data crawls have indexed to the crawl state, at most once
-     * per crawling execution interval. A data store creates no access results, so the documents of the
-     * session in the document index are counted; the batch that has not been committed yet is not in it.
+     * Writes the number of documents the running data crawls have stored to the crawl state, at most once
+     * per {@code crawler.progress.interval}. The number is the counter of the data configuration, which the
+     * crawling thread increments for each document, so no query to the search engine is needed.
      *
-     * @param sessionId unique identifier for this crawling session, which the documents are indexed with
      * @param statusList the statuses of the crawling threads, in the order of the thread list
      */
-    protected void saveProgress(final String sessionId, final List<String> statusList) {
+    protected void saveProgress(final List<String> statusList) {
+        final long interval = getProgressInterval();
         final long now = System.currentTimeMillis();
-        if (now - lastProgressTime < crawlingExecutionInterval) {
+        if (now - lastProgressTime < interval) {
             return;
         }
         lastProgressTime = now;
         for (int i = 0; i < dataCrawlingThreadList.size() && i < statusList.size(); i++) {
             if (Constants.RUNNING.equals(statusList.get(i))) {
-                final String configId = dataCrawlingThreadList.get(i).getConfigId();
+                final DataCrawlingThread thread = dataCrawlingThreadList.get(i);
+                final String configId = thread.getConfigId();
                 try {
-                    final CrawlStateService crawlStateService = getCrawlStateService();
-                    // the count and the write happen on the writer thread: this loop must not wait for the search engine
-                    crawlStateService.saveProgressAsync(configId,
-                            () -> crawlStateService.countDocuments(configId, sessionId, CrawlStateService.PROGRESS_TIMEOUT),
-                            CrawlStateService.getProgressTtl(crawlingExecutionInterval));
+                    // the write happens on the writer thread: this loop must not wait for the search engine
+                    getCrawlStateService().saveProgressAsync(configId, thread::getProgressCount,
+                            CrawlStateService.getProgressTtl(Math.max(interval, crawlingExecutionInterval)));
                 } catch (final Exception e) {
                     logger.debug("Failed to save the progress of a data crawl: configId={}", configId, e);
                 }
             }
         }
+    }
+
+    /**
+     * Gets how often the progress of the running crawls is written to the crawl state.
+     *
+     * @return The interval in milliseconds
+     */
+    protected long getProgressInterval() {
+        return ComponentUtil.getFessConfig().getCrawlerProgressIntervalOrDefault();
     }
 
     /**
@@ -350,6 +359,7 @@ public class DataIndexHelper {
         @Override
         public void run() {
             running = true;
+            dataConfig.getProgressCounter().set(0);
             try {
                 process();
             } finally {
@@ -374,7 +384,9 @@ public class DataIndexHelper {
             } else {
                 boolean succeeded = false;
                 try {
-                    dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
+                    // the data store gets a callback that counts the documents it stores, for the progress
+                    dataStore.store(dataConfig, new CountingIndexUpdateCallback(indexUpdateCallback, dataConfig.getProgressCounter()),
+                            initParamMap);
                     succeeded = true;
                 } catch (final Throwable e) {
                     logger.error("Failed to process a data crawling: {}", dataConfig.getName(), e);
@@ -397,8 +409,8 @@ public class DataIndexHelper {
         }
 
         /**
-         * Writes the result of the crawl to the crawl state. The number of documents the crawl indexed
-         * becomes the base of the percentage of the next crawl, when the crawl completed. A crawl that
+         * Writes the result of the crawl to the crawl state. The number of documents the data store
+         * stored, the count the progress reports, becomes the base of the percentage of the next crawl, when the crawl completed. A crawl that
          * failed or was stopped only ends its progress, and keeps the count of the previous crawl.
          *
          * @param completed true if the data store finished and its last documents were committed
@@ -408,12 +420,9 @@ public class DataIndexHelper {
                 final CrawlStateService crawlStateService = getCrawlStateService();
                 final String configId = dataConfig.getConfigId();
                 if (completed && !ComponentUtil.getSystemHelper().isForceStop()) {
-                    refreshIndex();
-                    final long count = crawlStateService.countDocuments(configId, initParamMap.getAsString(Constants.SESSION_ID));
-                    if (count >= 0) {
-                        crawlStateService.saveCompleted(configId, count);
-                        return;
-                    }
+                    // the same count as the progress, so the next crawl is compared by one measure
+                    crawlStateService.saveCompleted(configId, dataConfig.getProgressCounter().get());
+                    return;
                 }
                 crawlStateService.endProgress(configId);
             } catch (final Exception e) {
@@ -431,20 +440,21 @@ public class DataIndexHelper {
         }
 
         /**
-         * Makes the documents indexed so far visible to a count.
-         */
-        protected void refreshIndex() {
-            final String index = ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex();
-            ComponentUtil.getSearchEngineClient().admin().indices().prepareRefresh(index).execute().actionGet();
-        }
-
-        /**
          * Gets the ID of the data configuration being crawled.
          *
          * @return the config ID, such as D1
          */
         public String getConfigId() {
             return dataConfig.getConfigId();
+        }
+
+        /**
+         * Gets the number of documents the data store has stored in this crawl so far.
+         *
+         * @return the number of documents
+         */
+        public long getProgressCount() {
+            return dataConfig.getProgressCounter().get();
         }
 
         private void storeFailureUrl(final Throwable e) {

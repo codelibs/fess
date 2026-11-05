@@ -2799,6 +2799,31 @@ public interface FessProp {
     }
 
     /**
+     * Returns how often, in milliseconds, the progress of the running crawls is written to the crawl
+     * configurations ({@code crawler.progress.interval}, in seconds). A blank, unparsable or non-positive
+     * value falls back to 10 seconds, and a value above one day is taken as one day.
+     *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
+     * @return the interval in milliseconds
+     */
+    default long getCrawlerProgressIntervalOrDefault() {
+        long seconds = 10;
+        try {
+            final long value = Long.parseLong(get("crawler.progress.interval").trim());
+            if (value > 0) {
+                seconds = Math.min(value, 86400L);
+            }
+        } catch (final RuntimeException e) {
+            // blank or not a number: keep the default
+        }
+        return seconds * 1000L;
+    }
+
+    /**
      * Returns the maximum allowed length for a v2 API string query parameter
      * (e.g. {@code q}, {@code sort}, {@code sdh}). Enforced server-side per
      * OWASP API4:2023 guidance.

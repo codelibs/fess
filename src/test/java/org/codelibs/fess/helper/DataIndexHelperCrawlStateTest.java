@@ -46,7 +46,10 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
 
     private boolean noDataStore;
 
-    private long documentCount;
+    private long progressInterval;
+
+    /** How many documents the data store stores through the callback it is given. */
+    private int storedDocuments;
 
     /** False for a service that has only queued the write, as the real one does. */
     private boolean runSuppliers;
@@ -61,7 +64,8 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
         storeFails = false;
         commitFails = false;
         noDataStore = false;
-        documentCount = 55;
+        progressInterval = 10000L;
+        storedDocuments = 0;
         runSuppliers = true;
         crawlStateService = new CrawlStateService() {
             @Override
@@ -85,12 +89,6 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
             public void endProgress(final String configId) {
                 calls.add("end:" + configId);
             }
-
-            @Override
-            public long countDocuments(final String configId, final String segment, final String timeout) {
-                calls.add("count:" + configId + ":" + segment);
-                return documentCount;
-            }
         };
         ComponentUtil.register(new FailureUrlService() {
             @Override
@@ -113,6 +111,9 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
                 return new DataStore() {
                     @Override
                     public void store(final DataConfig dataConfig, final IndexUpdateCallback callback, final DataStoreParams params) {
+                        for (int i = 0; i < storedDocuments; i++) {
+                            callback.store(params, new java.util.HashMap<>());
+                        }
                         if (storeFails) {
                             throw new IllegalStateException("data source is down");
                         }
@@ -166,19 +167,15 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
             protected CrawlStateService getCrawlStateService() {
                 return crawlStateService;
             }
-
-            @Override
-            protected void refreshIndex() {
-                calls.add("refresh");
-            }
         };
     }
 
     @Test
-    public void test_process_savesTheNumberOfIndexedDocuments() {
+    public void test_process_savesTheNumberOfStoredDocuments() {
+        storedDocuments = 55;
         thread(dataConfig("1")).process();
-        // the segment is the parent session ID that all the data configurations of the job share
-        assertEquals(List.of("refresh", "count:D1:session1", "completed:D1:55"), calls);
+        // the count of the progress, not a second measure taken from the index
+        assertEquals(List.of("completed:D1:55"), calls);
     }
 
     @Test
@@ -203,73 +200,96 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_process_countFailureKeepsThePreviousCount() {
-        documentCount = -1;
-        thread(dataConfig("1")).process();
-        assertEquals(List.of("refresh", "count:D1:session1", "end:D1"), calls);
-    }
-
-    @Test
     public void test_process_missingDataStoreEndsTheProgress() {
         noDataStore = true;
         thread(dataConfig("1")).process();
         assertEquals(List.of("end:D1"), calls);
     }
 
-    @Test
-    public void test_saveProgress_runningThreadsOnly() {
-        final DataIndexHelper helper = new DataIndexHelper() {
+    private DataIndexHelper helper() {
+        return new DataIndexHelper() {
             @Override
             protected CrawlStateService getCrawlStateService() {
                 return crawlStateService;
             }
+
+            @Override
+            protected long getProgressInterval() {
+                return progressInterval;
+            }
         };
-        helper.dataCrawlingThreadList.add(thread(dataConfig("1")));
-        helper.dataCrawlingThreadList.add(thread(dataConfig("2")));
-        helper.dataCrawlingThreadList.add(thread(dataConfig("3")));
-
-        helper.saveProgress("session1", List.of(Constants.RUNNING, Constants.DONE, Constants.READY));
-
-        assertEquals(List.of("count:D1:session1", "progress:D1:55"), calls);
     }
 
     @Test
-    public void test_saveProgress_doesNotCountOrWriteOnTheLoopThread() {
-        final DataIndexHelper helper = new DataIndexHelper() {
-            @Override
-            protected CrawlStateService getCrawlStateService() {
-                return crawlStateService;
-            }
-        };
+    public void test_run_countsTheDocumentsTheDataStoreStores() {
+        final DataConfig dataConfig = dataConfig("1");
+        // what an earlier crawl of the same configuration counted is not carried over
+        dataConfig.getProgressCounter().set(40);
+        storedDocuments = 3;
+
+        thread(dataConfig).run();
+
+        assertEquals(3L, dataConfig.getProgressCounter().get());
+        assertEquals(List.of("completed:D1:3"), calls);
+    }
+
+    @Test
+    public void test_process_failedStoreKeepsWhatWasCounted() {
+        final DataConfig dataConfig = dataConfig("1");
+        storedDocuments = 2;
+        storeFails = true;
+
+        thread(dataConfig).process();
+
+        assertEquals(2L, dataConfig.getProgressCounter().get());
+    }
+
+    @Test
+    public void test_saveProgress_runningThreadsOnly() {
+        final DataIndexHelper helper = helper();
+        final DataConfig config1 = dataConfig("1");
+        final DataConfig config2 = dataConfig("2");
+        config1.getProgressCounter().set(7);
+        config2.getProgressCounter().set(9);
+        helper.dataCrawlingThreadList.add(thread(config1));
+        helper.dataCrawlingThreadList.add(thread(config2));
+        helper.dataCrawlingThreadList.add(thread(dataConfig("3")));
+
+        helper.saveProgress(List.of(Constants.RUNNING, Constants.DONE, Constants.READY));
+
+        // no query to the search engine: the number is the counter of the configuration
+        assertEquals(List.of("progress:D1:7"), calls);
+    }
+
+    @Test
+    public void test_saveProgress_doesNotWriteOnTheLoopThread() {
+        final DataIndexHelper helper = helper();
         helper.dataCrawlingThreadList.add(thread(dataConfig("1")));
         runSuppliers = false;
 
-        helper.saveProgress("session1", List.of(Constants.RUNNING));
+        helper.saveProgress(List.of(Constants.RUNNING));
 
         assertEquals(List.of("queued:D1"), calls);
     }
 
     @Test
-    public void test_saveProgress_writesOncePerIntervalAndSkipsFailedCounts() {
-        final DataIndexHelper helper = new DataIndexHelper() {
-            @Override
-            protected CrawlStateService getCrawlStateService() {
-                return crawlStateService;
-            }
-        };
+    public void test_saveProgress_writesOncePerProgressInterval() {
+        final DataIndexHelper helper = helper();
         helper.dataCrawlingThreadList.add(thread(dataConfig("1")));
         final List<String> statuses = List.of(Constants.RUNNING);
 
-        helper.setCrawlingExecutionInterval(60000L);
-        helper.saveProgress("session1", statuses);
-        helper.saveProgress("session1", statuses);
-        assertEquals(2, calls.size());
+        progressInterval = 60000L;
+        helper.saveProgress(statuses);
+        helper.saveProgress(statuses);
+        assertEquals(1, calls.size());
 
-        calls.clear();
+        // the crawling execution interval does not decide how often it is written
         helper.setCrawlingExecutionInterval(0L);
-        documentCount = -1;
-        helper.saveProgress("session1", statuses);
-        // a failed count is not written as zero progress
-        assertEquals(List.of("count:D1:session1"), calls);
+        helper.saveProgress(statuses);
+        assertEquals(1, calls.size());
+
+        progressInterval = 0L;
+        helper.saveProgress(statuses);
+        assertEquals(2, calls.size());
     }
 }

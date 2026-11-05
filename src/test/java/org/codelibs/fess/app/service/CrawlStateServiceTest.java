@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.Level;
-import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fess.app.service.CrawlStateService.ConfigMetadata;
 import org.codelibs.fess.entity.CrawlProgress;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
@@ -93,14 +92,6 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
 
     private boolean realList;
 
-    private long counted;
-
-    private QueryBuilder countedQuery;
-
-    private String countedIndex;
-
-    private boolean countFails;
-
     private CrawlStateService service;
 
     @Override
@@ -123,10 +114,6 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
         configs = new ArrayList<>();
         listFails = false;
         realList = false;
-        counted = 321;
-        countedQuery = null;
-        countedIndex = null;
-        countFails = false;
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
@@ -217,17 +204,6 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
             protected List<DataConfig> selectDataConfigs(final int max) {
                 selectedMax.add(max);
                 return dataConfigs;
-            }
-
-            @Override
-            protected long count(final String index, final QueryBuilder query, final String timeout) {
-                timeouts.add(timeout);
-                if (countFails) {
-                    throw new IllegalStateException("search engine is down");
-                }
-                countedIndex = index;
-                countedQuery = query;
-                return counted;
             }
         };
     }
@@ -472,25 +448,6 @@ public class CrawlStateServiceTest extends UnitFessTestCase {
     public void test_getRunningProgress_failureIsEmpty() {
         listFails = true;
         assertEquals(0, service.getRunningProgress().size());
-    }
-
-    @Test
-    public void test_countDocuments() {
-        assertEquals(321L, service.countDocuments("D1", "session-1"));
-
-        assertEquals("fess.update", countedIndex);
-        // the segment is shared by all the data configurations of a job, so the config ID is part of the query
-        final String query = countedQuery.toString();
-        assertTrue(query.contains("config_id"));
-        assertTrue(query.contains("D1"));
-        assertTrue(query.contains("segment"));
-        assertTrue(query.contains("session-1"));
-    }
-
-    @Test
-    public void test_countDocuments_failureIsMinusOne() {
-        countFails = true;
-        assertEquals(-1L, service.countDocuments("D1", "s"));
     }
 
     // ===================================================================================

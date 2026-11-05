@@ -458,6 +458,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60 */
     String CRAWLER_SYSTEM_MONITOR_INTERVAL = "crawler.system.monitor.interval";
 
+    /** The key of the configuration. e.g. 10 */
+    String CRAWLER_PROGRESS_INTERVAL = "crawler.progress.interval";
+
     /** The key of the configuration. e.g. true */
     String CRAWLER_HOTTHREAD_ignore_idle_threads = "crawler.hotthread.ignore_idle_threads";
 
@@ -3813,6 +3816,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerSystemMonitorIntervalAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.progress.interval'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Interval (seconds) for writing the progress of running crawls to the crawl configurations.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerProgressInterval();
+
+    /**
+     * Get the value for the key 'crawler.progress.interval' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Interval (seconds) for writing the progress of running crawls to the crawl configurations.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerProgressIntervalAsInteger();
 
     /**
      * Get the value for the key 'crawler.hotthread.ignore_idle_threads'. <br>
@@ -12006,6 +12026,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL);
         }
 
+        public String getCrawlerProgressInterval() {
+            return get(FessConfig.CRAWLER_PROGRESS_INTERVAL);
+        }
+
+        public Integer getCrawlerProgressIntervalAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_PROGRESS_INTERVAL);
+        }
+
         public String getCrawlerHotthreadIgnoreIdleThreads() {
             return get(FessConfig.CRAWLER_HOTTHREAD_ignore_idle_threads);
         }
@@ -15657,6 +15685,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
             defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404,403,410");
             defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");
+            defaultMap.put(FessConfig.CRAWLER_PROGRESS_INTERVAL, "10");
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_ignore_idle_threads, "true");
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_INTERVAL, "500ms");
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_SNAPSHOTS, "10");

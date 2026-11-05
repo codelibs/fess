@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -76,6 +77,9 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     protected CrawlerClientFactory crawlerClientFactory = null;
 
     protected Map<ConfigName, Map<String, String>> configParameterMap;
+
+    /** The number of documents the running crawl of this configuration has stored. It is not persisted. */
+    private final AtomicLong progressCounter = new AtomicLong();
 
     public DataConfig() {
         setBoost(1.0f);
@@ -367,6 +371,16 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         config.setCredentials(credentials);
 
         return config;
+    }
+
+    /**
+     * Returns the counter of the documents the running crawl of this configuration has stored. The crawl
+     * loop reads it to report the progress; it is runtime state, and neither saved nor read from the index.
+     *
+     * @return the counter
+     */
+    public AtomicLong getProgressCounter() {
+        return progressCounter;
     }
 
     @Override

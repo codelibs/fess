@@ -1219,6 +1219,33 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getCrawlerProgressIntervalOrDefault() {
+        // the shipped default is 10 seconds
+        assertEquals(10000L, ComponentUtil.getFessConfig().getCrawlerProgressIntervalOrDefault());
+        assertEquals(30000L, createProgressIntervalConfig("30").getCrawlerProgressIntervalOrDefault());
+        assertEquals(30000L, createProgressIntervalConfig(" 30 ").getCrawlerProgressIntervalOrDefault());
+        // a value above one day is taken as one day
+        assertEquals(86400000L, createProgressIntervalConfig("9223372036854775807").getCrawlerProgressIntervalOrDefault());
+        // blank, not a number and not positive values fall back to 10 seconds
+        assertEquals(10000L, createProgressIntervalConfig("").getCrawlerProgressIntervalOrDefault());
+        assertEquals(10000L, createProgressIntervalConfig("abc").getCrawlerProgressIntervalOrDefault());
+        assertEquals(10000L, createProgressIntervalConfig("0").getCrawlerProgressIntervalOrDefault());
+        assertEquals(10000L, createProgressIntervalConfig("-5").getCrawlerProgressIntervalOrDefault());
+        assertEquals(10000L, createProgressIntervalConfig(null).getCrawlerProgressIntervalOrDefault());
+    }
+
+    private FessConfig createProgressIntervalConfig(final String value) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String get(final String propertyKey) {
+                return value;
+            }
+        };
+    }
+
+    @Test
     public void test_isSessionCookieSecureEnabled() {
         assertFalse(createSessionCookieSecureConfig("").isSessionCookieSecureEnabled());
         assertFalse(createSessionCookieSecureConfig(" ").isSessionCookieSecureEnabled());
