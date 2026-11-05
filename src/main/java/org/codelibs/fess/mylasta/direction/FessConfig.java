@@ -302,6 +302,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10 */
     String API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE = "api.search.export.rate.limit.per.minute";
 
+    /** The key of the configuration. e.g. 30 */
+    String API_SEARCH_SIMILAR_RATE_LIMIT_PER_MINUTE = "api.search.similar.rate.limit.per.minute";
+
     /** The key of the configuration. e.g. Referrer-Policy:strict-origin-when-cross-origin */
     String API_JSON_RESPONSE_HEADERS = "api.json.response.headers";
 
@@ -3100,6 +3103,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getApiSearchExportRateLimitPerMinuteAsInteger();
+
+    /**
+     * Get the value for the key 'api.search.similar.rate.limit.per.minute'. <br>
+     * The value is, e.g. 30 <br>
+     * comment: Maximum number of similar-document requests (/api/v2/documents/{docId}/similar) per minute for each user (each client IP for a guest). 0 or less disables the limit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiSearchSimilarRateLimitPerMinute();
+
+    /**
+     * Get the value for the key 'api.search.similar.rate.limit.per.minute' as {@link Integer}. <br>
+     * The value is, e.g. 30 <br>
+     * comment: Maximum number of similar-document requests (/api/v2/documents/{docId}/similar) per minute for each user (each client IP for a guest). 0 or less disables the limit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiSearchSimilarRateLimitPerMinuteAsInteger();
 
     /**
      * Get the value for the key 'api.json.response.headers'. <br>
@@ -11642,6 +11662,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE);
         }
 
+        public String getApiSearchSimilarRateLimitPerMinute() {
+            return get(FessConfig.API_SEARCH_SIMILAR_RATE_LIMIT_PER_MINUTE);
+        }
+
+        public Integer getApiSearchSimilarRateLimitPerMinuteAsInteger() {
+            return getAsInteger(FessConfig.API_SEARCH_SIMILAR_RATE_LIMIT_PER_MINUTE);
+        }
+
         public String getApiJsonResponseHeaders() {
             return get(FessConfig.API_JSON_RESPONSE_HEADERS);
         }
@@ -15575,6 +15603,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_SEARCH_EXPORT_MAX_SIZE, "1000");
             defaultMap.put(FessConfig.API_SEARCH_EXPORT_FIELDS, "title,url_link,last_modified,content_length,filetype");
             defaultMap.put(FessConfig.API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE, "10");
+            defaultMap.put(FessConfig.API_SEARCH_SIMILAR_RATE_LIMIT_PER_MINUTE, "30");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED, "false");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");

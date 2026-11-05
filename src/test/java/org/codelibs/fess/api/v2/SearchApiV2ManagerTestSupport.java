@@ -36,6 +36,7 @@ import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHistoryHandler;
+import org.codelibs.fess.api.v2.handlers.SimilarDocumentsHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.TagsHandler;
 import org.codelibs.fess.api.v2.handlers.TargetOriginResolver;
@@ -82,6 +83,7 @@ final class SearchApiV2ManagerTestSupport {
         m.searchHandler = new SearchHandler();
         m.scrollSearchHandler = new ScrollSearchHandler();
         m.exportSearchHandler = new ExportSearchHandler();
+        m.similarDocumentsHandler = new SimilarDocumentsHandler();
         m.favoriteGetHandler = new FavoriteGetHandler();
         m.favoritePostHandler = new FavoritePostHandler();
         m.favoritesListHandler = new FavoritesListHandler();

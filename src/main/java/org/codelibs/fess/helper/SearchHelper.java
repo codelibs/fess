@@ -59,9 +59,13 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBuilder;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.query.StructuredQuerySplitter;
+import org.codelibs.fess.rank.fusion.DefaultSearcher;
 import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -75,10 +79,13 @@ import org.codelibs.fesen.opensearch.action.bulk.BulkRequestBuilder;
 import org.codelibs.fesen.opensearch.action.bulk.BulkResponse;
 import org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder;
 import org.codelibs.fesen.opensearch.action.update.UpdateResponse;
+import org.codelibs.fesen.opensearch.action.search.SearchResponse;
 import org.codelibs.fesen.opensearch.common.document.DocumentField;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.search.SearchHit;
+import org.codelibs.fesen.opensearch.search.sort.SortOrder;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -118,6 +125,9 @@ public class SearchHelper {
      * read the array while {@link #addRewriter} replaces it, so it is never modified in place.
      */
     protected volatile SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
+
+    /** Reads the additional query of the query helper as conditions. */
+    private final StructuredQuerySplitter querySplitter = new StructuredQuerySplitter();
 
     /** Jackson ObjectMapper for JSON serialization/deserialization. */
     protected ObjectMapper mapper = new ObjectMapper();
@@ -195,16 +205,7 @@ public class SearchHelper {
         }
 
         queryResponseList.setExecTime(systemHelper.getCurrentTimeAsLong() - startTime);
-        final NumberFormat nf = NumberFormat.getInstance(params.getLocale());
-        nf.setMaximumIntegerDigits(2);
-        nf.setMaximumFractionDigits(2);
-        String execTime;
-        try {
-            execTime = nf.format((double) queryResponseList.getExecTime() / 1000);
-        } catch (final Exception e) {
-            execTime = StringUtil.EMPTY;
-        }
-        data.setExecTime(execTime);
+        data.setExecTime(formatExecTime(queryResponseList.getExecTime(), params.getLocale()));
 
         final String queryId = ComponentUtil.getQueryHelper().generateId();
 
@@ -240,6 +241,25 @@ public class SearchHelper {
             ComponentUtil.getUserInfoHelper().storeQueryId(queryId, documentItems);
         }
 
+    }
+
+    /**
+     * Formats the time a search took the way the search result shows it: seconds with at most two
+     * decimals and two integer digits.
+     *
+     * @param execTimeMillis the time in milliseconds
+     * @param locale the locale of the number format
+     * @return the time in seconds, or an empty string if it cannot be formatted
+     */
+    public String formatExecTime(final long execTimeMillis, final Locale locale) {
+        final NumberFormat nf = NumberFormat.getInstance(locale);
+        nf.setMaximumIntegerDigits(2);
+        nf.setMaximumFractionDigits(2);
+        try {
+            return nf.format((double) execTimeMillis / 1000);
+        } catch (final Exception e) {
+            return StringUtil.EMPTY;
+        }
     }
 
     /**
@@ -444,12 +464,8 @@ public class SearchHelper {
         return ComponentUtil.getSearchEngineClient().getDocument(fessConfig.getIndexDocumentSearchIndex(), builder -> {
             final BoolQueryBuilder boolQuery =
                     QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-            final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON); // TODO SearchRequestType?
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-            if (!roleSet.isEmpty()) {
-                queryHelper.buildRoleQuery(roleSet, boolQuery);
-            }
-            queryHelper.buildVirtualHostQuery(ComponentUtil.getVirtualHostHelper().getVirtualHostKey(), boolQuery);
+            buildVisibilityQuery(boolQuery);
             if (filterQueries != null) {
                 filterQueries.forEach(boolQuery::filter);
             }
@@ -459,6 +475,238 @@ public class SearchHelper {
             return true;
         });
 
+    }
+
+    /**
+     * Retrieves the documents that have the same content signature as a document, that is, the same
+     * or nearly the same content.
+     *
+     * <p>The content signature ({@code content_minhash_bits}) is computed by the search engine when a
+     * document is indexed. It is the signature that the duplicate report of the admin screen and the
+     * {@code sdh} search parameter group documents by, so this finds the members of that group without
+     * the result collapsing that shows them. A document whose content was edited enough to change the
+     * signature is not found.</p>
+     *
+     * <p>The source document is looked up first, through the same role and virtual host filters as
+     * {@link #getDocumentByDocId} and the additional query of the query helper. A document the caller cannot see therefore ends the call before the
+     * search for the others, and looks exactly like a document that does not exist. The documents are
+     * searched through the caller's role and virtual host filters and the additional query of the query
+     * helper, so only documents the caller can see come back. The source document is excluded, and so
+     * is every other document with the URL of the source, which is the same page under another set of
+     * roles. The documents are ordered by URL and then document ID.</p>
+     *
+     * @param docId the document ID of the source document
+     * @param size the maximum number of documents to return
+     * @param responseFields the fields to read of each document, as a search reads them
+     * @param userBean Optional user information for permission checking
+     * @return the documents with the same signature; empty when the source document does not exist or is not visible to the caller
+     */
+    public OptionalEntity<QueryResponseList> getSimilarDocuments(final String docId, final int size, final String[] responseFields,
+            final OptionalThing<FessUserBean> userBean) {
+        final long startTime = System.currentTimeMillis();
+        final OptionalEntity<SimilarSource> sourceOpt = findSimilarSource(docId, userBean);
+        if (!sourceOpt.isPresent()) {
+            return OptionalEntity.empty();
+        }
+        final SimilarSource source = sourceOpt.get();
+        // Without the plugin there is no signature. A document without any word has every bit set, as
+        // every other such document, and a document without content has no signature at all.
+        if (ComponentUtil.getFessConfig().isFesenPluginless() || !isSignatureUsable(source.signature())) {
+            return OptionalEntity
+                    .of(createSimilarDocuments(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, false, size));
+        }
+        final QueryBuilder query = buildSimilarDocumentsQuery(docId, source);
+        if (query == null) {
+            return OptionalEntity
+                    .of(createSimilarDocuments(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, false, size));
+        }
+        final QueryResponseList documents = searchSimilarDocuments(query, docId, size, responseFields, userBean);
+        documents.setExecTime(System.currentTimeMillis() - startTime);
+        return OptionalEntity.of(documents);
+    }
+
+    /** The signature and the URL of the document a similar-document search starts from. */
+    protected record SimilarSource(String signature, String url) {
+    }
+
+    /**
+     * Adds the restrictions on what the caller may see to a query: the role filter and the virtual host
+     * filter, the same ones {@link #getDocumentByDocId} applies.
+     *
+     * @param boolQuery the query to restrict
+     */
+    protected void buildVisibilityQuery(final BoolQueryBuilder boolQuery) {
+        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON);
+        if (!roleSet.isEmpty()) {
+            queryHelper.buildRoleQuery(roleSet, boolQuery);
+        }
+        queryHelper.buildVirtualHostQuery(ComponentUtil.getVirtualHostHelper().getVirtualHostKey(), boolQuery);
+    }
+
+    /**
+     * Adds the additional query of the query helper to a query as a filter. The additional query is
+     * appended to every search, usually to keep documents out of it (for example "-label:internal"),
+     * so a document it excludes is not visible. It is a restriction: when it cannot be applied as a
+     * filter, nothing can be returned safely.
+     *
+     * @param boolQuery the query to restrict
+     * @return false when the additional query holds more than conditions and could not be applied
+     */
+    protected boolean applyAdditionalQuery(final BoolQueryBuilder boolQuery) {
+        final String additionalQuery = ComponentUtil.getQueryHelper().getAdditionalQuery();
+        if (StringUtil.isBlank(additionalQuery)) {
+            return true;
+        }
+        final QueryBuilder additional = getQuerySplitter().conditionsOf(additionalQuery, SearchRequestType.JSON);
+        if (additional == null) {
+            LogUtil.warnOnce(logger, "similarAdditionalQuery",
+                    "The additional query of the query helper holds more than conditions, so no similar documents are returned: {}",
+                    additionalQuery);
+            return false;
+        }
+        boolQuery.filter(additional);
+        return true;
+    }
+
+    /**
+     * Gets the splitter that reads the additional query of the query helper as conditions.
+     *
+     * @return the splitter
+     */
+    protected StructuredQuerySplitter getQuerySplitter() {
+        return querySplitter;
+    }
+
+    /**
+     * Looks up the document a similar-document search starts from, through the role and virtual host
+     * filters of the caller and the additional query of the query helper, so that it is visible under
+     * the same filters as in a search, and reads its content signature.
+     *
+     * @param docId the document ID
+     * @param userBean Optional user information for permission checking
+     * @return the source, empty when the document does not exist or is not visible to the caller
+     */
+    protected OptionalEntity<SimilarSource> findSimilarSource(final String docId, final OptionalThing<FessUserBean> userBean) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String hashField = fessConfig.getIndexFieldContentMinhashBits();
+        return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(), builder -> {
+            final BoolQueryBuilder boolQuery =
+                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+            buildVisibilityQuery(boolQuery);
+            if (!applyAdditionalQuery(boolQuery)) {
+                // no search: a source that the additional query might exclude is not visible
+                return false;
+            }
+            ComponentUtil.getQueryHelper().processSearchPreference(builder, userBean, docId);
+            builder.setQuery(boolQuery).setSize(1).setFetchSource(new String[] { fessConfig.getIndexFieldUrl() }, null);
+            builder.request().source().storedField(hashField);
+            return true;
+        }, (builder, execTime, searchResponse) -> {
+            if (!searchResponse.isPresent() || searchResponse.get().getHits().getHits().length == 0) {
+                return OptionalEntity.<SimilarSource> empty();
+            }
+            final SearchHit hit = searchResponse.get().getHits().getHits()[0];
+            final DocumentField signature = hit.getFields().get(hashField);
+            final Map<String, Object> hitSource = hit.getSourceAsMap();
+            return OptionalEntity
+                    .of(new SimilarSource(signature != null && signature.getValue() != null ? signature.getValue().toString() : null,
+                            hitSource != null ? DocumentUtil.getValue(hitSource, fessConfig.getIndexFieldUrl(), String.class) : null));
+        });
+    }
+
+    /**
+     * Checks that a signature can be searched for: it is not empty and not the signature of a document
+     * without a single word, which has every bit set and is shared by every such document.
+     *
+     * @param signature the content signature, or null
+     * @return true if documents with the same signature are similar
+     */
+    protected static boolean isSignatureUsable(final String signature) {
+        return StringUtil.isNotBlank(signature) && signature.chars().anyMatch(c -> c != '1');
+    }
+
+    /**
+     * Builds the query for the documents with the same signature as the source: the signature is an
+     * exact {@code term}, and everything that decides what the caller may see is a {@code filter}
+     * clause next to it. The source and the other documents with its URL are excluded. The signature of
+     * a document without a word is not searched for, as {@link #isSignatureUsable} rejects it.
+     *
+     * @param docId the document ID of the source document
+     * @param source the source document
+     * @return the query, or null when a restriction of the search cannot be applied to it and no document can be returned safely
+     */
+    protected QueryBuilder buildSimilarDocumentsQuery(final String docId, final SimilarSource source) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String hashField = fessConfig.getIndexFieldContentMinhashBits();
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                .filter(QueryBuilders.termQuery(hashField, source.signature()))
+                .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+        if (StringUtil.isNotBlank(source.url())) {
+            boolQuery.mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), source.url()));
+        }
+        buildVisibilityQuery(boolQuery);
+        if (!applyAdditionalQuery(boolQuery)) {
+            return null;
+        }
+        return boolQuery;
+    }
+
+    /**
+     * Searches the documents with the same signature. Every document matches with the same score, so
+     * they are ordered by URL and then document ID, which does not change between requests. A hit
+     * becomes a document the way a hit of a search does, and the total is counted the way a search
+     * counts it.
+     *
+     * @param query the query of {@link #buildSimilarDocumentsQuery}
+     * @param docId the document ID of the source document
+     * @param size the maximum number of documents
+     * @param responseFields the fields to read of each document
+     * @param userBean Optional user information for permission checking
+     * @return the documents
+     */
+    protected QueryResponseList searchSimilarDocuments(final QueryBuilder query, final String docId, final int size,
+            final String[] responseFields, final OptionalThing<FessUserBean> userBean) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
+            ComponentUtil.getQueryHelper().processSearchPreference(searchRequestBuilder, userBean, docId);
+            searchRequestBuilder.setQuery(query).setSize(size).setFetchSource(responseFields, null);
+            if (fessConfig.getQueryTrackTotalHitsValue() instanceof final Number upTo) {
+                searchRequestBuilder.setTrackTotalHitsUpTo(upTo.intValue());
+            } else {
+                searchRequestBuilder.setTrackTotalHits(true);
+            }
+            searchRequestBuilder.addSort(fessConfig.getIndexFieldUrl(), SortOrder.ASC)
+                    .addSort(fessConfig.getIndexFieldDocId(), SortOrder.ASC);
+            return true;
+        }, (searchRequestBuilder, execTime, searchResponse) -> {
+            if (!searchResponse.isPresent()) {
+                return createSimilarDocuments(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), execTime, false, false, size);
+            }
+            final SearchResponse response = searchResponse.get();
+            final String highlightPrefix = ComponentUtil.getQueryHelper().getHighlightPrefix();
+            final List<Map<String, Object>> documents = new ArrayList<>();
+            for (final SearchHit hit : response.getHits().getHits()) {
+                documents.add(hitConverter.convert(fessConfig, highlightPrefix, hit));
+            }
+            return createSimilarDocuments(documents, response.getHits().getTotalHits().value(),
+                    response.getHits().getTotalHits().relation().toString(), response.getTook().millis(), response.isTimedOut(),
+                    response.getTotalShards() != response.getSuccessfulShards(), size);
+        });
+    }
+
+    /** Turns a hit into a document with the code a search uses, which a searcher keeps to itself. */
+    private static class HitConverter extends DefaultSearcher {
+        Map<String, Object> convert(final FessConfig fessConfig, final String highlightPrefix, final SearchHit hit) {
+            return parseSearchHit(fessConfig, highlightPrefix, hit);
+        }
+    }
+
+    private final HitConverter hitConverter = new HitConverter();
+
+    private QueryResponseList createSimilarDocuments(final List<Map<String, Object>> documents, final long total, final String relation,
+            final long queryTime, final boolean timedOut, final boolean shardFailed, final int size) {
+        return new QueryResponseList(documents, total, relation, queryTime, false, timedOut, shardFailed, null, 0, size, 0);
     }
 
     /**

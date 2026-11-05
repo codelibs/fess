@@ -34,8 +34,8 @@ import jakarta.annotation.PreDestroy;
  * In-memory, per-instance rate limiter for /api/v2/auth/login (and /auth/password).
  *
  * <p>Maintains a sliding window of attempt timestamps per (scope, key) pair plus
- * an optional lockout-until timestamp. Four scopes are recognized: IP, USER,
- * CHAT and EXPORT. {@link Scope#CHAT} is used by the v2 chat endpoints to throttle
+ * an optional lockout-until timestamp. Five scopes are recognized: IP, USER,
+ * CHAT, EXPORT and SIMILAR. {@link Scope#CHAT} is used by the v2 chat endpoints to throttle
  * per-user chat invocations independently of the login buckets, and
  * {@link Scope#EXPORT} does the same for the search result export.
  * Thresholds are passed in per call so the manager can read FessConfig once and
@@ -87,7 +87,9 @@ public class LoginRateLimiter {
         /** Per-user chat-invocation bucket used by the v2 chat endpoints. */
         CHAT,
         /** Per-user search-result-export bucket used by the v2 export endpoint. */
-        EXPORT
+        EXPORT,
+        /** Per-user bucket used by the v2 similar-documents endpoint. */
+        SIMILAR
     }
 
     private static final class Entry {

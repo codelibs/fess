@@ -98,7 +98,20 @@ public class LoginRequirement {
         }
         return switch (subPath) {
         case "/search", "/documents/all", "/documents/export", "/suggest-words", "/labels", "/popular-words" -> true;
-        default -> false;
+        default -> isSimilarDocuments(subPath);
         };
+    }
+
+    /**
+     * Returns whether the sub-path is {@code /documents/{docId}/similar}, a search of the index
+     * whose result an access token decides, like {@code /search}.
+     */
+    private static boolean isSimilarDocuments(final String subPath) {
+        final String prefix = "/documents/";
+        final String suffix = "/similar";
+        if (!subPath.startsWith(prefix) || !subPath.endsWith(suffix) || subPath.length() <= prefix.length() + suffix.length()) {
+            return false;
+        }
+        return subPath.indexOf('/', prefix.length()) == subPath.length() - suffix.length();
     }
 }

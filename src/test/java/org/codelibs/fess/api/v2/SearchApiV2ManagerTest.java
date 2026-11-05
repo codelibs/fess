@@ -206,6 +206,52 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_documentsSimilarDispatchesToSimilarHandlerWithTheDocId() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.similarDocumentsHandler = new org.codelibs.fess.api.v2.handlers.SimilarDocumentsHandler() {
+            @Override
+            public void handle(final jakarta.servlet.http.HttpServletRequest request,
+                    final jakarta.servlet.http.HttpServletResponse response, final String docId) throws java.io.IOException {
+                calls.add(docId);
+            }
+        };
+        m.process(new StubRequest("/api/v2/documents/abc123/similar"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/documents/abc123/similar/"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("abc123", "abc123"), calls);
+    }
+
+    @Test
+    public void test_process_documentsSimilarRejectsMalformedDocId() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/has spaces/similar"), res, new NopChain());
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("invalid doc_id"), res.body());
+    }
+
+    @Test
+    public void test_process_documentsSimilarWithoutADocIdOrWithExtraSegmentsIsNotFound() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.similarDocumentsHandler = new org.codelibs.fess.api.v2.handlers.SimilarDocumentsHandler() {
+            @Override
+            public void handle(final jakarta.servlet.http.HttpServletRequest request,
+                    final jakarta.servlet.http.HttpServletResponse response, final String docId) throws java.io.IOException {
+                calls.add(docId);
+            }
+        };
+        for (final String path : new String[] { "/api/v2/documents/similar", "/api/v2/documents//similar", "/api/v2/documents/a/b/similar",
+                "/api/v2/documents/abc/similarx" }) {
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest(path), res, new NopChain());
+            assertEquals(404, res.status, path);
+            assertTrue(res.body().contains("\"code\":\"not_found\""), path + " -> " + res.body());
+        }
+        assertTrue(calls.isEmpty(), calls.toString());
+    }
+
+    @Test
     public void test_process_documentsFavoriteDispatchesToFavoriteHandler() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();

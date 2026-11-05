@@ -135,7 +135,7 @@ public class SearchHandler {
                 return;
             }
             final OptionalThing<FessUserBean> userBean = getSavedUserBean();
-            final String userId = userBean.map(FessUserBean::getUserId).filter(StringUtil::isNotBlank).orElse(null);
+            final String userId = resolveUserId(userBean);
             final Map<String, Object> payload = buildPayload(params.getQuery(), data, getVisibleTagTypes(data, userId), userId);
             // Evaluated per search: a user whose group and role permissions are still loading or
             // failed sees fewer results.
@@ -232,6 +232,16 @@ public class SearchHandler {
             logger.warn("Failed to resolve the visible tags; the hits are returned without tags.", e);
             return Collections.emptyMap();
         }
+    }
+
+    /**
+     * Returns the ID of the logged-in user.
+     *
+     * @param userBean the saved user bean, or empty for a guest
+     * @return the user ID, or null for a guest
+     */
+    String resolveUserId(final OptionalThing<FessUserBean> userBean) {
+        return userBean.map(FessUserBean::getUserId).filter(StringUtil::isNotBlank).orElse(null);
     }
 
     /**

@@ -46,6 +46,28 @@ public class LoginRequirementTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_similarDocumentsIsGated() {
+        assertTrue(requirement.requiresLogin("/documents/abc123/similar"));
+    }
+
+    @Test
+    public void test_similarDocumentsAcceptsAccessToken() {
+        assertTrue(requirement.acceptsAccessToken("/documents/abc123/similar"));
+    }
+
+    @Test
+    public void test_onlyTheSimilarDocumentsPatternAcceptsAccessToken() {
+        // the other document endpoints act for a signed-in user and keep requiring a login
+        assertFalse(requirement.acceptsAccessToken("/documents/abc123/favorite"));
+        assertFalse(requirement.acceptsAccessToken("/documents/abc123/tags"));
+        assertFalse(requirement.acceptsAccessToken("/documents/similar"));
+        assertFalse(requirement.acceptsAccessToken("/documents//similar"));
+        assertFalse(requirement.acceptsAccessToken("/documents/a/b/similar"));
+        assertFalse(requirement.acceptsAccessToken("/documents/abc/similarx"));
+        assertFalse(requirement.acceptsAccessToken("/xdocuments/abc/similar"));
+    }
+
+    @Test
     public void test_indexDerivedEndpointsAreGated() {
         assertTrue(requirement.requiresLogin("/labels"));
         assertTrue(requirement.requiresLogin("/popular-words"));
