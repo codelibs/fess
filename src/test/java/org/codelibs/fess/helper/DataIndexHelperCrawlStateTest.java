@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlStateService;
@@ -47,6 +48,9 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
 
     private long documentCount;
 
+    /** False for a service that has only queued the write, as the real one does. */
+    private boolean runSuppliers;
+
     private CrawlStateService crawlStateService;
 
     @Override
@@ -58,10 +62,18 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
         commitFails = false;
         noDataStore = false;
         documentCount = 55;
+        runSuppliers = true;
         crawlStateService = new CrawlStateService() {
             @Override
-            public void saveProgress(final String configId, final long count, final long ttl) {
-                calls.add("progress:" + configId + ":" + count);
+            public void saveProgressAsync(final String configId, final LongSupplier count, final long ttl) {
+                if (!runSuppliers) {
+                    calls.add("queued:" + configId);
+                    return;
+                }
+                final long value = count.getAsLong();
+                if (value >= 0) {
+                    calls.add("progress:" + configId + ":" + value);
+                }
             }
 
             @Override
@@ -75,7 +87,7 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
             }
 
             @Override
-            public long countDocuments(final String configId, final String segment) {
+            public long countDocuments(final String configId, final String segment, final String timeout) {
                 calls.add("count:" + configId + ":" + segment);
                 return documentCount;
             }
@@ -219,6 +231,22 @@ public class DataIndexHelperCrawlStateTest extends UnitFessTestCase {
         helper.saveProgress("session1", List.of(Constants.RUNNING, Constants.DONE, Constants.READY));
 
         assertEquals(List.of("count:D1:session1", "progress:D1:55"), calls);
+    }
+
+    @Test
+    public void test_saveProgress_doesNotCountOrWriteOnTheLoopThread() {
+        final DataIndexHelper helper = new DataIndexHelper() {
+            @Override
+            protected CrawlStateService getCrawlStateService() {
+                return crawlStateService;
+            }
+        };
+        helper.dataCrawlingThreadList.add(thread(dataConfig("1")));
+        runSuppliers = false;
+
+        helper.saveProgress("session1", List.of(Constants.RUNNING));
+
+        assertEquals(List.of("queued:D1"), calls);
     }
 
     @Test

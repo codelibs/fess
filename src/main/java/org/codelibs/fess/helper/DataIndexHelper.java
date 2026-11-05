@@ -275,10 +275,10 @@ public class DataIndexHelper {
                 final String configId = dataCrawlingThreadList.get(i).getConfigId();
                 try {
                     final CrawlStateService crawlStateService = getCrawlStateService();
-                    final long count = crawlStateService.countDocuments(configId, sessionId);
-                    if (count >= 0) {
-                        crawlStateService.saveProgress(configId, count, CrawlStateService.getProgressTtl(crawlingExecutionInterval));
-                    }
+                    // the count and the write happen on the writer thread: this loop must not wait for the search engine
+                    crawlStateService.saveProgressAsync(configId,
+                            () -> crawlStateService.countDocuments(configId, sessionId, CrawlStateService.PROGRESS_TIMEOUT),
+                            CrawlStateService.getProgressTtl(crawlingExecutionInterval));
                 } catch (final Exception e) {
                     logger.debug("Failed to save the progress of a data crawl: configId={}", configId, e);
                 }

@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlStateService;
@@ -36,6 +37,11 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
 
     private boolean countFails;
 
+    /** False for a service that has only queued the write, as the real one does. */
+    private boolean runSuppliers;
+
+    private int countCalls;
+
     private WebFsIndexHelper helper;
 
     private String sid1;
@@ -48,10 +54,16 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
         calls.clear();
         stopped = false;
         countFails = false;
+        runSuppliers = true;
+        countCalls = 0;
         final CrawlStateService crawlStateService = new CrawlStateService() {
             @Override
-            public void saveProgress(final String configId, final long count, final long ttl) {
-                calls.add("progress:" + configId + ":" + count + ":" + ttl);
+            public void saveProgressAsync(final String configId, final LongSupplier count, final long ttl) {
+                if (!runSuppliers) {
+                    calls.add("queued:" + configId);
+                    return;
+                }
+                calls.add("progress:" + configId + ":" + count.getAsLong() + ":" + ttl);
             }
 
             @Override
@@ -83,6 +95,7 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
 
             @Override
             protected int getAccessResultCount(final String sid) {
+                countCalls++;
                 if (countFails) {
                     throw new IllegalStateException("search engine is down");
                 }
@@ -160,6 +173,18 @@ public class WebFsIndexHelperCrawlStateTest extends UnitFessTestCase {
         helper.saveProgress(statuses);
         helper.saveProgress(statuses);
         assertEquals(3, calls.size());
+    }
+
+    @Test
+    public void test_saveProgress_doesNotCountOrWriteOnTheLoopThread() {
+        helper.crawlerList.add(crawler(sid1));
+        runSuppliers = false;
+
+        helper.saveProgress(List.of(Constants.RUNNING));
+
+        // the count is a request to the search engine too: it is left to the writer thread
+        assertEquals(List.of("queued:W1"), calls);
+        assertEquals(0, countCalls);
     }
 
     @Test

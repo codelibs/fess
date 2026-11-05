@@ -20,7 +20,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.function.LongSupplier;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,8 +34,13 @@ import org.codelibs.fesen.opensearch.action.search.SearchResponse;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fess.entity.CrawlProgress;
-import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.exbhv.DataConfigBhv;
+import org.codelibs.fess.opensearch.config.exbhv.FileConfigBhv;
+import org.codelibs.fess.opensearch.config.exbhv.WebConfigBhv;
+import org.codelibs.fess.opensearch.config.exentity.DataConfig;
+import org.codelibs.fess.opensearch.config.exentity.FileConfig;
+import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 
@@ -87,14 +96,40 @@ public class CrawlStateService {
     /** The shortest time a written progress is shown as running, in milliseconds. */
     public static final long MIN_PROGRESS_TTL = 30000L;
 
+    /** How long the periodic progress write may wait for the search engine. It runs off the crawl loop. */
+    public static final String PROGRESS_TIMEOUT = "5s";
+
+    /**
+     * How long the write of the result of a crawl may wait for the search engine. It runs once per
+     * crawl and configuration, in the crawl loop, and the previous count is not recoverable if it is lost.
+     */
+    public static final String RESULT_TIMEOUT = "30s";
+
+    /** The furthest a progress may claim to be running ahead of now; later values are not trusted. */
+    public static final long MAX_PROGRESS_AHEAD = 24L * 60 * 60 * 1000;
+
+    private static final Set<String> KNOWN_KEYS =
+            Set.of(LAST_COUNT, LAST_COMPLETED_TIME, PROGRESS_COUNT, PROGRESS_UPDATED_TIME, PROGRESS_EXPIRED_TIME);
+
     private static final String METADATA_FIELD = "metadata";
 
     private static final Pattern CONFIG_ID_PATTERN = Pattern.compile("[WFD][A-Za-z0-9_-]{1,100}");
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    // The state below is static: a service is created anew for every lookup, and the crawl loop, the
+    // writer thread and the data store threads must all see the same state.
+
     /** The metadata the crawler wrote last, by config ID. */
-    private final Map<String, Map<String, Object>> writtenMetadata = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Object>> WRITTEN_METADATA = new ConcurrentHashMap<>();
+
+    /** The config IDs whose crawl has ended in this process: a late progress write must not follow it. */
+    private static final Set<String> ENDED_CONFIGS = ConcurrentHashMap.newKeySet();
+
+    /** The config IDs that have a progress write queued or running. */
+    private static final Set<String> PENDING_CONFIGS = ConcurrentHashMap.newKeySet();
+
+    private static ExecutorService executor;
 
     /**
      * The identity and the stored metadata of a crawl configuration.
@@ -139,7 +174,9 @@ public class CrawlStateService {
     //                                                                               =====
 
     /**
-     * Saves the number of documents processed so far by a running crawl.
+     * Saves the number of documents processed so far by a running crawl. The call waits for the search
+     * engine for at most {@value #PROGRESS_TIMEOUT} per request; the crawl loop uses
+     * {@link #saveProgressAsync} instead.
      *
      * @param configId the crawl configuration ID
      * @param count the number of documents processed so far
@@ -151,18 +188,83 @@ public class CrawlStateService {
         changes.put(PROGRESS_COUNT, count);
         changes.put(PROGRESS_UPDATED_TIME, now);
         changes.put(PROGRESS_EXPIRED_TIME, now + ttl);
-        update(configId, changes);
+        update(configId, changes, PROGRESS_TIMEOUT, true);
+    }
+
+    /**
+     * Saves the progress of a running crawl on a thread of its own, so that a slow search engine cannot
+     * hold up the crawl loop that calls this. The count is taken on that thread too. A write is dropped
+     * when the previous one of the same configuration has not finished, and one that is queued when the
+     * crawl ends is dropped as well, because the next write would replace it anyway.
+     *
+     * @param configId the crawl configuration ID
+     * @param count supplies the number of documents processed so far, or a negative number if it is unknown
+     * @param ttl how long the progress is shown as running, in milliseconds
+     */
+    public void saveProgressAsync(final String configId, final LongSupplier count, final long ttl) {
+        if (!isValidConfigId(configId) || ENDED_CONFIGS.contains(configId) || !PENDING_CONFIGS.add(configId)) {
+            return;
+        }
+        try {
+            execute(() -> {
+                try {
+                    final long value = count.getAsLong();
+                    if (value >= 0) {
+                        saveProgress(configId, value, ttl);
+                    }
+                } catch (final Exception e) {
+                    reportFailure("progress", "Failed to save the crawl progress: configId={}", configId, e);
+                } finally {
+                    PENDING_CONFIGS.remove(configId);
+                }
+            });
+        } catch (final RuntimeException e) {
+            PENDING_CONFIGS.remove(configId);
+            reportFailure("progress", "Failed to queue the crawl progress: configId={}", configId, e);
+        }
+    }
+
+    /**
+     * Runs a task on the thread that writes the progress.
+     *
+     * @param task the task
+     */
+    protected void execute(final Runnable task) {
+        synchronized (CrawlStateService.class) {
+            if (executor == null) {
+                // one daemon thread for the process: it never keeps the crawler from exiting
+                executor = Executors.newSingleThreadExecutor(r -> {
+                    final Thread thread = new Thread(r, "CrawlStateWriter");
+                    thread.setDaemon(true);
+                    return thread;
+                });
+            }
+            executor.execute(task);
+        }
+    }
+
+    /**
+     * Forgets what this process has written and which crawls have ended. Only for tests.
+     */
+    static void reset() {
+        WRITTEN_METADATA.clear();
+        ENDED_CONFIGS.clear();
+        PENDING_CONFIGS.clear();
     }
 
     /**
      * Saves the result of a crawl that completed normally and ends its progress. The count becomes the
      * base of the percentage of the next crawl, unless it is zero: a crawl that processed nothing is
      * more likely a failure than a site that became empty, and it must not erase the last good count.
+     * It is written on the calling thread and may wait for the search engine for at most
+     * {@value #RESULT_TIMEOUT} per request: it happens once per crawl, and a progress write that was
+     * still queued is dropped so that it cannot follow it.
      *
      * @param configId the crawl configuration ID
      * @param count the number of documents processed by the crawl
      */
     public void saveCompleted(final String configId, final long count) {
+        markEnded(configId);
         final long now = System.currentTimeMillis();
         final Map<String, Object> changes = new LinkedHashMap<>();
         if (count > 0) {
@@ -172,7 +274,7 @@ public class CrawlStateService {
         changes.put(PROGRESS_COUNT, count);
         changes.put(PROGRESS_UPDATED_TIME, now);
         changes.put(PROGRESS_EXPIRED_TIME, 0L);
-        update(configId, changes);
+        update(configId, changes, RESULT_TIMEOUT, false);
     }
 
     /**
@@ -182,43 +284,63 @@ public class CrawlStateService {
      * @param configId the crawl configuration ID
      */
     public void endProgress(final String configId) {
+        markEnded(configId);
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(PROGRESS_EXPIRED_TIME, 0L);
-        update(configId, changes);
+        update(configId, changes, RESULT_TIMEOUT, false);
+    }
+
+    private void markEnded(final String configId) {
+        if (isValidConfigId(configId)) {
+            ENDED_CONFIGS.add(configId);
+        }
     }
 
     /**
      * Merges the changes into the metadata of a crawl configuration and writes it with a partial update.
+     * When the merged object is too long, the keys this service does not know are dropped, so that a
+     * stray key cannot stop the writes of the progress for good.
      *
      * @param configId the crawl configuration ID
      * @param changes the keys to set
+     * @param timeout how long a request may wait for the search engine
+     * @param skipIfEnded true to write nothing if the crawl of the configuration has ended in this process
      * @return true if the metadata was written
      */
-    protected boolean update(final String configId, final Map<String, Object> changes) {
+    protected boolean update(final String configId, final Map<String, Object> changes, final String timeout, final boolean skipIfEnded) {
         if (!isValidConfigId(configId)) {
             logger.debug("Skipped saving a crawl state, the ID is not valid: configId={}", configId);
             return false;
         }
         try {
-            Map<String, Object> state = writtenMetadata.get(configId);
+            Map<String, Object> state = WRITTEN_METADATA.get(configId);
             if (state == null) {
                 // A read that fails must not be followed by a write: the keys it did not see would be lost.
-                final Map<String, Object> stored = parseMetadata(fetchMetadata(getIndexName(configId), getDocumentId(configId)));
-                state = writtenMetadata.putIfAbsent(configId, stored);
+                final Map<String, Object> stored = parseMetadata(fetchMetadata(getIndexName(configId), getDocumentId(configId), timeout));
+                state = WRITTEN_METADATA.putIfAbsent(configId, stored);
                 if (state == null) {
                     state = stored;
                 }
             }
             synchronized (state) {
-                final Map<String, Object> merged = new LinkedHashMap<>(state);
-                merged.putAll(changes);
-                final String json = objectMapper.writeValueAsString(merged);
-                if (json.length() > MAX_METADATA_LENGTH) {
-                    reportFailure("size", "The metadata of the crawl state is too long: configId={}, length={}, max={}", configId,
-                            json.length(), MAX_METADATA_LENGTH);
+                if (skipIfEnded && ENDED_CONFIGS.contains(configId)) {
                     return false;
                 }
-                storeMetadata(getIndexName(configId), getDocumentId(configId), json);
+                Map<String, Object> merged = new LinkedHashMap<>(state);
+                merged.putAll(changes);
+                String json = objectMapper.writeValueAsString(merged);
+                if (json.length() > MAX_METADATA_LENGTH) {
+                    merged.entrySet()
+                            .removeIf(e -> !KNOWN_KEYS.contains(e.getKey())
+                                    || !(e.getValue() instanceof Long || e.getValue() instanceof Integer));
+                    json = objectMapper.writeValueAsString(merged);
+                    if (json.length() > MAX_METADATA_LENGTH) {
+                        reportFailure("size", "The metadata of the crawl state is too long: configId={}, length={}, max={}", configId,
+                                json.length(), MAX_METADATA_LENGTH);
+                        return false;
+                    }
+                }
+                storeMetadata(getIndexName(configId), getDocumentId(configId), json, timeout);
                 state.clear();
                 state.putAll(merged);
                 return true;
@@ -234,13 +356,11 @@ public class CrawlStateService {
      *
      * @param index the index of the crawl configuration
      * @param id the document ID of the crawl configuration
+     * @param timeout how long the request may wait for the search engine
      * @return the metadata string, or null if there is none
      */
-    protected String fetchMetadata(final String index, final String id) {
-        final GetResponse response = ComponentUtil.getSearchEngineClient()
-                .prepareGet(index, id)
-                .execute()
-                .actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
+    protected String fetchMetadata(final String index, final String id, final String timeout) {
+        final GetResponse response = ComponentUtil.getSearchEngineClient().prepareGet(index, id).execute().actionGet(timeout);
         return response.isExists() && response.getSourceAsMap().get(METADATA_FIELD) instanceof final String metadata ? metadata : null;
     }
 
@@ -250,14 +370,15 @@ public class CrawlStateService {
      * @param index the index of the crawl configuration
      * @param id the document ID of the crawl configuration
      * @param metadata the metadata string
+     * @param timeout how long the request may wait for the search engine
      */
-    protected void storeMetadata(final String index, final String id, final String metadata) {
+    protected void storeMetadata(final String index, final String id, final String metadata, final String timeout) {
         ComponentUtil.getSearchEngineClient()
                 .prepareUpdate(index, id)
                 .setRetryOnConflict(3)
                 .setDoc(METADATA_FIELD, metadata)
                 .execute()
-                .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout());
+                .actionGet(timeout);
     }
 
     // ===================================================================================
@@ -276,7 +397,9 @@ public class CrawlStateService {
             final long now = System.currentTimeMillis();
             for (final ConfigMetadata config : listConfigMetadata()) {
                 final Map<String, Object> metadata = parseMetadata(config.metadata());
-                if (getLong(metadata, PROGRESS_EXPIRED_TIME) > now) {
+                final long expired = getLong(metadata, PROGRESS_EXPIRED_TIME);
+                // a time far ahead is not one this service wrote, and would show a crawl that never ends
+                if (expired > now && expired <= now + MAX_PROGRESS_AHEAD) {
                     list.add(new CrawlProgress(config.configId(), config.name() != null ? config.name() : config.configId(),
                             getLong(metadata, PROGRESS_COUNT), getLong(metadata, LAST_COUNT), getLong(metadata, PROGRESS_UPDATED_TIME)));
                 }
@@ -290,20 +413,85 @@ public class CrawlStateService {
     }
 
     /**
-     * Lists the web, file and data store crawl configurations with their metadata.
+     * Lists the web, file and data store crawl configurations with their metadata. The configurations
+     * that can run come first, so that the disabled ones, which use up the cap of each type, are the ones
+     * left out when the cap is reached.
      *
      * @return the crawl configurations
      */
     protected List<ConfigMetadata> listConfigMetadata() {
-        final CrawlingConfigHelper helper = ComponentUtil.getCrawlingConfigHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<ConfigMetadata> list = new ArrayList<>();
-        helper.getAllWebConfigList(true, true, false, null)
-                .forEach(c -> list.add(new ConfigMetadata(c.getConfigId(), c.getName(), c.getMetadata())));
-        helper.getAllFileConfigList(true, true, false, null)
-                .forEach(c -> list.add(new ConfigMetadata(c.getConfigId(), c.getName(), c.getMetadata())));
-        helper.getAllDataConfigList(true, true, false, null)
-                .forEach(c -> list.add(new ConfigMetadata(c.getConfigId(), c.getName(), c.getMetadata())));
+        final int web = fessConfig.getPageWebConfigMaxFetchSizeAsInteger();
+        final List<WebConfig> webConfigs = selectWebConfigs(web);
+        warnIfCapped(webConfigs.size(), web, FessConfig.PAGE_WEB_CONFIG_MAX_FETCH_SIZE);
+        webConfigs.forEach(c -> list.add(new ConfigMetadata(c.getConfigId(), c.getName(), c.getMetadata())));
+        final int file = fessConfig.getPageFileConfigMaxFetchSizeAsInteger();
+        final List<FileConfig> fileConfigs = selectFileConfigs(file);
+        warnIfCapped(fileConfigs.size(), file, FessConfig.PAGE_FILE_CONFIG_MAX_FETCH_SIZE);
+        fileConfigs.forEach(c -> list.add(new ConfigMetadata(c.getConfigId(), c.getName(), c.getMetadata())));
+        final int data = fessConfig.getPageDataConfigMaxFetchSizeAsInteger();
+        final List<DataConfig> dataConfigs = selectDataConfigs(data);
+        warnIfCapped(dataConfigs.size(), data, FessConfig.PAGE_DATA_CONFIG_MAX_FETCH_SIZE);
+        dataConfigs.forEach(c -> list.add(new ConfigMetadata(c.getConfigId(), c.getName(), c.getMetadata())));
         return list;
+    }
+
+    private void warnIfCapped(final int size, final int max, final String key) {
+        if (max > 0 && size >= max) {
+            // The wording is about this list only: a configuration that is left out here can still be crawled.
+            LogUtil.warnOnce(logger, key,
+                    "{}={} limits how many crawl configurations of a type are checked for a running crawl, and that many were found. Crawls of further configurations are not listed in Crawling Info. Increase {} to list more.",
+                    key, max, key);
+        }
+    }
+
+    /**
+     * Selects web configurations, the ones that can run first.
+     *
+     * @param max the most to select
+     * @return the web configurations
+     */
+    protected List<WebConfig> selectWebConfigs(final int max) {
+        return ComponentUtil.getComponent(WebConfigBhv.class).selectList(cb -> {
+            cb.query().matchAll();
+            cb.query().addOrderBy_Available_Desc();
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(max);
+        });
+    }
+
+    /**
+     * Selects file configurations, the ones that can run first.
+     *
+     * @param max the most to select
+     * @return the file configurations
+     */
+    protected List<FileConfig> selectFileConfigs(final int max) {
+        return ComponentUtil.getComponent(FileConfigBhv.class).selectList(cb -> {
+            cb.query().matchAll();
+            cb.query().addOrderBy_Available_Desc();
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(max);
+        });
+    }
+
+    /**
+     * Selects data store configurations, the ones that can run first.
+     *
+     * @param max the most to select
+     * @return the data store configurations
+     */
+    protected List<DataConfig> selectDataConfigs(final int max) {
+        return ComponentUtil.getComponent(DataConfigBhv.class).selectList(cb -> {
+            cb.query().matchAll();
+            cb.query().addOrderBy_Available_Desc();
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(max);
+        });
     }
 
     /**
@@ -326,7 +514,9 @@ public class CrawlStateService {
     }
 
     private static long getLong(final Map<String, Object> metadata, final String key) {
-        return metadata.get(key) instanceof final Number number ? number.longValue() : 0L;
+        // Only whole numbers that fit a long: longValue() of a larger or fractional number is not what was stored.
+        return metadata.get(key) instanceof final Integer number ? number.longValue()
+                : metadata.get(key) instanceof final Long number ? number.longValue() : 0L;
     }
 
     /**
@@ -338,12 +528,25 @@ public class CrawlStateService {
      * @return the number of documents, or -1 if the count failed
      */
     public long countDocuments(final String configId, final String segment) {
+        return countDocuments(configId, segment, RESULT_TIMEOUT);
+    }
+
+    /**
+     * Counts the documents of the document index that a crawl of a data store configuration has indexed
+     * in a session, waiting for the search engine for at most the given time.
+     *
+     * @param configId the crawl configuration ID
+     * @param segment the session ID the documents are indexed with
+     * @param timeout how long the request may wait for the search engine
+     * @return the number of documents, or -1 if the count failed
+     */
+    public long countDocuments(final String configId, final String segment, final String timeout) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final QueryBuilder query = QueryBuilders.boolQuery()
                 .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configId))
                 .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), segment));
         try {
-            return count(fessConfig.getIndexDocumentUpdateIndex(), query);
+            return count(fessConfig.getIndexDocumentUpdateIndex(), query, timeout);
         } catch (final Exception e) {
             reportFailure("count", "Failed to count the documents of a crawl: configId={}", configId, e);
             return -1;
@@ -355,16 +558,17 @@ public class CrawlStateService {
      *
      * @param index the index name
      * @param query the query
+     * @param timeout how long the request may wait for the search engine
      * @return the number of documents
      */
-    protected long count(final String index, final QueryBuilder query) {
+    protected long count(final String index, final QueryBuilder query, final String timeout) {
         final SearchResponse response = ComponentUtil.getSearchEngineClient()
                 .prepareSearch(index)
                 .setSize(0)
                 .setTrackTotalHits(true)
                 .setQuery(query)
                 .execute()
-                .actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
+                .actionGet(timeout);
         return response.getHits().getTotalHits().value();
     }
 

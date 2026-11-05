@@ -47,10 +47,11 @@ public class CrawlProgress {
     public CrawlProgress(final String configId, final String name, final long count, final long lastCount, final long updatedTime) {
         this.configId = configId;
         this.name = name;
-        this.count = count;
-        this.lastCount = lastCount;
+        // a count is never negative; the metadata it comes from is not checked when it is read
+        this.count = Math.max(0, count);
+        this.lastCount = Math.max(0, lastCount);
         this.updatedTime = updatedTime;
-        this.percent = calculatePercent(count, lastCount);
+        this.percent = calculatePercent(this.count, this.lastCount);
     }
 
     /**
@@ -68,7 +69,8 @@ public class CrawlProgress {
         if (count <= 0) {
             return 0;
         }
-        return (int) Math.min(MAX_RUNNING_PERCENT, count * 100 / lastCount);
+        // Not count * 100 / lastCount: that overflows for a count above Long.MAX_VALUE / 100.
+        return (int) Math.max(0, Math.min(MAX_RUNNING_PERCENT, Math.floor(count * 100.0 / lastCount)));
     }
 
     /**
