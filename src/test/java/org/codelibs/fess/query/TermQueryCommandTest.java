@@ -47,6 +47,8 @@ public class TermQueryCommandTest extends QueryTestBase {
 
     private boolean fuzzyCjkEnabled;
 
+    private boolean fuzzyDigitEnabled;
+
     private void setQueryType(final String queryType) {
         // Re-create the base FessConfig with the new query type
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -396,6 +398,11 @@ public class TermQueryCommandTest extends QueryTestBase {
             }
 
             @Override
+            public boolean isQueryBoostFuzzyDigitEnabled() {
+                return fuzzyDigitEnabled;
+            }
+
+            @Override
             public String getQueryBoostFuzzyTitlePrefixLength() {
                 return baseConfig.getQueryBoostFuzzyTitlePrefixLength();
             }
@@ -533,6 +540,31 @@ public class TermQueryCommandTest extends QueryTestBase {
             }
         } finally {
             fuzzyCjkEnabled = false;
+        }
+    }
+
+    @Test
+    public void test_convertDefaultTermQuery_noFuzzyForTextWithDigit() throws Exception {
+        setQueryType("bool");
+        for (final String text : new String[] { "AB-1234", "windows11", "E0042", "1234" }) {
+            final QueryContext queryContext = new QueryContext(text, false);
+            final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+            final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString();
+            assertFalse(text, json.contains("fuzziness"));
+        }
+    }
+
+    @Test
+    public void test_convertDefaultTermQuery_fuzzyForTextWithDigitWhenEnabled() throws Exception {
+        setQueryType("bool");
+        fuzzyDigitEnabled = true;
+        try {
+            final QueryContext queryContext = new QueryContext("AB-1234", false);
+            final Query query = ComponentUtil.getQueryParser().parse(queryContext.getQueryString());
+            final String json = queryCommand.convertTermQuery(queryContext, (TermQuery) query, 1.0f).toString();
+            assertTrue(json.contains("\"fuzziness\""));
+        } finally {
+            fuzzyDigitEnabled = false;
         }
     }
 
