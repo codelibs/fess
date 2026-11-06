@@ -229,7 +229,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
         saveToken();
-        if (form.crudMode.intValue() == CrudMode.EDIT) {
+        if (Integer.valueOf(CrudMode.EDIT).equals(form.crudMode)) {
             // back
             form.crudMode = CrudMode.DETAILS;
             return asDetailsHtml();

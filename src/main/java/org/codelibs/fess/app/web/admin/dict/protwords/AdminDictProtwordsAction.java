@@ -213,7 +213,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
                     () -> asListHtml(form.dictId));
         });
         saveToken();
-        if (form.crudMode.intValue() == CrudMode.EDIT) {
+        if (Integer.valueOf(CrudMode.EDIT).equals(form.crudMode)) {
             // back
             form.crudMode = CrudMode.DETAILS;
             return asDetailsHtml();
