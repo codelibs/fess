@@ -16,8 +16,14 @@
 package org.codelibs.fess.app.web.login;
 
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
+import org.codelibs.fess.app.service.UserService;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -107,5 +113,58 @@ public class LoginActionTest extends UnitFessTestCase {
         assertFalse(action.isThrottled(limiter, "198.51.100.5", "alice"));
         action.forgiveAttempt(limiter, "198.51.100.5", "alice");
         assertFalse(action.isThrottled(limiter, "198.51.100.5", "alice"));
+    }
+
+    @Test
+    public void test_changePassword_withoutTheOldPasswordInTheSessionIsAValidationError() throws Exception {
+        // /login/ clears the old password that the forced password change keeps in the session, so a
+        // POST to /login/changePassword after it arrives with no old password to look the user up by.
+        suppressBindingOf(FessLoginAssist.class);
+        suppressBindingOf(UserService.class);
+        final LoginAction changeAction = new LoginAction() {
+            {
+                fessConfig = ComponentUtil.getFessConfig();
+            }
+
+            @Override
+            protected OptionalThing<FessUserBean> getUserBean() {
+                return OptionalThing.of(new FessUserBean(new FessUser() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public String getName() {
+                        return "admin";
+                    }
+
+                    @Override
+                    public String[] getRoleNames() {
+                        return new String[0];
+                    }
+
+                    @Override
+                    public String[] getGroupNames() {
+                        return new String[0];
+                    }
+
+                    @Override
+                    public String[] getPermissions() {
+                        return new String[0];
+                    }
+                }));
+            }
+        };
+        inject(changeAction);
+        final java.lang.reflect.Field sysField = org.codelibs.fess.app.web.base.FessBaseAction.class.getDeclaredField("systemHelper");
+        sysField.setAccessible(true);
+        final SystemHelper systemHelper = new SystemHelper();
+        sysField.set(changeAction, systemHelper);
+        ComponentUtil.register(systemHelper, "systemHelper");
+        final PasswordForm form = new PasswordForm();
+        form.password = "Abcdefg1234";
+        form.confirmPassword = "Abcdefg1234";
+
+        assertValidationError(() -> changeAction.changePassword(form)).handle(data -> {
+            data.requiredMessageOf("_global", "errors.no_user_for_changing_password");
+        });
     }
 }
