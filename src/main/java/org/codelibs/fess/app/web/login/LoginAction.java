@@ -242,6 +242,12 @@ public class LoginAction extends FessLoginAction {
                 getSession().map(session -> (String) session.getAttribute(INVALID_OLD_PASSWORD)).orElse(StringUtil.EMPTY);
         getUserBean().ifPresent(user -> {
             final String userId = user.getUserId();
+            // GET /login/ drops the old password, and a credential cannot be built without one.
+            if (StringUtil.isEmpty(oldPassword)) {
+                throwValidationError(messages -> {
+                    messages.addErrorsNoUserForChangingPassword(GLOBAL);
+                }, validationErrorLambda);
+            }
             fessLoginAssist.findLoginUser(new LocalUserCredential(userId, oldPassword)).orElseGet(() -> {
                 throwValidationError(messages -> {
                     messages.addErrorsNoUserForChangingPassword(GLOBAL);
