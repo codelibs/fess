@@ -497,8 +497,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
      * @param expectedMode The expected mode.
      * @param dictId The dictionary ID.
      */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
-        if (crudMode != expectedMode) {
+    protected void verifyCrudMode(final Integer crudMode, final int expectedMode, final String dictId) {
+        if (crudMode == null || crudMode.intValue() != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, () -> asListHtml(dictId));

@@ -468,8 +468,8 @@ public class AdminDictStopwordsAction extends FessAdminAction {
      * @param expectedMode the expected CRUD mode
      * @param dictId the dictionary ID for error redirection
      */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
-        if (crudMode != expectedMode) {
+    protected void verifyCrudMode(final Integer crudMode, final int expectedMode, final String dictId) {
+        if (crudMode == null || crudMode.intValue() != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, () -> asListHtml(dictId));

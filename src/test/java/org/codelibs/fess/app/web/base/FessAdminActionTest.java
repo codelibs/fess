@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserRoleLoginException;
@@ -368,6 +369,40 @@ public class FessAdminActionTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                             verifyCrudMode Tests
+    //                                                             ====================
+
+    @Test
+    public void test_verifyCrudMode_acceptsTheExpectedMode() {
+        final FessAdminAction action = createCrudModeAction();
+        final Integer mode = CrudMode.EDIT;
+
+        action.verifyCrudMode(mode, CrudMode.EDIT, () -> null);
+    }
+
+    @Test
+    public void test_verifyCrudMode_rejectsAnotherMode() {
+        final FessAdminAction action = createCrudModeAction();
+        final Integer mode = CrudMode.CREATE;
+
+        assertValidationError(() -> action.verifyCrudMode(mode, CrudMode.EDIT, () -> null))
+                .handle(data -> data.requiredMessageOf("_global", "errors.crud_invalid_mode"));
+    }
+
+    /**
+     * A form posted without crudMode carries null; it is a rejected mode like any other, not a
+     * NullPointerException (HTTP 500).
+     */
+    @Test
+    public void test_verifyCrudMode_rejectsAMissingMode() {
+        final FessAdminAction action = createCrudModeAction();
+        final Integer mode = null;
+
+        assertValidationError(() -> action.verifyCrudMode(mode, CrudMode.EDIT, () -> null))
+                .handle(data -> data.requiredMessageOf("_global", "errors.crud_invalid_mode"));
+    }
+
+    // ===================================================================================
     //                                                         godHandPrologue Tests
     //                                                         =========================
 
@@ -671,6 +706,20 @@ public class FessAdminActionTest extends UnitFessTestCase {
         };
         action.viewHelper = new ViewHelper();
         action.fessConfig = createFessConfigOfType(type);
+        return action;
+    }
+
+    private FessAdminAction createCrudModeAction() {
+        // throwValidationError needs the request manager and the system helper
+        suppressBindingOf(FessLoginAssist.class);
+        final FessAdminAction action = new FessAdminAction() {
+            @Override
+            protected String getActionRole() {
+                return "admin-test";
+            }
+        };
+        inject(action);
+        action.systemHelper = new SystemHelper();
         return action;
     }
 

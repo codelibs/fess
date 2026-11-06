@@ -220,12 +220,12 @@ public abstract class FessAdminAction extends FessBaseAction {
     /**
      * Verifies that the CRUD mode matches the expected mode.
      *
-     * @param crudMode the actual CRUD mode
+     * @param crudMode the actual CRUD mode, null when the request did not carry one
      * @param expectedMode the expected CRUD mode
      * @param errorHook the error hook to call if verification fails
      */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode, final VaErrorHook errorHook) {
-        if (crudMode != expectedMode) {
+    protected void verifyCrudMode(final Integer crudMode, final int expectedMode, final VaErrorHook errorHook) {
+        if (crudMode == null || crudMode.intValue() != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, errorHook);
