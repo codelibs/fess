@@ -1213,6 +1213,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String QUERY_BOOST_FUZZY_CJK_ENABLED = "query.boost.fuzzy.cjk.enabled";
 
+    /** The key of the configuration. e.g. false */
+    String QUERY_BOOST_FUZZY_DIGIT_ENABLED = "query.boost.fuzzy.digit.enabled";
+
     /** The key of the configuration. e.g. 0.01 */
     String QUERY_BOOST_FUZZY_TITLE = "query.boost.fuzzy.title";
 
@@ -6555,6 +6558,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryBoostFuzzyCjkEnabled();
+
+    /**
+     * Get the value for the key 'query.boost.fuzzy.digit.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to add the fuzzy clause for text containing a digit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostFuzzyDigitEnabled();
+
+    /**
+     * Is the property for the key 'query.boost.fuzzy.digit.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to add the fuzzy clause for text containing a digit.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryBoostFuzzyDigitEnabled();
 
     /**
      * Get the value for the key 'query.boost.fuzzy.title'. <br>
@@ -13280,6 +13299,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isQueryBoostFuzzyCjkEnabled() {
             return is(FessConfig.QUERY_BOOST_FUZZY_CJK_ENABLED);
+        }
+
+        public String getQueryBoostFuzzyDigitEnabled() {
+            return get(FessConfig.QUERY_BOOST_FUZZY_DIGIT_ENABLED);
+        }
+
+        public boolean isQueryBoostFuzzyDigitEnabled() {
+            return is(FessConfig.QUERY_BOOST_FUZZY_DIGIT_ENABLED);
         }
 
         public String getQueryBoostFuzzyTitle() {

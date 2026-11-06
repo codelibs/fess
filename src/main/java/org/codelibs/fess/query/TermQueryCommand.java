@@ -264,7 +264,8 @@ public class TermQueryCommand extends QueryCommand {
         final DefaultQueryBuilder defaultQuery =
                 buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
-        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength && (fessConfig.isQueryBoostFuzzyCjkEnabled() || !containsCjk(text))) {
+        if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength && (fessConfig.isQueryBoostFuzzyCjkEnabled() || !containsCjk(text))
+                && (fessConfig.isQueryBoostFuzzyDigitEnabled() || !containsDigit(text))) {
             defaultQuery.add(QueryBuilders.matchQuery(fessConfig.getIndexFieldTitle(), text)
                     .operator(Operator.AND)
                     .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())
@@ -281,6 +282,18 @@ public class TermQueryCommand extends QueryCommand {
                     .maxExpansions(fessConfig.getQueryBoostFuzzyContentExpansionsAsInteger()));
         }
         return defaultQuery;
+    }
+
+    /**
+     * Returns whether the text contains a digit.
+     * Such text is usually an identifier (a part number, a ticket number, an error code), and a fuzzy match
+     * would also hit its neighbours, so no fuzzy clause is added for it.
+     *
+     * @param text the query text
+     * @return true if the text contains a digit
+     */
+    protected boolean containsDigit(final String text) {
+        return text.codePoints().anyMatch(Character::isDigit);
     }
 
     /**

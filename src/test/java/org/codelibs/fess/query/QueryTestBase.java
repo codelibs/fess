@@ -337,6 +337,11 @@ public abstract class QueryTestBase extends UnitFessTestCase {
             }
 
             @Override
+            public boolean isQueryBoostFuzzyDigitEnabled() {
+                return false;
+            }
+
+            @Override
             public String getQueryBoostFuzzyTitlePrefixLength() {
                 return "0";
             }

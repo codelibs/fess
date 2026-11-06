@@ -139,6 +139,11 @@ public class QueryHelperTest extends UnitFessTestCase {
             public boolean isQueryBoostFuzzyCjkEnabled() {
                 return fessConfig.isQueryBoostFuzzyCjkEnabled();
             }
+
+            @Override
+            public boolean isQueryBoostFuzzyDigitEnabled() {
+                return true; // the fixtures (QUERY1, ...) carry a digit, and these tests check the shape of the fuzzy clause
+            }
         });
     }
 
@@ -186,6 +191,7 @@ public class QueryHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_build_multiple() {
+        setQueryType("bool");
         float titleBoost = 0.5f;
         float contentBoost = 0.05f;
 
