@@ -284,16 +284,19 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         transformer.transform(responseData);
 
-        // The response body is read exactly 3 times per transform() call:
-        //   1) HtmlTransformer.updateCharset(...) sniffs the charset (base class, before storeData)
-        //   2) FessXpathTransformer.storeData(...) parses the DOM - this is the Document that gets
+        // The response body is read exactly 4 times per transform() call:
+        //   1) HtmlTransformer.updateCharset(...) sniffs the charset declared in a <meta> tag
+        //      (base class, before storeData)
+        //   2) HtmlTransformer.detectCharset(...) detects the charset from the bytes, since this
+        //      page declares none
+        //   3) FessXpathTransformer.storeData(...) parses the DOM - this is the Document that gets
         //      reused for child-URL/anchor extraction
-        //   3) processAdditionalData(...) reads the raw bytes again to populate the "cache" field
+        //   4) processAdditionalData(...) reads the raw bytes again to populate the "cache" field
         //      (crawler.document.cache.enabled=true by default for text/html)
-        // Crucially, there is NO 4th read: storeChildUrls(responseData, resultData) reuses the
+        // Crucially, there is NO 5th read: storeChildUrls(responseData, resultData) reuses the
         // Document stashed by storeData instead of re-parsing the body via a fresh DOMParser -
-        // that removed 4th read is exactly what this test guards against regressing.
-        assertEquals(3, bodyReadCount[0]);
+        // that removed extra read is exactly what this test guards against regressing.
+        assertEquals(4, bodyReadCount[0]);
     }
 
     @Test
