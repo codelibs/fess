@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.codelibs.fess.mylasta.direction.sponsor.FessSecurityResourceProvider;
 import org.codelibs.fess.servlet.ErrorPageServlet;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,60 @@ public class FessFwAssistantDirectorTest extends UnitFessTestCase {
 
     /** Prefix of the API the child processes do not have; see this class' javadoc. */
     private static final String MISSING_PACKAGE_PREFIX = "jakarta.servlet.";
+
+    @Test
+    public void test_createSecurityResourceProvider_emptyCipherKeyNamesTheSetting() {
+        for (final String algorithm : new String[] { "aes", "blowfish", "des", "rsa" }) {
+            final FessFwAssistantDirector director = newDirector(algorithm, "");
+            try {
+                director.createSecurityResourceProvider();
+                fail("an empty app.cipher.key should stop the start: " + algorithm);
+            } catch (final IllegalStateException e) {
+                assertTrue(e.getMessage(), e.getMessage().contains("app.cipher.key"));
+                assertTrue(e.getMessage(), e.getMessage().contains("fess-setup init"));
+            }
+        }
+    }
+
+    @Test
+    public void test_createSecurityResourceProvider_nullCipherKeyNamesTheSetting() {
+        try {
+            newDirector("aes", null).createSecurityResourceProvider();
+            fail();
+        } catch (final IllegalStateException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("app.cipher.key"));
+        }
+    }
+
+    @Test
+    public void test_createSecurityResourceProvider_validCipherKey() {
+        final String key = "abcdefghijklmnop"; // 16 characters, a placeholder
+        final FessSecurityResourceProvider provider = newDirector("aes", key).createSecurityResourceProvider();
+        assertNotNull(provider.providePrimaryInvertibleCryptographer());
+        assertEquals("text",
+                provider.providePrimaryInvertibleCryptographer().decrypt(provider.providePrimaryInvertibleCryptographer().encrypt("text")));
+    }
+
+    private FessFwAssistantDirector newDirector(final String algorithm, final String key) {
+        final FessFwAssistantDirector director = new FessFwAssistantDirector();
+        director.fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getAppCipherAlgorithm() {
+                return algorithm;
+            }
+
+            @Override
+            public String getAppCipherKey() {
+                return key;
+            }
+
+            @Override
+            public String getAppDigestAlgorithm() {
+                return "sha256";
+            }
+        };
+        return director;
+    }
 
     @Test
     public void test_directorComponentsLoadWithoutServletApi() throws Exception {

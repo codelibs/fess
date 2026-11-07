@@ -123,20 +123,21 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
 
     protected FessSecurityResourceProvider createSecurityResourceProvider() {
         final InvertibleCryptographer inver;
+        final String cipherKey = getCipherKey();
         final String cipherAlgorithm = fessConfig.getAppCipherAlgorithm();
         if ("blowfish".equalsIgnoreCase(cipherAlgorithm)) {
             logger.warn(
                     "Blowfish cipher is deprecated due to its 64-bit block size vulnerability. Please consider migrating to AES. algorithm={}",
                     cipherAlgorithm);
-            inver = InvertibleCryptographer.createBlowfishCipher(fessConfig.getAppCipherKey());
+            inver = InvertibleCryptographer.createBlowfishCipher(cipherKey);
         } else if ("des".equalsIgnoreCase(cipherAlgorithm)) {
             logger.warn("DES cipher is deprecated due to its 56-bit key size vulnerability. Please consider migrating to AES. algorithm={}",
                     cipherAlgorithm);
-            inver = InvertibleCryptographer.createDesCipher(fessConfig.getAppCipherKey());
+            inver = InvertibleCryptographer.createDesCipher(cipherKey);
         } else if ("rsa".equalsIgnoreCase(cipherAlgorithm)) {
-            inver = InvertibleCryptographer.createRsaCipher(fessConfig.getAppCipherKey());
+            inver = InvertibleCryptographer.createRsaCipher(cipherKey);
         } else {
-            inver = InvertibleCryptographer.createAesCipher(fessConfig.getAppCipherKey());
+            inver = InvertibleCryptographer.createAesCipher(cipherKey);
         }
 
         final OneWayCryptographer oneWay;
@@ -152,6 +153,24 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         }
 
         return new FessSecurityResourceProvider(inver, oneWay);
+    }
+
+    /**
+     * Gets {@code app.cipher.key}, which must not be empty.
+     *
+     * <p>An empty key would otherwise stop the start with only "Empty key" from the JDK in the log,
+     * which does not name the setting.</p>
+     *
+     * @return The cipher key.
+     * @throws IllegalStateException If the key is empty.
+     */
+    protected String getCipherKey() {
+        final String cipherKey = fessConfig.getAppCipherKey();
+        if (cipherKey == null || cipherKey.isEmpty()) {
+            throw new IllegalStateException("app.cipher.key in fess_config.properties is empty, so Fess cannot start. "
+                    + "Set it to a key of 16, 24 or 32 characters, or run bin/fess-setup init before the first start to generate one.");
+        }
+        return cipherKey;
     }
 
     protected FessTimeResourceProvider createTimeResourceProvider() {
