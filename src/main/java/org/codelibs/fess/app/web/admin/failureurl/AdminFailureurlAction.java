@@ -98,6 +98,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+        validate(form, messages -> {}, this::asListHtml);
         failureUrlPager.setCurrentPageNumber(limitPageNumber(pageNumber, failureUrlPager.getPageSize()));
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -113,6 +114,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
+        validate(form, messages -> {}, this::asListHtml);
         copyBeanToBean(form, failureUrlPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -128,6 +130,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
+        validate(form, messages -> {}, this::asListHtml);
         failureUrlPager.clear();
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -143,6 +146,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
+        validate(form, messages -> {}, this::asListHtml);
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
