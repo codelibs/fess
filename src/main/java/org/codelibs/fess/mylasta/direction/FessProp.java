@@ -811,16 +811,19 @@ public interface FessProp {
     Integer getLdapMaxUsernameLengthAsInteger();
 
     default String getLdapSecurityPrincipal(final String username) {
-        final String value;
+        final String template = getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
         final int maxLength = getLdapMaxUsernameLengthAsInteger();
+        final String name;
         if (username == null) {
-            value = StringUtil.EMPTY;
+            name = StringUtil.EMPTY;
         } else if (maxLength >= 0 && username.length() > maxLength) {
-            value = LdapUtil.escapeValue(username.substring(0, maxLength));
+            name = username.substring(0, maxLength);
         } else {
-            value = LdapUtil.escapeValue(username);
+            name = username;
         }
-        return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), value);
+        // A DN template (uid=%s,ou=...) needs DN escaping; a UPN (%s@example.com) or a down-level name (DOMAIN\%s) does not.
+        final String value = template.contains("=") ? LdapUtil.escapeDnValue(name) : LdapUtil.escapeValue(name);
+        return String.format(template, value);
     }
 
     default String getLdapSecurityPrincipal() {

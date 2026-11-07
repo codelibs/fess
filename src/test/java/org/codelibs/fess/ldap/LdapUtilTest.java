@@ -118,4 +118,23 @@ public class LdapUtilTest extends UnitFessTestCase {
         // Escape sequence confusion
         assertEquals("admin\\5c\\2a", LdapUtil.escapeValue("admin\\*"));
     }
+
+    @Test
+    public void test_escapeDnValue() {
+        assertEquals("", LdapUtil.escapeDnValue(null));
+        assertEquals("alice", LdapUtil.escapeDnValue("alice"));
+        // Characters that split or end a relative distinguished name
+        assertEquals("a\\,b", LdapUtil.escapeDnValue("a,b"));
+        assertEquals("x\\+uid=alice", LdapUtil.escapeDnValue("x+uid=alice"));
+        assertEquals("a\\;b\\<c\\>d\\\"e", LdapUtil.escapeDnValue("a;b<c>d\"e"));
+        // Leading '#' and space, trailing space
+        assertEquals("\\#a", LdapUtil.escapeDnValue("#a"));
+        assertEquals("a#b", LdapUtil.escapeDnValue("a#b"));
+        assertEquals("\\ a b\\ ", LdapUtil.escapeDnValue(" a b "));
+        // Everything escapeValue escapes stays escaped the same way
+        assertEquals("a\\5c\\2a\\28b\\29\\00", LdapUtil.escapeDnValue("a\\*(b)\0"));
+        // Other characters, including non-ASCII, are untouched
+        assertEquals("o'brien", LdapUtil.escapeDnValue("o'brien"));
+        assertEquals("山田", LdapUtil.escapeDnValue("山田"));
+    }
 }

@@ -77,6 +77,30 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_securityPrincipalEscaping() throws IOException {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public Integer getLdapMaxUsernameLengthAsInteger() {
+                return Integer.valueOf(-1);
+            }
+        };
+        DynamicProperties existingProps = SingletonLaContainerFactory.getContainer().getComponent("systemProperties");
+
+        // A DN template: RDN special characters are escaped
+        existingProps.setProperty("ldap.security.principal", "uid=%s,ou=People,dc=example,dc=com");
+        assertEquals("uid=alice,ou=People,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("alice"));
+        assertEquals("uid=a\\,b,ou=People,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("a,b"));
+        assertEquals("uid=a\\,ou=x,ou=People,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("a,ou=x"));
+
+        // A user principal name or a down-level name is not a DN: only the filter characters are escaped
+        existingProps.setProperty("ldap.security.principal", "%s@example.com");
+        assertEquals("a,b@example.com", fessConfig.getLdapSecurityPrincipal("a,b"));
+        existingProps.setProperty("ldap.security.principal", "EXAMPLE\\%s");
+        assertEquals("EXAMPLE\\a,b", fessConfig.getLdapSecurityPrincipal("a,b"));
+    }
+
+    @Test
     public void test_maxUsernameLength10() throws IOException {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
