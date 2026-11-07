@@ -25,6 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -1379,6 +1380,12 @@ public class SystemHelper {
             }
         } catch (final Exception e) {
             // getPasswordMaxLengthOrDefault is unavailable in slim test harnesses — skip the check.
+        }
+
+        // BCrypt ignores everything after the first 72 bytes, so a longer password would be
+        // accepted with any ending. Refuse it when a password is set instead.
+        if (password.getBytes(StandardCharsets.UTF_8).length > PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES) {
+            return "errors.password_length";
         }
 
         if (fessConfig.isPasswordRequireUppercase() && !containsUppercase(password)) {
