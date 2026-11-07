@@ -403,19 +403,24 @@ public class SimilarDocumentsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_size_defaultIsThePageSizeOfSearch() throws Exception {
+    public void test_size_defaultIsTenWhateverThePageSizeOfSearchIs() throws Exception {
         pageSize = 25;
         get(DOC_ID, null);
         get(DOC_ID, "");
-        assertEquals(List.of("abc123:25", "abc123:25"), calls);
+        get(DOC_ID, "abc");
+        assertEquals(List.of("abc123:10", "abc123:10", "abc123:10"), calls);
+        // a num is still read as in the search
+        get(DOC_ID, "25");
+        assertEquals("abc123:25", calls.get(3));
     }
 
     @Test
     public void test_size_isNeverMoreThanThePageMaxSize() throws Exception {
         pageMaxSize = 8;
+        get(DOC_ID, null);
         get(DOC_ID, "15");
         get(DOC_ID, "3");
-        assertEquals(List.of("abc123:8", "abc123:3"), calls);
+        assertEquals(List.of("abc123:8", "abc123:8", "abc123:3"), calls);
     }
 
     @Test

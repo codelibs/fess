@@ -57,7 +57,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * </ol>
  *
  * <p>There is only one page, whose size is {@code num} as for {@code /api/v2/search}
- * ({@code paging.search.page.size} by default, at most {@code paging.search.page.max.size}).
+ * ({@value #DEFAULT_SIZE} by default, at most {@code paging.search.page.max.size}).
  * The documents carry the same fields as the hits of
  * {@code /api/v2/search}.</p>
  *
@@ -67,6 +67,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SimilarDocumentsHandler {
 
     private static final Logger logger = LogManager.getLogger(SimilarDocumentsHandler.class);
+
+    /** The number of documents returned when {@code num} is not given. */
+    protected static final int DEFAULT_SIZE = 10;
 
     /**
      * Default constructor. The handler is stateless and intended to be
@@ -100,7 +103,8 @@ public class SimilarDocumentsHandler {
             // The caller, the fields to read and the tags to show are decided as /search does, by its handler.
             final SearchHandler searchHandler = createSearchHandler();
             final V2JsonRequestParams params = searchHandler.createRequestParams(request, fessConfig);
-            // The page size is read as /search reads it: paging.search.page.size by default, at most paging.search.page.max.size.
+            // The page size is read as /search reads it, except that the default is 10: at most paging.search.page.max.size.
+            params.setDefaultPageSize(Math.max(1, Math.min(DEFAULT_SIZE, fessConfig.getPagingSearchPageMaxSizeAsInteger())));
             final int size = params.getPageSize();
             if (isRateLimited(request, response, fessConfig, contextTag)) {
                 return;
