@@ -16,6 +16,7 @@
 package org.codelibs.fess.crawler.transformer;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
@@ -37,6 +38,7 @@ import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.exception.ExtractException;
 import org.codelibs.fess.crawler.exception.MaxLengthExceededException;
 import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -259,6 +261,29 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
                     "the document that lost its content must be named: " + capture.warnings());
         } finally {
             capture.detach();
+        }
+    }
+
+    /**
+     * A suspected zip bomb is a failure even when the content exceptions are ignored: the exception
+     * is rethrown, so that the crawler records the url as a failure url and the document is not
+     * indexed.
+     */
+    @Test
+    public void test_getExtractData_rethrowsAZipBombEvenWhenContentExceptionsAreIgnored() {
+        final Map<String, String> params = new HashMap<>();
+        params.put(ExtractData.URL, "http://example.com/files/bomb.docx");
+        final ExtractException bomb =
+                new ExtractException("Failed to extract via Tika: reason=zipBombDetected", new IOException("Suspected zip bomb"));
+        final Extractor extractor = (in, p) -> {
+            throw bomb;
+        };
+        assertTrue(ComponentUtil.getFessConfig().isCrawlerIgnoreContentException());
+        try {
+            transformer.getExtractData(extractor, new ByteArrayInputStream(new byte[0]), params);
+            fail("Should rethrow the exception of a suspected zip bomb");
+        } catch (final ExtractException e) {
+            assertSame(bomb, e);
         }
     }
 
