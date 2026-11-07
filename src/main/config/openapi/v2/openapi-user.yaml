@@ -496,7 +496,8 @@ paths:
         documents the caller can see are returned. The given document, and any
         other document with the same URL, is never part of the result.
 
-        There is a single page of at most 20 documents (`num`, bounded by
+        There is a single page, whose size `num` is read as `GET /search` reads
+        it (`paging.search.page.size` by default, at most
         `paging.search.page.max.size`); there is no `start` or `offset`. The
         documents are ordered by URL and then document ID, since they all match
         equally. Each document is converted as a hit of `GET /search` is and has
@@ -518,11 +519,13 @@ paths:
         - name: num
           in: query
           description: |-
-            Number of documents. Values `<= 0` produce `invalid_request`;
-            values above 20 (or above `paging.search.page.max.size`) are
-            silently clamped, which the response `page_size` shows.
+            Page size, as for `GET /search`. Values `<= 0` produce
+            `invalid_request`. Values above the configured maximum are silently
+            clamped — clients can detect clamping by comparing the request `num`
+            with the response `page_size` field. Effective upper bound is
+            clamped by `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 1, maximum: 20, default: 10 }
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
       responses:
         '200':
           description: Similar documents returned (possibly none).
