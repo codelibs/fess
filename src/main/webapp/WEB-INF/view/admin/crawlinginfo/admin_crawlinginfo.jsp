@@ -71,6 +71,7 @@ ${fe:html(true)}
                                                         <c:if test="${crawl.percent != null}">
                                                             <div class="progress">
                                                                 <div class="progress-bar" role="progressbar"
+                                                                     aria-label="${f:h(crawl.name)}"
                                                                      style="width: ${crawl.percent}%"
                                                                      aria-valuenow="${crawl.percent}" aria-valuemin="0"
                                                                      aria-valuemax="100">${crawl.percent}%</div>
