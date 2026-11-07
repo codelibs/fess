@@ -126,6 +126,36 @@ public class UserInfoHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getUserCodeFromRequest_ignoresTheCodeOfALoginUser() {
+        final UserInfoHelper userInfoHelper = new UserInfoHelper();
+        final MockletHttpServletRequest request = getMockRequest();
+
+        // the code of a logged-in user is the encrypted user ID
+        final String loginUserCode = userInfoHelper.createUserCodeFromUserId("alice-user-id");
+        assertNotNull(loginUserCode);
+        request.setParameter("userCode", loginUserCode);
+        assertNull(userInfoHelper.getUserCodeFromRequest(request));
+
+        // a random ID, which is what a client that is not logged in is given, is kept
+        for (int i = 0; i < 200; i++) {
+            final String id = java.util.UUID.randomUUID().toString().replace("-", "");
+            request.setParameter("userCode", id);
+            assertEquals(id, userInfoHelper.getUserCodeFromRequest(request));
+        }
+    }
+
+    @Test
+    public void test_getUserCodeFromCookie_ignoresTheCodeOfALoginUser() {
+        final UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieName("fessuser");
+        final MockletHttpServletRequest request = getMockRequest();
+
+        final String loginUserCode = userInfoHelper.createUserCodeFromUserId("alice-user-id");
+        request.addCookie(new Cookie("fessuser", loginUserCode));
+        assertNull(userInfoHelper.getUserCodeFromCookie(request));
+    }
+
+    @Test
     public void test_getUserCodeFromCookie() {
         UserInfoHelper userInfoHelper = new UserInfoHelper() {
             @Override

@@ -190,11 +190,31 @@ public class UserInfoHelper {
             return null;
         }
 
-        if (fessConfig.isValidUserCode(userCode)) {
+        if (fessConfig.isValidUserCode(userCode) && !isUserCodeOfLoginUser(userCode)) {
             request.setAttribute(Constants.USER_CODE, userCode);
             return userCode;
         }
         return null;
+    }
+
+    /**
+     * Returns whether a code that a client sent is the code of a logged-in user, that is, the encrypted
+     * user ID (see {@link #createUserCodeFromUserId(String)}). A client that is not logged in has to be
+     * identified by the code it was given, a random ID; a code that decrypts to text is not one, and
+     * honouring it would let the client read and write the favorites and the history of that user.
+     * A random ID does not decrypt to printable text, so it is not mistaken for one.
+     *
+     * @param userCode a code taken from a request parameter or a cookie
+     * @return {@code true} if the code is the encrypted ID of a user
+     */
+    protected boolean isUserCodeOfLoginUser(final String userCode) {
+        try {
+            final String plain = ComponentUtil.getPrimaryCipher().decrypt(userCode);
+            return StringUtil.isNotEmpty(plain)
+                    && plain.codePoints().noneMatch(c -> c == 0xFFFD || Character.isISOControl(c) || !Character.isDefined(c));
+        } catch (final RuntimeException e) {
+            return false;
+        }
     }
 
     /**
@@ -274,7 +294,8 @@ public class UserInfoHelper {
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName()) && fessConfig.isValidUserCode(cookie.getValue())) {
+                if (cookieName.equals(cookie.getName()) && fessConfig.isValidUserCode(cookie.getValue())
+                        && !isUserCodeOfLoginUser(cookie.getValue())) {
                     return cookie.getValue();
                 }
             }
