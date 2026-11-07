@@ -428,7 +428,29 @@ public class FessPropTest extends UnitFessTestCase {
         for (final int code : new int[] { 401, 403, 404, 410 }) {
             assertTrue("HTTP " + code + " must be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
         }
-        for (final int code : new int[] { 200, 301, 304, 500, 503 }) {
+        // every 5xx response leaves a failure URL, or the crawl ends with no trace of a server error
+        for (final int code : new int[] { 500, 502, 503, 504, 520, 599 }) {
+            assertTrue("HTTP " + code + " must be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
+        }
+        for (final int code : new int[] { 200, 301, 304, 400, 429 }) {
+            assertFalse("HTTP " + code + " must not be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
+        }
+    }
+
+    @Test
+    public void test_isCrawlerFailureUrlStatusCodes_range() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerFailureUrlStatusCodes() {
+                return " 404 , 5XX,,429 ";
+            }
+        };
+
+        for (final int code : new int[] { 404, 429, 500, 503, 599 }) {
+            assertTrue("HTTP " + code + " must be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
+        }
+        for (final int code : new int[] { 200, 403, 499, 600 }) {
             assertFalse("HTTP " + code + " must not be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
         }
     }

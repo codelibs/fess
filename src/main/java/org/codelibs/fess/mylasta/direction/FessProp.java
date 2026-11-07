@@ -2151,7 +2151,7 @@ public interface FessProp {
         int[] codes = (int[]) propMap.get(CRAWLER_FAILURE_URL_STATUS_CODES);
         if (codes == null) {
             codes = split(getCrawlerFailureUrlStatusCodes(), ",")
-                    .get(stream -> stream.filter(StringUtil::isNotBlank).mapToInt(Integer::parseInt).toArray());
+                    .get(stream -> stream.filter(StringUtil::isNotBlank).flatMapToInt(FessProp::toStatusCodes).toArray());
             propMap.put(CRAWLER_FAILURE_URL_STATUS_CODES, codes);
         }
         for (final int v : codes) {
@@ -2160,6 +2160,19 @@ public interface FessProp {
             }
         }
         return false;
+    }
+
+    /**
+     * Converts an entry of crawler.failure.url.status.codes to HTTP status codes.
+     * An entry is a status code such as 404, or a class such as 5xx that stands for 500 to 599.
+     */
+    private static java.util.stream.IntStream toStatusCodes(final String entry) {
+        final String value = entry.trim();
+        if (value.matches("[1-5][xX]{2}")) {
+            final int first = (value.charAt(0) - '0') * 100;
+            return java.util.stream.IntStream.rangeClosed(first, first + 99);
+        }
+        return java.util.stream.IntStream.of(Integer.parseInt(value));
     }
 
     Integer getThumbnailHtmlImageMinWidthAsInteger();

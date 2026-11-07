@@ -452,7 +452,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_IGNORE_CONTENT_EXCEPTION = "crawler.ignore.content.exception";
 
-    /** The key of the configuration. e.g. 404,403,410 */
+    /** The key of the configuration. e.g. 404,403,410,401,5xx */
     String CRAWLER_FAILURE_URL_STATUS_CODES = "crawler.failure.url.status.codes";
 
     /** The key of the configuration. e.g. 60 */
@@ -3788,16 +3788,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.failure.url.status.codes'. <br>
-     * The value is, e.g. 404,403,410,401 <br>
-     * comment: HTTP status codes considered as failure URLs.
+     * The value is, e.g. 404,403,410,401,5xx <br>
+     * comment: HTTP status codes considered as failure URLs. 5xx stands for 500 to 599.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFailureUrlStatusCodes();
 
     /**
      * Get the value for the key 'crawler.failure.url.status.codes' as {@link Integer}. <br>
-     * The value is, e.g. 404,403,410,401 <br>
-     * comment: HTTP status codes considered as failure URLs.
+     * The value is, e.g. 404,403,410,401,5xx <br>
+     * comment: HTTP status codes considered as failure URLs. 5xx stands for 500 to 599.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -15710,7 +15710,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_ROBOTS_TAGS, "false");
             defaultMap.put(FessConfig.CRAWLER_IGNORE_CONTENT_EXCEPTION, "true");
-            defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404,403,410");
+            defaultMap.put(FessConfig.CRAWLER_FAILURE_URL_STATUS_CODES, "404,403,410,401,5xx");
             defaultMap.put(FessConfig.CRAWLER_SYSTEM_MONITOR_INTERVAL, "60");
             defaultMap.put(FessConfig.CRAWLER_PROGRESS_INTERVAL, "10");
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_ignore_idle_threads, "true");
