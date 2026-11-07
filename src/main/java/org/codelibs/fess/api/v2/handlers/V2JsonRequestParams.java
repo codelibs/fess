@@ -60,6 +60,9 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     private boolean pageSizeInitialized;
 
+    /** The page size when {@code num} is missing or not a number; 0 means {@code paging.search.page.size}. */
+    private int defaultPageSize;
+
     /**
      * Constructs a v2 request-params adapter over an incoming HTTP request.
      *
@@ -278,7 +281,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
         final String num = request.getParameter("num");
         if (StringUtil.isBlank(num)) {
-            pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
+            pageSize = getDefaultPageSize();
         } else {
             try {
                 final int requested = Integer.parseInt(num);
@@ -294,11 +297,25 @@ public class V2JsonRequestParams extends SearchRequestParams {
                     pageSize = requested;
                 }
             } catch (final NumberFormatException e) {
-                pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
+                pageSize = getDefaultPageSize();
             }
         }
         pageSizeInitialized = true;
         return pageSize;
+    }
+
+    /**
+     * Sets the page size that {@link #getPageSize()} returns when {@code num} is missing or not a number,
+     * in place of {@code paging.search.page.size}. Call it before {@link #getPageSize()}.
+     *
+     * @param defaultPageSize the default page size, at least 1
+     */
+    public void setDefaultPageSize(final int defaultPageSize) {
+        this.defaultPageSize = defaultPageSize;
+    }
+
+    private int getDefaultPageSize() {
+        return defaultPageSize > 0 ? defaultPageSize : fessConfig.getPagingSearchPageSizeAsInteger();
     }
 
     /**

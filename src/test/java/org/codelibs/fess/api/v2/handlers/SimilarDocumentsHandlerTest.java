@@ -86,6 +86,8 @@ public class SimilarDocumentsHandlerTest extends UnitFessTestCase {
 
     private int rateLimit = 0;
 
+    private int pageSize = 10;
+
     private int pageMaxSize = 100;
 
     /** What the search helper answers: the documents, or null for "no such document". */
@@ -102,6 +104,11 @@ public class SimilarDocumentsHandlerTest extends UnitFessTestCase {
             @Override
             public Integer getApiSearchSimilarRateLimitPerMinuteAsInteger() {
                 return rateLimit;
+            }
+
+            @Override
+            public Integer getPagingSearchPageSizeAsInteger() {
+                return pageSize;
             }
 
             @Override
@@ -384,14 +391,27 @@ public class SimilarDocumentsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_size_numIsHonouredUpToTheCap() throws Exception {
+    public void test_size_numIsHonouredUpToThePageMaxSizeAsInSearch() throws Exception {
+        get(DOC_ID, null);
         get(DOC_ID, "1");
         get(DOC_ID, "5");
-        get(DOC_ID, "20");
         get(DOC_ID, "21");
         get(DOC_ID, "100");
+        get(DOC_ID, "101");
         get(DOC_ID, "2147483647");
-        assertEquals(List.of("abc123:1", "abc123:5", "abc123:20", "abc123:20", "abc123:20", "abc123:20"), calls);
+        assertEquals(List.of("abc123:10", "abc123:1", "abc123:5", "abc123:21", "abc123:100", "abc123:100", "abc123:100"), calls);
+    }
+
+    @Test
+    public void test_size_defaultIsTenWhateverThePageSizeOfSearchIs() throws Exception {
+        pageSize = 25;
+        get(DOC_ID, null);
+        get(DOC_ID, "");
+        get(DOC_ID, "abc");
+        assertEquals(List.of("abc123:10", "abc123:10", "abc123:10"), calls);
+        // a num is still read as in the search
+        get(DOC_ID, "25");
+        assertEquals("abc123:25", calls.get(3));
     }
 
     @Test
@@ -401,9 +421,14 @@ public class SimilarDocumentsHandlerTest extends UnitFessTestCase {
         get(DOC_ID, "15");
         get(DOC_ID, "3");
         assertEquals(List.of("abc123:8", "abc123:8", "abc123:3"), calls);
-        pageMaxSize = 0;
-        get(DOC_ID, "5");
-        assertEquals("abc123:1", calls.get(3));
+    }
+
+    @Test
+    public void test_size_aNumThatIsNotAnIntIsTheDefaultAsInSearch() throws Exception {
+        for (final String num : new String[] { "abc", "1.5", "99999999999", "+99999999999", "1".repeat(5000) }) {
+            get(DOC_ID, num);
+        }
+        assertEquals(List.of("abc123:10", "abc123:10", "abc123:10", "abc123:10", "abc123:10"), calls);
     }
 
     @Test
@@ -413,13 +438,6 @@ public class SimilarDocumentsHandlerTest extends UnitFessTestCase {
             assertEquals(400, res.status, "num=" + num + " " + res.body());
             assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
         }
-        assertTrue(calls.isEmpty());
-    }
-
-    @Test
-    public void test_size_aVeryLongNumIsRejected() throws Exception {
-        final CapturingResponse res = get(DOC_ID, "1".repeat(5000));
-        assertEquals(400, res.status, res.body());
         assertTrue(calls.isEmpty());
     }
 
