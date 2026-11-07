@@ -229,7 +229,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
                     if (idValue != null && !indexingHelper.deleteDocument(searchEngineClient, idValue.toString())
                             && logger.isDebugEnabled()) {
-                        logger.debug("Failed to delete expired document: {}", url);
+                        logger.debug("Failed to delete expired document: {}", urlQueue.getLogUrl());
                     }
                     return true;
                 }
@@ -252,12 +252,12 @@ public class FessCrawlerThread extends CrawlerThread {
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Accessing document: url={}, status={}", url, httpStatusCode);
+                    logger.debug("Accessing document: url={}, status={}", urlQueue.getLogUrl(), httpStatusCode);
                 }
                 if (httpStatusCode == Constants.NOT_FOUND_STATUS_CODE) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     if (!indexingHelper.deleteDocument(searchEngineClient, id) && logger.isDebugEnabled()) {
-                        logger.debug("Failed to delete document: status={}, url={}", Constants.NOT_FOUND_STATUS_CODE, url);
+                        logger.debug("Failed to delete document: status={}, url={}", Constants.NOT_FOUND_STATUS_CODE, urlQueue.getLogUrl());
                     }
                     return false;
                 }
@@ -311,7 +311,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 && !ComponentUtil.getIndexingHelper()
                         .updateDocument(ComponentUtil.getSearchEngineClient(), id, fessConfig.getIndexFieldExpires(), documentExpires)
                 && logger.isDebugEnabled()) {
-            logger.debug("Failed to update field: field={}, url={}", fessConfig.getIndexFieldExpires(), urlQueue.getUrl());
+            logger.debug("Failed to update field: field={}, url={}", fessConfig.getIndexFieldExpires(), urlQueue.getLogUrl());
         }
     }
 

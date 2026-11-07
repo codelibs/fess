@@ -18,15 +18,19 @@ package org.codelibs.fess.helper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.entity.UrlQueueImpl;
 import org.codelibs.fess.crawler.exception.MaxLengthExceededException;
+import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
+import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.entity.FailureUrlDetails;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -145,5 +149,82 @@ public class CrawlerLogHelperTest extends UnitFessTestCase {
         // but we can verify the class structure
         assertNotNull(crawlerLogHelper);
         assertTrue(CrawlerLogHelper.class.getSuperclass().getSimpleName().contains("LogHelper"));
+    }
+
+    /** Makes the statistics a no-op, so that the log handlers reach the logger without a configuration. */
+    private static void registerLoggingComponents() {
+        ComponentUtil.register(new CrawlerStatsHelper() {
+            @Override
+            public void begin(final Object keyObj) {
+            }
+
+            @Override
+            public void record(final Object keyObj, final StatsAction action) {
+            }
+        }, "crawlerStatsHelper");
+    }
+
+    @Test
+    public void test_log_startCrawling_doesNotLogTheUserInfoOfTheUrl() {
+        registerLoggingComponents();
+
+        final CrawlerLogHelper helper = new CrawlerLogHelper();
+        final LogCapturingAppender helperAppender = LogCapturingAppender.attach(CrawlerLogHelper.class);
+        final LogCapturingAppender baseAppender = LogCapturingAppender.attach(LogHelperImpl.class);
+        try {
+            helper.processStartCrawling(new CrawlerContext(), urlQueue("http://user:secret@host.example.com/path"));
+
+            final List<String> messages = new ArrayList<>(helperAppender.messagesAt(Level.INFO));
+            messages.addAll(baseAppender.messagesAt(Level.INFO));
+            assertTrue(messages.toString(), messages.contains("Crawling URL: http://host.example.com/path"));
+            messages.forEach(m -> assertFalse(m, m.contains("secret")));
+        } finally {
+            helperAppender.detach();
+            baseAppender.detach();
+        }
+    }
+
+    @Test
+    public void test_log_crawlingAccessException_doesNotLogTheUserInfoOfTheUrl() {
+        registerLoggingComponents();
+
+        final CrawlerLogHelper helper = createHelper();
+        final String url = "http://user:secret@host.example.com/path?q=1";
+        // the message FaultTolerantClient builds: the url, then each failure, and the client repeats the url in its own
+        final MultipleCrawlingAccessException e = new MultipleCrawlingAccessException(
+                "Failed to access to " + url + "; I/O exception(Request URI authority contains deprecated userinfo component): " + url,
+                new Throwable[] { new RuntimeException() });
+        final LogCapturingAppender helperAppender = LogCapturingAppender.attach(CrawlerLogHelper.class);
+        final LogCapturingAppender baseAppender = LogCapturingAppender.attach(LogHelperImpl.class);
+        try {
+            helper.processCrawlingAccessException(new CrawlerContext(), urlQueue(url), e);
+
+            final List<String> messages = new ArrayList<>(helperAppender.messagesAt(Level.INFO));
+            messages.addAll(baseAppender.messagesAt(Level.INFO));
+            assertEquals(messages.toString(), 1, messages.size());
+            assertEquals("[?] Failed to access to http://host.example.com/path?q=1; "
+                    + "I/O exception(Request URI authority contains deprecated userinfo component): http://host.example.com/path?q=1",
+                    messages.get(0));
+        } finally {
+            helperAppender.detach();
+            baseAppender.detach();
+        }
+    }
+
+    @Test
+    public void test_log_crawlingAccessException_keepsAMessageWithoutTheUrl() {
+        registerLoggingComponents();
+
+        final CrawlerLogHelper helper = createHelper();
+        final MultipleCrawlingAccessException e =
+                new MultipleCrawlingAccessException("Connection time out", new Throwable[] { new RuntimeException() });
+        final LogCapturingAppender helperAppender = LogCapturingAppender.attach(CrawlerLogHelper.class);
+        try {
+            helper.processCrawlingAccessException(new CrawlerContext(), urlQueue("http://host.example.com/path"), e);
+
+            assertEquals(List.of("[?] Connection time out"), helperAppender.messagesAt(Level.INFO));
+        } finally {
+            helperAppender.detach();
+        }
     }
 }

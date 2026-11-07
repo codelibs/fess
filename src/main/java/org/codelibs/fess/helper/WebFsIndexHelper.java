@@ -48,6 +48,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 
 /**
  * Helper class for web and file system crawling and indexing operations.
@@ -217,7 +218,7 @@ public class WebFsIndexHelper {
                         final String u = duplicateHostHelper.convert(urlValue);
                         crawler.addUrl(u);
                         if (logger.isInfoEnabled()) {
-                            logger.info("Target URL: {}", u);
+                            logger.info("Target URL: {}", CredentialUrlUtil.removeUserInfo(u));
                         }
                     } else {
                         // Unlike a file crawling path, which falls back to file:, a web URL with an
@@ -372,7 +373,7 @@ public class WebFsIndexHelper {
                     }
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Target Path: {}", u);
+                        logger.info("Target Path: {}", CredentialUrlUtil.removeUserInfo(u));
                     }
                 }
             }));
