@@ -42,6 +42,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -291,6 +292,18 @@ public class FessFunctions {
             return "#";
         }
         return url;
+    }
+
+    /**
+     * Returns the URL without its userinfo (user:password@), for showing a crawl URL on a page. The
+     * value is only converted for display; the entity it comes from is left as it is. The result is
+     * not HTML-escaped; wrap it with f:h.
+     *
+     * @param url the URL (may be null)
+     * @return the URL without the userinfo, or null for null
+     */
+    public static String hideUserInfo(final String url) {
+        return CredentialUrlUtil.removeUserInfo(url);
     }
 
     /**

@@ -134,7 +134,7 @@ ${fe:html(true)}
                                                 <c:forEach var="data" varStatus="s"
                                                            items="${failureUrlItems}">
                                                     <tr data-href="${contextPath}/admin/failureurl/details/4/${f:u(data.id)}" role="button" tabindex="0">
-                                                        <td>${f:h(data.url)}</td>
+                                                        <td>${f:h(fe:hideUserInfo(data.url))}</td>
                                                         <td>${f:h(data.errorName)}</td>
                                                         <td>${f:h(data.mimeType)}</td>
                                                         <td>${f:h(data.httpStatusCode)}</td>

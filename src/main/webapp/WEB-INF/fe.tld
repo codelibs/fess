@@ -92,6 +92,16 @@
 
   <function>
     <description>
+      Returns a URL without its userinfo (user:password@) for showing it. Not HTML-escaped.
+    </description>
+    <name>hideUserInfo</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String hideUserInfo(java.lang.String)</function-signature>
+    <example>${f:h(fe:hideUserInfo(data.url))}</example>
+  </function>
+
+  <function>
+    <description>
       Returns a string resulting from replacing in an input string all occurrences
       of a "before" string into an "after" substring.
     </description>

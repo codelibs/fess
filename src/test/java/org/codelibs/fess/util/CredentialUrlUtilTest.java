@@ -217,4 +217,36 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
         final String manySeparators = "a:/".repeat(1_000_000);
         assertEquals(manySeparators, CredentialUrlUtil.removeUserInfo(manySeparators));
     }
+
+    @Test
+    public void test_removeUserInfoInText_stripsEveryUrlOfAText() throws Exception {
+        assertNull(CredentialUrlUtil.removeUserInfoInText(null));
+        assertEquals("", CredentialUrlUtil.removeUserInfoInText(""));
+        assertEquals("Could not access http://host/a: refused",
+                CredentialUrlUtil.removeUserInfoInText("Could not access http://user:secret@host/a: refused"));
+        assertEquals("a http://host:8080?x=1 b smb://host/s c ftp://host",
+                CredentialUrlUtil.removeUserInfoInText("a http://u:secret@host:8080?x=1 b smb://v@host/s c ftp://w:secret@host"));
+        // the password holds an at sign, a colon, or a space
+        assertEquals("[http://host/a]", CredentialUrlUtil.removeUserInfoInText("[http://user:p@ss:w rd@host/a]"));
+        // a line break ends the authority
+        assertEquals("http://host\nuser:secret@x", CredentialUrlUtil.removeUserInfoInText("http://host\nuser:secret@x"));
+        assertEquals("jdbc:mysql://host/db", CredentialUrlUtil.removeUserInfoInText("jdbc:mysql://user:secret@host/db"));
+    }
+
+    @Test
+    public void test_removeUserInfoInText_leavesWhatHasNoUserInfo() throws Exception {
+        final String text = "mail me@example.com at http://host/a@b?c=d@e#f@g, then file:///srv/a@b and ://x@y and 1://x@y\nsmb://host";
+        assertEquals(text, CredentialUrlUtil.removeUserInfoInText(text));
+        assertEquals("no url, only a@b", CredentialUrlUtil.removeUserInfoInText("no url, only a@b"));
+    }
+
+    @Test
+    public void test_removeUserInfoInText_isLinearOnLongInput() throws Exception {
+        final String manySeparators = "a://".repeat(500_000);
+        assertEquals(manySeparators, CredentialUrlUtil.removeUserInfoInText(manySeparators));
+        final String manyAt = "http://" + "@".repeat(2_000_000) + "host/a";
+        assertEquals("http://host/a", CredentialUrlUtil.removeUserInfoInText(manyAt));
+        final String longScheme = "a".repeat(2_000_000);
+        assertEquals(longScheme + "://host", CredentialUrlUtil.removeUserInfoInText(longScheme + "://u:p@host"));
+    }
 }

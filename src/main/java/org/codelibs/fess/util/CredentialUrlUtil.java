@@ -183,6 +183,59 @@ public final class CredentialUrlUtil {
         return url.substring(0, authorityStart) + url.substring(at + 1);
     }
 
+    /**
+     * Removes the userinfo from every absolute URL in a free text, such as a stack trace, where a
+     * URL that failed is quoted back in an exception message. Each {@code scheme://authority} found
+     * is handed to {@link #removeUserInfo(String)}.
+     *
+     * <p>The authority of a URL in a text ends at the first {@code /}, {@code ?}, {@code #} or line
+     * break, so a password that holds a space (which no delimiter can bound) is still removed. A
+     * line that quotes an authority without a path and then holds an at sign later on loses the text
+     * up to that sign; hiding a credential is preferred to keeping such a line intact. The scan is
+     * linear in the length of the text.</p>
+     *
+     * @param text the text (may be {@code null})
+     * @return the text without the userinfo of the URLs in it, the text itself when it has none, or
+     *         {@code null} for {@code null}
+     */
+    public static String removeUserInfoInText(final String text) {
+        if (text == null) {
+            return null;
+        }
+        int separator = text.indexOf(SCHEME_SEPARATOR);
+        if (separator < 0) {
+            return text;
+        }
+        final int length = text.length();
+        final StringBuilder sb = new StringBuilder(length);
+        int copied = 0;
+        while (separator >= 0) {
+            int schemeStart = separator;
+            while (schemeStart > copied && isSchemeChar(text.charAt(schemeStart - 1))) {
+                schemeStart--;
+            }
+            while (schemeStart < separator && !isAsciiLetter(text.charAt(schemeStart))) {
+                schemeStart++;
+            }
+            int authorityEnd = separator + SCHEME_SEPARATOR.length();
+            while (authorityEnd < length && "/?#\r\n".indexOf(text.charAt(authorityEnd)) < 0) {
+                authorityEnd++;
+            }
+            sb.append(text, copied, schemeStart).append(removeUserInfo(text.substring(schemeStart, authorityEnd)));
+            copied = authorityEnd;
+            separator = text.indexOf(SCHEME_SEPARATOR, authorityEnd);
+        }
+        return sb.append(text, copied, length).toString();
+    }
+
+    private static boolean isAsciiLetter(final char c) {
+        return c < 128 && Character.isLetter(c);
+    }
+
+    private static boolean isSchemeChar(final char c) {
+        return c < 128 && Character.isLetterOrDigit(c) || c == '+' || c == '-' || c == '.';
+    }
+
     private static boolean isScheme(final String url, final int end) {
         if (!Character.isLetter(url.charAt(0)) || url.charAt(0) > 127) {
             return false;
