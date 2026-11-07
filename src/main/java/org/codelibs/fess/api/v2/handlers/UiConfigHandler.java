@@ -31,6 +31,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -238,18 +239,40 @@ public class UiConfigHandler {
      * not interpret them; the values are opaque strings.
      *
      * <p>This endpoint is served without authentication even when login.required is on, so in that case
-     * the settings go only to an authenticated caller and an anonymous caller gets an empty object.</p>
+     * the settings go only to a caller who is logged in or carries a valid access token, and any other
+     * caller gets an empty object.</p>
      *
      * @param cfg the configuration
      * @param userBean the authenticated user, empty for a guest
+     * @param request the request, read for its access token
      * @return the settings in order; never null
      */
-    Map<String, String> buildThemeSettings(final FessConfig cfg, final OptionalThing<FessUserBean> userBean) {
-        return isVisible(cfg, userBean) ? cfg.getThemeSettingsMap() : Map.of();
+    Map<String, String> buildThemeSettings(final FessConfig cfg, final OptionalThing<FessUserBean> userBean,
+            final HttpServletRequest request) {
+        return isVisible(cfg, userBean, request) ? cfg.getThemeSettingsMap() : Map.of();
     }
 
-    private static boolean isVisible(final FessConfig cfg, final OptionalThing<FessUserBean> userBean) {
-        return !cfg.isLoginRequired() || userBean.isPresent();
+    private boolean isVisible(final FessConfig cfg, final OptionalThing<FessUserBean> userBean, final HttpServletRequest request) {
+        return !cfg.isLoginRequired() || userBean.isPresent() || hasValidAccessToken(request);
+    }
+
+    /**
+     * Returns whether the request carries a registered, unexpired access token. With {@code login.required}
+     * such a token stands in for the login on the other endpoints that an access token decides (see
+     * {@link LoginRequirement#acceptsAccessToken(String)}), so it does here. A seam so tests supply a token
+     * without the access token service.
+     *
+     * @param request the request
+     * @return {@code true} for a valid token; a request without a token, or with a token that is not valid, is {@code false}
+     */
+    protected boolean hasValidAccessToken(final HttpServletRequest request) {
+        try {
+            return StringUtil.isNotBlank(ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request))
+                    && ComponentUtil.getComponent(AccessTokenService.class).getTokenPermissions(request).isPresent();
+        } catch (final Exception e) {
+            logger.debug("access token lookup failed; treating the caller as a guest", e);
+            return false;
+        }
     }
 
     /**
@@ -569,7 +592,7 @@ public class UiConfigHandler {
             payload.put("default_label_values", labelOptions.isEmpty() ? List.of() : Arrays.asList(cfg.getDefaultLabelValues(userBean)));
             payload.put("default_sort", cfg.getDefaultSortForUser(userBean));
             payload.put("theme", themePayload);
-            payload.put("theme_settings", buildThemeSettings(cfg, userBean));
+            payload.put("theme_settings", buildThemeSettings(cfg, userBean, req));
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());
             payload.put("page_size_max", pageMax);
