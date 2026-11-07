@@ -65,14 +65,23 @@ public final class ConfigInitializer {
     private ConfigInitializer() {
     }
 
+    /** Where an RPM or DEB package keeps {@code fess_config.properties}. */
+    private static final Path PACKAGED_CONFIG = Path.of("/etc/fess/fess_config.properties");
+
     /**
-     * Returns where a Fess distribution keeps {@code fess_config.properties}.
+     * Returns where a Fess installation keeps {@code fess_config.properties}.
      *
      * @param fessHome the Fess home directory
-     * @return the path of the file in a ZIP or tar.gz installation
+     * @return the file under the webapp of a ZIP or tar.gz installation, or the file in
+     *         {@code /etc/fess} of an RPM or DEB package, which has none under the webapp
      */
     public static Path defaultConfig(final Path fessHome) {
-        return fessHome.resolve("app").resolve("WEB-INF").resolve("classes").resolve("fess_config.properties");
+        return defaultConfig(fessHome, PACKAGED_CONFIG);
+    }
+
+    static Path defaultConfig(final Path fessHome, final Path packaged) {
+        final Path bundled = fessHome.resolve("app").resolve("WEB-INF").resolve("classes").resolve("fess_config.properties");
+        return !Files.exists(bundled) && Files.exists(packaged) ? packaged : bundled;
     }
 
     /**
