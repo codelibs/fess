@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
+import org.apache.catalina.Service;
 import org.apache.catalina.Host;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardHost;
@@ -101,19 +102,26 @@ public class FessBoot extends TomcatBoot {
     }
 
     /**
-     * Starts Tomcat and exits the process when the web application did not start.
+     * Starts Tomcat and exits the process when the web application or a connector did not start.
      *
      * <p>Tomcat does not fail when a web application fails to initialize (for example, when
      * the search engine cannot be reached at startup): the context is left in the failed
-     * state, the connector stays open and every request is answered with 404. Nothing would
-     * ever start the application again, so leave it to the launcher (a service manager, a
-     * container restart policy or the operator) to notice the failure and retry.</p>
+     * state, the connector stays open and every request is answered with 404. Nor does it
+     * fail when a connector cannot bind its port (for example, when another Fess already
+     * uses it): the error is only logged and the process keeps running, with its scheduler
+     * jobs, without serving anything. Nothing would ever start either again, so leave it to
+     * the launcher (a service manager, a container restart policy or the operator) to notice
+     * the failure and retry.</p>
      *
      * @return the URI Tomcat is serving
      */
     @Override
     protected URI startServer() {
         final URI uri = super.startServer();
+        final List<Integer> failedPorts = findUnavailableConnectors(server.getService());
+        if (!failedPorts.isEmpty()) {
+            abortStartupOnPorts(failedPorts);
+        }
         final List<String> failedContexts = findUnavailableContexts(server.getHost());
         if (!failedContexts.isEmpty()) {
             abortStartup(failedContexts);
@@ -135,6 +143,33 @@ public class FessBoot extends TomcatBoot {
             }
         }
         return paths;
+    }
+
+    /**
+     * Finds the connectors of a service that are not available after Tomcat has started.
+     *
+     * @param service the service that holds the connectors
+     * @return the ports of the connectors that are not available
+     */
+    protected static List<Integer> findUnavailableConnectors(final Service service) {
+        final List<Integer> ports = new ArrayList<>();
+        for (final Connector connector : service.findConnectors()) {
+            if (!connector.getState().isAvailable()) {
+                ports.add(connector.getPort());
+            }
+        }
+        return ports;
+    }
+
+    /**
+     * Reports that a connector did not start and terminates the JVM.
+     *
+     * @param ports the ports of the connectors that did not start
+     */
+    protected void abortStartupOnPorts(final List<Integer> ports) {
+        System.err.println("Fess aborted the startup because the port " + ports
+                + " could not be opened. Another process may already use it (see also the console output).");
+        System.exit(1);
     }
 
     /**
