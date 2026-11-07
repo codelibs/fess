@@ -845,6 +845,17 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertEquals("", UiConfigHandler.toUiLocaleTag(null));
         assertEquals("", UiConfigHandler.toUiLocaleTag(java.util.Locale.ROOT));
         assertEquals("zh-CN", UiConfigHandler.toUiLocaleTag(java.util.Locale.SIMPLIFIED_CHINESE));
+        assertEquals("sr-Latn", UiConfigHandler.toUiLocaleTag(java.util.Locale.forLanguageTag("sr-Latn")));
+    }
+
+    @Test
+    public void test_toUiLocaleTag_scriptReportedAsVariant() {
+        // Tomcat 11.0.27 builds the request locale of "sr-Latn" / "zh-Hant-TW" with the script as an upper-cased variant.
+        assertEquals("sr-Latn", UiConfigHandler.toUiLocaleTag(java.util.Locale.of("sr", "", "LATN")));
+        assertEquals("sr-Latn-RS", UiConfigHandler.toUiLocaleTag(java.util.Locale.of("sr", "RS", "LATN")));
+        assertEquals("zh-Hant-TW", UiConfigHandler.toUiLocaleTag(java.util.Locale.of("zh", "TW", "HANT")));
+        // a real variant is kept
+        assertEquals("ca-ES-valencia", UiConfigHandler.toUiLocaleTag(java.util.Locale.of("ca", "ES", "valencia")));
     }
 
     @Test

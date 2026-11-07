@@ -298,6 +298,16 @@ public class UiConfigHandler {
         if (locale == null || StringUtil.isBlank(locale.getLanguage())) {
             return "";
         }
+        final String variant = locale.getVariant();
+        if (locale.getScript().isEmpty() && variant.length() == 4 && variant.chars().allMatch(Character::isLetter)) {
+            // Some Tomcat releases (11.0.27) put the script of "sr-Latn" into the variant of the
+            // request locale; a real variant has at least five characters, so this is a script.
+            return new Locale.Builder().setLanguage(locale.getLanguage())
+                    .setRegion(locale.getCountry())
+                    .setScript(variant)
+                    .build()
+                    .toLanguageTag();
+        }
         return locale.toLanguageTag();
     }
 
