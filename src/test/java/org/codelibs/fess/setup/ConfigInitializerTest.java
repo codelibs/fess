@@ -144,6 +144,19 @@ public class ConfigInitializerTest {
     }
 
     @Test
+    public void test_defaultConfigOfAPackageIsInEtc(@TempDir final Path dir) throws Exception {
+        final Path home = dir.resolve("share");
+        final Path packaged = Files.writeString(dir.resolve("fess_config.properties"), "");
+        // A package has no fess_config.properties under the webapp, only the one in /etc/fess.
+        assertEquals(packaged, ConfigInitializer.defaultConfig(home, packaged));
+        // A ZIP installation keeps its own file even when the machine also has a package.
+        final Path bundled = ConfigInitializer.defaultConfig(home, dir.resolve("none"));
+        Files.createDirectories(bundled.getParent());
+        Files.writeString(bundled, "");
+        assertEquals(bundled, ConfigInitializer.defaultConfig(home, packaged));
+    }
+
+    @Test
     public void test_initCommand() throws Exception {
         final Path file = config(SHIPPED);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
