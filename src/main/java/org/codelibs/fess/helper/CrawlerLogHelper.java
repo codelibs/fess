@@ -31,6 +31,7 @@ import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 
 /**
  * Helper class for crawler logging operations.
@@ -105,8 +106,11 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
     @Override
     protected void processStartCrawling(final Object... objs) {
-        super.processStartCrawling(objs);
+        // not super's: it would log the URL as it is, with the user name and password of a URL like http://user:password@host/
         if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Crawling URL: {}", CredentialUrlUtil.removeUserInfo(urlQueue.getUrl()));
+            }
             ComponentUtil.getCrawlerStatsHelper().begin(urlQueue);
         }
     }
@@ -187,7 +191,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         if (cae.isDebugEnabled()) {
             logger.debug("[{}] Crawling Access Exception: url={}", failureUrlId, urlQueue.getUrl(), cae);
         } else if (cae.isInfoEnabled()) {
-            logger.info("[{}] {}", failureUrlId, cae.getMessage());
+            logger.info("[{}] {}", failureUrlId, removeUserInfo(cae.getMessage(), urlQueue.getUrl()));
         } else if (cae.isWarnEnabled()) {
             logger.warn("[{}] Crawling Access Exception: url={}", failureUrlId, urlQueue.getUrl(), cae);
         } else if (cae.isErrorEnabled()) {
@@ -224,6 +228,22 @@ public class CrawlerLogHelper extends LogHelperImpl {
         if (urlQueue != null) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
         }
+    }
+
+    /**
+     * Removes the user name and password of the URL from a message that quotes the URL, so that a
+     * URL like http://user:password@host/ does not reach the log. The message is returned as it is
+     * when it does not quote the URL.
+     *
+     * @param message the message, which may quote the URL as it is
+     * @param url the URL that was crawled
+     * @return the message with the URL quoted without its user information
+     */
+    protected String removeUserInfo(final String message, final String url) {
+        if (message == null || url == null) {
+            return message;
+        }
+        return message.replace(url, CredentialUrlUtil.removeUserInfo(url));
     }
 
     /**
