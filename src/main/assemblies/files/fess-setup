@@ -44,4 +44,15 @@ if [ ! -x "$JAVA" ]; then
     exit 1
 fi
 
+# Java decodes the arguments with the locale. In the POSIX locale a non-ASCII value, such as an
+# admin password given to init, would be stored as something else. en_US.UTF-8 is not installed on
+# minimal OS images, where C.UTF-8 is used.
+if locale -a 2>/dev/null | grep -Eiq '^en_US\.utf-?8$'; then
+    LANG=en_US.UTF-8
+else
+    LANG=C.UTF-8
+fi
+LC_ALL=$LANG
+export LANG LC_ALL
+
 exec "$JAVA" -Dfess.home="$FESS_HOME" -jar "$FESS_HOME/bin/fess-setup.jar" "$@"
