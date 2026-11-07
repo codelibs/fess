@@ -1586,6 +1586,18 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_themeSettings_aValidAccessTokenStandsInForTheLoginWhenLoginIsRequired() throws Exception {
+        final String body = handleWithRoots(ROOTS_VALUE, true, OptionalThing.empty(), true);
+        assertTrue(body.contains(THEME_SETTINGS_ROOTS), body);
+    }
+
+    @Test
+    public void test_themeSettings_noValidAccessTokenGetsNoSettingsWhenLoginIsRequired() throws Exception {
+        final String body = handleWithRoots(ROOTS_VALUE, true, OptionalThing.empty(), false);
+        assertTrue(body.contains(THEME_SETTINGS_EMPTY), body);
+    }
+
+    @Test
     public void test_themeSettings_invalidStoredEntriesAreDroppedWhenRead() throws Exception {
         final String body = handleWithRoots(BAD_ROOTS_VALUE, false, OptionalThing.empty());
         assertTrue(body.contains(THEME_SETTINGS_ONE_ROOT), body);
@@ -1620,6 +1632,11 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
     private String handleWithRoots(final String roots, final boolean loginRequired, final OptionalThing<FessUserBean> user)
             throws Exception {
+        return handleWithRoots(roots, loginRequired, user, false);
+    }
+
+    private String handleWithRoots(final String roots, final boolean loginRequired, final OptionalThing<FessUserBean> user,
+            final boolean validAccessToken) throws Exception {
         final org.codelibs.core.misc.DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         FessProp.propMap.clear();
         if (roots != null) {
@@ -1632,6 +1649,11 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
                 @Override
                 protected OptionalThing<FessUserBean> getSavedUserBean() {
                     return user;
+                }
+
+                @Override
+                protected boolean hasValidAccessToken(final jakarta.servlet.http.HttpServletRequest request) {
+                    return validAccessToken;
                 }
             };
             handler.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
