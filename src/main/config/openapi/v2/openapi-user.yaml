@@ -2097,10 +2097,11 @@ components:
                     entries are served; for a repeated key the later line wins.
 
                     This endpoint is served without a login even when
-                    `login_required` is true, so that a caller who is not signed in
-                    can read `login_required` and be sent to the login page. The
-                    object is the same for an anonymous caller. It is visible to
-                    every visitor of the UI, so it must not hold secrets.
+                    `login_required` is true, so the object is `{}` for an
+                    anonymous caller in that case. A caller that carries only an
+                    access token is not signed in and gets `{}` too. It is
+                    otherwise visible to every user of the UI, so it must not
+                    hold secrets.
                     A theme must treat the values as data only: never insert
                     them as HTML (`innerHTML`) and never use them as a
                     navigation target (link, redirect or `href`).

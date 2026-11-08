@@ -550,10 +550,10 @@ public class UiConfigHandler {
             payload.put("default_label_values", labelOptions.isEmpty() ? List.of() : Arrays.asList(cfg.getDefaultLabelValues(userBean)));
             payload.put("default_sort", cfg.getDefaultSortForUser(userBean));
             payload.put("theme", themePayload);
-            // Served to every caller, signed in or not. /ui/config is exempt from login.required so that a caller
-            // who is not signed in can read login_required and be sent to the login page; theme_settings is part of
-            // that same response and is not withheld.
-            payload.put("theme_settings", cfg.getThemeSettingsMap());
+            // /ui/config is exempt from login.required so that a caller who is not signed in can read login_required
+            // and be sent to the login page. theme_settings is not part of what that page needs: when login.required
+            // is on it goes only to a signed-in caller, and the key stays present as {} for anyone else.
+            payload.put("theme_settings", !cfg.isLoginRequired() || userBean.isPresent() ? cfg.getThemeSettingsMap() : Map.of());
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());
             payload.put("page_size_max", pageMax);
