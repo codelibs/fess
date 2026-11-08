@@ -118,6 +118,37 @@ public class FessBootTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_findUnavailableConnectors_portInUse() throws Exception {
+        final File baseDir = Files.createTempDirectory("fessboot").toFile();
+        try (final java.net.ServerSocket taken = new java.net.ServerSocket(0)) {
+            final Tomcat tomcat = new Tomcat();
+            tomcat.setBaseDir(baseDir.getAbsolutePath());
+            tomcat.setPort(taken.getLocalPort());
+            tomcat.getConnector();
+            // Tomcat itself does not fail when the port is taken
+            tomcat.start();
+            try {
+                assertEquals(List.of(taken.getLocalPort()), FessBoot.findUnavailableConnectors(tomcat.getService()));
+            } finally {
+                tomcat.stop();
+                tomcat.destroy();
+            }
+        }
+    }
+
+    @Test
+    public void test_findUnavailableConnectors_allStarted() throws Exception {
+        final File baseDir = Files.createTempDirectory("fessboot").toFile();
+        final Tomcat tomcat = startTomcat(baseDir);
+        try {
+            assertTrue(FessBoot.findUnavailableConnectors(tomcat.getService()).isEmpty());
+        } finally {
+            tomcat.stop();
+            tomcat.destroy();
+        }
+    }
+
     // The launcher starts with only lib/classes on its class path (bin/fess.in.sh), so it must not use the core library.
     @Test
     public void test_doesNotReferenceCoreLibrary() throws Exception {
