@@ -292,6 +292,22 @@ final class TagHandlerTestSupport {
         public synchronized void insert(final TagType tagType) {
             super.insert(tagType);
         }
+
+        // The store is a plain map: a read that runs while another request inserts throws ConcurrentModificationException.
+        @Override
+        public synchronized OptionalEntity<TagType> getTagType(final String id) {
+            return super.getTagType(id);
+        }
+
+        @Override
+        public synchronized List<TagType> getTagTypeListByOwner(final String owner, final String virtualHostKey) {
+            return super.getTagTypeListByOwner(owner, virtualHostKey);
+        }
+
+        @Override
+        public synchronized Map<String, Long> getPathCountMapByOwner(final String owner) {
+            return super.getPathCountMapByOwner(owner);
+        }
     }
 
     /**
@@ -330,7 +346,7 @@ final class TagHandlerTestSupport {
 
     static class FakeTagTypeHelper extends TagTypeHelper {
         private final Env env;
-        final List<TagChange> changes = new ArrayList<>();
+        final List<TagChange> changes = new java.util.concurrent.CopyOnWriteArrayList<>();
 
         FakeTagTypeHelper(final Env env) {
             this.env = env;
