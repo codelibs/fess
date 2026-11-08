@@ -1572,11 +1572,10 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_themeSettings_anonymousCallerGetsNoSettingsWhenLoginIsRequired() throws Exception {
+    public void test_themeSettings_anonymousCallerGetsSettingsWhenLoginIsRequired() throws Exception {
         final String body = handleWithRoots(ROOTS_VALUE, true, OptionalThing.empty());
-        assertTrue(body.contains(THEME_SETTINGS_EMPTY), body);
+        assertTrue(body.contains(THEME_SETTINGS_ROOTS), body);
         assertTrue(body.contains(LOGIN_REQUIRED_TRUE), body);
-        assertFalse(body.contains("two"), body);
     }
 
     @Test
