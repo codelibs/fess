@@ -82,6 +82,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     private static final Pattern TRAILING_SLASHES_PATTERN = Pattern.compile("/+$");
 
+    /** The reason that the Tika extractor gives for a suspected zip bomb. */
+    protected static final String ZIP_BOMB_REASON = "reason=zipBombDetected";
+
     /** The extracted metadata name holding the last author of a document (Tika's Office.LAST_AUTHOR). */
     protected static final String LAST_AUTHOR_METADATA_NAME = "meta:last-author";
 
@@ -568,7 +571,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         try {
             return extractor.getText(in, params);
         } catch (final RuntimeException e) {
-            if (!fessConfig.isCrawlerIgnoreContentException()) {
+            // A suspected zip bomb is a failure even when the content exceptions are ignored: the
+            // exception is rethrown, so the caller turns it into a CrawlingAccessException and the
+            // crawler records the url as a failure url and does not index the document.
+            if (!fessConfig.isCrawlerIgnoreContentException() || isZipBomb(e)) {
                 throw e;
             }
             // The document is still indexed, with no text at all, and nothing downstream says
@@ -580,6 +586,20 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                     params.get(ExtractData.URL), extractor.getClass().getSimpleName(), e);
         }
         return new ExtractData();
+    }
+
+    /**
+     * Checks whether the exception, or one of its causes, reports that the extractor suspected a zip bomb.
+     * @param e The exception thrown by the extractor.
+     * @return {@code true} if a zip bomb was suspected.
+     */
+    protected boolean isZipBomb(final Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t.getMessage() != null && t.getMessage().contains(ZIP_BOMB_REASON)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
