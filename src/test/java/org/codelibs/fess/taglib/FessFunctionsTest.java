@@ -73,6 +73,15 @@ public class FessFunctionsTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_hideUserInfo() {
+        assertEquals("http://example.com/docs/a.html", FessFunctions.hideUserInfo("http://user:secret@example.com/docs/a.html"));
+        assertEquals("http://example.com/a", FessFunctions.hideUserInfo("http://example.com/a"));
+        // not a URL with a userinfo: shown as it is
+        assertEquals("12:me@example", FessFunctions.hideUserInfo("12:me@example"));
+        assertNull(FessFunctions.hideUserInfo(null));
+    }
+
+    @Test
     public void test_safeHref() {
         // Schemes Fess crawls, and relative URLs, are kept as they are.
         assertEquals("http://example.com/a?b=c#d", FessFunctions.safeHref("http://example.com/a?b=c#d"));

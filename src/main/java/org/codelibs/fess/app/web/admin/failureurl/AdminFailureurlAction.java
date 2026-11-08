@@ -23,6 +23,7 @@ import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -205,6 +206,9 @@ public class AdminFailureurlAction extends FessAdminAction {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
+                    // the entity is left as it is, only what is shown hides the userinfo of the crawl URL
+                    form.url = CredentialUrlUtil.removeUserInfo(form.url);
+                    form.errorLog = CredentialUrlUtil.removeUserInfoInText(form.errorLog);
                 });
             });
         });

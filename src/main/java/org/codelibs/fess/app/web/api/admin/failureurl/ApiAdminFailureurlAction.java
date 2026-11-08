@@ -29,6 +29,7 @@ import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
@@ -153,6 +154,9 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
         copyBeanToBean(entity, body, copyOp -> {
             copyOp.excludeNull();
         });
+        // the entity is left as it is, only the response hides the userinfo of the crawl URL
+        body.url = CredentialUrlUtil.removeUserInfo(body.url);
+        body.errorLog = CredentialUrlUtil.removeUserInfoInText(body.errorLog);
         return body;
     }
 }
