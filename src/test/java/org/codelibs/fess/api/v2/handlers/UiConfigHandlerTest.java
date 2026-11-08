@@ -1572,16 +1572,45 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_themeSettings_anonymousCallerGetsSettingsWhenLoginIsRequired() throws Exception {
+    public void test_themeSettings_anonymousCallerGetsNoSettingsWhenLoginIsRequired() throws Exception {
         final String body = handleWithRoots(ROOTS_VALUE, true, OptionalThing.empty());
-        assertTrue(body.contains(THEME_SETTINGS_ROOTS), body);
+        assertTrue(body.contains(THEME_SETTINGS_EMPTY), body);
         assertTrue(body.contains(LOGIN_REQUIRED_TRUE), body);
+        assertFalse(body.contains("two"), body);
     }
 
     @Test
     public void test_themeSettings_loggedInCallerGetsSettingsWhenLoginIsRequired() throws Exception {
         final String body = handleWithRoots(ROOTS_VALUE, true, loggedInUser());
         assertTrue(body.contains(THEME_SETTINGS_ROOTS), body);
+    }
+
+    @Test
+    public void test_themeSettings_failedLoginLookupIsTreatedAsGuestWhenLoginIsRequired() throws Exception {
+        final java.util.concurrent.atomic.AtomicBoolean looked = new java.util.concurrent.atomic.AtomicBoolean();
+        ComponentUtil.setFessLoginAssist(new org.codelibs.fess.app.web.base.login.FessLoginAssist() {
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                looked.set(true);
+                throw new IllegalStateException("login lookup failed");
+            }
+        });
+        final org.codelibs.core.misc.DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        FessProp.propMap.clear();
+        systemProperties.setProperty(Constants.THEME_SETTINGS_PROPERTY, ROOTS_VALUE);
+        systemProperties.setProperty(Constants.LOGIN_REQUIRED_PROPERTY, "true");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(looked.get(), "the login lookup must have been consulted");
+            assertTrue(res.body().contains(THEME_SETTINGS_EMPTY), res.body());
+        } finally {
+            ComponentUtil.setFessLoginAssist(null);
+            systemProperties.remove(Constants.THEME_SETTINGS_PROPERTY);
+            systemProperties.remove(Constants.LOGIN_REQUIRED_PROPERTY);
+            FessProp.propMap.clear();
+        }
     }
 
     @Test
