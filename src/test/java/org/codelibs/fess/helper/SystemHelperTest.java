@@ -1426,10 +1426,17 @@ public class SystemHelperTest extends UnitFessTestCase {
             }
         });
 
-        // Exactly 100 chars (maxLength) is valid.
-        assertEquals("", systemHelper.validatePassword("a".repeat(100)));
+        // Up to the BCrypt limit (72 bytes) is valid, below maxLength.
+        assertEquals("", systemHelper.validatePassword("a".repeat(72)));
         // 101 chars exceeds maxLength — returns the same key as minLength violation.
         assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(101)));
+
+        // BCrypt only reads 72 bytes: 72 bytes pass, 73 do not, even though both are below maxLength.
+        assertEquals("", systemHelper.validatePassword("a".repeat(72)));
+        assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(73)));
+        // The limit counts UTF-8 bytes, not characters: 24 Japanese characters are 72 bytes, 25 are 75.
+        assertEquals("", systemHelper.validatePassword("あ".repeat(24)));
+        assertEquals("errors.password_length", systemHelper.validatePassword("あ".repeat(25)));
     }
 
     @Test

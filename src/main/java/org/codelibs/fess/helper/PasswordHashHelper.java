@@ -61,6 +61,12 @@ public class PasswordHashHelper {
     public static final String BCRYPT_PREFIX = PREFIX + ID_BCRYPT + SUFFIX;
 
     /**
+     * The number of bytes of a password that BCrypt takes into account. Anything after
+     * this many UTF-8 bytes does not change the hash.
+     */
+    public static final int BCRYPT_MAX_PASSWORD_BYTES = 72;
+
+    /**
      * Plaintext seed used to generate the dummy BCrypt hash consumed by
      * {@link #applyTimingPadding()}. The value is not secret and is not
      * user-supplied; it exists only to produce a well-formed hash for
