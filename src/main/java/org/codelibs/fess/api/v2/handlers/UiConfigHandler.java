@@ -234,25 +234,6 @@ public class UiConfigHandler {
     }
 
     /**
-     * Builds theme_settings: key=value settings that an administrator passes to the active theme. Fess does
-     * not interpret them; the values are opaque strings.
-     *
-     * <p>This endpoint is served without authentication even when login.required is on, so in that case
-     * the settings go only to an authenticated caller and an anonymous caller gets an empty object.</p>
-     *
-     * @param cfg the configuration
-     * @param userBean the authenticated user, empty for a guest
-     * @return the settings in order; never null
-     */
-    Map<String, String> buildThemeSettings(final FessConfig cfg, final OptionalThing<FessUserBean> userBean) {
-        return isVisible(cfg, userBean) ? cfg.getThemeSettingsMap() : Map.of();
-    }
-
-    private static boolean isVisible(final FessConfig cfg, final OptionalThing<FessUserBean> userBean) {
-        return !cfg.isLoginRequired() || userBean.isPresent();
-    }
-
-    /**
      * Resolves the display locale the JSP pages use for this request: {@code ?browser_lang=}, then
      * the locale remembered in the session, then Accept-Language.
      *
@@ -569,7 +550,10 @@ public class UiConfigHandler {
             payload.put("default_label_values", labelOptions.isEmpty() ? List.of() : Arrays.asList(cfg.getDefaultLabelValues(userBean)));
             payload.put("default_sort", cfg.getDefaultSortForUser(userBean));
             payload.put("theme", themePayload);
-            payload.put("theme_settings", buildThemeSettings(cfg, userBean));
+            // Served to every caller, signed in or not. /ui/config is exempt from login.required so that a caller
+            // who is not signed in can read login_required and be sent to the login page; theme_settings is part of
+            // that same response and is not withheld.
+            payload.put("theme_settings", cfg.getThemeSettingsMap());
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());
             payload.put("page_size_max", pageMax);
