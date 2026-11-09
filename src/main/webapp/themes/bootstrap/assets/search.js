@@ -15,6 +15,7 @@ let currentRelatedAbort = null;
 const state = {
   q: "",
   start: 0,
+  offset: 0,            // /search `offset` of the latest response: sent back with start > 0 so deep paging stays exact
   num: 10,
   sort: "",
   lang: [],             // string[] — zero or more language codes; serialised as repeated lang= params
@@ -170,6 +171,7 @@ function buildPendingNote() {
 function filterByTag(value) {
   state.fields = { ...state.fields, tag: [value] };
   state.start = 0;
+  state.offset = 0;
   runSearch();
 }
 
@@ -881,6 +883,7 @@ function buildResultCard(d, queryId, order) {
       ev.preventDefault();
       state.sdh = d.similar_docs_hash || d.doc_id || "";
       state.start = 0;
+      state.offset = 0;
       runSearch();
     });
     info.appendChild(simLink);
@@ -998,6 +1001,7 @@ function renderSimilarDocBanner() {
   closeBtn.addEventListener("click", () => {
     state.sdh = "";
     state.start = 0;
+    state.offset = 0;
     runSearch();
   });
   banner.appendChild(closeBtn);
@@ -1246,8 +1250,19 @@ function exQClauses() {
   return clauses;
 }
 
+/** A non-negative integer from an API value or a URL parameter; anything else is 0. */
+function nonNegativeInt(v) {
+  const n = Number(v);
+  return Number.isSafeInteger(n) && n > 0 ? n : 0;
+}
+
+/** The `offset` to send and keep in the URL: the latest response's, and only when paging past the first page. */
+function pagingOffset() {
+  return state.start > 0 && state.offset > 0 ? state.offset : 0;
+}
+
 /**
- * Keep the address bar's start=, ex_q= and fields.tag= in step with state.start, the facet
+ * Keep the address bar's start=, offset=, ex_q= and fields.tag= in step with state.start, the facet
  * selections and the tag filter, as the JSP paging and facet links did, so reload,
  * back/forward and a shared link land on the same page with the same filters (runFromUrl
  * reads them back). fields.tag is the only field filter kept here: it is set by the tag
@@ -1264,8 +1279,11 @@ function syncUrlParams(push) {
   const sameExQ = sameList(params.getAll("ex_q"), clauses);
   const tags = Array.isArray(state.fields.tag) ? state.fields.tag : [];
   const sameTags = sameList(params.getAll("fields.tag"), tags);
-  if ((Number(params.get("start")) || 0) === state.start && sameExQ && sameTags) return;
+  const offset = pagingOffset();
+  const sameOffset = (params.get("offset") || "") === (offset > 0 ? String(offset) : "");
+  if ((Number(params.get("start")) || 0) === state.start && sameOffset && sameExQ && sameTags) return;
   if (state.start > 0) params.set("start", String(state.start)); else params.delete("start");
+  if (offset > 0) params.set("offset", String(offset)); else params.delete("offset");
   if (!sameExQ) {
     params.delete("ex_q");
     clauses.forEach(v => params.append("ex_q", v));
@@ -1285,6 +1303,8 @@ function syncUrlParams(push) {
  */
 function buildSearchParams() {
   const params = { q: state.q, start: state.start, num: state.num };
+  // Echo the offset of the previous response so the server pages exactly (see pagingOffset).
+  if (pagingOffset() > 0) params.offset = pagingOffset();
   if (state.sort) params.sort = state.sort;
   // state.lang is string[] — send as repeated lang= params (empty array → omit).
   if (Array.isArray(state.lang) && state.lang.length > 0) {
@@ -1332,6 +1352,7 @@ function buildSearchParams() {
 
 async function runSearch() {
   syncUrlParams(false);
+  const searchPath = location.pathname;
   // Cancel any in-flight request before issuing a new one.
   if (currentSearchAbort) currentSearchAbort.abort();
   currentSearchAbort = new AbortController();
@@ -1358,6 +1379,11 @@ async function runSearch() {
     }
     // Prefer the server-supplied requested_time when available (more accurate).
     if (env.requested_time) state.requestedTime = env.requested_time;
+    // The latest response is authoritative for the offset; a missing or invalid one means 0.
+    const prevOffset = state.offset;
+    state.offset = nonNegativeInt(env.offset);
+    // Follow a changed offset in the address bar, unless the user has since moved to another view.
+    if (state.offset !== prevOffset && location.pathname === searchPath) syncUrlParams(false);
     // A.5: store server-supplied highlight params for cache link construction.
     state.highlightParams = (typeof env.highlight_params === "string" && env.highlight_params) ? env.highlight_params : "";
     // A.6: show/hide the warning banner above the results. JSP parity
@@ -1922,6 +1948,7 @@ export function runFromUrl() {
   const q = params.get("q");
   state.q = q || "";
   state.start = Number(params.get("start")) || 0;
+  state.offset = nonNegativeInt(params.get("offset"));
   // JSP parity (SearchAction, session attribute resultsPerPage): an explicit num is
   // remembered for this tab; a URL without one uses the remembered or default size.
   const numVal = Number(params.get("num"));
@@ -2077,6 +2104,7 @@ export function attach() {
       const params = new URLSearchParams(location.search);
       if (q) params.set("q", q); else params.delete("q");
       params.delete("start");
+      params.delete("offset");
       for (const key of [...params.keys()]) {
         // JSP parity (header.jsp): the header form holds neither the similar-docs hash nor
         // advanced-search conditions, so a new query drops them.
@@ -2289,6 +2317,7 @@ function buildFacetGroup(title, entries, fieldKey, store = "facets") {
       const idx = arr.indexOf(entry.value);
       if (idx >= 0) arr.splice(idx, 1); else arr.push(entry.value);
       state.start = 0;
+      state.offset = 0;
       runSearch();
     });
     li.appendChild(a);
@@ -2348,6 +2377,7 @@ function renderFacetQueryViews(body, env) {
         if (i >= 0) arr.splice(i, 1); else arr.push(qy.value);
         state.facetQueries = arr;
         state.start = 0;
+        state.offset = 0;
         runSearch();
       });
       li.appendChild(a);
@@ -2466,6 +2496,7 @@ function renderFacets(env, labels) {
         state.fields = {};
         state.facetQueries = [];
         state.start = 0;
+        state.offset = 0;
         runSearch();
       });
       wrap.appendChild(link);
@@ -2519,6 +2550,7 @@ function renderActiveChips() {
           if (idx >= 0) arr.splice(idx, 1);
         }
         state.start = 0;
+        state.offset = 0;
         runSearch();
       }
     }));
@@ -2533,6 +2565,7 @@ function renderActiveChips() {
       if (idx >= 0) arr.splice(idx, 1);
       state.fields.filetype = arr;
       state.start = 0;
+      state.offset = 0;
       runSearch();
     }
   }));
@@ -2559,6 +2592,7 @@ function renderActiveChips() {
         if (idx >= 0) arr.splice(idx, 1);
         state.facetQueries = arr;
         state.start = 0;
+        state.offset = 0;
         runSearch();
       }
     }));
@@ -2688,6 +2722,7 @@ function renderRelatedQueries(queries) {
       if (input) input.value = q;
       state.q = q;
       state.start = 0;
+      state.offset = 0;
       runSearch();
     });
     container.appendChild(btn);
@@ -2790,6 +2825,7 @@ function renderPagination(env) {
   // Navigate to a page and scroll back to the top so the new results start in view.
   const goToPage = (start) => {
     state.start = Math.max(0, start);
+    if (state.start === 0) state.offset = 0;
     syncUrlParams(true);
     runSearch();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2928,6 +2964,7 @@ export function clearSearchState() {
   const defaultLabels = cfg && Array.isArray(cfg.default_label_values) ? cfg.default_label_values : [];
   state.q             = "";
   state.start         = 0;
+  state.offset        = 0;
   state.num           = initialNum();
   state.sort          = (cfg && cfg.default_sort) || "";
   state.lang          = [];

@@ -260,7 +260,7 @@ describe("attach: submit builds the /search URL", () => {
 
   it("preserves unrelated params, drops advance-owned ones, appends timestamp date-math", () => {
     // theme/keepme are unrelated (preserved); start is advance-owned (dropped).
-    setLocation("/advance?theme=custom&keepme=1&start=50");
+    setLocation("/advance?theme=custom&keepme=1&start=50&offset=40");
     attach();
 
     document.getElementById("adv-all").value = "hello";
@@ -281,6 +281,7 @@ describe("attach: submit builds the /search URL", () => {
     expect(p.get("keepme")).toBe("1");
     // advance-owned param removed
     expect(p.has("start")).toBe(false);
+    expect(p.has("offset")).toBe(false);
     // the submit button is left enabled: it is the form's default button, and the form is rebuilt
     // (not reloaded) when the user comes back to it
     expect(form.querySelector('button[type="submit"]').disabled).toBe(false);
