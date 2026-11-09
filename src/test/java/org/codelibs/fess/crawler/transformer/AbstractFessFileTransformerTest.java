@@ -476,6 +476,17 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         assertEquals("Jiro", dataMap.get("last_modifier"));
     }
 
+    @Test
+    public void test_generateData_sameMetadataValueUnderSeveralNames_isAddedToContentOnce() {
+        final Map<String, String[]> metadata = new HashMap<>();
+        metadata.put("dc:description", new String[] { "Lighthouse on the northern cliff" });
+        metadata.put("Exif IFD0:Image Description", new String[] { "Lighthouse on the northern cliff" });
+        metadata.put("Exif IFD0:Artist", new String[] { "R1510 photographer" });
+        final String content = (String) generateDataWith(Map.of(), null, metadata, null).get("content");
+        assertEquals(1, content.split("Lighthouse on the northern cliff", -1).length - 1, content);
+        assertEquals(1, content.split("R1510 photographer", -1).length - 1, content);
+    }
+
     private static FessConfig createFessConfig(final boolean ownerEnabled, final boolean lastModifierEnabled,
             final Map<String, Tuple3<String, String, String>> metadataNameMappings) {
         // Delegate every call to the real configuration except the ones under test.

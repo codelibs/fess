@@ -22,8 +22,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -143,6 +145,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final Extractor extractor = getExtractor(responseData);
         final String mimeType = responseData.getMimeType();
         final StringBuilder contentMetaBuf = new StringBuilder(1000);
+        final Set<String> contentMetaValues = new HashSet<>();
         final Map<String, Object> dataMap = new HashMap<>();
         final Map<String, Object> metaDataMap = new HashMap<>();
         String content;
@@ -163,7 +166,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 // meta -> content
                 if (fessConfig.isCrawlerMetadataContentIncluded(mimeType, key)) {
                     final String joinedValue = StringUtils.join(values, ' ');
-                    if (StringUtil.isNotBlank(joinedValue)) {
+                    // one value is often stored under several names (e.g. dc:description and Exif IFD0:Image Description)
+                    if (StringUtil.isNotBlank(joinedValue) && contentMetaValues.add(joinedValue.trim())) {
                         if (contentMetaBuf.length() > 0) {
                             contentMetaBuf.append(' ');
                         }
