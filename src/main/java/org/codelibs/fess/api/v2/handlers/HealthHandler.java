@@ -82,8 +82,7 @@ public class HealthHandler {
             engine.put("ping_status", ping.getStatus());
             if ("red".equalsIgnoreCase(clusterStatus)) {
                 ComponentUtil.getV2EnvelopeWriter()
-                        .writeErrorWithDetails(response, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine cluster is red",
-                                Map.of("engine", engine));
+                        .writeSearchEngineUnavailable(response, "search engine cluster is red", Map.of("engine", engine));
             } else {
                 ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, Map.of("engine", engine));
             }
@@ -97,8 +96,7 @@ public class HealthHandler {
             engine.put("status", UNAVAILABLE_STATUS);
             engine.put("ping_status", PING_STATUS_ERROR);
             ComponentUtil.getV2EnvelopeWriter()
-                    .writeErrorWithDetails(response, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine is not reachable",
-                            Map.of("engine", engine));
+                    .writeSearchEngineUnavailable(response, "search engine is not reachable", Map.of("engine", engine));
         }
     }
 }

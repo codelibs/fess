@@ -304,11 +304,25 @@ public class V2EnvelopeWriter {
      * @throws IOException if writing the envelope fails
      */
     public void writeSearchEngineUnavailable(final HttpServletResponse res) throws IOException {
+        writeSearchEngineUnavailable(res, "search engine is temporarily unable to process the request", null);
+    }
+
+    /**
+     * Writes the {@code 503 service_unavailable} envelope with a {@code Retry-After} header and the
+     * given message and details, for an endpoint that reports the engine state to its caller.
+     *
+     * @param res the HTTP response to write to
+     * @param message the message to write
+     * @param details extra details for the envelope's {@code error.details}, or {@code null}
+     * @throws IOException if writing the envelope fails
+     */
+    public void writeSearchEngineUnavailable(final HttpServletResponse res, final String message, final Map<String, Object> details)
+            throws IOException {
         if (res.isCommitted()) {
             return;
         }
         res.setHeader("Retry-After", RETRY_AFTER_SECONDS);
-        writeError(res, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine is temporarily unable to process the request");
+        writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, message, details);
     }
 
     /**
