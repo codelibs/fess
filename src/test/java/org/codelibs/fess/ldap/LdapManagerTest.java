@@ -1422,12 +1422,21 @@ public class LdapManagerTest extends UnitFessTestCase {
         return probe;
     }
 
-    @SuppressWarnings("serial")
     private void registerProviderConfig() {
+        registerProviderConfig(-1);
+    }
+
+    @SuppressWarnings("serial")
+    private void registerProviderConfig(final int maxUsernameLength) {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
             public String getLdapProviderUrl() {
                 return "ldap://localhost:389";
+            }
+
+            @Override
+            public Integer getLdapMaxUsernameLengthAsInteger() {
+                return Integer.valueOf(maxUsernameLength);
             }
         });
     }
@@ -1473,6 +1482,82 @@ public class LdapManagerTest extends UnitFessTestCase {
             final LoginProbe probe = probeLogin(typed);
             assertTrue(String.valueOf(typed), probe.boundNames.isEmpty());
             assertFalse(String.valueOf(typed), probe.result.isPresent());
+        }
+    }
+
+    /**
+     * ldap.max.username.length cuts a long name down to what an old Active Directory accepts as a logon name, and
+     * the directory then binds the cut name. Everything Fess derives from the name -- the user, the role search,
+     * the permission name, the session -- has to use the cut name too, or "aliceroot" with alice's password signs in
+     * as alice and is then looked up, and granted roles, as the unrelated account aliceroot.
+     */
+    @Test
+    public void test_login_longNameIsCutOnceForEverything() {
+        registerProviderConfig(5);
+        for (final String typed : new String[] { "aliceroot", " aliceroot", "aliceroot ", "alice", "alice ", " alice " }) {
+            final LoginProbe probe = probeLogin(typed);
+            assertEquals(typed, List.of("alice"), probe.boundNames);
+            assertEquals(typed, List.of("alice"), probe.userNames);
+            assertTrue(typed, probe.result.isPresent());
+            assertEquals(typed, "alice", probe.result.get().getName());
+        }
+    }
+
+    /** The blanks are dropped before the cut, and a blank the cut leaves at the end goes as well. */
+    @Test
+    public void test_login_blanksAreDroppedBeforeAndAfterTheCut() {
+        registerProviderConfig(6);
+        // 9 characters once the blanks around it are gone; the cut falls right behind the blank
+        final LoginProbe probe = probeLogin("  alice bob  ");
+        assertEquals(List.of("alice"), probe.boundNames);
+        assertEquals(List.of("alice"), probe.userNames);
+    }
+
+    @Test
+    public void test_login_nameWithinTheLimitIsUnchanged() {
+        registerProviderConfig(5);
+        for (final String typed : new String[] { "alice", "bob", "a b" }) {
+            final LoginProbe probe = probeLogin(typed);
+            assertEquals(typed, List.of(typed), probe.boundNames);
+            assertEquals(typed, List.of(typed), probe.userNames);
+        }
+    }
+
+    @Test
+    public void test_login_aNegativeLimitCutsNothing() {
+        for (final int disabled : new int[] { -1, -100 }) {
+            registerProviderConfig(disabled);
+            final String longName = "a".repeat(300);
+            final LoginProbe probe = probeLogin(longName);
+            assertEquals(List.of(longName), probe.boundNames);
+            assertEquals(List.of(longName), probe.userNames);
+        }
+    }
+
+    @Test
+    public void test_login_cuttingTheNameIsLoggedAtDebugOnce() {
+        registerProviderConfig(5);
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LdapManager.class.getName(), Level.DEBUG);
+        try {
+            probeLogin("aliceroot");
+            final List<String> cut =
+                    appender.messagesOnThisThreadAt(Level.DEBUG).stream().filter(m -> m.contains("ldap.max.username.length")).toList();
+            assertEquals(cut.toString(), 1, cut.size());
+            assertTrue(cut.get(0), cut.get(0).contains("aliceroot") && cut.get(0).contains("alice"));
+
+            // normalizing a name by itself, as the reserved-name check of the login form does, logs nothing
+            registerProviderConfig(5);
+            final LdapManager ldapManager = new LdapManager();
+            ldapManager.init();
+            assertEquals("alice", ldapManager.normalizeLoginName("aliceroot"));
+            assertEquals("alice", ldapManager.normalizeLoginName("aliceroot"));
+
+            // a name that needs no cut adds nothing
+            probeLogin("alice");
+            assertEquals(1,
+                    appender.messagesOnThisThreadAt(Level.DEBUG).stream().filter(m -> m.contains("ldap.max.username.length")).count());
+        } finally {
+            appender.detach();
         }
     }
 
