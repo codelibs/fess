@@ -155,10 +155,10 @@ paths:
           in: query
           description: |-
             Send back the `offset` of the response to the previous page when
-            asking for a page that starts at or beyond `rank.fusion.window_size / 2`
-            (100 by default). With rank fusion, the first pages are fused
+            asking for a page that starts at or beyond `rank.fusion.window_size`
+            (200 by default). With rank fusion, the first pages are fused
             results and the later ones are keyword results; `offset` is how many
-            of the fused results do not come from the keyword results, and
+            of the top fused results are not in the keyword results' window, and
             shifts `start` back so that the later pages follow the fused ones
             without a gap or a repeat. When it is left out the shift is 0.
             Depends on `query.max.search.result.offset`.

@@ -360,11 +360,17 @@ public class RankFusionProcessor implements AutoCloseable {
      * the query and never replied, for instance - is left out of this search, and the response is
      * flagged as partial and timed out.</p>
      *
-     * <p>A page that starts inside the first {@code windowSize / 2} positions is cut from the fused
-     * list, without any further query: the rest of the list is the main searcher's window, which
-     * the main request already returned. A page that starts beyond them is answered by the main
-     * searcher alone, shifted back by the request's {@code offset} - the offset the response to
-     * the previous page reported. Without it, the shift is zero.</p>
+     * <p>The list the pages are cut from is the head - the first {@code windowSize / 2} documents by
+     * fused score - followed by the rest of the main searcher's window in its order, then by the
+     * main searcher's documents past the window. The offset is the number of the head's documents
+     * that are not in the main searcher's window, and the list holds {@code windowSize + offset}
+     * positions before the documents past the window begin. A page that starts before that is cut
+     * from the one fused request: the main request asks for {@code windowSize + pageSize}
+     * documents, so the first rows past the window are in hand. A page that starts at or after
+     * {@code windowSize + offset} is answered by the main searcher alone, shifted back by the
+     * request's {@code offset} - the offset the response to the previous page reported. Without
+     * it, the shift is zero. So the pages from {@code windowSize / 2} up to {@code windowSize +
+     * offset} cost the vector searchers' queries too, which they did not before.</p>
      *
      * @param searchers array of searchers to use for concurrent searching
      * @param query the search query string
@@ -379,33 +385,33 @@ public class RankFusionProcessor implements AutoCloseable {
         }
         final int pageSize = params.getPageSize();
         final int startPosition = params.getStartPosition();
-        if (startPosition * 2 >= windowSize) {
+        int requestOffset = params.getOffset();
+        if (requestOffset < 0) {
+            requestOffset = 0;
+        } else if (requestOffset > windowSize / 2) {
+            requestOffset = windowSize / 2;
+        }
+        if (startPosition >= windowSize + requestOffset) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Deep pagination detected: startPosition={}, windowSize={}, falling back to main searcher", startPosition,
                         windowSize);
             }
-            int offset = params.getOffset();
-            if (offset < 0) {
-                offset = 0;
-            } else if (offset > windowSize / 2) {
-                offset = windowSize / 2;
-            }
-            int start = startPosition - offset;
+            int start = startPosition - requestOffset;
             if (start < 0) {
                 start = 0;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Adjusted start position: original={}, adjusted={}, offset={}", startPosition, start, offset);
+                logger.debug("Adjusted start position: original={}, adjusted={}, offset={}", startPosition, start, requestOffset);
             }
             final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, start, pageSize);
             final SearchResult searchResult = searchers[0].search(query, reqParams, userBean);
             long allRecordCount = searchResult.getAllRecordCount();
             if (Relation.EQUAL_TO.toString().equals(searchResult.getAllRecordCountRelation())) {
-                allRecordCount += offset;
+                allRecordCount += requestOffset;
             }
             return createResponseList(searchResult.getDocumentList(), allRecordCount, searchResult.getAllRecordCountRelation(),
                     searchResult.getQueryTime(), searchResult.isPartialResults(), searchResult.isTimedOut(), searchResult.isShardFailed(),
-                    searchResult.getFacetResponse(), params.getStartPosition(), pageSize, offset);
+                    searchResult.getFacetResponse(), params.getStartPosition(), pageSize, requestOffset);
         }
 
         final ExternalContext externalContext = SingletonLaContainerFactory.getExternalContext();
@@ -448,7 +454,8 @@ public class RankFusionProcessor implements AutoCloseable {
         // the search engine's own timeouts do - and it never queues for a pool thread behind
         // searchers that are still waiting on an unresponsive provider.
         try {
-            results[0] = searchers[0].search(query, new SearchRequestParamsWrapper(params, 0, windowSize), userBean);
+            // the window, and the first rows past it, which a page just after the window needs
+            results[0] = searchers[0].search(query, new SearchRequestParamsWrapper(params, 0, windowSize + pageSize), userBean);
         } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException
                 | SearchEngineUnavailableException e) {
             throw e;
@@ -504,11 +511,17 @@ public class RankFusionProcessor implements AutoCloseable {
         // The ids the main searcher returned in its window (windowSize documents), best first.
         final List<String> mainSearcherIds = new ArrayList<>();
         final Set<Object> mainSearcherIdSet = new HashSet<>();
+        // The main searcher's documents past its window: they are not fused, only listed after it.
+        final List<Map<String, Object>> extraDocs = new ArrayList<>();
         for (int searcherIndex = 0; searcherIndex < results.length; searcherIndex++) {
-            final List<Map<String, Object>> docList = results[searcherIndex].getDocumentList();
+            List<Map<String, Object>> docList = results[searcherIndex].getDocumentList();
             if (logger.isDebugEnabled()) {
                 logger.debug("Searcher[{}]: retrieved {} documents / {} total documents", searcherIndex, docList.size(),
                         results[searcherIndex].getAllRecordCount());
+            }
+            if (searcherIndex == 0 && docList.size() > windowSize) {
+                extraDocs.addAll(docList.subList(windowSize, docList.size()));
+                docList = docList.subList(0, windowSize);
             }
             for (int docRank = 0; docRank < docList.size(); docRank++) {
                 final Map<String, Object> doc = docList.get(docRank);
@@ -546,39 +559,39 @@ public class RankFusionProcessor implements AutoCloseable {
                 .sorted((doc1, doc2) -> Float.compare(toFloat(doc2.get(scoreField)), toFloat(doc1.get(scoreField))))
                 .toList();
 
-        // The first windowSize / 2 fused documents (the head) hold some documents the main searcher
-        // did not return in its window - found only by another searcher. offset is their number.
-        // The head the pages are cut from keeps exactly those and the main searcher's first
-        // (windowSize / 2 - offset) documents, ordered by fused score. So the main searcher's
-        // documents in the head are a prefix of its own order, and the rest of its order follows
-        // the head: the main searcher's document at index (windowSize / 2 - offset + n) is the one
-        // at position (windowSize / 2 + n). A deep page, which does not fuse, reads that document
-        // with start - offset, so a client that sends back the offset of the response it got
-        // pages through the list without a gap or a repeat. A document another searcher promoted
-        // from the main searcher's window into the fused top is not forced into the head; it
-        // appears at its own position in the main searcher's order.
+        // The list the pages are cut from: the head - the first windowSize / 2 documents by fused
+        // score, whichever searcher found them - then the rest of the main searcher's window in its
+        // own order, then the main searcher's documents past the window. offset is the number of the
+        // head's documents that are not in the main searcher's window (another searcher alone found
+        // them, or ranked them below the window). The list has windowSize + offset positions before
+        // the documents past the window begin, so the main searcher's document at index
+        // (windowSize + n) is at position (windowSize + offset + n). A deep page, which does not
+        // fuse, reads it with start - offset, so a client that sends back the offset of the response
+        // it got pages through the list without a gap or a repeat.
         // Residual: a head document that matches the main searcher's query but ranked below its
         // window is counted in offset like any other, and is reached again in the main searcher's
         // order, so it is shown twice. Each such document adds one row, which record_count
         // includes, so the pages still tile; there are at most offset of them.
         final int headLimit = windowSize / 2;
+        final List<Map<String, Object>> head = fusedDocs.subList(0, Math.min(headLimit, fusedDocs.size()));
+        final Set<Object> headIdSet = new HashSet<>();
         int offset = 0;
-        for (int i = 0; i < headLimit && i < fusedDocs.size(); i++) {
-            if (!mainSearcherIdSet.contains(fusedDocs.get(i).get(idField))) {
+        for (final Map<String, Object> doc : head) {
+            headIdSet.add(doc.get(idField));
+            if (!mainSearcherIdSet.contains(doc.get(idField))) {
                 offset++;
             }
         }
-        final int mainDocsInHead = Math.min(mainSearcherIds.size(), headLimit - offset);
-        final Set<Object> headIdSet = new HashSet<>(mainSearcherIds.subList(0, mainDocsInHead));
-        for (int i = 0; i < headLimit && i < fusedDocs.size(); i++) {
-            final Object id = fusedDocs.get(i).get(idField);
-            if (!mainSearcherIdSet.contains(id)) {
-                headIdSet.add(id);
+        final List<Map<String, Object>> orderedDocs = new ArrayList<>(head);
+        for (final String id : mainSearcherIds) {
+            if (!headIdSet.contains(id)) {
+                orderedDocs.add(documentsByIdMap.get(id));
             }
         }
-        final List<Map<String, Object>> head = fusedDocs.stream().filter(doc -> headIdSet.contains(doc.get(idField))).toList();
+        orderedDocs.addAll(extraDocs);
         if (logger.isDebugEnabled()) {
-            logger.debug("Calculated offset: {}, head size: {}, total fused documents: {}", offset, head.size(), fusedDocs.size());
+            logger.debug("Calculated offset: {}, head size: {}, listed documents: {}, total fused documents: {}", offset, head.size(),
+                    orderedDocs.size(), fusedDocs.size());
             final int logLimit = Math.min(10, head.size());
             for (int i = 0; i < logLimit; i++) {
                 final Map<String, Object> doc = head.get(i);
@@ -586,24 +599,14 @@ public class RankFusionProcessor implements AutoCloseable {
             }
         }
 
-        // The rows after the head are the main searcher's next documents, from the window it
-        // already returned: the head is windowSize / 2 long unless fewer documents matched, and
-        // then the main searcher has nothing past it.
-        final List<Map<String, Object>> pageDocs = new ArrayList<>(extractList(head, pageSize, startPosition));
-        final int tailRows = pageSize - pageDocs.size();
-        final int tailStart = mainDocsInHead + Math.max(0, startPosition - head.size());
-        for (int i = tailStart; i < tailStart + tailRows && i < mainSearcherIds.size(); i++) {
-            pageDocs.add(documentsByIdMap.get(mainSearcherIds.get(i)));
-        }
-
         final SearchResult mainResult = results[0];
         long allRecordCount = mainResult.getAllRecordCount();
         if (Relation.EQUAL_TO.toString().equals(mainResult.getAllRecordCountRelation())) {
             allRecordCount += offset;
         }
-        return createResponseList(pageDocs, allRecordCount, mainResult.getAllRecordCountRelation(), mainResult.getQueryTime(),
-                mainResult.isPartialResults() || searcherTimedOut, mainResult.isTimedOut() || searcherTimedOut, mainResult.isShardFailed(),
-                mainResult.getFacetResponse(), startPosition, pageSize, offset);
+        return createResponseList(extractList(orderedDocs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
+                mainResult.getQueryTime(), mainResult.isPartialResults() || searcherTimedOut, mainResult.isTimedOut() || searcherTimedOut,
+                mainResult.isShardFailed(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
     }
 
     /**
