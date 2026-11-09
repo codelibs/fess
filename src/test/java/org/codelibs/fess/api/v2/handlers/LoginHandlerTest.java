@@ -151,6 +151,122 @@ public class LoginHandlerTest extends UnitFessTestCase {
         org.junit.jupiter.api.Assertions.assertNotEquals(401, victim.status, victim.body());
     }
 
+    @SuppressWarnings("serial")
+    private void registerDirectory(final String providerUrl, final int maxUsernameLength) {
+        final org.codelibs.fess.mylasta.direction.FessConfig config = new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapProviderUrl() {
+                return providerUrl;
+            }
+
+            @Override
+            public Integer getLdapMaxUsernameLengthAsInteger() {
+                return Integer.valueOf(maxUsernameLength);
+            }
+
+            @Override
+            public String getAuthenticationAdminUsers() {
+                return "admin";
+            }
+
+            @Override
+            public String getAuthenticationAdminUsersIgnoreCase() {
+                return "false";
+            }
+
+            @Override
+            public Integer getThemeApiLoginRateLimitPerUserPerMinuteAsInteger() {
+                return Integer.valueOf(5);
+            }
+
+            @Override
+            public Integer getThemeApiLoginLockoutSecondsAsInteger() {
+                return Integer.valueOf(60);
+            }
+        };
+        ComponentUtil.setFessConfig(config);
+    }
+
+    /** The directory treats alice1, ALICE2 ... as alice when ldap.max.username.length is 5: one allowance for all of them. */
+    @Test
+    public void test_userScopeKey_followsTheNameTheDirectoryIsAsked() {
+        registerDirectory("ldap://localhost:389", 5);
+        final LoginHandler handler = new LoginHandler(new LoginRateLimiter());
+        final String expected = handler.userScopeKey("10.0.0.9", "alice");
+        for (final String typed : new String[] { "alice1", "ALICE2", " alice3", "alice4 ", "aliceroot", "Alice", "alice 9" }) {
+            assertEquals(typed, expected, handler.userScopeKey("10.0.0.9", typed));
+        }
+        org.junit.jupiter.api.Assertions.assertNotEquals(expected, handler.userScopeKey("10.0.0.9", "bobby"));
+        org.junit.jupiter.api.Assertions.assertNotEquals(expected, handler.userScopeKey("10.0.0.10", "alice1"));
+    }
+
+    /** The form login and the v2 login share one limiter, so they must put the same attempt in the same bucket. */
+    @Test
+    public void test_userScopeKey_isTheKeyOfTheFormLoginToo() {
+        final String ip = "10.0.0.11";
+        for (final int limit : new int[] { 5, -1 }) {
+            for (final String url : new String[] { "ldap://localhost:389", "" }) {
+                registerDirectory(url, limit);
+                final LoginRateLimiter rl = new LoginRateLimiter();
+                rl.init();
+                try {
+                    final LoginHandler handler = new LoginHandler(rl);
+                    final org.codelibs.fess.app.web.login.LoginAction action = new org.codelibs.fess.app.web.login.LoginAction() {
+                        {
+                            fessConfig = ComponentUtil.getFessConfig();
+                        }
+
+                        void failTwice(final String name) {
+                            recordFailure(rl, ip, name);
+                            recordFailure(rl, ip, name);
+                        }
+                    };
+                    final java.lang.reflect.Method failTwice = action.getClass().getDeclaredMethod("failTwice", String.class);
+                    failTwice.setAccessible(true);
+                    for (final String typed : new String[] { "alice", "alice1", "ALICE2", " alice3 ", "admin", "adminxyz" }) {
+                        rl.clear(LoginRateLimiter.Scope.USER, handler.userScopeKey(ip, typed));
+                        failTwice.invoke(action, typed);
+                        // the two failures were counted in the bucket the v2 login reads for the same typed name
+                        assertFalse(typed + " url=" + url + " limit=" + limit,
+                                rl.peek(LoginRateLimiter.Scope.USER, handler.userScopeKey(ip, typed), 2, 60));
+                        rl.clear(LoginRateLimiter.Scope.USER, handler.userScopeKey(ip, typed));
+                    }
+                } catch (final Exception e) {
+                    throw new IllegalStateException(e);
+                } finally {
+                    rl.destroy();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test_userScopeKey_keepsWholeNamesWhenTheNameLimitIsOff() {
+        registerDirectory("ldap://localhost:389", -1);
+        final LoginHandler handler = new LoginHandler(new LoginRateLimiter());
+        org.junit.jupiter.api.Assertions.assertNotEquals(handler.userScopeKey("10.0.0.9", "alice"),
+                handler.userScopeKey("10.0.0.9", "alice1"));
+        assertEquals(handler.userScopeKey("10.0.0.9", "alice1"), handler.userScopeKey("10.0.0.9", " ALICE1 "));
+    }
+
+    @Test
+    public void test_userScopeKey_keepsWholeNamesWithoutADirectory() {
+        registerDirectory("", 5);
+        final LoginHandler handler = new LoginHandler(new LoginRateLimiter());
+        org.junit.jupiter.api.Assertions.assertNotEquals(handler.userScopeKey("10.0.0.9", "alice"),
+                handler.userScopeKey("10.0.0.9", "alice1"));
+        assertEquals(handler.userScopeKey("10.0.0.9", "alice1"), handler.userScopeKey("10.0.0.9", " ALICE1 "));
+    }
+
+    @Test
+    public void test_userScopeKey_doesNotCutAReservedName() {
+        registerDirectory("ldap://localhost:389", 5);
+        final LoginHandler handler = new LoginHandler(new LoginRateLimiter());
+        assertEquals(handler.userScopeKey("10.0.0.9", "admin"), handler.userScopeKey("10.0.0.9", " admin "));
+        org.junit.jupiter.api.Assertions.assertNotEquals(handler.userScopeKey("10.0.0.9", "admin"),
+                handler.userScopeKey("10.0.0.9", "adminxyz"));
+    }
+
     @Test
     public void test_userScopeKey_ignoresBlanksAroundTheName() {
         final LoginHandler handler = new LoginHandler(new LoginRateLimiter());

@@ -347,7 +347,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * @return false for a name authentication.admin.users reserves
      */
     protected boolean isLdapLoginCandidate(final String username) {
-        return !fessConfig.isAdminUser(username) && !fessConfig.isAdminUser(ComponentUtil.getLdapManager().normalizeLoginName(username));
+        return !fessConfig.isReservedLoginName(username);
     }
 
     /**

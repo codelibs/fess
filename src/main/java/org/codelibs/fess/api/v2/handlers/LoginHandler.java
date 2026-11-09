@@ -494,16 +494,19 @@ public class LoginHandler {
      *
      * <p>The name is lower-cased, and only here: a directory compares an account name without regard
      * to case, so a client that varies the case of one name would otherwise get a bucket per spelling.
-     * The blanks around the name are dropped for the same reason: a directory ignores them when it
-     * compares a uid, so " alice" signs in as alice. The name in the lockout log line is still the name
-     * as typed. {@code LoginAction} builds the same key.</p>
+     * The name is the one the directory is asked about ({@code FessProp#getLoginAttemptName}): the
+     * blanks around it are dropped, because a directory ignores them when it compares a uid, so " alice"
+     * signs in as alice, and so is what {@code ldap.max.username.length} cuts off, so with a limit of 5
+     * "alice1" and "alice2" are guesses at one account. A name that never goes to the directory is kept
+     * whole. The name in the lockout log line is still the name as typed. {@code LoginAction} builds the
+     * same key.</p>
      *
      * @param clientIp resolved client IP (see {@link #resolveClientIp})
      * @param username submitted username
      * @return composite key {@code clientIp + NUL + lower-cased username}
      */
     String userScopeKey(final String clientIp, final String username) {
-        return clientIp + USER_SCOPE_KEY_SEP + username.strip().toLowerCase(Locale.ROOT);
+        return clientIp + USER_SCOPE_KEY_SEP + ComponentUtil.getFessConfig().getLoginAttemptName(username).toLowerCase(Locale.ROOT);
     }
 
     /**

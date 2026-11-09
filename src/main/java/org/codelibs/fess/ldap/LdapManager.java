@@ -350,15 +350,7 @@ public class LdapManager {
      * @return the normalized name, or null if the given name is null
      */
     public String normalizeLoginName(final String typedUsername) {
-        if (typedUsername == null) {
-            return null;
-        }
-        final String name = typedUsername.strip();
-        final int maxLength = fessConfig.getLdapMaxUsernameLengthAsInteger();
-        if (maxLength < 0 || name.length() <= maxLength) {
-            return name;
-        }
-        return name.substring(0, maxLength).stripTrailing();
+        return fessConfig.normalizeLdapLoginName(typedUsername);
     }
 
     /**
