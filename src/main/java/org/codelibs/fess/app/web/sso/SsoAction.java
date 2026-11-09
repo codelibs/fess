@@ -132,6 +132,11 @@ public class SsoAction extends FessLoginAction {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SSO is available but no user found.");
                 }
+                // The authenticators answer a response they refuse (a SAML response whose signature
+                // does not verify, an ID token they reject) with null, and a first visit with an
+                // ActionResponseCredential, so a null here is a failed login. Same record as for an
+                // SsoLoginException above: no user, and nothing the anonymous caller sent.
+                activityHelper.loginFailure(OptionalThing.empty());
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             }
             if (logger.isDebugEnabled()) {

@@ -42,6 +42,9 @@ import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.exception.LoginFailureException;
+import org.lastaflute.web.login.option.LoginOpCall;
+import org.lastaflute.web.login.redirect.LoginRedirectSuccessCall;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaMessenger;
@@ -276,30 +279,99 @@ public class SsoActionTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_index_noAuditRecordForAnUnauthenticatedHitOrAChallenge() {
-        // A plain hit has no credential to reject, and a SPNEGO 401 challenge is the first leg of a
-        // handshake that is still running.
-        for (final LoginCredential credential : new LoginCredential[] { null, new ActionResponseCredential(() -> REDIRECT_TO_LOGIN) }) {
-            final List<String> audit = new CopyOnWriteArrayList<>();
-            ComponentUtil.register(new SsoManager() {
-                @Override
-                public LoginCredential getLoginCredential() {
-                    return credential;
-                }
+    public void test_index_noAuditRecordForAChallenge() {
+        // The first leg of a handshake that is still running (a SPNEGO 401, the redirect to the
+        // IdP) is not a rejection, so it must not read as a failed login.
+        final List<String> audit = new CopyOnWriteArrayList<>();
+        registerSsoManagerReturning(new ActionResponseCredential(() -> REDIRECT_TO_LOGIN), true);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.audit(audit);
 
-                @Override
-                public boolean available() {
-                    return true;
-                }
-            }, "ssoManager");
-            final TestableSsoAction action = new TestableSsoAction();
-            action.anonymous(new CopyOnWriteArrayList<>(), false);
-            action.audit(audit);
+        action.index();
 
-            action.index();
+        assertEquals(List.of(), audit);
+    }
 
-            assertEquals(List.of(), audit);
-        }
+    @Test
+    public void test_index_refusedCredentialWritesOneAuditRecordWithoutAnythingTheCallerSent() {
+        // The authenticators answer a SAML response with a bad signature or an ID token they
+        // reject with null, not with an exception. The login error is shown for it, so the audit
+        // record has to be written under the same condition. The endpoint is anonymous: the record
+        // carries no user and nothing of the request.
+        final List<String> audit = new CopyOnWriteArrayList<>();
+        registerSsoManagerReturning(null, true);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.audit(audit);
+
+        action.index();
+
+        assertEquals(List.of("action:LOGIN_FAILURE"), audit);
+        assertEquals(List.of(LoginAction.class), action.redirectTargets);
+        assertEquals(1, action.savedErrors.size());
+    }
+
+    @Test
+    public void test_index_noAuditRecordForANullCredentialWhenSsoIsNotAvailable() {
+        // The login error is not shown here either: there is no SSO login to have failed.
+        final List<String> audit = new CopyOnWriteArrayList<>();
+        registerSsoManagerReturning(null, false);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.audit(audit);
+
+        action.index();
+
+        assertEquals(List.of(), audit);
+        assertEquals(List.of(), action.savedErrors);
+    }
+
+    @Test
+    public void test_index_loginRefusedByTheLoginAssistWritesOneAuditRecordForTheCredential() {
+        final List<String> audit = new CopyOnWriteArrayList<>();
+        registerSsoManagerReturning(new TestCredential(), true);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.audit(audit);
+        action.loginRedirectFails = true;
+
+        action.index();
+
+        assertEquals(1, audit.size());
+        assertTrue(audit.toString(), audit.get(0).contains("action:LOGIN_FAILURE"));
+        assertEquals(List.of(LoginAction.class), action.redirectTargets);
+    }
+
+    @Test
+    public void test_index_successfulLoginWritesNoFailureRecord() {
+        final List<String> audit = new CopyOnWriteArrayList<>();
+        registerSsoManagerReturning(new TestCredential(), true);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.audit(audit);
+
+        action.index();
+
+        assertEquals(List.of(), audit);
+        assertEquals(List.of(), action.redirectTargets);
+    }
+
+    private static class TestCredential implements LoginCredential {
+    }
+
+    private static void registerSsoManagerReturning(final LoginCredential credential, final boolean available) {
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public LoginCredential getLoginCredential() {
+                return credential;
+            }
+
+            @Override
+            public boolean available() {
+                return available;
+            }
+        }, "ssoManager");
     }
 
     private static void registerSsoManagerFailing(final SsoLoginException failure, final boolean available) {
@@ -502,6 +574,8 @@ public class SsoActionTest extends UnitFessTestCase {
 
         boolean post;
 
+        boolean loginRedirectFails;
+
         int landingPages;
 
         @Override
@@ -553,6 +627,15 @@ public class SsoActionTest extends UnitFessTestCase {
                 @Override
                 public OptionalThing<FessUserBean> getSavedUserBean() {
                     return OptionalThing.empty();
+                }
+
+                @Override
+                public HtmlResponse loginRedirect(final LoginCredential credential, final LoginOpCall option,
+                        final LoginRedirectSuccessCall redirectCall) throws LoginFailureException {
+                    if (loginRedirectFails) {
+                        throw new LoginFailureException("refused");
+                    }
+                    return REDIRECT_TO_LOGIN;
                 }
             };
             searchHelper = new SearchHelper() {
