@@ -487,6 +487,16 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         assertEquals(1, content.split("R1510 photographer", -1).length - 1, content);
     }
 
+    @Test
+    public void test_generateData_repeatedValueInMultiValuedMetadata_isAddedToContentOnce() {
+        final Map<String, String[]> metadata = new HashMap<>();
+        metadata.put("dc:subject", new String[] { "harbour", "lighthouse" });
+        metadata.put("Exif IFD0:Image Description", new String[] { "lighthouse" });
+        final String content = (String) generateDataWith(Map.of(), null, metadata, null).get("content");
+        assertEquals(1, content.split("lighthouse", -1).length - 1, content);
+        assertTrue(content.contains("harbour"), content);
+    }
+
     private static FessConfig createFessConfig(final boolean ownerEnabled, final boolean lastModifierEnabled,
             final Map<String, Tuple3<String, String, String>> metadataNameMappings) {
         // Delegate every call to the real configuration except the ones under test.

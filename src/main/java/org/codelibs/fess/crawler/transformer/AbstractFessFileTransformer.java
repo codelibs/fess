@@ -165,13 +165,14 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
                 // meta -> content
                 if (fessConfig.isCrawlerMetadataContentIncluded(mimeType, key)) {
-                    final String joinedValue = StringUtils.join(values, ' ');
-                    // one value is often stored under several names (e.g. dc:description and Exif IFD0:Image Description)
-                    if (StringUtil.isNotBlank(joinedValue) && contentMetaValues.add(joinedValue.trim())) {
-                        if (contentMetaBuf.length() > 0) {
-                            contentMetaBuf.append(' ');
+                    for (final String value : values) {
+                        // one value is often stored under several names (e.g. dc:description and Exif IFD0:Image Description)
+                        if (StringUtil.isNotBlank(value) && contentMetaValues.add(value.trim())) {
+                            if (contentMetaBuf.length() > 0) {
+                                contentMetaBuf.append(' ');
+                            }
+                            contentMetaBuf.append(value.trim());
                         }
-                        contentMetaBuf.append(joinedValue.trim());
                     }
                 }
 
