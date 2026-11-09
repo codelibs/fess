@@ -427,6 +427,21 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_addMissingProperties_addsThePasswordChangeTimeToAnOldUserIndex() throws Exception {
+        final PutRecordingClient client = new PutRecordingClient();
+        // an index created before the time of the last password change was recorded
+        final Map<String, Object> existing = readBundledProperties("fess_indices/fess_user.user/user.json");
+        existing.remove("password_changed_at");
+
+        client.addMissingProperties("fess_user.user", "user", "fess_user.user", toMappingMetadata(existing));
+
+        assertEquals(1, client.putSources.size());
+        final Map<String, Object> put = new ObjectMapper().readValue(client.putSources.get(0), new TypeReference<Map<String, Object>>() {
+        });
+        assertEquals(Map.of("properties", Map.of("password_changed_at", Map.of("type", "long"))), put);
+    }
+
+    @Test
     public void test_addMissingProperties_noPutWhenNothingIsMissing() throws Exception {
         final PutRecordingClient client = new PutRecordingClient();
         final Map<String, Object> existing = readBundledProperties(SEARCH_LOG_MAPPING);

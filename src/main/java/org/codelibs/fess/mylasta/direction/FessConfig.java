@@ -2179,6 +2179,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String PASSWORD_REQUIRE_SPECIAL_CHAR = "password.require.special.char";
 
+    /** The key of the configuration. e.g. 10 */
+    String PASSWORD_CHANGED_CACHE_EXPIRE = "password.changed.cache.expire";
+
     /** The key of the configuration. e.g. false */
     String RAG_CHAT_ENABLED = "rag.chat.enabled";
 
@@ -10682,6 +10685,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isPasswordRequireSpecialChar();
 
     /**
+     * Get the value for the key 'password.changed.cache.expire'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Seconds a node caches the time a local user last changed the password, as read from the user index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordChangedCacheExpire();
+
+    /**
+     * Get the value for the key 'password.changed.cache.expire' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Seconds a node caches the time a local user last changed the password, as read from the user index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPasswordChangedCacheExpireAsInteger();
+
+    /**
      * Get the value for the key 'rag.chat.enabled'. <br>
      * The value is, e.g. false <br>
      * comment: Whether RAG chat feature is enabled.
@@ -15281,6 +15301,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR);
         }
 
+        public String getPasswordChangedCacheExpire() {
+            return get(FessConfig.PASSWORD_CHANGED_CACHE_EXPIRE);
+        }
+
+        public Integer getPasswordChangedCacheExpireAsInteger() {
+            return getAsInteger(FessConfig.PASSWORD_CHANGED_CACHE_EXPIRE);
+        }
+
         public String getRagChatEnabled() {
             return get(FessConfig.RAG_CHAT_ENABLED);
         }
@@ -16253,6 +16281,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_LOWERCASE, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
+            defaultMap.put(FessConfig.PASSWORD_CHANGED_CACHE_EXPIRE, "10");
             defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
             defaultMap.put(FessConfig.RAG_CHAT_LOG_ENABLED, "true");
             defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS, "5");

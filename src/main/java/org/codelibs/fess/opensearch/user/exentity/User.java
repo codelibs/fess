@@ -46,6 +46,11 @@ public class User extends BsUser implements FessUser {
 
     private Map<String, String> attributes;
 
+    /** The field of the user document that holds {@link #getPasswordChangedAt()}. */
+    public static final String PASSWORD_CHANGED_AT = "password_changed_at";
+
+    private Long passwordChangedAt;
+
     public Long getVersionNo() {
         return asDocMeta().version();
     }
@@ -133,6 +138,21 @@ public class User extends BsUser implements FessUser {
         return true;
     }
 
+    /**
+     * Gets when the password was last changed, as epoch milliseconds. Login sessions opened before
+     * this time are ended. A user whose password has not been changed since the field was
+     * introduced has none.
+     *
+     * @return the time of the last password change, or null when none is recorded
+     */
+    public Long getPasswordChangedAt() {
+        return passwordChangedAt;
+    }
+
+    public void setPasswordChangedAt(final Long passwordChangedAt) {
+        this.passwordChangedAt = passwordChangedAt;
+    }
+
     public Map<String, String> getAttributes() {
         return attributes;
     }
@@ -158,6 +178,9 @@ public class User extends BsUser implements FessUser {
         }
         if (attributes != null) {
             sourceMap.putAll(attributes);
+        }
+        if (passwordChangedAt != null) {
+            sourceMap.put(PASSWORD_CHANGED_AT, passwordChangedAt);
         }
         return sourceMap;
     }

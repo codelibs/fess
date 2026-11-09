@@ -55,6 +55,7 @@ public class UserBhv extends BsUserBhv {
             result.setPassword(DfTypeUtil.toString(source.get(PASSWORD)));
             result.setGroups(toStringArray(source.get(GROUPS)));
             result.setRoles(toStringArray(source.get(ROLES)));
+            result.setPasswordChangedAt(DfTypeUtil.toLong(source.get(User.PASSWORD_CHANGED_AT)));
             result.setAttributes(source.entrySet()
                     .stream()
                     .filter(e -> isAttribute(e.getKey()))
@@ -68,7 +69,8 @@ public class UserBhv extends BsUserBhv {
     }
 
     private boolean isAttribute(final String key) {
-        return !NAME.equals(key) && !PASSWORD.equals(key) && !GROUPS.equals(key) && !ROLES.equals(key);
+        return !NAME.equals(key) && !PASSWORD.equals(key) && !GROUPS.equals(key) && !ROLES.equals(key)
+                && !User.PASSWORD_CHANGED_AT.equals(key);
     }
 
 }

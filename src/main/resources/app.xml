@@ -77,6 +77,8 @@
 	</component>
 	<component name="loginRateLimiter" class="org.codelibs.fess.api.v2.handlers.LoginRateLimiter">
 	</component>
+	<component name="passwordChangedAtCache" class="org.codelibs.fess.auth.PasswordChangedAtCache">
+	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
 	<component name="userInfoHelper" class="org.codelibs.fess.helper.UserInfoHelper">

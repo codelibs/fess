@@ -39,6 +39,12 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /**
+     * The password change time (epoch milliseconds) of the local user document that this login
+     * session was opened with, 0 when that document had none. Null when the session does not
+     * track it: a session of a user who is not a local user, or one opened before it was tracked.
+     */
+    private Long passwordChangedAt;
 
     // ===================================================================================
     //                                                                         Constructor
@@ -94,6 +100,19 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
     public FessUser getFessUser() {
         return user;
+    }
+
+    /**
+     * Gets the password change time this login session was opened with.
+     *
+     * @return epoch milliseconds, 0 when the user had none, or null when the session does not track it
+     */
+    public Long getPasswordChangedAt() {
+        return passwordChangedAt;
+    }
+
+    public void setPasswordChangedAt(final Long passwordChangedAt) {
+        this.passwordChangedAt = passwordChangedAt;
     }
 
     public static FessUserBean empty() {

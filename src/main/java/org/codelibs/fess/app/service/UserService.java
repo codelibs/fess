@@ -128,9 +128,18 @@ public class UserService {
 
             ComponentUtil.getAuthenticationManager().insert(user);
 
+            // The original password is set only when the caller sets a new one.
+            final Long passwordChangedAt = StringUtil.isNotBlank(user.getOriginalPassword()) ? nextPasswordChangedAt(user) : null;
+            if (passwordChangedAt != null) {
+                user.setPasswordChangedAt(passwordChangedAt);
+            }
+
             userBhv.insertOrUpdate(user, op -> {
                 op.setRefreshPolicy(Constants.TRUE);
             });
+            if (passwordChangedAt != null) {
+                acceptPasswordChange(username, passwordChangedAt);
+            }
 
             if (logger.isInfoEnabled()) {
                 logger.info("User {} completed successfully: username={}, id={}", isUpdate ? "update" : "create", username, user.getId());
@@ -163,7 +172,10 @@ public class UserService {
                 userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
                     final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
                     entity.setPassword(encodedPassword);
+                    final long passwordChangedAt = nextPasswordChangedAt(entity);
+                    entity.setPasswordChangedAt(passwordChangedAt);
                     userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
+                    acceptPasswordChange(username, passwordChangedAt);
 
                     if (logger.isInfoEnabled()) {
                         logger.info("Password changed successfully for user: username={}, id={}", username, entity.getId());
@@ -183,6 +195,49 @@ public class UserService {
             logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
             throw e;
         }
+    }
+
+    /**
+     * Gets the time to record for a password change of the user: now, but later than the time
+     * already recorded, so that a node whose clock is behind still ends the sessions opened before.
+     *
+     * @param user the user whose password is changed
+     * @return epoch milliseconds
+     */
+    protected long nextPasswordChangedAt(final User user) {
+        final Long previous = user.getPasswordChangedAt();
+        final long now = System.currentTimeMillis();
+        return previous == null ? now : Math.max(now, previous.longValue() + 1);
+    }
+
+    /**
+     * Tells the login assist that a password was changed, so that the login session that made the
+     * change stays open while the other sessions of the user end.
+     *
+     * <p>There is no login session to keep when the change is not made by a request, and the
+     * password has been changed by then, so a failure here is not one of the change.</p>
+     *
+     * @param username the name of the user
+     * @param changedAt the recorded time
+     */
+    protected void acceptPasswordChange(final String username, final long changedAt) {
+        try {
+            ComponentUtil.getFessLoginAssist().acceptPasswordChange(username, changedAt);
+        } catch (final RuntimeException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Could not update the login session for the password change: username={}", username, e);
+            }
+        }
+    }
+
+    /**
+     * Gets when the password of a local user was last changed.
+     *
+     * @param username the username of the user
+     * @return epoch milliseconds, or 0 when the user has no recorded password change or does not exist
+     */
+    public long getPasswordChangedAt(final String username) {
+        return userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).map(User::getPasswordChangedAt).orElse(0L);
     }
 
     /**

@@ -25,6 +25,7 @@ import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.auth.PasswordChangedAtCache;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.PasswordHashHelper;
@@ -148,14 +149,22 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                                                       Login Process
     //                                                                       =============
     /**
-     * Creates a user bean from the given user entity.
+     * Creates a user bean from the given user entity. For a local user the bean remembers when the
+     * password was last changed, see {@link #getSavedUserBean()}.
      *
      * @param user the user entity to create a bean from
      * @return the created user bean
      */
     @Override
     protected FessUserBean createUserBean(final FessUser user) {
-        return new FessUserBean(user);
+        final FessUserBean userBean = new FessUserBean(user);
+        if (user instanceof final User localUser) {
+            // The session remembers the time of the document it was opened with, 0 when the
+            // document has none, so that the first password change of a user is noticed too.
+            final Long changedAt = localUser.getPasswordChangedAt();
+            userBean.setPasswordChangedAt(changedAt != null ? changedAt : Long.valueOf(0L));
+        }
+        return userBean;
     }
 
     /**
@@ -239,6 +248,109 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             return false;
         }
         return super.needsLoginSessionSyncCheck(userBean, checkDt, currentDt);
+    }
+
+    // -----------------------------------------------------
+    //                                  Password Change Check
+    //                                  ---------------------
+    /**
+     * Gets the user bean of the login session, ending the session first when the password of the
+     * user was changed after it was opened.
+     *
+     * <p>Every way to ask who is logged in ends here, the admin screens as well as the search
+     * and the {@code /api/v2} requests, so a session cannot outlive a password change by taking a
+     * path that does not look. The time of the change is read from the user document, not
+     * recorded where the sessions are, so it works the same behind several nodes.</p>
+     *
+     * <p>Only a session of a local user is looked at: it remembers the time of the user document
+     * it was opened with (see {@link #createUserBean(FessUser)}). A user authenticated by LDAP or
+     * an identity provider has no such time, so the password of the identity provider, which Fess
+     * does not manage, is not looked up. A session opened before the time was remembered has none
+     * either, and is left alone.</p>
+     *
+     * @return the user bean, or the empty result when nobody is logged in or the session was ended
+     */
+    @Override
+    public OptionalThing<FessUserBean> getSavedUserBean() {
+        final OptionalThing<FessUserBean> saved = getSessionUserBeanUnchecked();
+        if (saved.isPresent() && isPasswordChangedAfterLogin(saved.get())) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Ended a login session opened before the password was changed. username={}", saved.get().getUserId());
+            }
+            logout();
+            return getSessionUserBeanUnchecked();
+        }
+        return saved;
+    }
+
+    /**
+     * Gets the user bean of the login session as it is, without the password change check.
+     *
+     * @return the user bean in the session
+     */
+    protected OptionalThing<FessUserBean> getSessionUserBeanUnchecked() {
+        return super.getSavedUserBean();
+    }
+
+    /**
+     * Stores the user bean in the session again, so that a session store that replicates a
+     * session when an attribute is set learns of a change made to the bean.
+     *
+     * @param userBean the user bean to store
+     */
+    protected void saveSessionUserBean(final FessUserBean userBean) {
+        sessionManager.setAttribute(getUserBeanKey(), userBean);
+    }
+
+    /**
+     * Tests whether the password of the user was changed after the session was opened.
+     *
+     * <p>The session ends only when the stored time is later than the remembered one, not when
+     * they merely differ: a node that has not yet seen a newer change, or a document rewritten by
+     * a node that does not know the field, must not end a session that is still valid.</p>
+     *
+     * @param userBean the user bean of the session
+     * @return true if the session was opened before the latest password change
+     */
+    protected boolean isPasswordChangedAfterLogin(final FessUserBean userBean) {
+        final Long remembered = userBean.getPasswordChangedAt();
+        if (remembered == null) {
+            return false;
+        }
+        return getPasswordChangedAtCache().get(userBean.getUserId()) > remembered.longValue();
+    }
+
+    /**
+     * Gets the cache of password change times that all sessions of this node share.
+     *
+     * <p>It is a component of its own because this class is created anew for every lookup, so a
+     * cache held here would be used once and thrown away.</p>
+     *
+     * @return the cache
+     */
+    protected PasswordChangedAtCache getPasswordChangedAtCache() {
+        return ComponentUtil.getComponent(PasswordChangedAtCache.class);
+    }
+
+    /**
+     * Takes note that the password of a user was changed at the given time, on this node.
+     *
+     * <p>The login session of the request, when it belongs to that user, remembers the new time
+     * and so stays open: it is the one that made the change. Every other session of the user
+     * opened before it ends on its next request, as the cache of this node now holds the new
+     * time. Other nodes see the change when their cache entry expires.</p>
+     *
+     * @param username the name of the user whose password was changed
+     * @param changedAt the time stored in the user document, in epoch milliseconds
+     */
+    public void acceptPasswordChange(final String username, final long changedAt) {
+        getPasswordChangedAtCache().put(username, changedAt);
+        getSessionUserBeanUnchecked().ifPresent(userBean -> {
+            if (userBean.getPasswordChangedAt() != null && username.equals(userBean.getUserId())) {
+                userBean.setPasswordChangedAt(changedAt);
+                saveSessionUserBean(userBean);
+            }
+        });
     }
 
     // -----------------------------------------------------
