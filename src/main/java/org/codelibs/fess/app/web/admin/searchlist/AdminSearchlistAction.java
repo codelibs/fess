@@ -719,7 +719,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             RenderDataUtil.register(data, "appendHighlightParams", appendHighlightParams);
             RenderDataUtil.register(data, "execTime", execTime);
             RenderDataUtil.register(data, "pageSize", pageSize);
-            RenderDataUtil.register(data, "offset", offset);
+            RenderDataUtil.register(data, "fusionOffset", offset);
             RenderDataUtil.register(data, "currentPageNumber", currentPageNumber);
             RenderDataUtil.register(data, "allRecordCount", allRecordCount);
             RenderDataUtil.register(data, "allRecordCountRelation", allRecordCountRelation);
