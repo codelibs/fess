@@ -112,9 +112,10 @@ public class SearchHandlerTest extends UnitFessTestCase {
             // Every top-level snake_case key from the spec should be present in a success
             // envelope, even when the underlying values are nulls or empty arrays.
             for (final String key : new String[] { "\"q\"", "\"query_id\"", "\"exec_time\"", "\"query_time\"", "\"page_size\"",
-                    "\"page_number\"", "\"record_count\"", "\"record_count_relation\"", "\"page_count\"", "\"highlight_params\"",
-                    "\"next_page\"", "\"prev_page\"", "\"start_record_number\"", "\"end_record_number\"", "\"page_numbers\"", "\"partial\"",
-                    "\"search_query\"", "\"requested_time\"", "\"related_query\"", "\"related_contents\"", "\"data\"" }) {
+                    "\"page_number\"", "\"record_count\"", "\"record_count_relation\"", "\"page_count\"", "\"offset\"",
+                    "\"highlight_params\"", "\"next_page\"", "\"prev_page\"", "\"start_record_number\"", "\"end_record_number\"",
+                    "\"page_numbers\"", "\"partial\"", "\"search_query\"", "\"requested_time\"", "\"related_query\"",
+                    "\"related_contents\"", "\"data\"" }) {
                 assertTrue(body.contains(key), "missing key " + key + " in body: " + body);
             }
         } else {

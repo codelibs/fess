@@ -18,8 +18,8 @@ package org.codelibs.fess.rank.fusion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -360,6 +360,12 @@ public class RankFusionProcessor implements AutoCloseable {
      * the query and never replied, for instance - is left out of this search, and the response is
      * flagged as partial and timed out.</p>
      *
+     * <p>A page that starts inside the first {@code windowSize / 2} positions is cut from the fused
+     * list, without any further query: the rest of the list is the main searcher's window, which
+     * the main request already returned. A page that starts beyond them is answered by the main
+     * searcher alone, shifted back by the request's {@code offset} - the offset the response to
+     * the previous page reported. Without it, the shift is zero.</p>
+     *
      * @param searchers array of searchers to use for concurrent searching
      * @param query the search query string
      * @param params search request parameters including pagination and filters
@@ -491,8 +497,12 @@ public class RankFusionProcessor implements AutoCloseable {
         }
 
         final String scoreField = fessConfig.getRankFusionScoreField();
-        final Map<String, Map<String, Object>> documentsByIdMap = new HashMap<>();
+        // Insertion order is the main searcher's rank first, so documents with equal fused scores
+        // are ordered the same way on every request instead of by hash order.
+        final Map<String, Map<String, Object>> documentsByIdMap = new LinkedHashMap<>();
         final String idField = fessConfig.getIndexFieldId();
+        // The ids the main searcher returned in its window (windowSize documents), best first.
+        final List<String> mainSearcherIds = new ArrayList<>();
         final Set<Object> mainSearcherIdSet = new HashSet<>();
         for (int searcherIndex = 0; searcherIndex < results.length; searcherIndex++) {
             final List<Map<String, Object>> docList = results[searcherIndex].getDocumentList();
@@ -523,9 +533,8 @@ public class RankFusionProcessor implements AutoCloseable {
                         doc.put(scoreField, Float.valueOf(rrfScore));
                         documentsByIdMap.put(id, doc);
                     }
-                    // Track documents from main searcher (index 0) within window size
-                    if (searcherIndex == 0 && docRank < windowSize / 2) {
-                        mainSearcherIdSet.add(id);
+                    if (searcherIndex == 0 && mainSearcherIdSet.add(id)) {
+                        mainSearcherIds.add(id);
                     }
                 }
             }
@@ -537,29 +546,64 @@ public class RankFusionProcessor implements AutoCloseable {
                 .sorted((doc1, doc2) -> Float.compare(toFloat(doc2.get(scoreField)), toFloat(doc1.get(scoreField))))
                 .toList();
 
-        // Calculate offset based on documents not in main searcher's top results
+        // The first windowSize / 2 fused documents (the head) hold some documents the main searcher
+        // did not return in its window - found only by another searcher. offset is their number.
+        // The head the pages are cut from keeps exactly those and the main searcher's first
+        // (windowSize / 2 - offset) documents, ordered by fused score. So the main searcher's
+        // documents in the head are a prefix of its own order, and the rest of its order follows
+        // the head: the main searcher's document at index (windowSize / 2 - offset + n) is the one
+        // at position (windowSize / 2 + n). A deep page, which does not fuse, reads that document
+        // with start - offset, so a client that sends back the offset of the response it got
+        // pages through the list without a gap or a repeat. A document another searcher promoted
+        // from the main searcher's window into the fused top is not forced into the head; it
+        // appears at its own position in the main searcher's order.
+        // Residual: a head document that matches the main searcher's query but ranked below its
+        // window is counted in offset like any other, and is reached again in the main searcher's
+        // order, so it is shown twice. Each such document adds one row, which record_count
+        // includes, so the pages still tile; there are at most offset of them.
+        final int headLimit = windowSize / 2;
         int offset = 0;
-        for (int i = 0; i < windowSize / 2 && i < fusedDocs.size(); i++) {
+        for (int i = 0; i < headLimit && i < fusedDocs.size(); i++) {
             if (!mainSearcherIdSet.contains(fusedDocs.get(i).get(idField))) {
                 offset++;
             }
         }
+        final int mainDocsInHead = Math.min(mainSearcherIds.size(), headLimit - offset);
+        final Set<Object> headIdSet = new HashSet<>(mainSearcherIds.subList(0, mainDocsInHead));
+        for (int i = 0; i < headLimit && i < fusedDocs.size(); i++) {
+            final Object id = fusedDocs.get(i).get(idField);
+            if (!mainSearcherIdSet.contains(id)) {
+                headIdSet.add(id);
+            }
+        }
+        final List<Map<String, Object>> head = fusedDocs.stream().filter(doc -> headIdSet.contains(doc.get(idField))).toList();
         if (logger.isDebugEnabled()) {
-            logger.debug("Calculated offset: {}, total fused documents: {}", offset, fusedDocs.size());
-            final int logLimit = Math.min(10, fusedDocs.size());
+            logger.debug("Calculated offset: {}, head size: {}, total fused documents: {}", offset, head.size(), fusedDocs.size());
+            final int logLimit = Math.min(10, head.size());
             for (int i = 0; i < logLimit; i++) {
-                final Map<String, Object> doc = fusedDocs.get(i);
+                final Map<String, Object> doc = head.get(i);
                 logger.debug("Fused rank[{}]: id={}, score={}", i, doc.get(idField), doc.get(scoreField));
             }
         }
+
+        // The rows after the head are the main searcher's next documents, from the window it
+        // already returned: the head is windowSize / 2 long unless fewer documents matched, and
+        // then the main searcher has nothing past it.
+        final List<Map<String, Object>> pageDocs = new ArrayList<>(extractList(head, pageSize, startPosition));
+        final int tailRows = pageSize - pageDocs.size();
+        final int tailStart = mainDocsInHead + Math.max(0, startPosition - head.size());
+        for (int i = tailStart; i < tailStart + tailRows && i < mainSearcherIds.size(); i++) {
+            pageDocs.add(documentsByIdMap.get(mainSearcherIds.get(i)));
+        }
+
         final SearchResult mainResult = results[0];
         long allRecordCount = mainResult.getAllRecordCount();
         if (Relation.EQUAL_TO.toString().equals(mainResult.getAllRecordCountRelation())) {
             allRecordCount += offset;
         }
-        return createResponseList(extractList(fusedDocs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
-                mainResult.getQueryTime(), mainResult.isPartialResults() || searcherTimedOut, mainResult.isTimedOut() || searcherTimedOut,
-                mainResult.isShardFailed(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
+        return createResponseList(pageDocs, allRecordCount, mainResult.getAllRecordCountRelation(), mainResult.getQueryTime(),
+                mainResult.isPartialResults() || searcherTimedOut, mainResult.isTimedOut() || searcherTimedOut, mainResult.isShardFailed(),
+                mainResult.getFacetResponse(), startPosition, pageSize, offset);
     }
 
     /**

@@ -56,6 +56,12 @@ public class SearchRenderData {
     /** Total number of pages based on record count and page size. */
     protected int allPageCount;
 
+    /**
+     * Number of leading documents that rank fusion placed ahead of the main searcher's order. A
+     * client that pages by start position sends it back as the request offset.
+     */
+    protected int offset;
+
     /** Flag indicating whether a next page exists. */
     protected boolean existNextPage;
 
@@ -181,6 +187,24 @@ public class SearchRenderData {
      */
     public void setAllPageCount(final int allPageCount) {
         this.allPageCount = allPageCount;
+    }
+
+    /**
+     * Sets the offset a client sends back when it requests a later page.
+     *
+     * @param offset The offset
+     */
+    public void setOffset(final int offset) {
+        this.offset = offset;
+    }
+
+    /**
+     * Gets the offset a client sends back when it requests a later page.
+     *
+     * @return The offset, 0 when the results were not fused
+     */
+    public int getOffset() {
+        return offset;
     }
 
     /**
@@ -503,10 +527,11 @@ public class SearchRenderData {
         return "SearchRenderData [documentItems=" + documentItems + ", facetResponse=" + facetResponse + ", appendHighlightParams="
                 + appendHighlightParams + ", execTime=" + execTime + ", pageSize=" + pageSize + ", currentPageNumber=" + currentPageNumber
                 + ", allRecordCount=" + allRecordCount + ", allRecordCountRelation=" + allRecordCountRelation + ", allPageCount="
-                + allPageCount + ", existNextPage=" + existNextPage + ", existPrevPage=" + existPrevPage + ", currentStartRecordNumber="
-                + currentStartRecordNumber + ", currentEndRecordNumber=" + currentEndRecordNumber + ", pageNumberList=" + pageNumberList
-                + ", partialResults=" + partialResults + ", timedOut=" + timedOut + ", shardFailed=" + shardFailed + ", searchQuery="
-                + searchQuery + ", queryTime=" + queryTime + ", requestedTime=" + requestedTime + ", queryId=" + queryId + "]";
+                + allPageCount + ", offset=" + offset + ", existNextPage=" + existNextPage + ", existPrevPage=" + existPrevPage
+                + ", currentStartRecordNumber=" + currentStartRecordNumber + ", currentEndRecordNumber=" + currentEndRecordNumber
+                + ", pageNumberList=" + pageNumberList + ", partialResults=" + partialResults + ", timedOut=" + timedOut + ", shardFailed="
+                + shardFailed + ", searchQuery=" + searchQuery + ", queryTime=" + queryTime + ", requestedTime=" + requestedTime
+                + ", queryId=" + queryId + "]";
     }
 
 }

@@ -154,7 +154,14 @@ paths:
         - name: offset
           in: query
           description: |-
-            Offset from `start`. Depends on `query.max.search.result.offset`.
+            Send back the `offset` of the response to the previous page when
+            asking for a page that starts at or beyond `rank.fusion.window_size / 2`
+            (100 by default). With rank fusion, the first pages are fused
+            results and the later ones are keyword results; `offset` is how many
+            of the fused results do not come from the keyword results, and
+            shifts `start` back so that the later pages follow the fused ones
+            without a gap or a repeat. When it is left out the shift is 0.
+            Depends on `query.max.search.result.offset`.
           required: false
           schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
         - name: num
@@ -1704,6 +1711,12 @@ components:
                     lower bound is known.
                   enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL_TO]
                 page_count: { type: integer }
+                offset:
+                  type: integer
+                  minimum: 0
+                  description: |-
+                    The request parameter `offset` to send with a request for a later
+                    page (see the parameter). `0` when the results are not fused.
                 highlight_params:
                   type: string
                   nullable: true

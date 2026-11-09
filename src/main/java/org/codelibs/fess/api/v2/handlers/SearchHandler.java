@@ -290,6 +290,7 @@ public class SearchHandler {
         payload.put("record_count", data.getAllRecordCount());
         payload.put("record_count_relation", data.getAllRecordCountRelation());
         payload.put("page_count", data.getAllPageCount());
+        payload.put("offset", data.getOffset());
         payload.put("highlight_params", data.getAppendHighlightParams());
         payload.put("next_page", data.isExistNextPage());
         payload.put("prev_page", data.isExistPrevPage());

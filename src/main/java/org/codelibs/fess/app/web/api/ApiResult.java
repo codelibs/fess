@@ -376,6 +376,10 @@ public class ApiResult {
          */
         protected int pageCount;
         /**
+         * The offset to send back as the request offset when asking for a later page.
+         */
+        protected int offset;
+        /**
          * Indicates if there is a next page of search results.
          */
         protected boolean nextPage;
@@ -435,6 +439,7 @@ public class ApiResult {
             recordCount = data.getAllRecordCount();
             recordCountRelation = data.getAllRecordCountRelation();
             pageCount = data.getAllPageCount();
+            offset = data.getOffset();
             nextPage = data.isExistNextPage();
             prevPage = data.isExistPrevPage();
             startRecordNumber = data.getCurrentStartRecordNumber();

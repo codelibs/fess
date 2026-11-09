@@ -19,11 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.lucene.search.TotalHits.Relation;
@@ -170,10 +174,14 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
     @Test
     public void test_1searcher10_45_45_1000docs_100size() throws Exception {
+        // Rewritten for the offset that tiles. The vector searcher promotes documents 100..144 from
+        // the keyword window's second half, and no document outside the window reaches the head, so
+        // the offset is 0: those documents are not forced into the head, they follow it at their
+        // own keyword positions. The old version counted them in the offset and so showed
+        // documents 55..99 only on a page the client reached with the offset sent back.
         String query = "*";
         int allRecordCount = 1000;
         int pageSize = 100;
-        int offset = 45;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
             rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(10, 45, 45));
@@ -182,12 +190,12 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
             if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
                     OptionalThing.empty()) instanceof QueryResponseList list) {
                 assertEquals(pageSize, list.size());
-                assertEquals(allRecordCount + offset, list.getAllRecordCount());
-                assertEquals(11, list.getAllPageCount());
+                assertEquals(allRecordCount, list.getAllRecordCount());
+                assertEquals(10, list.getAllPageCount());
                 assertEquals(100, list.getCurrentEndRecordNumber());
                 assertEquals(1, list.getCurrentPageNumber());
                 assertEquals(1, list.getCurrentStartRecordNumber());
-                assertEquals(offset, list.getOffset());
+                assertEquals(0, list.getOffset());
                 assertEquals(100, list.getPageSize());
                 assertEquals(0, list.getStart());
                 assertEquals("0", list.get(0).get(ID_FIELD));
@@ -200,85 +208,268 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
                 assertEquals("6", list.get(7).get(ID_FIELD));
                 assertEquals("4", list.get(8).get(ID_FIELD));
                 assertEquals("5", list.get(9).get(ID_FIELD));
+                assertEquals("99", list.get(99).get(ID_FIELD));
             } else {
                 fail();
             }
 
-            if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, offset),
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(100, pageSize, 0),
                     OptionalThing.empty()) instanceof QueryResponseList list) {
                 assertEquals(pageSize, list.size());
-                assertEquals(allRecordCount + offset, list.getAllRecordCount());
-                assertEquals(11, list.getAllPageCount());
-                assertEquals(100, list.getCurrentEndRecordNumber());
-                assertEquals(1, list.getCurrentPageNumber());
-                assertEquals(1, list.getCurrentStartRecordNumber());
-                assertEquals(offset, list.getOffset());
-                assertEquals(100, list.getPageSize());
-                assertEquals(0, list.getStart());
-                assertEquals("0", list.get(0).get(ID_FIELD));
-                assertEquals("9", list.get(1).get(ID_FIELD));
-                assertEquals("1", list.get(2).get(ID_FIELD));
-                assertEquals("8", list.get(3).get(ID_FIELD));
-                assertEquals("2", list.get(4).get(ID_FIELD));
-                assertEquals("7", list.get(5).get(ID_FIELD));
-                assertEquals("3", list.get(6).get(ID_FIELD));
-                assertEquals("6", list.get(7).get(ID_FIELD));
-                assertEquals("4", list.get(8).get(ID_FIELD));
-                assertEquals("5", list.get(9).get(ID_FIELD));
-            } else {
-                fail();
-            }
-
-            if (rankFusionProcessor.search(query, new TestSearchRequestParams(100, pageSize, offset),
-                    OptionalThing.empty()) instanceof QueryResponseList list) {
-                assertEquals(pageSize, list.size());
-                assertEquals(allRecordCount + offset, list.getAllRecordCount());
-                assertEquals(11, list.getAllPageCount());
+                assertEquals(allRecordCount, list.getAllRecordCount());
+                assertEquals(10, list.getAllPageCount());
                 assertEquals(200, list.getCurrentEndRecordNumber());
                 assertEquals(2, list.getCurrentPageNumber());
                 assertEquals(101, list.getCurrentStartRecordNumber());
-                assertEquals(offset, list.getOffset());
-                assertEquals(100, list.getPageSize());
+                assertEquals(0, list.getOffset());
                 assertEquals(100, list.getStart());
-                assertEquals("55", list.get(0).get(ID_FIELD));
-                assertEquals("154", list.get(99).get(ID_FIELD));
+                assertEquals("100", list.get(0).get(ID_FIELD));
+                assertEquals("199", list.get(99).get(ID_FIELD));
             } else {
                 fail();
             }
 
-            if (rankFusionProcessor.search(query, new TestSearchRequestParams(900, pageSize, offset),
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(900, pageSize, 0),
                     OptionalThing.empty()) instanceof QueryResponseList list) {
                 assertEquals(pageSize, list.size());
-                assertEquals(allRecordCount + offset, list.getAllRecordCount());
-                assertEquals(11, list.getAllPageCount());
+                assertEquals(allRecordCount, list.getAllRecordCount());
+                assertEquals(10, list.getAllPageCount());
                 assertEquals(1000, list.getCurrentEndRecordNumber());
-                assertEquals(10, list.getCurrentPageNumber());
-                assertEquals(901, list.getCurrentStartRecordNumber());
-                assertEquals(offset, list.getOffset());
-                assertEquals(100, list.getPageSize());
-                assertEquals(900, list.getStart());
-                assertEquals("855", list.get(0).get(ID_FIELD));
-                assertEquals("954", list.get(99).get(ID_FIELD));
+                assertEquals("900", list.get(0).get(ID_FIELD));
+                assertEquals("999", list.get(99).get(ID_FIELD));
             } else {
                 fail();
             }
 
-            if (rankFusionProcessor.search(query, new TestSearchRequestParams(1000, pageSize, offset),
+            if (rankFusionProcessor.search(query, new TestSearchRequestParams(1000, pageSize, 0),
                     OptionalThing.empty()) instanceof QueryResponseList list) {
-                assertEquals(offset, list.size());
-                assertEquals(allRecordCount + offset, list.getAllRecordCount());
-                assertEquals(11, list.getAllPageCount());
-                assertEquals(1045, list.getCurrentEndRecordNumber());
-                assertEquals(11, list.getCurrentPageNumber());
-                assertEquals(1001, list.getCurrentStartRecordNumber());
-                assertEquals(offset, list.getOffset());
-                assertEquals(100, list.getPageSize());
-                assertEquals(1000, list.getStart());
-                assertEquals("955", list.get(0).get(ID_FIELD));
-                assertEquals("999", list.get(44).get(ID_FIELD));
+                assertEquals(0, list.size());
+                assertEquals(allRecordCount, list.getAllRecordCount());
             } else {
                 fail();
             }
+        }
+    }
+
+    /** What the vector branch finds, best first: keyword hits it promotes from below the head, ones in the head, and three it alone finds. */
+    private static final List<String> VECTOR_IDS =
+            List.of("150", "x1", "160", "2", "x2", "170", "180", "190", "7", "151", "x3", "161", "171", "181", "191");
+
+    /**
+     * What the pages must add up to, worked out from the definition: the head is the keyword
+     * window's first (windowSize / 2 - offset) documents and the offset documents only the vector
+     * branch found, in fused order; the rest is the keyword order. The offset counts the fused
+     * top's documents that are not in the keyword window.
+     */
+    private static List<String> expectedList(final RankFusionProcessor processor, final int keywordCount, final List<String> vectorIds) {
+        final int rankConstant = ComponentUtil.getFessConfig().getRankFusionRankConstantAsInteger();
+        final int half = processor.windowSize / 2;
+        final int windowCount = Math.min(processor.windowSize, keywordCount);
+        final Map<String, Float> scores = new LinkedHashMap<>();
+        for (int rank = 0; rank < windowCount; rank++) {
+            scores.put(Integer.toString(rank), 1.0f / (rankConstant + rank));
+        }
+        final List<String> vector = vectorIds.subList(0, Math.min(vectorIds.size(), half));
+        for (int rank = 0; rank < vector.size(); rank++) {
+            final float rrf = 1.0f / (rankConstant + rank);
+            final Float current = scores.get(vector.get(rank));
+            scores.put(vector.get(rank), current == null ? rrf : current + rrf);
+        }
+        final List<String> fused = new ArrayList<>(scores.keySet());
+        fused.sort((a, b) -> Float.compare(scores.get(b), scores.get(a)));
+        final Set<String> head = new HashSet<>();
+        int offset = 0;
+        for (final String id : fused.subList(0, Math.min(half, fused.size()))) {
+            if (!id.matches("\\d+") || Integer.parseInt(id) >= windowCount) {
+                head.add(id);
+                offset++;
+            }
+        }
+        final int keywordInHead = Math.min(windowCount, half - offset);
+        for (int rank = 0; rank < keywordInHead; rank++) {
+            head.add(Integer.toString(rank));
+        }
+        final List<String> expected = new ArrayList<>();
+        for (final String id : fused) {
+            if (head.contains(id)) {
+                expected.add(id);
+            }
+        }
+        for (int rank = keywordInHead; rank < keywordCount; rank++) {
+            expected.add(Integer.toString(rank));
+        }
+        return expected;
+    }
+
+    private static List<String> idsOf(final List<Map<String, Object>> page) {
+        final List<String> ids = new ArrayList<>();
+        page.forEach(doc -> ids.add((String) doc.get(ID_FIELD)));
+        return ids;
+    }
+
+    private static QueryResponseList searchPage(final RankFusionProcessor processor, final int start, final int num, final int offset) {
+        return (QueryResponseList) processor.search("q", new TestSearchRequestParams(start, num, offset), OptionalThing.empty());
+    }
+
+    /**
+     * Walks every start position for page sizes 10, 20 and 30, sending back the offset of the
+     * response before, as a client does, and checks each page against the expected list; then
+     * checks that consecutive pages cover the list once.
+     *
+     * @return the offset the fused pages reported
+     */
+    private int assertTilesExactly(final RankFusionProcessor processor, final TestMainSearcher main, final ListSubSearcher vector,
+            final List<String> expected) {
+        final int half = processor.windowSize / 2;
+        int reportedOffset = -1;
+        for (final int num : new int[] { 10, 20, 30 }) {
+            int echoed = 0;
+            final Set<Integer> pageCounts = new HashSet<>();
+            for (int start = 0; start <= expected.size() + num; start++) {
+                main.requests.clear();
+                final int vectorSearches = vector.searchCount.get();
+                final QueryResponseList list = searchPage(processor, start, num, echoed);
+                final List<String> expectedPage =
+                        expected.subList(Math.min(start, expected.size()), Math.min(start + num, expected.size()));
+                org.junit.jupiter.api.Assertions.assertEquals(expectedPage, idsOf(list), "start=" + start + ", num=" + num);
+                org.junit.jupiter.api.Assertions.assertEquals((long) expected.size(), list.getAllRecordCount(),
+                        "record count at start=" + start + ", num=" + num);
+                assertEquals(Relation.EQUAL_TO.toString(), list.getAllRecordCountRelation());
+
+                // no page needs more than one keyword search, and a deep page does not fuse
+                assertEquals(1, main.requests.size(), "start=" + start + ", num=" + num);
+                if (start < half) {
+                    assertEquals(processor.windowSize, main.requests.get(0)[1]);
+                    assertEquals(vectorSearches + 1, vector.searchCount.get());
+                    echoed = list.getOffset();
+                    if (reportedOffset >= 0) {
+                        assertEquals(reportedOffset, echoed, "the offset changes between pages");
+                    }
+                    reportedOffset = echoed;
+                } else {
+                    assertEquals(vectorSearches, vector.searchCount.get(), "a deep page does not run the vector searcher");
+                    assertEquals(start - echoed, main.requests.get(0)[0]);
+                    assertEquals(echoed, list.getOffset(), "a deep page reports the offset it got");
+                }
+                if (start < expected.size() && start % num == 0) {
+                    pageCounts.add(list.getAllPageCount());
+                }
+            }
+            assertEquals(1, pageCounts.size(), "page count differs between pages, num=" + num + ": " + pageCounts);
+
+            final List<String> walked = new ArrayList<>();
+            for (int start = 0; start < expected.size(); start += num) {
+                walked.addAll(idsOf(searchPage(processor, start, num, echoed)));
+            }
+            org.junit.jupiter.api.Assertions.assertEquals(expected, walked, "a walk over the pages, num=" + num);
+        }
+        return reportedOffset;
+    }
+
+    @Test
+    public void test_pagesWithTheReportedOffset_tileTheResultWithoutGapsOrDuplicates() throws Exception {
+        // 386 keyword hits. The vector branch promotes keyword hits from below the head, boosts
+        // two from the top, and finds three the keyword search does not match.
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final TestMainSearcher main = new TestMainSearcher(386);
+            final ListSubSearcher vector = new ListSubSearcher(VECTOR_IDS);
+            processor.setSearcher(main);
+            processor.register(vector);
+            processor.init();
+
+            final List<String> expected = expectedList(processor, 386, VECTOR_IDS);
+            assertEquals(386 + 3, expected.size());
+            // the head is the keyword top 97 and the three vector-only documents
+            assertTrue(expected.subList(0, 100).containsAll(List.of("x1", "x2", "x3", "0", "96")));
+            assertFalse(expected.subList(0, 100).contains("97"));
+            assertFalse(expected.subList(0, 100).contains("150"), "a promoted keyword hit follows the head at its own position");
+            assertEquals(1, new HashSet<>(expected.subList(100, 389)).stream().filter("150"::equals).count());
+            assertEquals(expected.size(), new HashSet<>(expected).size(), "no document is repeated");
+            assertEquals(3, assertTilesExactly(processor, main, vector, expected));
+        }
+    }
+
+    @Test
+    public void test_pagesWithoutTheOffset_leaveAGapOfOffsetDocumentsBeforeTheKeywordPages() throws Exception {
+        // A client that does not send the offset back gets the keyword pages as if the offset were 0:
+        // the page at the head's end starts at keyword position 100 and keyword positions 97..99 are
+        // never shown. The record count is the keyword total.
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new TestMainSearcher(386));
+            processor.register(new ListSubSearcher(VECTOR_IDS));
+            processor.init();
+
+            final QueryResponseList fused = searchPage(processor, 0, 10, 0);
+            assertEquals(3, fused.getOffset());
+            assertEquals(386 + 3, fused.getAllRecordCount());
+            final QueryResponseList deep = searchPage(processor, 100, 10, 0);
+            assertEquals(0, deep.getOffset());
+            assertEquals(386, deep.getAllRecordCount());
+            assertEquals(List.of("100", "101", "102", "103", "104", "105", "106", "107", "108", "109"), idsOf(deep));
+            final QueryResponseList withOffset = searchPage(processor, 100, 10, 3);
+            assertEquals(List.of("97", "98", "99", "100", "101", "102", "103", "104", "105", "106"), idsOf(withOffset));
+            // an offset larger than the head is clamped to its size
+            assertEquals(100, searchPage(processor, 100, 10, 5000).getOffset());
+        }
+    }
+
+    @Test
+    public void test_aHeadDocumentThatMatchesBelowTheKeywordWindow_isShownTwice() throws Exception {
+        // Pins the residual. Document 300 matches the keyword query but ranks below its window of
+        // 200, so it is counted among the documents only the vector branch found and is shown in
+        // the head and again at its keyword position. Each such document adds one row, and the
+        // record count includes it, so the pages still tile.
+        final List<String> vectorIds = new ArrayList<>(VECTOR_IDS);
+        vectorIds.add(0, "300");
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final TestMainSearcher main = new TestMainSearcher(386);
+            final ListSubSearcher vector = new ListSubSearcher(vectorIds);
+            processor.setSearcher(main);
+            processor.register(vector);
+            processor.init();
+
+            final List<String> expected = expectedList(processor, 386, vectorIds);
+            assertEquals(386 + 4, expected.size());
+            assertEquals(2, expected.stream().filter("300"::equals).count());
+            assertEquals(4, assertTilesExactly(processor, main, vector, expected));
+        }
+    }
+
+    @Test
+    public void test_whenTheVectorBranchFindsNothing_theHeadIsTheKeywordTop() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final TestMainSearcher main = new TestMainSearcher(386);
+            final ListSubSearcher vector = new ListSubSearcher(List.of());
+            processor.setSearcher(main);
+            processor.register(vector);
+            processor.init();
+
+            final List<String> expected = expectedList(processor, 386, List.of());
+            for (int i = 0; i < 386; i++) {
+                assertEquals(Integer.toString(i), expected.get(i));
+            }
+            assertEquals(0, assertTilesExactly(processor, main, vector, expected));
+        }
+    }
+
+    @Test
+    public void test_whenFewerDocumentsThanTheHeadMatch_thereIsNothingPastTheFusedList() throws Exception {
+        // 50 keyword hits and 3 only the vector branch finds: the fused list is shorter than the
+        // head and holds every keyword hit, so the pages end with it, the offset is 3, and a deep
+        // page that sends the offset back is empty.
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final TestMainSearcher main = new TestMainSearcher(50);
+            final List<String> vectorIds = List.of("v1", "20", "v2", "v3");
+            final ListSubSearcher vector = new ListSubSearcher(vectorIds);
+            processor.setSearcher(main);
+            processor.register(vector);
+            processor.init();
+
+            final List<String> expected = expectedList(processor, 50, vectorIds);
+            assertEquals(53, expected.size());
+            assertEquals(3, assertTilesExactly(processor, main, vector, expected));
+            assertEquals(0, searchPage(processor, 100, 10, 3).size());
+            assertEquals(53, searchPage(processor, 100, 10, 3).getAllRecordCount());
         }
     }
 
@@ -1343,9 +1534,13 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    /** A keyword searcher over the documents "0" .. "allRecordCount - 1", ranked in that order, that records what it is asked. */
     static class TestMainSearcher extends RankFusionSearcher {
 
         private long allRecordCount;
+
+        /** The (start, size) of every search. */
+        final List<int[]> requests = new java.util.concurrent.CopyOnWriteArrayList<>();
 
         TestMainSearcher(int allRecordCount) {
             this.allRecordCount = allRecordCount;
@@ -1355,6 +1550,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
             int start = params.getStartPosition();
             int size = params.getPageSize();
+            requests.add(new int[] { start, size });
             SearchResultBuilder builder = SearchResult.create();
             for (int i = start; i < start + size && i < allRecordCount; i++) {
                 Map<String, Object> doc = new HashMap<>();
@@ -1366,6 +1562,31 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
             if (allRecordCount < 10000) {
                 builder.allRecordCountRelation(Relation.EQUAL_TO.toString());
             }
+            return builder.build();
+        }
+    }
+
+    /** A vector-like searcher that answers with the given ids, best first, cut to the size it is asked for. */
+    static class ListSubSearcher extends RankFusionSearcher {
+
+        private final List<String> ids;
+
+        final AtomicInteger searchCount = new AtomicInteger();
+
+        ListSubSearcher(final List<String> ids) {
+            this.ids = ids;
+        }
+
+        @Override
+        protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
+            searchCount.incrementAndGet();
+            final SearchResultBuilder builder = SearchResult.create();
+            for (int i = 0; i < ids.size() && i < params.getPageSize(); i++) {
+                final Map<String, Object> doc = new HashMap<>();
+                doc.put(ID_FIELD, ids.get(i));
+                builder.addDocument(doc);
+            }
+            builder.allRecordCount(ids.size());
             return builder.build();
         }
     }
