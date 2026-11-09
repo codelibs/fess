@@ -231,6 +231,9 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
         // a line break ends the authority
         assertEquals("http://host\nuser:secret@x", CredentialUrlUtil.removeUserInfoInText("http://host\nuser:secret@x"));
         assertEquals("jdbc:mysql://host/db", CredentialUrlUtil.removeUserInfoInText("jdbc:mysql://user:secret@host/db"));
+        // a URL filter as the crawler logs it: typed as a regular expression, or quoted as a literal
+        assertEquals("http://host/.*", CredentialUrlUtil.removeUserInfoInText("http://user:secret@host/.*"));
+        assertEquals("\\Qhttp://host/a\\E", CredentialUrlUtil.removeUserInfoInText("\\Qhttp://user:secret@host/a\\E"));
     }
 
     @Test

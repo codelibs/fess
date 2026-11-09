@@ -243,7 +243,7 @@ public class WebFsIndexHelper {
                     }
                     crawler.addIncludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Included URL: {}", urlValue);
+                        logger.info("Included URL: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                     }
                 } else if (line.startsWith(DISABLE_URL_ENCODE)) {
                     urlEncodeDisabled.set(true);
@@ -263,7 +263,7 @@ public class WebFsIndexHelper {
                     }
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL: {}", urlValue);
+                        logger.info("Excluded URL: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                     }
                 } else if (line.startsWith(DISABLE_URL_ENCODE)) {
                     urlEncodeDisabled.set(true);
@@ -277,7 +277,7 @@ public class WebFsIndexHelper {
                     final String urlValue = Pattern.quote(u);
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL from failures: {}", urlValue);
+                        logger.info("Excluded URL from failures: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                     }
                 });
             }
