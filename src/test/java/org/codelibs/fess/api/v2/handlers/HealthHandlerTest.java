@@ -123,6 +123,8 @@ public class HealthHandlerTest extends UnitFessTestCase {
         assertTrue(body.contains("\"status\":\"UNAVAILABLE\""), body);
         assertTrue(body.contains("\"ping_status\""), body);
         assertFalse(body.contains("\"cluster_name\""), body);
+        // Same as /api/v2/search: a 503 for an unavailable engine tells the client when to retry.
+        assertEquals("5", res.getHeader("Retry-After"));
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
