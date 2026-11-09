@@ -473,9 +473,10 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final int healthIdx = source.indexOf("public void handle");
         assertTrue(healthIdx >= 0, "HealthHandler.handle not found in source");
         final String healthSection = source.substring(healthIdx, Math.min(source.length(), healthIdx + 2500));
-        // Must reference SERVICE_UNAVAILABLE (the 503 code added by MJ-26 fix).
-        assertTrue(healthSection.contains("SERVICE_UNAVAILABLE"),
-                "HealthHandler must map red cluster to SERVICE_UNAVAILABLE: " + healthSection);
+        // Must answer 503 service_unavailable (the MJ-26 fix), through the writer method that
+        // also sends Retry-After, as /api/v2/search does.
+        assertTrue(healthSection.contains("writeSearchEngineUnavailable"),
+                "HealthHandler must map red cluster to a 503 with Retry-After: " + healthSection);
         // Must check for "red" cluster status.
         assertTrue(healthSection.contains("\"red\"") || healthSection.contains("red"),
                 "HealthHandler must check for red cluster status: " + healthSection);
