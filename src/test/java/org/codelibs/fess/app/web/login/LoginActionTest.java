@@ -108,6 +108,24 @@ public class LoginActionTest extends UnitFessTestCase {
         assertFalse(action.isThrottled(limiter, "198.51.100.7", "Alice"));
     }
 
+    /**
+     * The directory ignores the blanks around a uid, so " alice" signs in as alice. Its failures have to be counted
+     * against alice's allowance, not against a second bucket of their own.
+     */
+    @Test
+    public void test_theUserAllowanceIgnoresBlanksAroundTheName() {
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        for (int i = 0; i < userLimit; i++) {
+            assertFalse(action.isThrottled(limiter, "198.51.100.8", " alice"));
+            action.recordFailure(limiter, "198.51.100.8", " alice");
+        }
+        assertTrue(action.isThrottled(limiter, "198.51.100.8", "alice"));
+        assertTrue(action.isThrottled(limiter, "198.51.100.8", "alice "));
+        assertTrue(action.isThrottled(limiter, "198.51.100.8", "\tAlice\t"));
+        // a blank inside the name is a different name
+        assertFalse(action.isThrottled(limiter, "198.51.100.8", "al ice"));
+    }
+
     @Test
     public void test_aCorrectLoginUnderTheLimitStillPasses() {
         assertFalse(action.isThrottled(limiter, "198.51.100.5", "alice"));

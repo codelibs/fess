@@ -494,15 +494,16 @@ public class LoginHandler {
      *
      * <p>The name is lower-cased, and only here: a directory compares an account name without regard
      * to case, so a client that varies the case of one name would otherwise get a bucket per spelling.
-     * What is authenticated, logged and stored is still the name as typed. {@code LoginAction} builds
-     * the same key.</p>
+     * The blanks around the name are dropped for the same reason: a directory ignores them when it
+     * compares a uid, so " alice" signs in as alice. The name in the lockout log line is still the name
+     * as typed. {@code LoginAction} builds the same key.</p>
      *
      * @param clientIp resolved client IP (see {@link #resolveClientIp})
      * @param username submitted username
      * @return composite key {@code clientIp + NUL + lower-cased username}
      */
     String userScopeKey(final String clientIp, final String username) {
-        return clientIp + USER_SCOPE_KEY_SEP + username.toLowerCase(Locale.ROOT);
+        return clientIp + USER_SCOPE_KEY_SEP + username.strip().toLowerCase(Locale.ROOT);
     }
 
     /**

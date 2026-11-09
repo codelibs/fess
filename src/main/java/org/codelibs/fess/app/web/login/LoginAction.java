@@ -185,9 +185,12 @@ public class LoginAction extends FessLoginAction {
         limiter.release(LoginRateLimiter.Scope.IP, clientIp);
     }
 
-    /** Must stay the key of {@code LoginHandler#userScopeKey}: both logins share one limiter. */
+    /**
+     * Must stay the key of {@code LoginHandler#userScopeKey}: both logins share one limiter. The blanks
+     * around the name do not count, because the directory does not count them: " alice" signs in as alice.
+     */
     private static String userKey(final String clientIp, final String username) {
-        return clientIp + USER_SCOPE_KEY_SEP + username.toLowerCase(Locale.ROOT);
+        return clientIp + USER_SCOPE_KEY_SEP + username.strip().toLowerCase(Locale.ROOT);
     }
 
     /**
