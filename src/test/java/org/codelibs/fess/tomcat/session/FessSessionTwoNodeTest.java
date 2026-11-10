@@ -50,6 +50,12 @@ public class FessSessionTwoNodeTest {
 
     private File baseDir;
 
+    /** Counted down by a request on hold once it has used the session. */
+    private volatile java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
+
+    /** A request on hold waits for it. */
+    private volatile java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+
     private Tomcat start(final String name) throws Exception {
         final File dir = new File(baseDir, name);
         dir.mkdirs();
@@ -86,6 +92,16 @@ public class FessSessionTwoNodeTest {
                         resp.setContentType("text/plain");
                         resp.getWriter().print(body);
                         return;
+                    } else if ("hold".equals(op)) {
+                        if (req.getParameter("v") != null) {
+                            session.setAttribute("user", req.getParameter("v"));
+                        }
+                        entered.countDown();
+                        try {
+                            release.await();
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     } else if ("rotate".equals(op)) {
                         req.changeSessionId();
                     }
@@ -175,5 +191,47 @@ public class FessSessionTwoNodeTest {
         assertEquals("alice", get(nodeA, "op=read", renewed[1])[0]);
         assertEquals("none", get(nodeA, "op=read", cookie)[0]);
         assertEquals(1, store.docs.size());
+    }
+
+    private void assertDeletedSessionStaysDeleted(final String holdQuery) throws Exception {
+        final String cookie = get(nodeA, "op=set&v=alice", null)[1];
+        assertEquals("alice", get(nodeB, "op=read", cookie)[0]);
+        assertEquals(1, store.docs.size());
+
+        // a request on A is still running when the user logs out on B
+        final java.util.concurrent.atomic.AtomicReference<Throwable> failure = new java.util.concurrent.atomic.AtomicReference<>();
+        final Thread inFlight = new Thread(() -> {
+            try {
+                get(nodeA, holdQuery, cookie);
+            } catch (final Throwable t) {
+                failure.set(t);
+            }
+        });
+        inFlight.start();
+        assertTrue(entered.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        assertEquals("bye", get(nodeB, "op=logout", cookie)[0]);
+        assertTrue(store.docs.isEmpty());
+
+        release.countDown();
+        inFlight.join(10_000L);
+        assertEquals(null, failure.get());
+
+        // the end of the request on A must not bring the session back
+        assertTrue(store.docs.isEmpty(), "the logged-out session was written again");
+        assertEquals(1, store.gones);
+        assertEquals("none", get(nodeA, "op=read", cookie)[0]);
+        assertEquals("none", get(nodeB, "op=read", cookie)[0]);
+        assertTrue(store.docs.isEmpty());
+    }
+
+    @Test
+    public void test_logoutWhileRequestInFlight_changedSessionIsNotRecreated() throws Exception {
+        assertDeletedSessionStaysDeleted("op=hold&v=stale");
+    }
+
+    @Test
+    public void test_logoutWhileRequestInFlight_touchedSessionIsNotRecreated() throws Exception {
+        store.touchIntervalMs = 0L;
+        assertDeletedSessionStaysDeleted("op=hold");
     }
 }

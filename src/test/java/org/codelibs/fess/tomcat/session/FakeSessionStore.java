@@ -32,6 +32,7 @@ class FakeSessionStore {
     volatile long touchIntervalMs = 60_000L;
     volatile int fullWrites;
     volatile int touches;
+    volatile int gones;
     volatile int purges;
 
     Map<String, Function<Map<String, Object>, Object>> bridge() {
@@ -62,8 +63,12 @@ class FakeSessionStore {
         return result;
     }
 
+    /**
+     * Like the real store: a session that was stored before (persistedAt greater than zero) is only updated, and a
+     * missing document is reported as gone; a new session is created, or updated if a concurrent request created it.
+     */
     @SuppressWarnings("unchecked")
-    private Object save(final Map<String, Object> args) {
+    private synchronized Object save(final Map<String, Object> args) {
         check("save");
         final String id = (String) args.get("id");
         final Map<String, Object> attributes = new HashMap<>((Map<String, Object>) args.get("attributes"));
@@ -72,13 +77,21 @@ class FakeSessionStore {
         attributes.keySet().removeIf(n -> n.startsWith("skip") && skipped.add(n));
         final String digest = String.valueOf(new java.util.TreeMap<>(attributes));
         final long now = System.currentTimeMillis();
+        final long persistedAt = args.get("persistedAt") instanceof final Number n ? n.longValue() : 0L;
+        final boolean stored = persistedAt > 0;
         final Map<String, Object> doc = docs.get(id);
         final Map<String, Object> result = new HashMap<>();
         result.put("digest", digest);
         result.put("skippedNames", skipped);
-        if (digest.equals(args.get("digest")) && doc != null && now - (Long) args.get("persistedAt") < touchIntervalMs) {
-            result.put("persistedAt", args.get("persistedAt"));
+        if (stored && digest.equals(args.get("digest")) && now - persistedAt < touchIntervalMs) {
+            result.put("persistedAt", persistedAt);
             return result;
+        }
+        if (stored && doc == null) {
+            gones++;
+            final Map<String, Object> gone = new HashMap<>();
+            gone.put("gone", Boolean.TRUE);
+            return gone;
         }
         final Map<String, Object> next = new HashMap<>();
         next.put("creationTime", args.get("creationTime"));
@@ -88,7 +101,7 @@ class FakeSessionStore {
         next.put("attributes", new HashMap<>(attributes));
         next.put("expiredTime", (Long) args.get("lastAccessedTime") + ((Integer) args.get("maxInactiveInterval")) * 1000L);
         docs.put(id, next);
-        if (digest.equals(args.get("digest"))) {
+        if (stored && digest.equals(args.get("digest"))) {
             touches++;
         } else {
             fullWrites++;

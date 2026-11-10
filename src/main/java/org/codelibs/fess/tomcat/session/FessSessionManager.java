@@ -52,7 +52,9 @@ import org.apache.tomcat.util.ExceptionUtils;
  * maxInactiveInterval, digest, attributes}}; throws a {@link RuntimeException} if the store is unreachable.</li>
  * <li>{@value #OP_SAVE}: {@code {id, creationTime, lastAccessedTime, maxInactiveInterval, attributes, digest,
  * persistedAt}} to {@code {digest, persistedAt, skippedNames}}, where {@code skippedNames}
- * are the attributes the store could not keep; they are never removed or overwritten by a state read from the store.</li>
+ * are the attributes the store could not keep; they are never removed or overwritten by a state read from the store.
+ * A session that was stored before is never created again: if its document is gone (deleted on another node), the result is
+ * {@code {gone=true}} and the session is expired locally.</li>
  * <li>{@value #OP_DELETE}: {@code {id}} to {@code null}.</li>
  * <li>{@value #OP_PURGE}: {@code {}} to the number of deleted expired sessions.</li>
  * </ul>
@@ -236,7 +238,12 @@ public class FessSessionManager extends ManagerBase {
         args.put("persistedAt", session.getPersistedAt());
         try {
             final Map<String, Object> result = toMap(save.apply(args));
-            if (result != null) {
+            if (result != null && Boolean.TRUE.equals(result.get("gone"))) {
+                // Deleted on another node (logout, a new session id) while this request was running. Like in
+                // refresh(), this is not an explicit invalidate here, so the store is left alone and the next
+                // request with the cookie gets a new session.
+                session.expire();
+            } else if (result != null) {
                 session.setDigest((String) result.get("digest"));
                 final Object skipped = result.get("skippedNames");
                 session.setSkippedNames(

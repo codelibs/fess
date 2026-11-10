@@ -29,12 +29,12 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fesen.opensearch.OpenSearchException;
+import org.codelibs.fesen.opensearch.action.DocWriteRequest.OpType;
 import org.codelibs.fesen.opensearch.action.get.GetResponse;
 import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.SystemUtil;
 import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -59,9 +59,13 @@ import jakarta.servlet.ServletContext;
  *   session) or a map of {@code creationTime}, {@code lastAccessedTime}, {@code maxInactiveInterval},
  *   {@code digest} and {@code attributes}. It throws when the store cannot be reached.</li>
  *   <li>{@code save}: {@code {id, creationTime, lastAccessedTime, maxInactiveInterval, attributes,
- *   digest, persistedAt}} to {@code {digest, persistedAt}}. The attributes are written only when their
- *   digest differs from the {@code digest} the caller already knows; otherwise only the expiry is
- *   touched, and only when the last write is older than {@value #TOUCH_INTERVAL_MS} ms.</li>
+ *   digest, persistedAt}} to {@code {digest, persistedAt, skippedNames}} or, when the session is gone from the store,
+ *   {@code {gone=true}}. The attributes are written only when their digest differs from the {@code digest}
+ *   the caller already knows; otherwise only the expiry is touched, and only when the last write is older
+ *   than {@value #TOUCH_INTERVAL_MS} ms. A session that was stored before ({@code persistedAt} greater than
+ *   zero) is only ever updated, never created: if its document is missing, it was deleted (logout, a new
+ *   session id, a password change) or expired on another node, and writing it again would log the old
+ *   session id in on every node, so the result is {@code gone} and the caller must drop the session.</li>
  *   <li>{@code delete}: {@code {id}} to {@code null}.</li>
  *   <li>{@code purge}: {@code {}} to the number of expired documents deleted.</li>
  * </ul>
@@ -259,7 +263,8 @@ public class SessionStore {
      *
      * @param args the session, see the class description.
      * @return the digest and the time of the last write, for the caller to pass back next time, and the names of the
-     *         attributes that were not stored ({@code skippedNames}), which the caller must keep local.
+     *         attributes that were not stored ({@code skippedNames}), which the caller must keep local; or
+     *         {@code gone=true} if the session was stored before and its document no longer exists.
      * @throws RuntimeException if the store cannot be written.
      */
     @SuppressWarnings("unchecked")
@@ -280,15 +285,13 @@ public class SessionStore {
             return result(digest, 0L, skippedNames);
         }
 
-        if (digest.equals(args.get(DIGEST))) {
+        final boolean stored = isStored(args);
+        if (stored && digest.equals(args.get(DIGEST))) {
             final Object persistedAt = args.get("persistedAt");
-            if (persistedAt instanceof final Number number && now - number.longValue() < TOUCH_INTERVAL_MS) {
-                return result(digest, number.longValue(), skippedNames);
+            if (now - ((Number) persistedAt).longValue() < TOUCH_INTERVAL_MS) {
+                return result(digest, ((Number) persistedAt).longValue(), skippedNames);
             }
-            if (touchSession(id, lastAccessedTime, expiredTime)) {
-                return result(digest, now, skippedNames);
-            }
-            // The document is gone, so write it again.
+            return touchSession(id, lastAccessedTime, expiredTime) ? result(digest, now, skippedNames) : gone();
         }
 
         final Map<String, Object> source = new HashMap<>();
@@ -299,8 +302,12 @@ public class SessionStore {
         source.put(LAST_ACCESSED_TIME, lastAccessedTime);
         source.put(MAX_INACTIVE_INTERVAL, maxInactiveInterval);
         source.put(EXPIRED_TIME, expiredTime);
-        indexSession(id, source);
-        return result(digest, now, skippedNames);
+        if (!stored && createSession(id, source)) {
+            return result(digest, now, skippedNames);
+        }
+        // Either a stored session, or a new one whose document another request of the same session just created.
+        // Both are updates: a document that is missing now was deleted, and must stay deleted.
+        return updateSession(id, source) ? result(digest, now, skippedNames) : gone();
     }
 
     /**
@@ -406,6 +413,12 @@ public class SessionStore {
         return ((Number) value).longValue();
     }
 
+    private static Map<String, Object> gone() {
+        final Map<String, Object> result = new HashMap<>();
+        result.put("gone", Boolean.TRUE);
+        return result;
+    }
+
     private static Map<String, Object> result(final String digest, final long persistedAt, final Set<String> skippedNames) {
         final Map<String, Object> result = new HashMap<>();
         result.put(DIGEST, digest);
@@ -446,23 +459,59 @@ public class SessionStore {
     }
 
     /**
-     * Writes a session document, which replaces the stored one. The index is not refreshed, because
-     * the reads are real-time.
+     * Creates the document of a new session. The request has {@code op_type=create}, so it fails instead of
+     * replacing a document that exists. The index is not refreshed, because the reads are real-time.
      *
      * @param id the document id.
      * @param source the source of the document.
+     * @return false if the document already exists, true if it was created.
      */
-    protected void indexSession(final String id, final Map<String, Object> source) {
-        ComponentUtil.getSearchEngineClient()
-                .prepareIndex(getIndexName())
-                .setId(id)
-                .setSource(source)
-                .execute()
-                .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout());
+    protected boolean createSession(final String id, final Map<String, Object> source) {
+        try {
+            ComponentUtil.getSearchEngineClient()
+                    .prepareIndex(getIndexName())
+                    .setId(id)
+                    .setOpType(OpType.CREATE)
+                    .setSource(source)
+                    .execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout());
+            return true;
+        } catch (final OpenSearchException e) {
+            if (e.status() == RestStatus.CONFLICT) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     /**
-     * Moves the expiry of a stored session with a partial update.
+     * Writes the fields of a session document with a partial update, without upsert, so that a document
+     * that was deleted is not created again.
+     *
+     * @param id the document id.
+     * @param source the fields to write.
+     * @return false if the document does not exist, true otherwise.
+     */
+    protected boolean updateSession(final String id, final Map<String, Object> source) {
+        try {
+            ComponentUtil.getSearchEngineClient()
+                    .prepareUpdate(getIndexName(), id)
+                    .setDoc(source)
+                    .setDocAsUpsert(false)
+                    .execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout());
+            return true;
+        } catch (final OpenSearchException e) {
+            if (isDocumentMissing(e)) {
+                logger.debug("A session document to update was gone: id={}", id);
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Moves the expiry of a stored session with a partial update, without upsert.
      *
      * @param id the document id.
      * @param lastAccessedTime the last access time.
@@ -482,7 +531,7 @@ public class SessionStore {
             return true;
         } catch (final OpenSearchException e) {
             if (isDocumentMissing(e)) {
-                LogUtil.warnOnce(logger, "touch-missing", "A session document to touch was gone, so it is written again.");
+                logger.debug("A session document to touch was gone: id={}", id);
                 return false;
             }
             throw e;

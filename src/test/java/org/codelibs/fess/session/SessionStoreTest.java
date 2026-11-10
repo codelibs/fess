@@ -107,9 +107,24 @@ public class SessionStoreTest extends UnitFessTestCase {
         }
 
         @Override
-        protected void indexSession(final String id, final Map<String, Object> source) {
-            calls.add("index");
+        protected boolean createSession(final String id, final Map<String, Object> source) {
+            calls.add("create");
+            if (docs.containsKey(id)) {
+                return false;
+            }
             docs.put(id, new HashMap<>(source));
+            return true;
+        }
+
+        @Override
+        protected boolean updateSession(final String id, final Map<String, Object> source) {
+            calls.add("update");
+            final Map<String, Object> doc = docs.get(id);
+            if (doc == null) {
+                return false;
+            }
+            doc.putAll(source);
+            return true;
         }
 
         @Override
@@ -205,14 +220,14 @@ public class SessionStoreTest extends UnitFessTestCase {
 
         store.save(args);
 
-        assertEquals(List.of("index"), store.calls);
+        assertEquals(List.of("update"), store.calls);
     }
 
     @Test
     public void test_save_storesUnderHashedId() throws Exception {
         final Map<String, Object> result = store.save(saveArgs(null, null, "a"));
 
-        assertEquals(List.of("index"), store.calls);
+        assertEquals(List.of("create"), store.calls);
         assertEquals(1, store.docs.size());
         final String docId = store.docs.keySet().iterator().next();
         assertEquals(store.hashId(SESSION_ID), docId);
@@ -276,13 +291,59 @@ public class SessionStoreTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_save_unknownPersistedAtTouches() throws Exception {
+    public void test_save_unknownPersistedAtCreatesAndUpdatesOnConflict() throws Exception {
         final Map<String, Object> first = store.save(saveArgs(null, null, "a"));
         store.calls.clear();
 
-        store.save(saveArgs((String) first.get("digest"), null, "a"));
+        // not known to be stored: create, and as the document exists, update it
+        final Map<String, Object> second = store.save(saveArgs((String) first.get("digest"), null, "a"));
 
-        assertEquals(List.of("touch"), store.calls);
+        assertEquals(List.of("create", "update"), store.calls);
+        assertNull(second.get("gone"));
+    }
+
+    @Test
+    public void test_save_newSessionIsCreated_notUpdated() throws Exception {
+        for (final Long persistedAt : new Long[] { null, 0L, -1L }) {
+            store.docs.clear();
+            store.calls.clear();
+
+            final Map<String, Object> result = store.save(saveArgs(null, persistedAt, "a"));
+
+            assertEquals(List.of("create"), store.calls);
+            assertEquals(1, store.docs.size());
+            assertNull(result.get("gone"));
+            assertEquals(store.now, result.get("persistedAt"));
+        }
+    }
+
+    @Test
+    public void test_save_newSessionLosingTheCreateRaceDoesNotOverwriteButUpdates() throws Exception {
+        store.save(saveArgs(null, null, "a"));
+        store.calls.clear();
+
+        final Map<String, Object> result = store.save(saveArgs(null, 0L, "b"));
+
+        assertEquals(List.of("create", "update"), store.calls);
+        assertNull(result.get("gone"));
+        assertEquals(result.get("digest"), store.docs.get(store.hashId(SESSION_ID)).get("digest"));
+    }
+
+    @Test
+    public void test_save_newSessionWhoseDocumentVanishesBetweenCreateAndUpdateIsGone() throws Exception {
+        final FakeSessionStore racing = new FakeSessionStore() {
+            @Override
+            protected boolean createSession(final String id, final Map<String, Object> source) {
+                calls.add("create");
+                return false; // somebody created it ... and deleted it again before our update
+            }
+        };
+        racing.sessionDataSerializer = serializer;
+
+        final Map<String, Object> result = racing.save(saveArgs(null, 0L, "a"));
+
+        assertEquals(Boolean.TRUE, result.get("gone"));
+        assertTrue(racing.docs.isEmpty());
     }
 
     @Test
@@ -293,22 +354,49 @@ public class SessionStoreTest extends UnitFessTestCase {
         store.now += 1_000L;
         final Map<String, Object> second = store.save(saveArgs((String) first.get("digest"), (Long) first.get("persistedAt"), "b"));
 
-        assertEquals(List.of("index"), store.calls);
+        assertEquals(List.of("update"), store.calls);
         assertFalse(first.get("digest").equals(second.get("digest")));
         assertEquals(second.get("digest"), store.docs.get(store.hashId(SESSION_ID)).get("digest"));
     }
 
     @Test
-    public void test_save_touchOfMissingDocumentWritesAgain() throws Exception {
+    public void test_save_touchOfMissingDocumentIsGone() throws Exception {
         final Map<String, Object> first = store.save(saveArgs(null, null, "a"));
         store.docs.clear();
         store.calls.clear();
 
         store.now += 60_000L;
-        store.save(saveArgs((String) first.get("digest"), (Long) first.get("persistedAt"), "a"));
+        final Map<String, Object> result = store.save(saveArgs((String) first.get("digest"), (Long) first.get("persistedAt"), "a"));
 
-        assertEquals(List.of("touch", "index"), store.calls);
-        assertEquals(1, store.docs.size());
+        assertEquals(Boolean.TRUE, result.get("gone"));
+        assertEquals(List.of("touch"), store.calls);
+        assertTrue(store.docs.isEmpty(), "a deleted session must not be written again");
+    }
+
+    @Test
+    public void test_save_changedDigestOfMissingDocumentIsGone() throws Exception {
+        final Map<String, Object> first = store.save(saveArgs(null, null, "a"));
+        store.docs.clear();
+        store.calls.clear();
+
+        store.now += 1_000L;
+        final Map<String, Object> result = store.save(saveArgs((String) first.get("digest"), (Long) first.get("persistedAt"), "b"));
+
+        assertEquals(Boolean.TRUE, result.get("gone"));
+        assertNull(result.get("digest"));
+        assertEquals(List.of("update"), store.calls);
+        assertTrue(store.docs.isEmpty(), "a deleted session must not be written again");
+    }
+
+    @Test
+    public void test_save_storedSessionWithoutDigestIsUpdatedNotIndexed() throws Exception {
+        final Map<String, Object> first = store.save(saveArgs(null, null, "a"));
+        store.calls.clear();
+
+        // a state the caller knows nothing of (digest null) but that was stored before
+        store.save(saveArgs(null, (Long) first.get("persistedAt"), "a"));
+
+        assertEquals(List.of("update"), store.calls);
     }
 
     @Test

@@ -327,6 +327,83 @@ public class FessSessionManagerTest {
         assertFalse(store.docs.containsKey(oldId));
         assertTrue(store.docs.containsKey(newId));
         assertNotNull(session.getDigest());
+        assertTrue(session.isValid(), "the new id is created in the store, not rejected as gone");
+        assertEquals(0, store.gones);
+    }
+
+    @Test
+    public void test_changeSessionId_resetsPersistedAt() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v"));
+        assertTrue(session.getPersistedAt() > 0);
+
+        manager.rotateSessionId(session);
+
+        assertEquals(0L, session.getPersistedAt());
+        assertNull(session.getDigest());
+    }
+
+    @Test
+    public void test_sessionDeletedWhileInFlight_isExpiredLocallyAndNotRecreated() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager nodeA = newManager(store);
+        final FessSession onA = request(nodeA, null, true, s -> s.setAttribute("user", "alice"));
+        final String id = onA.getId();
+
+        // the changed content is saved at the end of a request that outlives the logout on another node
+        final FessSession inFlight = request(nodeA, id, false, s -> {
+            store.docs.remove(id);
+            s.setAttribute("user", "bob");
+        });
+
+        assertNotNull(inFlight);
+        assertEquals(1, store.gones);
+        assertTrue(store.docs.isEmpty(), "a deleted session must not be written again");
+        assertFalse(inFlight.isValid());
+        assertEquals(0, store.count("delete"), "the local expiry does not delete from the store");
+        assertEquals(0, nodeA.findSessions().length);
+        assertNull(nodeA.findSession(id));
+    }
+
+    @Test
+    public void test_sessionDeletedWhileInFlight_touchPathIsExpiredLocallyAndNotRecreated() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        store.touchIntervalMs = 0L;
+        final FessSessionManager nodeA = newManager(store);
+        final FessSession onA = request(nodeA, null, true, s -> s.setAttribute("user", "alice"));
+        final String id = onA.getId();
+
+        final FessSession inFlight = request(nodeA, id, false, s -> store.docs.remove(id));
+
+        assertEquals(1, store.gones);
+        assertTrue(store.docs.isEmpty());
+        assertFalse(inFlight.isValid());
+        assertNull(nodeA.findSession(id));
+    }
+
+    @Test
+    public void test_goneSession_isNotSavedAgain() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager nodeA = newManager(store);
+        final FessSession onA = request(nodeA, null, true, s -> s.setAttribute("user", "alice"));
+        final String id = onA.getId();
+        request(nodeA, id, false, s -> {
+            store.docs.remove(id);
+            s.setAttribute("user", "bob");
+        });
+        store.calls.clear();
+
+        // an old request still holding the expired session ends: nothing is written
+        assertTrue(nodeA.beginRequest());
+        try {
+            onA.access();
+        } finally {
+            nodeA.endRequest();
+        }
+
+        assertEquals(0, store.count("save"));
+        assertTrue(store.docs.isEmpty());
     }
 
     @Test
