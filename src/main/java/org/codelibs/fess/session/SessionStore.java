@@ -496,7 +496,7 @@ public class SessionStore {
         try {
             ComponentUtil.getSearchEngineClient()
                     .prepareUpdate(getIndexName(), id)
-                    .setDoc(source)
+                    .setDoc(toKeyValues(source))
                     .setDocAsUpsert(false)
                     .execute()
                     .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout());
@@ -508,6 +508,23 @@ public class SessionStore {
             }
             throw e;
         }
+    }
+
+    /**
+     * Flattens a map into the key and value pairs that {@code UpdateRequestBuilder#setDoc(Object...)} takes.
+     * A {@code Map} passed to {@code setDoc} directly binds to that varargs method as a single argument and fails.
+     *
+     * @param fields the fields of the document.
+     * @return the keys and values in turn.
+     */
+    protected static Object[] toKeyValues(final Map<String, Object> fields) {
+        final Object[] keyValues = new Object[fields.size() * 2];
+        int i = 0;
+        for (final Map.Entry<String, Object> entry : fields.entrySet()) {
+            keyValues[i++] = entry.getKey();
+            keyValues[i++] = entry.getValue();
+        }
+        return keyValues;
     }
 
     /**
@@ -525,7 +542,7 @@ public class SessionStore {
         try {
             ComponentUtil.getSearchEngineClient()
                     .prepareUpdate(getIndexName(), id)
-                    .setDoc(doc)
+                    .setDoc(toKeyValues(doc))
                     .execute()
                     .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout());
             return true;

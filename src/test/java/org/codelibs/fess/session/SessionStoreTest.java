@@ -224,6 +224,22 @@ public class SessionStoreTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_toKeyValues_isAcceptedByTheUpdateRequest() throws Exception {
+        final Map<String, Object> fields = new HashMap<>();
+        fields.put("lastAccessedTime", 1L);
+        fields.put("expiredTime", 2L);
+
+        final Object[] keyValues = SessionStore.toKeyValues(fields);
+
+        assertEquals(4, keyValues.length);
+        // The real request builder takes the pairs; a Map passed to doc(Object...) fails with an odd-argument error.
+        final org.codelibs.fesen.opensearch.action.update.UpdateRequest request =
+                new org.codelibs.fesen.opensearch.action.update.UpdateRequest("i", "id");
+        request.doc(keyValues);
+        assertTrue(request.doc().source().utf8ToString().contains("\"expiredTime\":2"));
+    }
+
+    @Test
     public void test_save_storesUnderHashedId() throws Exception {
         final Map<String, Object> result = store.save(saveArgs(null, null, "a"));
 
