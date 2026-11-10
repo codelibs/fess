@@ -10103,7 +10103,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.max.username.length'. <br>
      * The value is, e.g. -1 <br>
-     * comment: Maximum username length for LDAP.
+     * comment: Maximum length of the login name for LDAP, for a directory whose logon names are shorter (20 characters in an old Active Directory).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapMaxUsernameLength();
@@ -10111,7 +10111,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.max.username.length' as {@link Integer}. <br>
      * The value is, e.g. -1 <br>
-     * comment: Maximum username length for LDAP.
+     * comment: Maximum length of the login name for LDAP, for a directory whose logon names are shorter (20 characters in an old Active Directory).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
