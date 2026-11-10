@@ -1535,6 +1535,62 @@ public interface FessProp {
                 .anyMatch(s -> ignoreCase ? s.equalsIgnoreCase(username) : s.equals(username)));
     }
 
+    /**
+     * Normalizes a name typed at the login form into the name an LDAP account is known by: the blanks
+     * around it are dropped and it is cut to {@code ldap.max.username.length} characters when that is not
+     * negative. {@code LdapManager#normalizeLoginName} is the entry point for the login itself; it is here
+     * so that the login attempt limit, which has no directory in reach, can use the very same rule.
+     *
+     * @param typedUsername the username as typed, may be null
+     * @return the normalized name, or null if the given name is null
+     */
+    default String normalizeLdapLoginName(final String typedUsername) {
+        if (typedUsername == null) {
+            return null;
+        }
+        final String name = typedUsername.strip();
+        final int maxLength = getLdapMaxUsernameLengthAsInteger();
+        if (maxLength < 0 || name.length() <= maxLength) {
+            return name;
+        }
+        return name.substring(0, maxLength).stripTrailing();
+    }
+
+    /**
+     * Tells whether a name typed at the login form is reserved by authentication.admin.users, either as
+     * typed or in the form the directory would be asked about ({@link #normalizeLdapLoginName(String)}):
+     * padded or cut, it would otherwise get past the check and come back from the directory as the
+     * reserved account.
+     *
+     * @param typedUsername the username as typed, may be null
+     * @return true when the name is reserved in either form
+     */
+    default boolean isReservedLoginName(final String typedUsername) {
+        return isAdminUser(typedUsername) || isAdminUser(normalizeLdapLoginName(typedUsername));
+    }
+
+    /**
+     * Returns the name the login attempt limit counts a typed name under.
+     *
+     * <p>A name that may go to the directory -- one is configured and the name is not reserved -- is
+     * counted under the name the directory answers to: with {@code ldap.max.username.length} 5, "alice1"
+     * and "alice2" are guesses at one account, and have to share one allowance. Any other name is only
+     * stripped: it is never cut, and a local user is known by the whole name. The case is left as typed;
+     * the caller that builds the key folds it.</p>
+     *
+     * <p>The form login and the v2 login build their key from this method, so that both count an attempt
+     * in the same bucket.</p>
+     *
+     * @param typedUsername the username as typed, must not be null
+     * @return the name to build the attempt key from
+     */
+    default String getLoginAttemptName(final String typedUsername) {
+        if (StringUtil.isBlank(getLdapProviderUrl()) || isReservedLoginName(typedUsername)) {
+            return typedUsername.strip();
+        }
+        return normalizeLdapLoginName(typedUsername);
+    }
+
     boolean isLdapAdminEnabled();
 
     default boolean isLdapAdminEnabled(final String username) {

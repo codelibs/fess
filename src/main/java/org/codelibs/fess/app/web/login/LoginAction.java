@@ -186,11 +186,12 @@ public class LoginAction extends FessLoginAction {
     }
 
     /**
-     * Must stay the key of {@code LoginHandler#userScopeKey}: both logins share one limiter. The blanks
-     * around the name do not count, because the directory does not count them: " alice" signs in as alice.
+     * Must stay the key of {@code LoginHandler#userScopeKey}: both logins share one limiter. The name is the
+     * one the directory is asked about ({@code FessProp#getLoginAttemptName}): the blanks around it do not
+     * count, and neither does what {@code ldap.max.username.length} cuts off.
      */
     private static String userKey(final String clientIp, final String username) {
-        return clientIp + USER_SCOPE_KEY_SEP + username.strip().toLowerCase(Locale.ROOT);
+        return clientIp + USER_SCOPE_KEY_SEP + ComponentUtil.getFessConfig().getLoginAttemptName(username).toLowerCase(Locale.ROOT);
     }
 
     /**
