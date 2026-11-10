@@ -46,6 +46,13 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
      */
     private Long passwordChangedAt;
 
+    /**
+     * The time (epoch milliseconds) this login session was opened, for a user of any kind. Null for a
+     * session opened before it was recorded, which is how {@code passwordChangedAt} being null is told
+     * apart between such a session and the session of a user who is not a local user.
+     */
+    private Long loginTime;
+
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
@@ -113,6 +120,19 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
     public void setPasswordChangedAt(final Long passwordChangedAt) {
         this.passwordChangedAt = passwordChangedAt;
+    }
+
+    /**
+     * Gets the time this login session was opened.
+     *
+     * @return epoch milliseconds, or null for a session opened before it was recorded
+     */
+    public Long getLoginTime() {
+        return loginTime;
+    }
+
+    public void setLoginTime(final Long loginTime) {
+        this.loginTime = loginTime;
     }
 
     public static FessUserBean empty() {

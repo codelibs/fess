@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.base.login;
 
 import java.util.Hashtable;
+import java.util.OptionalLong;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -127,14 +128,35 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     // ---------------------------------------------------------------------
 
     @Test
-    public void test_sessionOpenedBeforeTheFieldExisted_notChecked() {
-        final FessUserBean bean = new FessUserBean(localUser("alice", null)); // no snapshot: a pre-upgrade session
+    public void test_sessionOpenedBeforeTheFieldExisted_endsWhenThePasswordChangedAfterTheSessionWasCreated() {
+        final FessUserBean bean = new FessUserBean(localUser("alice", null)); // nothing recorded: a pre-upgrade session
         assertNull(bean.getPasswordChangedAt());
+        assertNull(bean.getLoginTime());
         assist.session = bean;
+        assist.sessionCreated = 500L;
+        service.stamps.put("alice", 1000L);
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(1, assist.logouts.get());
+    }
+
+    @Test
+    public void test_sessionOpenedBeforeTheFieldExisted_keptWhenThePasswordChangedBeforeTheSessionWasCreated() {
+        assist.session = new FessUserBean(localUser("alice", null));
+        assist.sessionCreated = 1500L;
         service.stamps.put("alice", 1000L);
 
         assertTrue(assist.getSavedUserBean().isPresent());
-        assertEquals(0, service.reads.get());
+        assertEquals(0, assist.logouts.get());
+    }
+
+    @Test
+    public void test_sessionOpenedBeforeTheFieldExisted_keptWhenThePasswordWasNeverChanged() {
+        assist.session = new FessUserBean(localUser("alice", null));
+        assist.sessionCreated = 500L;
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertEquals(0, assist.logouts.get());
     }
 
     @Test
@@ -143,6 +165,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         service.stamps.put("bob", 1000L);
 
         assertNull(assist.session.getPasswordChangedAt());
+        assertNotNull(assist.session.getLoginTime());
+        assist.sessionCreated = 1L;
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, service.reads.get());
     }
@@ -153,6 +177,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         service.stamps.put("carol", 1000L);
 
         assertNull(assist.session.getPasswordChangedAt());
+        assertNotNull(assist.session.getLoginTime());
+        assist.sessionCreated = 1L;
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, service.reads.get());
     }
@@ -262,6 +288,19 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_acceptPasswordChange_keepsAPreUpgradeSessionThatChangedIt() {
+        assist.session = new FessUserBean(localUser("alice", null));
+        assist.sessionCreated = 500L;
+        service.stamps.put("alice", 2000L);
+
+        assist.acceptPasswordChange("alice", 2000L);
+
+        assertEquals(Long.valueOf(2000L), assist.session.getPasswordChangedAt());
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertEquals(0, assist.logouts.get());
+    }
+
+    @Test
     public void test_acceptPasswordChange_withoutSession_doesNotFail() {
         assist.acceptPasswordChange("alice", 2000L);
         assertEquals(0, assist.saved.get());
@@ -324,6 +363,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     /** A login assist whose session is a field, so that it needs no servlet container. */
     private static class SessionAssist extends FessLoginAssist {
         FessUserBean session;
+        /** The creation time of the HTTP session, 0 when the test does not care. */
+        long sessionCreated = 0L;
         final AtomicInteger logouts = new AtomicInteger();
         final AtomicInteger saved = new AtomicInteger();
         final FakeTicker ticker = new FakeTicker();
@@ -339,6 +380,11 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
             return OptionalThing.ofNullable(session, () -> {
                 throw new IllegalStateException("no session");
             });
+        }
+
+        @Override
+        protected OptionalLong getSessionCreationTime() {
+            return OptionalLong.of(sessionCreated);
         }
 
         @Override

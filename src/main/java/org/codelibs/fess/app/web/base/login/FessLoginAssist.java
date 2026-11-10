@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.base.login;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.OptionalLong;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +41,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.web.login.LoginHandlingResource;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.login.PrimaryLoginManager;
 import org.lastaflute.web.login.TypicalLoginAssist;
 import org.lastaflute.web.login.credential.LoginCredential;
@@ -158,6 +160,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     @Override
     protected FessUserBean createUserBean(final FessUser user) {
         final FessUserBean userBean = new FessUserBean(user);
+        userBean.setLoginTime(System.currentTimeMillis());
         if (user instanceof final User localUser) {
             // The session remembers the time of the document it was opened with, 0 when the
             // document has none, so that the first password change of a user is noticed too.
@@ -262,11 +265,12 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * path that does not look. The time of the change is read from the user document, not
      * recorded where the sessions are, so it works the same behind several nodes.</p>
      *
-     * <p>Only a session of a local user is looked at: it remembers the time of the user document
-     * it was opened with (see {@link #createUserBean(FessUser)}). A user authenticated by LDAP or
-     * an identity provider has no such time, so the password of the identity provider, which Fess
-     * does not manage, is not looked up. A session opened before the time was remembered has none
-     * either, and is left alone.</p>
+     * <p>A session of a local user remembers the time of the user document it was opened with (see
+     * {@link #createUserBean(FessUser)}). A user authenticated by LDAP or an identity provider has no
+     * such time, so the password of the identity provider, which Fess does not manage, is not looked
+     * up. A session opened before the time was remembered has neither it nor the time it was opened
+     * (an upgrade can keep such a session), so it is judged by the time its HTTP session was created
+     * instead: it ends if the password was changed after that.</p>
      *
      * @return the user bean, or the empty result when nobody is logged in or the session was ended
      */
@@ -314,10 +318,32 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      */
     protected boolean isPasswordChangedAfterLogin(final FessUserBean userBean) {
         final Long remembered = userBean.getPasswordChangedAt();
-        if (remembered == null) {
+        if (remembered != null) {
+            return getPasswordChangedAtCache().get(userBean.getUserId()) > remembered.longValue();
+        }
+        if (userBean.getLoginTime() != null) {
             return false;
         }
-        return getPasswordChangedAtCache().get(userBean.getUserId()) > remembered.longValue();
+        // Opened by a version that recorded neither. Nothing says when it logged in, so the creation of
+        // the HTTP session stands in for it; a session that logged in after the change in a session
+        // created before it is ended too, and the user logs in once more.
+        final OptionalLong created = getSessionCreationTime();
+        return created.isPresent() && getPasswordChangedAtCache().get(userBean.getUserId()) > created.getAsLong();
+    }
+
+    /**
+     * Gets the time the HTTP session was created.
+     *
+     * @return epoch milliseconds, or empty when there is no HTTP session
+     */
+    protected OptionalLong getSessionCreationTime() {
+        return LaRequestUtil.getOptionalRequest().map(request -> request.getSession(false)).map(session -> {
+            try {
+                return OptionalLong.of(session.getCreationTime());
+            } catch (final IllegalStateException e) {
+                return OptionalLong.empty(); // invalidated meanwhile
+            }
+        }).orElse(OptionalLong.empty());
     }
 
     /**
@@ -346,8 +372,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     public void acceptPasswordChange(final String username, final long changedAt) {
         getPasswordChangedAtCache().put(username, changedAt);
         getSessionUserBeanUnchecked().ifPresent(userBean -> {
-            if (userBean.getPasswordChangedAt() != null && username.equals(userBean.getUserId())) {
+            if (username.equals(userBean.getUserId()) && (userBean.getPasswordChangedAt() != null || userBean.getLoginTime() == null)) {
                 userBean.setPasswordChangedAt(changedAt);
+                userBean.setLoginTime(System.currentTimeMillis());
                 saveSessionUserBean(userBean);
             }
         });
