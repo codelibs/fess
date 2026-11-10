@@ -39,6 +39,26 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /**
+     * The password change time (epoch milliseconds) of the local user document that this login
+     * session was opened with, 0 when that document had none. Null when the session does not
+     * track it: a session of a user who is not a local user, or one opened before it was tracked.
+     */
+    private Long passwordChangedAt;
+
+    /**
+     * The time (epoch milliseconds) this login session was opened, for a user of any kind. Null for a
+     * session opened before it was recorded, which is how {@code passwordChangedAt} being null is told
+     * apart between such a session and the session of a user who is not a local user.
+     */
+    private Long loginTime;
+
+    /**
+     * The time (epoch milliseconds) the stored password change time was last looked up for this
+     * login session, so that the user index is asked at most once per
+     * {@code password.changed.check.interval}. Null before the first look.
+     */
+    private Long passwordCheckTime;
 
     // ===================================================================================
     //                                                                         Constructor
@@ -94,6 +114,45 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
     public FessUser getFessUser() {
         return user;
+    }
+
+    /**
+     * Gets the password change time this login session was opened with.
+     *
+     * @return epoch milliseconds, 0 when the user had none, or null when the session does not track it
+     */
+    public Long getPasswordChangedAt() {
+        return passwordChangedAt;
+    }
+
+    public void setPasswordChangedAt(final Long passwordChangedAt) {
+        this.passwordChangedAt = passwordChangedAt;
+    }
+
+    /**
+     * Gets the time this login session was opened.
+     *
+     * @return epoch milliseconds, or null for a session opened before it was recorded
+     */
+    public Long getLoginTime() {
+        return loginTime;
+    }
+
+    public void setLoginTime(final Long loginTime) {
+        this.loginTime = loginTime;
+    }
+
+    /**
+     * Gets the time the password change time was last looked up for this login session.
+     *
+     * @return epoch milliseconds, or null before the first look
+     */
+    public Long getPasswordCheckTime() {
+        return passwordCheckTime;
+    }
+
+    public void setPasswordCheckTime(final Long passwordCheckTime) {
+        this.passwordCheckTime = passwordCheckTime;
     }
 
     public static FessUserBean empty() {

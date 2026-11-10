@@ -119,6 +119,9 @@
       },
       "roles": {
         "type": "keyword"
+      },
+      "password_changed_at": {
+        "type": "long"
       }
     }
 }

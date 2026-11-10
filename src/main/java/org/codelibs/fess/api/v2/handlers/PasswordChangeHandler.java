@@ -74,9 +74,10 @@ import jakarta.servlet.http.HttpSession;
  * {@code re_login_required: true} so the SPA can redirect to the login page.
  * Note that {@code csrf_token} is NOT returned in the success response because the
  * session that held the old token has already been destroyed; the SPA must obtain a
- * fresh token after re-authenticating. Invalidating other concurrent sessions for the
- * same user is a follow-up item (requires a Fess-wide session registry, not available
- * in this release).</p>
+ * fresh token after re-authenticating. The other concurrent sessions of the same user end
+ * on their next request: {@link UserService#changePassword} records the time of the change
+ * in the user document, and {@link FessLoginAssist#getSavedUserBean()} ends a session that was
+ * opened before it.</p>
  *
  * <p>MJ-30 i18n contract: {@code error.message} values in this handler are
  * developer-facing English strings. Clients MUST use {@code error.code}
@@ -320,8 +321,8 @@ public class PasswordChangeHandler {
         //
         // re_login_required:true signals the SPA that the password has changed and it
         // must redirect to the login page to obtain a fresh session and CSRF token.
-        // Other concurrent sessions for the same user are NOT invalidated — this is a
-        // known limitation (requires a Fess-wide session registry, follow-up item).
+        // The other concurrent sessions of the same user end on their next request, see
+        // FessLoginAssist#getSavedUserBean().
         //
         // MINOR-4: call assist.logout() first so that remember-me cookies are cleared —
         // matching the LogoutHandler pattern. Failures are swallowed so that
