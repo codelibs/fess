@@ -36,6 +36,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.SystemUtil;
+import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 import jakarta.annotation.PostConstruct;
@@ -269,6 +270,12 @@ public class SessionStore {
         final String digest = digest(bytes);
         final long now = currentTimeMillis();
 
+        if (!isStored(args) && isRebuildable(((Map<String, Object>) args.get("attributes")).keySet(), skippedNames)) {
+            // A session that holds nothing but what every node derives from the request, such as the
+            // locale of a client that sends no cookie (health checks, API clients), is not worth a document.
+            return result(digest, 0L, skippedNames);
+        }
+
         if (digest.equals(args.get(DIGEST))) {
             final Object persistedAt = args.get("persistedAt");
             if (persistedAt instanceof final Number number && now - number.longValue() < TOUCH_INTERVAL_MS) {
@@ -290,6 +297,27 @@ public class SessionStore {
         source.put(EXPIRED_TIME, expiredTime);
         indexSession(id, source);
         return result(digest, now, skippedNames);
+    }
+
+    /**
+     * Tells whether the session has been written to the store before.
+     *
+     * @param args the arguments of {@code save}.
+     * @return true if the caller reports a write.
+     */
+    protected boolean isStored(final Map<String, Object> args) {
+        return args.get("persistedAt") instanceof final Number number && number.longValue() > 0;
+    }
+
+    /**
+     * Tells whether the session holds nothing that another node could not rebuild from a request.
+     *
+     * @param names the attribute names of the session.
+     * @param skippedNames the names that are not stored.
+     * @return true if no stored attribute is left apart from the locale.
+     */
+    protected boolean isRebuildable(final Set<String> names, final Set<String> skippedNames) {
+        return names.stream().allMatch(name -> skippedNames.contains(name) || LastaWebKey.USER_LOCALE_KEY.equals(name));
     }
 
     /**

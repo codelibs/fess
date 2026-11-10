@@ -182,6 +182,33 @@ public class SessionStoreTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_save_localeOnlyNewSessionIsNotWritten() throws Exception {
+        final Map<String, Object> args = saveArgs(null, null, "a");
+        final Map<String, Object> attributes = new HashMap<>();
+        attributes.put(org.lastaflute.web.LastaWebKey.USER_LOCALE_KEY, java.util.Locale.JAPAN);
+        args.put("attributes", attributes);
+
+        final Map<String, Object> result = store.save(args);
+
+        assertTrue(store.calls.isEmpty());
+        assertEquals(0L, result.get("persistedAt"));
+    }
+
+    @Test
+    public void test_save_localeOnlyStoredSessionIsStillWritten() throws Exception {
+        final Map<String, Object> first = store.save(saveArgs(null, null, "a"));
+        final Map<String, Object> args = saveArgs((String) first.get("digest"), (Long) first.get("persistedAt"), "a");
+        final Map<String, Object> attributes = new HashMap<>();
+        attributes.put(org.lastaflute.web.LastaWebKey.USER_LOCALE_KEY, java.util.Locale.JAPAN);
+        args.put("attributes", attributes);
+        store.calls.clear();
+
+        store.save(args);
+
+        assertEquals(List.of("index"), store.calls);
+    }
+
+    @Test
     public void test_save_storesUnderHashedId() throws Exception {
         final Map<String, Object> result = store.save(saveArgs(null, null, "a"));
 
