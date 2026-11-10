@@ -373,7 +373,7 @@ public class AdminTagtypeAction extends FessAdminAction {
     /**
      * Validates the fields of a tag type that the annotations of the form cannot: the name must be
      * a valid tag name, the owner must not be blank and the number of paths must not exceed
-     * {@code user.tag.max.paths}.
+     * {@code user.tag.max.paths}, and the permission entries must not contain a space where none is expected.
      *
      * @param form the form
      * @param messages the messages to add the errors to
@@ -390,6 +390,7 @@ public class AdminTagtypeAction extends FessAdminAction {
         if (splitPaths(form.paths).length > maxPaths) {
             messages.addErrorsTagtypeTooManyPaths("paths", String.valueOf(maxPaths));
         }
+        ComponentUtil.getPermissionHelper().validateEntries(form.permissions, messages);
     }
 
     /**

@@ -116,7 +116,7 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
     // POST /api/admin/webconfig/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.CREATE;
         // The create screens fill this in through CreateForm#initialize, which an API request
         // never runs. Without it the setting records no script type, and an unset type means
@@ -147,7 +147,7 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
     // PUT /api/admin/webconfig/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
         final WebConfig webConfig = getWebConfig(body).map(entity -> {
             try {

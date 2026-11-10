@@ -342,7 +342,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
-        validate(form, messages -> {}, this::asEditHtml);
+        validate(form, messages -> ComponentUtil.getPermissionHelper().validateEntries(form.permissions, messages), this::asEditHtml);
         verifyToken(this::asEditHtml);
         getFileConfig(form).ifPresent(entity -> {
             try {
@@ -369,7 +369,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
-        validate(form, messages -> {}, this::asEditHtml);
+        validate(form, messages -> ComponentUtil.getPermissionHelper().validateEntries(form.permissions, messages), this::asEditHtml);
         verifyToken(this::asEditHtml);
         getFileConfig(form).ifPresent(entity -> {
             try {

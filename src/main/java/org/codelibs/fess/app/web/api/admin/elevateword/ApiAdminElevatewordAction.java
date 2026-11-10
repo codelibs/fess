@@ -140,7 +140,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.CREATE;
         final ElevateWord entity = getElevateWord(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -169,7 +169,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
         final ElevateWord elevateWord = getElevateWord(body).map(entity -> {
             try {

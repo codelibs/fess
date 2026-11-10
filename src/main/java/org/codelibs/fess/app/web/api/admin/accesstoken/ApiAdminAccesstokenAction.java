@@ -106,7 +106,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.CREATE;
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
             entity.setToken(accessTokenHelper.generateAccessToken());
@@ -133,7 +133,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
             try {

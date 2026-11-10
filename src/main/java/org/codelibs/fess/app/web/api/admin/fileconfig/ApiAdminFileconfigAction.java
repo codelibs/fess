@@ -118,7 +118,7 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.CREATE;
         // The create screens fill this in through CreateForm#initialize, which an API request
         // never runs. Without it the setting records no script type, and an unset type means
@@ -149,7 +149,7 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
         final FileConfig fileConfig = getFileConfig(body).map(entity -> {
             try {

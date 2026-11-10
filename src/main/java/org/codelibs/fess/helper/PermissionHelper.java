@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
 import java.io.IOException;
 import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
@@ -31,11 +33,13 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.fs.FileSystemClient;
 import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.jcifs.smb.SID;
@@ -133,6 +137,68 @@ public class PermissionHelper {
             return null;
         }
         return permission;
+    }
+
+    /**
+     * Checks the permission entries typed into a permission field of the admin screens and the admin
+     * API, one entry per line, and adds an error for the {@code permissions} field when an entry is
+     * written with whitespace where none is expected (see {@link #isSpacedEntry(String)}).
+     * <p>
+     * {@link #encode(String)} stays lenient because it also parses configuration values that are
+     * read while searching, where an exception would break the request. An entry entered by a
+     * person is checked here instead of being converted without a word.
+     * </p>
+     *
+     * @param permissionsText the permission entries, separated by line breaks (may be null)
+     * @param messages the messages to add the error to
+     */
+    public void validateEntries(final String permissionsText, final FessMessages messages) {
+        if (hasSpacedEntry(permissionsText)) {
+            messages.addErrorsInvalidPermissionSpacing(Constants.PERMISSIONS, denyPrefix + userPrefix + "name",
+                    allowPrefix + userPrefix + "name");
+        }
+    }
+
+    /**
+     * Returns whether any line of the permission entries is a spaced entry.
+     *
+     * @param permissionsText the permission entries, separated by line breaks (may be null)
+     * @return true if a line is a spaced entry
+     */
+    public boolean hasSpacedEntry(final String permissionsText) {
+        return StringUtil.isNotBlank(permissionsText) && split(permissionsText, "\n").get(stream -> stream.anyMatch(this::isSpacedEntry));
+    }
+
+    /**
+     * Returns whether a permission entry is written with whitespace where none is expected. That is
+     * the case when whitespace sits between the {@code (allow)} / {@code (deny)} prefix and what
+     * follows it, such as {@code (deny) {user}bob}, and when the entry starts with whitespace
+     * followed by a {@code {user}}, {@code {group}} or {@code {role}} name, which is how an
+     * entry such as {@code (deny) {user}bob} was stored by Fess 15.9. Whitespace before an
+     * {@code (allow)} / {@code (deny)} prefix, whitespace around a plain value and trailing
+     * whitespace are not spaced entries.
+     *
+     * @param entry a single permission entry (may be null)
+     * @return true if the entry is a spaced entry
+     */
+    public boolean isSpacedEntry(final String entry) {
+        if (StringUtil.isBlank(entry)) {
+            return false;
+        }
+        final String stripped = entry.strip();
+        final String lower = stripped.toLowerCase(Locale.ROOT);
+        if (lower.startsWith(allowPrefix)) {
+            return startsWithWhitespace(stripped.substring(allowPrefix.length()));
+        }
+        if (lower.startsWith(denyPrefix)) {
+            return startsWithWhitespace(stripped.substring(denyPrefix.length()));
+        }
+        return startsWithWhitespace(entry)
+                && (lower.startsWith(userPrefix) || lower.startsWith(groupPrefix) || lower.startsWith(rolePrefix));
+    }
+
+    private boolean startsWithWhitespace(final String value) {
+        return !value.isEmpty() && Character.isWhitespace(value.charAt(0));
     }
 
     /**
