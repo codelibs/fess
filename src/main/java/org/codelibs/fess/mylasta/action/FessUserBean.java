@@ -53,6 +53,13 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
      */
     private Long loginTime;
 
+    /**
+     * The time (epoch milliseconds) the stored password change time was last looked up for this
+     * login session, so that the user index is asked at most once per
+     * {@code password.changed.check.interval}. Null before the first look.
+     */
+    private Long passwordCheckTime;
+
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
@@ -133,6 +140,19 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
     public void setLoginTime(final Long loginTime) {
         this.loginTime = loginTime;
+    }
+
+    /**
+     * Gets the time the password change time was last looked up for this login session.
+     *
+     * @return epoch milliseconds, or null before the first look
+     */
+    public Long getPasswordCheckTime() {
+        return passwordCheckTime;
+    }
+
+    public void setPasswordCheckTime(final Long passwordCheckTime) {
+        this.passwordCheckTime = passwordCheckTime;
     }
 
     public static FessUserBean empty() {

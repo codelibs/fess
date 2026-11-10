@@ -19,11 +19,9 @@ import java.util.Hashtable;
 import java.util.OptionalLong;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.app.service.UserService;
-import org.codelibs.fess.auth.PasswordChangedAtCache;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -34,8 +32,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-
-import com.google.common.base.Ticker;
 
 /**
  * Tests that a login session of a local user ends once the password of that user is changed, and
@@ -211,31 +207,31 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
-    // the cache
+    // how often the user index is asked
     // ---------------------------------------------------------------------
 
     @Test
-    public void test_lookup_cachedWithinTtl_andRepeatedAfterIt() {
-        config.expire = 10;
+    public void test_lookup_onceAnInterval_perSession() {
+        config.interval = 10;
         assist.session = assist.createUserBean(localUser("alice", null));
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(1, service.reads.get());
 
-        assist.ticker.advance(9, TimeUnit.SECONDS);
+        assist.now += 9_000L;
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(1, service.reads.get());
 
-        assist.ticker.advance(2, TimeUnit.SECONDS);
+        assist.now += 2_000L;
         service.stamps.put("alice", 1000L);
-        assertFalse(assist.getSavedUserBean().isPresent()); // the change shows once the entry expired
+        assertFalse(assist.getSavedUserBean().isPresent()); // the change shows at the next look
         assertEquals(2, service.reads.get());
     }
 
     @Test
-    public void test_lookup_notCachedWhenTtlIsZero() {
-        config.expire = 0;
+    public void test_lookup_everyRequestWhenTheIntervalIsZero() {
+        config.interval = 0;
         assist.session = assist.createUserBean(localUser("alice", null));
 
         assertTrue(assist.getSavedUserBean().isPresent());
@@ -244,10 +240,10 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_lookup_cachedPerUser() {
+    public void test_lookup_eachSessionKeepsItsOwnTime() {
         assist.session = assist.createUserBean(localUser("alice", null));
         assertTrue(assist.getSavedUserBean().isPresent());
-        assist.session = assist.createUserBean(localUser("bob", null));
+        assist.session = assist.createUserBean(localUser("alice", null));
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(2, service.reads.get());
     }
@@ -259,7 +255,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     @Test
     public void test_acceptPasswordChange_keepsTheSessionThatChangedIt() {
         assist.session = assist.createUserBean(localUser("alice", null));
-        assertTrue(assist.getSavedUserBean().isPresent()); // caches the old time
+        assertTrue(assist.getSavedUserBean().isPresent());
         service.stamps.put("alice", 2000L);
 
         assist.acceptPasswordChange("alice", 2000L);
@@ -271,20 +267,16 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_acceptPasswordChange_endsOtherSessionsOfThatUserOnThisNodeAtOnce() {
-        // an administrator changes the password of bob; the cache already holds bob's old time
-        assist.session = assist.createUserBean(localUser("bob", null));
-        assertTrue(assist.getSavedUserBean().isPresent());
-        assertEquals(1, service.reads.get());
-
+    public void test_acceptPasswordChange_leavesOtherSessionsToTheirNextLook() {
+        // an administrator changes the password of bob; bob's session is not the one of the request
         assist.session = assist.createUserBean(localUser("admin", null));
         assist.acceptPasswordChange("bob", 3000L);
         assertEquals(Long.valueOf(0L), assist.session.getPasswordChangedAt()); // not the session of bob
         assertEquals(0, assist.saved.get());
 
+        service.stamps.put("bob", 3000L);
         assist.session = assist.createUserBean(localUser("bob", null));
         assertFalse(assist.getSavedUserBean().isPresent());
-        assertEquals(1, service.reads.get()); // answered from the cache the change wrote
     }
 
     @Test
@@ -347,19 +339,6 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         }
     }
 
-    private static class FakeTicker extends Ticker {
-        private long nanos;
-
-        void advance(final long time, final TimeUnit unit) {
-            nanos += unit.toNanos(time);
-        }
-
-        @Override
-        public long read() {
-            return nanos;
-        }
-    }
-
     /** A login assist whose session is a field, so that it needs no servlet container. */
     private static class SessionAssist extends FessLoginAssist {
         FessUserBean session;
@@ -367,13 +346,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         long sessionCreated = 0L;
         final AtomicInteger logouts = new AtomicInteger();
         final AtomicInteger saved = new AtomicInteger();
-        final FakeTicker ticker = new FakeTicker();
-        final PasswordChangedAtCache cache = new PasswordChangedAtCache() {
-            @Override
-            protected Ticker getTicker() {
-                return ticker;
-            }
-        };
+        /** The clock of the assist, in epoch milliseconds. */
+        long now = 1_000_000L;
 
         @Override
         protected OptionalThing<FessUserBean> getSessionUserBeanUnchecked() {
@@ -399,8 +373,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         }
 
         @Override
-        protected PasswordChangedAtCache getPasswordChangedAtCache() {
-            return cache;
+        protected long currentTimeMillis() {
+            return now;
         }
 
         @Override
@@ -427,11 +401,11 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     private static class TestConfig extends FessConfig.SimpleImpl {
         private static final long serialVersionUID = 1L;
 
-        int expire = 10;
+        int interval = 10;
 
         @Override
-        public Integer getPasswordChangedCacheExpireAsInteger() {
-            return Integer.valueOf(expire);
+        public Integer getPasswordChangedCheckIntervalAsInteger() {
+            return Integer.valueOf(interval);
         }
     }
 }
