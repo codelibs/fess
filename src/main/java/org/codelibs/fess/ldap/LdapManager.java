@@ -280,11 +280,15 @@ public class LdapManager {
     /**
      * Authenticates a user with the specified username and password against LDAP.
      *
-     * @param username the username for authentication
+     * <p>The name is normalized once, here ({@link #normalizeLoginName(String)}), and the bind and the
+     * resulting {@link LdapUser} both use the normalized name.</p>
+     *
+     * @param typedUsername the username as typed at the login form
      * @param password the password for authentication
      * @return an optional containing the authenticated user if successful, empty otherwise
      */
-    public OptionalEntity<FessUser> login(final String username, final String password) {
+    public OptionalEntity<FessUser> login(final String typedUsername, final String password) {
+        final String username = normalizeLoginName(typedUsername);
         // Add defensive null/blank checks
         if (StringUtil.isBlank(username) || StringUtil.isBlank(password)) {
             if (logger.isDebugEnabled()) {
@@ -319,6 +323,21 @@ public class LdapManager {
             logger.debug("Login failed for user: {}", username, e);
         }
         return OptionalEntity.empty();
+    }
+
+    /**
+     * Normalizes a name typed at the login form into the name the account is known by.
+     *
+     * <p>The blanks around the name are dropped. A directory ignores them when it compares a uid, so
+     * {@code " alice"} binds as {@code alice}; the name Fess keeps for the session, the audit log and the
+     * login attempt limit has to be {@code alice} too, not a second spelling of the same account. A blank
+     * inside the name is kept.</p>
+     *
+     * @param typedUsername the username as typed, may be null
+     * @return the normalized name, or null if the given name is null
+     */
+    public String normalizeLoginName(final String typedUsername) {
+        return typedUsername == null ? null : typedUsername.strip();
     }
 
     /**

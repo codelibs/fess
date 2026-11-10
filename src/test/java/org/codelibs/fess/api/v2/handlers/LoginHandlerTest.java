@@ -152,6 +152,17 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_userScopeKey_ignoresBlanksAroundTheName() {
+        final LoginHandler handler = new LoginHandler(new LoginRateLimiter());
+        final String expected = handler.userScopeKey("10.0.0.8", "alice");
+        assertEquals(expected, handler.userScopeKey("10.0.0.8", " alice"));
+        assertEquals(expected, handler.userScopeKey("10.0.0.8", "alice "));
+        assertEquals(expected, handler.userScopeKey("10.0.0.8", "\t Alice\t"));
+        // a blank inside the name is a different name
+        org.junit.jupiter.api.Assertions.assertNotEquals(expected, handler.userScopeKey("10.0.0.8", "al ice"));
+    }
+
+    @Test
     public void test_lockoutWarning_doesNotLetTheUserNameStartALogLine() throws Throwable {
         // The user name is typed by an anonymous caller and the lockout is logged at WARN, which is
         // on by default. The application log is one event per line, so a raw line break in the name

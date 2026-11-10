@@ -1374,6 +1374,108 @@ public class LdapManagerTest extends UnitFessTestCase {
         };
     }
 
+    /**
+     * What one {@link LdapManager#login(String, String)} call handed to the directory: the name the bind principal was
+     * built from, and the name of the {@link LdapUser} it produced.
+     */
+    private static class LoginProbe {
+        final List<String> boundNames = new ArrayList<>();
+
+        final List<String> userNames = new ArrayList<>();
+
+        OptionalEntity<FessUser> result;
+    }
+
+    /** Runs a password login against an {@link LdapManager} whose directory is replaced by a recorder. */
+    private LoginProbe probeLogin(final String typed) {
+        final LoginProbe probe = new LoginProbe();
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected boolean validate() {
+                return true;
+            }
+
+            @Override
+            protected Hashtable<String, String> createSearchEnv(final String username, final String password) {
+                probe.boundNames.add(username);
+                return new Hashtable<>();
+            }
+
+            @Override
+            protected DirContextHolder getDirContext(final Supplier<Hashtable<String, String>> envSupplier) {
+                return new DirContextHolder(null);
+            }
+
+            @Override
+            protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
+                probe.userNames.add(username);
+                return super.createLdapUser(username, env);
+            }
+
+            @Override
+            protected boolean allowEmptyGroupAndRole(final LdapUser ldapUser) {
+                return true;
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+        probe.result = ldapManager.login(typed, "secret");
+        return probe;
+    }
+
+    @SuppressWarnings("serial")
+    private void registerProviderConfig() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapProviderUrl() {
+                return "ldap://localhost:389";
+            }
+        });
+    }
+
+    /**
+     * The directory ignores the blanks around a uid when it compares it, so a bind with " alice" succeeds as alice. The
+     * name Fess keeps for the session, the audit log and the login attempt limit must then be alice as well, not a
+     * second spelling of the same account.
+     */
+    @Test
+    public void test_login_surroundingWhitespaceIsDropped() {
+        registerProviderConfig();
+        for (final String typed : new String[] { " alice", "alice ", "  alice  ", "\talice", "alice\t", "\talice \t",
+                "\u3000alice\u3000" }) {
+            final LoginProbe probe = probeLogin(typed);
+            assertEquals(typed, List.of("alice"), probe.boundNames);
+            assertEquals(typed, List.of("alice"), probe.userNames);
+            assertTrue(typed, probe.result.isPresent());
+            assertEquals(typed, "alice", probe.result.get().getName());
+        }
+    }
+
+    @Test
+    public void test_login_innerWhitespaceIsKept() {
+        registerProviderConfig();
+        final LoginProbe probe = probeLogin(" al ice ");
+        assertEquals(List.of("al ice"), probe.boundNames);
+        assertEquals(List.of("al ice"), probe.userNames);
+    }
+
+    @Test
+    public void test_login_nameWithoutSurroundingWhitespaceIsUnchanged() {
+        registerProviderConfig();
+        final LoginProbe probe = probeLogin("alice");
+        assertEquals(List.of("alice"), probe.boundNames);
+        assertEquals(List.of("alice"), probe.userNames);
+    }
+
+    @Test
+    public void test_login_whitespaceOnlyNameIsStillRejectedBeforeAnyBind() {
+        registerProviderConfig();
+        for (final String typed : new String[] { "", " ", "   ", "\t", " \t ", "\u3000", null }) {
+            final LoginProbe probe = probeLogin(typed);
+            assertTrue(String.valueOf(typed), probe.boundNames.isEmpty());
+            assertFalse(String.valueOf(typed), probe.result.isPresent());
+        }
+    }
+
     /** An {@link LdapManager} whose directory context is a {@link CapturingDirContext}. */
     private static class CapturingLdapManager extends LdapManager {
         private final CapturingDirContext context;

@@ -90,6 +90,42 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
+    // isLdapLoginCandidate
+    // ---------------------------------------------------------------------
+
+    /**
+     * A reserved name stays off the directory path however it is padded: the directory ignores the blanks around a uid,
+     * so " admin" would otherwise reach it and come back as the account named admin.
+     */
+    @Test
+    public void test_isLdapLoginCandidate_reservedNameIsRefusedWhenPadded() {
+        final FessConfig config = new TestFessConfig() {
+            @Override
+            public String getAuthenticationAdminUsers() {
+                return "admin";
+            }
+
+            @Override
+            public String getAuthenticationAdminUsersIgnoreCase() {
+                return "false";
+            }
+        };
+        ComponentUtil.setFessConfig(config);
+        final org.codelibs.fess.ldap.LdapManager ldapManager = new org.codelibs.fess.ldap.LdapManager();
+        ldapManager.init();
+        ComponentUtil.register(ldapManager, "ldapManager");
+        setField(FessLoginAssist.class, loginAssist, "fessConfig", config);
+
+        assertFalse(loginAssist.isLdapLoginCandidate("admin"));
+        assertFalse(loginAssist.isLdapLoginCandidate(" admin"));
+        assertFalse(loginAssist.isLdapLoginCandidate("admin "));
+        assertFalse(loginAssist.isLdapLoginCandidate("\tadmin\t"));
+        assertTrue(loginAssist.isLdapLoginCandidate("alice"));
+        assertTrue(loginAssist.isLdapLoginCandidate(" alice "));
+        assertTrue(loginAssist.isLdapLoginCandidate("admin2"));
+    }
+
+    // ---------------------------------------------------------------------
     // doAuthenticateLocal
     // ---------------------------------------------------------------------
 

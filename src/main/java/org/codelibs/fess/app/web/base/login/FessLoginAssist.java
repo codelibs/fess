@@ -322,7 +322,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             final LocalUserCredential userCredential = credential;
             final String username = userCredential.getUser();
             final String password = userCredential.getPassword();
-            if (!fessConfig.isAdminUser(username)) {
+            if (isLdapLoginCandidate(username)) {
                 final OptionalEntity<FessUser> ldapUser = ComponentUtil.getLdapManager().login(username, password);
                 if (ldapUser.isPresent()) {
                     return ldapUser;
@@ -334,6 +334,20 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
         for (final SsoAuthenticator auth : ComponentUtil.getSsoManager().getAuthenticators()) {
             auth.resolveCredential(loginResolver);
         }
+    }
+
+    /**
+     * Tells whether the typed name may be tried against the directory.
+     *
+     * <p>The name the directory is asked about is the one {@code LdapManager#normalizeLoginName} makes of
+     * it, so a reserved name must be recognised in that form as well: padded, it would otherwise get past
+     * the check and come back from the directory as the reserved account.</p>
+     *
+     * @param username the name as typed at the login form
+     * @return false for a name authentication.admin.users reserves
+     */
+    protected boolean isLdapLoginCandidate(final String username) {
+        return !fessConfig.isAdminUser(username) && !fessConfig.isAdminUser(ComponentUtil.getLdapManager().normalizeLoginName(username));
     }
 
     /**
