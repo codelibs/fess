@@ -109,6 +109,11 @@ public class FessLoginAssistTest extends UnitFessTestCase {
             public String getAuthenticationAdminUsersIgnoreCase() {
                 return "false";
             }
+
+            @Override
+            public Integer getLdapMaxUsernameLengthAsInteger() {
+                return Integer.valueOf(-1);
+            }
         };
         ComponentUtil.setFessConfig(config);
         final org.codelibs.fess.ldap.LdapManager ldapManager = new org.codelibs.fess.ldap.LdapManager();
@@ -123,6 +128,41 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(loginAssist.isLdapLoginCandidate("alice"));
         assertTrue(loginAssist.isLdapLoginCandidate(" alice "));
         assertTrue(loginAssist.isLdapLoginCandidate("admin2"));
+    }
+
+    /**
+     * ldap.max.username.length cuts the name the directory is asked about, so a reserved name has to be recognised in
+     * the cut form: "adminxyz" is asked about as admin when the limit is 5.
+     */
+    @Test
+    public void test_isLdapLoginCandidate_reservedNameIsRefusedWhenCutToTheLimit() {
+        final FessConfig config = new TestFessConfig() {
+            @Override
+            public String getAuthenticationAdminUsers() {
+                return "admin";
+            }
+
+            @Override
+            public String getAuthenticationAdminUsersIgnoreCase() {
+                return "false";
+            }
+
+            @Override
+            public Integer getLdapMaxUsernameLengthAsInteger() {
+                return Integer.valueOf(5);
+            }
+        };
+        ComponentUtil.setFessConfig(config);
+        final org.codelibs.fess.ldap.LdapManager ldapManager = new org.codelibs.fess.ldap.LdapManager();
+        ldapManager.init();
+        ComponentUtil.register(ldapManager, "ldapManager");
+        setField(FessLoginAssist.class, loginAssist, "fessConfig", config);
+
+        assertFalse(loginAssist.isLdapLoginCandidate("admin"));
+        assertFalse(loginAssist.isLdapLoginCandidate("adminxyz"));
+        assertFalse(loginAssist.isLdapLoginCandidate(" adminxyz "));
+        assertTrue(loginAssist.isLdapLoginCandidate("alice"));
+        assertTrue(loginAssist.isLdapLoginCandidate("aliceroot"));
     }
 
     // ---------------------------------------------------------------------

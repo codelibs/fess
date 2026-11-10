@@ -65,6 +65,7 @@ import org.codelibs.fess.opensearch.user.exentity.Group;
 import org.codelibs.fess.opensearch.user.exentity.Role;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.OptionalUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
@@ -289,6 +290,10 @@ public class LdapManager {
      */
     public OptionalEntity<FessUser> login(final String typedUsername, final String password) {
         final String username = normalizeLoginName(typedUsername);
+        if (logger.isDebugEnabled() && username != null && username.length() < typedUsername.strip().length()) {
+            logger.debug("ldap.max.username.length={} cut the login name: {} -> {}", fessConfig.getLdapMaxUsernameLengthAsInteger(),
+                    LogUtil.sanitize(typedUsername.strip()), LogUtil.sanitize(username));
+        }
         // Add defensive null/blank checks
         if (StringUtil.isBlank(username) || StringUtil.isBlank(password)) {
             if (logger.isDebugEnabled()) {
@@ -333,11 +338,27 @@ public class LdapManager {
      * login attempt limit has to be {@code alice} too, not a second spelling of the same account. A blank
      * inside the name is kept.</p>
      *
+     * <p>Then the name is cut to {@code ldap.max.username.length} characters, when that is not negative.
+     * The setting exists for the 20-character logon name of an old Active Directory, which treats a longer
+     * name as the cut one. The cut is made here, once, so that the bind, the {@link LdapUser}, the role
+     * search, the permission name and the session all carry the cut name -- cutting only inside the bind
+     * principal would sign "aliceroot" in as alice and then look up, and grant the roles of, the unrelated
+     * account aliceroot. A blank the cut leaves at the end is dropped as well. The login is not refused for
+     * the length. This method has no side effect; {@link #login(String, String)} logs the cut.</p>
+     *
      * @param typedUsername the username as typed, may be null
      * @return the normalized name, or null if the given name is null
      */
     public String normalizeLoginName(final String typedUsername) {
-        return typedUsername == null ? null : typedUsername.strip();
+        if (typedUsername == null) {
+            return null;
+        }
+        final String name = typedUsername.strip();
+        final int maxLength = fessConfig.getLdapMaxUsernameLengthAsInteger();
+        if (maxLength < 0 || name.length() <= maxLength) {
+            return name;
+        }
+        return name.substring(0, maxLength).stripTrailing();
     }
 
     /**
