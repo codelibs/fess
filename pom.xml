@@ -294,6 +294,26 @@
 							</target>
 						</configuration>
 					</execution>
+					<execution>
+						<!-- unpack-provided keeps the time stamp of each jar entry, and some jars (the
+						     jakarta.annotation-api classes) carry the fixed 1980 date of a reproducible
+						     build. The RPM ships tomcat-lib as it is, whereas the ZIP and DEB apply
+						     project.build.outputTimestamp, so bring those files to the build time. -->
+						<id>touch-tomcat-lib</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<touch>
+									<fileset dir="${project.build.directory}/tomcat-lib">
+										<date millis="946684800000" when="before" />
+									</fileset>
+								</touch>
+							</target>
+						</configuration>
+					</execution>
 				</executions>
 				<configuration>
 					<target>
