@@ -1331,6 +1331,203 @@ describe("runSearch — facet and pagination click handlers", () => {
   });
 });
 
+describe("runSearch — carrying the /search offset through paging", () => {
+  const DOCS = [{ doc_id: "d1", title: "T", url: "https://e.com/1" }];
+  const pagedEnv = (extra = {}) => makeSearchEnv(DOCS, { prev_page: true, next_page: true, page_number: 2, ...extra });
+  /** The params object of the n-th (0-based) /search request. */
+  const searchParams = (n) => api.get.mock.calls.filter((c) => c[0] === "/search")[n][1];
+  const urlParams = () => new URLSearchParams(location.search);
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue(FULL_CFG);
+    mountBody(SEARCH_FIXTURE);
+    window.scrollTo = () => {};
+    _state.q = "foo";
+    _state.num = 10;
+  });
+
+  it("starts at 0 and takes the offset of every response, 0 when missing or invalid", async () => {
+    expect(_state.offset).toBe(0);
+    for (const [value, expected] of [[90, 90], ["120", 120], [0, 0], [-5, 0], [1.5, 0], ["abc", 0], [null, 0], [undefined, 0]]) {
+      installApiDispatch({ search: makeSearchEnv(DOCS, { offset: value }) });
+      _state.offset = 7;
+      await runSearch();
+      await settle();
+      expect(_state.offset, String(value)).toBe(expected);
+    }
+  });
+
+  it("never sends offset on the first page, even when a previous offset is held", async () => {
+    installApiDispatch({ search: pagedEnv({ offset: 90 }) });
+    _state.start = 0;
+    _state.offset = 90;
+    await runSearch();
+    await settle();
+    expect("offset" in searchParams(0)).toBe(false);
+    expect(urlParams().has("offset")).toBe(false);
+  });
+
+  it("sends offset only when start > 0 and the offset is positive", async () => {
+    installApiDispatch({ search: pagedEnv({ offset: 0 }) });
+    _state.start = 100;
+    _state.offset = 0;
+    await runSearch();
+    await settle();
+    expect("offset" in searchParams(0)).toBe(false);
+
+    api.get.mockClear();
+    installApiDispatch({ search: pagedEnv({ offset: 90 }) });
+    _state.start = 100;
+    _state.offset = 90;
+    await runSearch();
+    await settle();
+    expect(searchParams(0).offset).toBe(90);
+    expect(searchParams(0).start).toBe(100);
+  });
+
+  it("echoes the previous response's offset on the next and previous page, and keeps it in the URL", async () => {
+    setLocation("/search?q=foo");
+    installApiDispatch({ search: pagedEnv({ offset: 90 }) });
+    _state.start = 0;
+    await runSearch();
+    await settle();
+    expect(_state.offset).toBe(90);
+
+    // Next page (start 10): request and address bar both carry offset=90.
+    document.querySelector("#pagination li:last-child a").click();
+    await settle();
+    expect(_state.start).toBe(10);
+    expect(searchParams(1).offset).toBe(90);
+    expect(urlParams().get("start")).toBe("10");
+    expect(urlParams().get("offset")).toBe("90");
+
+    // Numbered page 3 (start 20) and Previous (start 10) keep carrying it.
+    document.querySelectorAll("#pagination li.page-item:not([aria-label]) a")[2].click();
+    await settle();
+    expect(searchParams(2).start).toBe(20);
+    expect(searchParams(2).offset).toBe(90);
+    document.querySelector("#pagination li:first-child a").click();
+    await settle();
+    expect(searchParams(3).start).toBe(10);
+    expect(searchParams(3).offset).toBe(90);
+    expect(urlParams().get("offset")).toBe("90");
+
+    // First page: neither the request nor the URL carry it.
+    document.querySelectorAll("#pagination li.page-item:not([aria-label]) a")[0].click();
+    await settle();
+    expect(searchParams(4).start).toBe(0);
+    expect("offset" in searchParams(4)).toBe(false);
+    expect(urlParams().has("offset")).toBe(false);
+    expect(urlParams().has("start")).toBe(false);
+  });
+
+  it("resets the offset as soon as paging returns to the first page, before the response arrives", async () => {
+    installApiDispatch({ search: pagedEnv({ offset: 90 }) });
+    _state.start = 10;
+    await runSearch();
+    await settle();
+    expect(_state.offset).toBe(90);
+    api.get.mockImplementation(async (path) => { if (path === "/search") throw new Error("down"); return {}; });
+    document.querySelectorAll("#pagination li.page-item:not([aria-label]) a")[0].click();
+    await settle();
+    expect(_state.start).toBe(0);
+    expect(_state.offset).toBe(0);
+  });
+
+  it("follows a response that returns a different offset than the URL held", async () => {
+    setLocation("/search?q=foo&start=100&offset=90");
+    installApiDispatch({ search: pagedEnv({ offset: 40 }) });
+    runFromUrl();
+    await settle();
+    expect(searchParams(0).offset).toBe(90);
+    expect(_state.offset).toBe(40);
+    expect(urlParams().get("offset")).toBe("40");
+  });
+
+  it("leaves another view's URL alone when the response lands after the user navigated away", async () => {
+    setLocation("/search?q=foo&start=100&offset=90");
+    let release;
+    api.get.mockImplementation((path) => (path === "/search"
+      ? new Promise((resolve) => { release = () => resolve(pagedEnv({ offset: 40 })); })
+      : Promise.resolve({})));
+    _state.start = 100;
+    _state.offset = 90;
+    const pending = runSearch();
+    setLocation("/chat?x=1");
+    release();
+    await pending;
+    await settle();
+    expect(location.pathname).toBe("/chat");
+    expect(location.search).toBe("?x=1");
+  });
+
+  it("drops the offset from the URL when the latest response has none", async () => {
+    setLocation("/search?q=foo&start=100&offset=90");
+    installApiDispatch({ search: pagedEnv() });
+    runFromUrl();
+    await settle();
+    expect(_state.offset).toBe(0);
+    expect(urlParams().get("start")).toBe("100");
+    expect(urlParams().has("offset")).toBe(false);
+  });
+
+  it("resets the offset with the page when a facet click returns to the first page", async () => {
+    setLocation("/search?q=foo&start=100&offset=90");
+    installApiDispatch({ search: pagedEnv({ offset: 90 }) });
+    _state.start = 100;
+    _state.offset = 90;
+    await runSearch();
+    await settle();
+    expect(urlParams().get("offset")).toBe("90");
+    // The follow-up search is a first-page one: it must not echo the stale offset.
+    installApiDispatch({ search: makeSearchEnv(DOCS) });
+    document.querySelector("#facet-body ul li.list-group-item a").click();
+    await settle();
+    expect(_state.start).toBe(0);
+    expect(_state.offset).toBe(0);
+    expect("offset" in searchParams(1)).toBe(false);
+    expect(urlParams().has("offset")).toBe(false);
+    expect(urlParams().has("start")).toBe(false);
+  });
+
+  it("clearSearchState resets the offset", () => {
+    _state.offset = 90;
+    clearSearchState();
+    expect(_state.offset).toBe(0);
+  });
+
+  describe("runFromUrl", () => {
+    it("reads offset back with start", async () => {
+      installApiDispatch({ search: pagedEnv({ offset: 90 }) });
+      setLocation("/search?q=foo&start=100&offset=90");
+      runFromUrl();
+      await settle();
+      expect(searchParams(0).start).toBe(100);
+      expect(searchParams(0).offset).toBe(90);
+    });
+
+    it("treats a missing or invalid offset as 0", async () => {
+      installApiDispatch({ search: pagedEnv() });
+      for (const bad of ["", "&offset=abc", "&offset=-3", "&offset=1.5", "&offset="]) {
+        api.get.mockClear();
+        setLocation("/search?q=foo&start=100" + bad);
+        runFromUrl();
+        await settle();
+        expect("offset" in searchParams(0), bad).toBe(false);
+      }
+    });
+
+    it("does not send an offset that arrived without start", async () => {
+      installApiDispatch({ search: makeSearchEnv(DOCS) });
+      setLocation("/search?q=foo&offset=90");
+      runFromUrl();
+      await settle();
+      expect("offset" in searchParams(0)).toBe(false);
+      expect(urlParams().has("offset")).toBe(false);
+    });
+  });
+});
+
 describe("runSearch — favorites and similar docs", () => {
   // /api/v2 can only add a favorite (POST /documents/{id}/favorite answers a repeat as an
   // idempotent success; there is no DELETE), so a favorited star is a state, not a toggle.
@@ -1730,7 +1927,7 @@ describe("attach — wiring", () => {
 
     // 1. Header form submit → navigate to search?q=..., syncs inputs.
     // The drawer's labels ride along; a legacy URL's sdh and as.* conditions do not.
-    setLocation("/search?q=old&sdh=h1&as.q=legacy&fields.label=lblB");
+    setLocation("/search?q=old&sdh=h1&as.q=legacy&fields.label=lblB&start=100&offset=90");
     document.getElementById("labelSearchOption").value = "lblA";
     document.getElementById("query").value = "hello";
     document.getElementById("search-form").dispatchEvent(new Event("submit", { cancelable: true }));
@@ -1741,6 +1938,9 @@ describe("attach — wiring", () => {
     expect(headerParams.getAll("fields.label")).toEqual(["lblA"]);
     expect(headerParams.has("sdh")).toBe(false);
     expect(headerParams.has("as.q")).toBe(false);
+    // A new query starts on the first page: neither start nor the old query's offset rides along.
+    expect(headerParams.has("start")).toBe(false);
+    expect(headerParams.has("offset")).toBe(false);
     setLocation("/");
     expect(document.getElementById("contentQuery").value).toBe("hello");
     // The button is not disabled after a search: a disabled default button would stop Enter in the box.

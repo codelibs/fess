@@ -692,7 +692,7 @@ export function attach() {
 
     const params = new URLSearchParams(location.search);
     // ADV-5: delete only the params owned by advance search, preserve unrelated ones
-    for (const key of ["q", "start", "num", "sort", "lang", "ex_q"]) params.delete(key);
+    for (const key of ["q", "start", "offset", "num", "sort", "lang", "ex_q"]) params.delete(key);
     for (const key of Array.from(params.keys())) { if (key.startsWith("fields.")) params.delete(key); }
     if (q) params.set("q", q);
 
