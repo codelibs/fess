@@ -193,6 +193,17 @@ public class AdminBackupActionTest extends UnitFessTestCase {
      * encrypted, is not written to the backup file as it is.
      */
     @Test
+    public void test_isSessionIndex() throws Exception {
+        assertTrue(AdminBackupAction.isSessionIndex("fess_config.session"));
+        assertTrue(AdminBackupAction.isSessionIndex("fess_config.session.backup.20261110000000"));
+        assertTrue(AdminBackupAction.isSessionIndex("myconfig.session"));
+        assertFalse(AdminBackupAction.isSessionIndex("fess_config.web_config"));
+        assertFalse(AdminBackupAction.isSessionIndex("fess_config.coordinator"));
+        assertFalse(AdminBackupAction.isSessionIndex("session"));
+        assertFalse(AdminBackupAction.isSessionIndex(null));
+    }
+
+    @Test
     public void test_encryptPassword_encryptsLegacyPlainText() throws Exception {
         for (final String index : new String[] { "fess_config.web_authentication", "fess_config.file_authentication",
                 "myprefix.web_authentication" }) {

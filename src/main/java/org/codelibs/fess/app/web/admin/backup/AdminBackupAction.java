@@ -124,6 +124,12 @@ public class AdminBackupAction extends FessAdminAction {
      */
     private static final List<String> PASSWORD_INDICES = List.of("web_authentication", "file_authentication");
 
+    /**
+     * The index of the HTTP session store, without its prefix. Its documents are the login state of
+     * the users, which a bearer of the session id can use, so no export carries them.
+     */
+    private static final String SESSION_INDEX = "session";
+
     @Resource
     private AsyncManager asyncManager;
 
@@ -561,6 +567,9 @@ public class AdminBackupAction extends FessAdminAction {
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
                         SearchEngineUtil.scroll(alias, hit -> {
+                            if (isSessionIndex(hit.getIndex())) {
+                                return true;
+                            }
                             try {
                                 writer.write("{\"index\":{\"_index\":\"" + hit.getIndex() + "\",\"_id\":\""
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
@@ -583,6 +592,22 @@ public class AdminBackupAction extends FessAdminAction {
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), this::asListHtml);
         return redirect(getClass()); // no-op
+    }
+
+    /**
+     * Tells whether an index is the HTTP session store, or a copy of it that a rebuild left behind.
+     * The store joins the {@code fess_config} alias like the other configuration indices, so the export
+     * of that alias would otherwise write the sessions into the backup file.
+     *
+     * @param index The index name of the document.
+     * @return true for a session index.
+     */
+    public static boolean isSessionIndex(final String index) {
+        if (index == null) {
+            return false;
+        }
+        final String[] parts = index.split("\\.");
+        return parts.length > 1 && SESSION_INDEX.equals(parts[1]);
     }
 
     /**

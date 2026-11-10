@@ -34,6 +34,8 @@ import org.apache.tomcat.util.http.CookieProcessorBase;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
+import org.codelibs.fess.tomcat.session.FessSessionManager;
+import org.codelibs.fess.tomcat.session.FessSessionValve;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
 import org.codelibs.fess.tomcat.webresources.FessWebResourceRoot;
 import org.dbflute.tomcat.TomcatBoot;
@@ -75,6 +77,9 @@ public class FessBoot extends TomcatBoot {
 
     /** System property key for Tomcat configuration path */
     private static final String TOMCAT_CONFIG_PATH = "tomcat.config.path";
+
+    /** Environment variable that selects the HTTP session store ({@code opensearch}); unset keeps Tomcat's in-memory sessions */
+    protected static final String FESS_SESSION_STORE = "FESS_SESSION_STORE";
 
     /**
      * Constructs a new FessBoot instance with the specified port and context path.
@@ -305,6 +310,27 @@ public class FessBoot extends TomcatBoot {
         if (context != null) {
             context.setResources(new FessWebResourceRoot(context));
             context.setCookieProcessor(new Rfc6265CookieProcessor());
+            setupSessionStore(context, System.getenv(FESS_SESSION_STORE));
+        }
+    }
+
+    /**
+     * Switches the context to the OpenSearch-backed HTTP session store when requested.
+     * Nothing changes for an unset, empty or {@code memory} value; an unknown value is reported and treated as {@code memory}.
+     *
+     * @param context the web application context
+     * @param sessionStore the value of {@link #FESS_SESSION_STORE}, or {@code null}
+     */
+    protected static void setupSessionStore(final Context context, final String sessionStore) {
+        if (sessionStore == null || sessionStore.isBlank()) {
+            return;
+        }
+        final String value = sessionStore.trim();
+        if ("opensearch".equalsIgnoreCase(value)) {
+            context.setManager(new FessSessionManager());
+            context.getPipeline().addValve(new FessSessionValve());
+        } else if (!"memory".equalsIgnoreCase(value)) {
+            System.err.println("Unknown " + FESS_SESSION_STORE + " value: " + value + ". Sessions are kept in memory.");
         }
     }
 

@@ -1,0 +1,26 @@
+{
+    "properties": {
+      "digest": {
+        "type": "keyword"
+      },
+      "formatVersion": {
+        "type": "keyword"
+      },
+      "data": {
+        "type": "binary",
+        "doc_values": false
+      },
+      "creationTime": {
+        "type": "long"
+      },
+      "lastAccessedTime": {
+        "type": "long"
+      },
+      "maxInactiveInterval": {
+        "type": "integer"
+      },
+      "expiredTime": {
+        "type": "long"
+      }
+    }
+}
