@@ -531,6 +531,25 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_webRenderData_registersOffsetForPagerLinks() {
+        // The pager links send the offset of the fused page back with the next request. It is registered under a name
+        // of its own: ListForm has an "offset" field too, and that one would shadow it in the page.
+        final AdminSearchlistAction.WebRenderData webRenderData = new AdminSearchlistAction.WebRenderData();
+        webRenderData.setOffset(7);
+        final RenderData renderData = new RenderData();
+        webRenderData.register(renderData);
+        assertEquals(7, renderData.getDataMap().get("fusionOffset"));
+    }
+
+    @Test
+    public void test_pagerLinksCarryOffset() throws Exception {
+        final String jsp = java.nio.file.Files
+                .readString(java.nio.file.Paths.get("src/main/webapp/WEB-INF/view/admin/searchlist/admin_searchlist.jsp"));
+        // prev, numbered and next links
+        assertEquals(3, jsp.split("&offset=\\$\\{f:u\\(fusionOffset\\)\\}", -1).length - 1);
+    }
+
+    @Test
     public void test_registerExtraFields_withCustomFields() throws Exception {
         final AdminSearchlistAction action = new AdminSearchlistAction();
 

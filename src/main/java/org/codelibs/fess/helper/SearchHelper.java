@@ -214,6 +214,7 @@ public class SearchHelper {
         data.setAllRecordCount(queryResponseList.getAllRecordCount());
         data.setAllRecordCountRelation(queryResponseList.getAllRecordCountRelation());
         data.setAllPageCount(queryResponseList.getAllPageCount());
+        data.setOffset(queryResponseList.getOffset());
         data.setExistNextPage(queryResponseList.isExistNextPage());
         data.setExistPrevPage(queryResponseList.isExistPrevPage());
         data.setCurrentStartRecordNumber(queryResponseList.getCurrentStartRecordNumber());

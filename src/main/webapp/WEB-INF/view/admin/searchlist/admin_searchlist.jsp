@@ -140,7 +140,7 @@ ${fe:html(true)}
                                                 <c:if test="${existPrevPage}">
                                                     <li class="page-item"><la:link
                                                                                    styleClass="page-link"
-                                                                                   href="prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
+                                                                                   href="prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&offset=${f:u(fusionOffset)}&labelTypeValue=${f:u(labelTypeValue)}">
                                                         <la:message key="labels.prev_page"/>
                                                     </la:link></li>
                                                 </c:if>
@@ -155,7 +155,7 @@ ${fe:html(true)}
                                                             <c:if test="${pageNumber == currentPageNumber}">class="page-item active"</c:if>>
                                                         <la:link
                                                                 styleClass="page-link"
-                                                                href="move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">${f:h(pageNumber)}</la:link>
+                                                                href="move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&offset=${f:u(fusionOffset)}&labelTypeValue=${f:u(labelTypeValue)}">${f:h(pageNumber)}</la:link>
                                                     </li>
                                                 </c:forEach>
                                                 <c:if test="${existNextPage}">
@@ -163,7 +163,7 @@ ${fe:html(true)}
                                                             class="page-item<c:if test="${!existNextPage}"> disabled</c:if>">
                                                         <la:link
                                                                 styleClass="page-link"
-                                                                href="next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
+                                                                href="next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&offset=${f:u(fusionOffset)}&labelTypeValue=${f:u(labelTypeValue)}">
                                                             <la:message key="labels.next_page"/>
                                                         </la:link>
                                                     </li>
