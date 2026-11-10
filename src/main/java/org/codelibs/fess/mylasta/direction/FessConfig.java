@@ -10686,7 +10686,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'password.changed.check.interval'. <br>
-     * The value is, e.g. 10 <br>
+     * The value is, e.g. 60 <br>
      * comment: Seconds between two looks of a login session of a local user at the time the password was last changed, as stored in the user index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -10694,7 +10694,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'password.changed.check.interval' as {@link Integer}. <br>
-     * The value is, e.g. 10 <br>
+     * The value is, e.g. 60 <br>
      * comment: Seconds between two looks of a login session of a local user at the time the password was last changed, as stored in the user index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
@@ -16281,7 +16281,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_LOWERCASE, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
-            defaultMap.put(FessConfig.PASSWORD_CHANGED_CHECK_INTERVAL, "10");
+            defaultMap.put(FessConfig.PASSWORD_CHANGED_CHECK_INTERVAL, "60");
             defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
             defaultMap.put(FessConfig.RAG_CHAT_LOG_ENABLED, "true");
             defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS, "5");

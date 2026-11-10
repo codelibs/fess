@@ -64,7 +64,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     private static final Logger logger = LogManager.getLogger(FessLoginAssist.class);
 
     /** The seconds used when {@code password.changed.check.interval} is not a number. */
-    protected static final int DEFAULT_PASSWORD_CHECK_INTERVAL = 10;
+    protected static final int DEFAULT_PASSWORD_CHECK_INTERVAL = 60;
 
     /**
      * Default constructor.
