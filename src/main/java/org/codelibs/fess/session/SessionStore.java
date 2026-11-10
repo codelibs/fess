@@ -237,6 +237,10 @@ public class SessionStore {
         if (!(source.get(DATA) instanceof final String data)) {
             return null;
         }
+        // Base64 takes 4 characters for 3 bytes: a longer text is decoded to more than the serializer accepts
+        if (data.length() > SessionDataSerializer.MAX_PAYLOAD_BYTES / 3 * 4 + 8) {
+            return null;
+        }
         final Map<String, Object> attributes = sessionDataSerializer.fromBytes(Base64.getDecoder().decode(data));
         if (attributes == null) {
             return null;

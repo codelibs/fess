@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -62,10 +63,16 @@ import org.lastaflute.web.login.redirect.LoginRedirectBean;
 import org.lastaflute.web.token.DoubleSubmitTokenMap;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
+import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.BooleanArraySerializer;
+import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.ObjectArraySerializer;
+import com.esotericsoftware.kryo.serializers.DefaultSerializers.ArraysAsListSerializer;
+import com.esotericsoftware.kryo.serializers.DefaultSerializers.TreeMapSerializer;
+import com.esotericsoftware.kryo.serializers.DefaultSerializers.TreeSetSerializer;
 import com.esotericsoftware.kryo.serializers.MapSerializer;
 
 /**
@@ -90,6 +97,13 @@ import com.esotericsoftware.kryo.serializers.MapSerializer;
  * {@link User}, and the LDAP environment of an {@link LdapUser}, are not written at all, and the attributes
  * named by {@link #isExcluded(String)} are dropped by name because their values are plain strings that the
  * type cannot tell apart.</p>
+ *
+ * <p>The stored bytes are not trusted: anyone who can write the session index can write anything. Every
+ * length read from them is checked before something is allocated or looped over: the payload is at most
+ * {@link #MAX_PAYLOAD_BYTES}, a count cannot exceed the bytes that are left (see {@link #checkLength} and
+ * {@link #checkElementCount}) nor the absolute {@link #MAX_ELEMENTS}, the arrays of Kryo are checked by
+ * {@link BoundedInput}, the collections and maps by the serializers below, and the nesting is limited to
+ * {@link #MAX_DEPTH}. A violation is a {@link KryoException}, so that only the attribute concerned is dropped.</p>
  *
  * <p>Plugins add classes with {@link #register(Class, Serializer)} while the DI container initializes. The
  * registrations are fixed as soon as the format version is asked for or the first Kryo is created.</p>
@@ -116,6 +130,24 @@ public class SessionDataSerializer {
     /** The classes whose instances are kept as they are in the arguments of a message. */
     protected static final Set<Class<?>> MESSAGE_VALUE_TYPES = Set.of(String.class, Integer.class, Long.class, Short.class, Byte.class,
             Boolean.class, Double.class, Float.class, Character.class, BigDecimal.class, BigInteger.class, Date.class, Timestamp.class);
+
+    /** The largest payload that is written or read. A session is a few kilobytes; this only stops a hostile length. */
+    public static final int MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
+
+    /** The largest number of elements of a collection, a map or an array that is read. */
+    protected static final int MAX_ELEMENTS = 1_000_000;
+
+    /**
+     * The number of elements that is accepted even when fewer bytes are left, because elements such as the
+     * nulls of a list of one type take no bytes at all.
+     */
+    protected static final int ZERO_BYTE_ELEMENTS = 1024;
+
+    /** The largest limit of a {@link LruHashMap} that is restored; a larger one is lowered to it. */
+    protected static final int MAX_LRU_LIMIT = 10_000;
+
+    /** The deepest nesting of objects that is written or read; it keeps a hostile nesting from overflowing the stack. */
+    protected static final int MAX_DEPTH = 64;
 
     /** How many times the entries of a map that another thread changes are copied before giving up. */
     protected static final int SNAPSHOT_RETRY = 3;
@@ -234,6 +266,7 @@ public class SessionDataSerializer {
         lock();
         final Kryo kryo = new Kryo();
         kryo.setRegistrationRequired(true);
+        kryo.setMaxDepth(MAX_DEPTH);
         for (final Registration r : registrations) {
             if (r.serializer() == null) {
                 kryo.register(r.type());
@@ -255,22 +288,28 @@ public class SessionDataSerializer {
                 Double.class, double[].class, Float.class, float[].class, Boolean.class, boolean[].class, Byte.class, byte[].class,
                 Short.class, short[].class, Character.class, char[].class, Date.class, Timestamp.class, BigDecimal.class, BigInteger.class,
                 TreeSet.class, TreeMap.class }) {
-            list.add(new Registration(type, null));
+            // The default serializers of Kryo for these allocate from the length they read, except those of the
+            // primitive arrays, which BoundedInput checks.
+            final Supplier<Serializer<?>> bounded = type == String[].class ? BoundedStringArraySerializer::new
+                    : type == boolean[].class ? BoundedBooleanArraySerializer::new
+                            : type == TreeSet.class ? BoundedTreeSetSerializer::new
+                                    : type == TreeMap.class ? BoundedTreeMapSerializer::new : null;
+            list.add(new Registration(type, bounded));
         }
-        list.add(new Registration(ArrayList.class, CollectionSerializer::new));
-        list.add(new Registration(LinkedList.class, CollectionSerializer::new));
-        list.add(new Registration(HashSet.class, CollectionSerializer::new));
-        list.add(new Registration(LinkedHashSet.class, CollectionSerializer::new));
-        list.add(new Registration(HashMap.class, MapSerializer::new));
-        list.add(new Registration(LinkedHashMap.class, MapSerializer::new));
-        list.add(new Registration(ConcurrentHashMap.class, MapSerializer::new));
+        list.add(new Registration(ArrayList.class, BoundedCollectionSerializer::new));
+        list.add(new Registration(LinkedList.class, BoundedCollectionSerializer::new));
+        list.add(new Registration(HashSet.class, BoundedCollectionSerializer::new));
+        list.add(new Registration(LinkedHashSet.class, BoundedCollectionSerializer::new));
+        list.add(new Registration(HashMap.class, BoundedMapSerializer::new));
+        list.add(new Registration(LinkedHashMap.class, BoundedMapSerializer::new));
+        list.add(new Registration(ConcurrentHashMap.class, BoundedMapSerializer::new));
         list.add(new Registration(Collections.emptyList().getClass(), null));
         list.add(new Registration(Collections.emptySet().getClass(), null));
         list.add(new Registration(Collections.emptyMap().getClass(), null));
         list.add(new Registration(Collections.singletonList(null).getClass(), null));
         list.add(new Registration(Collections.singleton(null).getClass(), null));
         list.add(new Registration(Collections.singletonMap(null, null).getClass(), null));
-        list.add(new Registration(Arrays.asList().getClass(), null));
+        list.add(new Registration(Arrays.asList().getClass(), BoundedArraysAsListSerializer::new));
 
         list.add(new Registration(Locale.class, LocaleSerializer::new));
         list.add(new Registration(LruHashMap.class, LruHashMapSerializer::new));
@@ -324,7 +363,8 @@ public class SessionDataSerializer {
         final Kryo kryo = kryoThreadLocal.get();
         final Map<String, byte[]> entries = new LinkedHashMap<>();
         if (attributes != null) {
-            final Output scratch = new Output(256, -1);
+            final Output scratch = new Output(256, MAX_PAYLOAD_BYTES);
+            int total = 0;
             for (final Map.Entry<String, Object> entry : new ArrayList<>(attributes.entrySet())) {
                 final String name = entry.getKey();
                 final Object value = entry.getValue();
@@ -340,7 +380,12 @@ public class SessionDataSerializer {
                 try {
                     scratch.reset();
                     kryo.writeClassAndObject(scratch, value);
-                    entries.put(name, scratch.toBytes());
+                    final byte[] bytes = scratch.toBytes();
+                    total += bytes.length + name.length() * 3 + 10;
+                    if (total > MAX_PAYLOAD_BYTES - 64) {
+                        throw new KryoException("The stored session would exceed " + MAX_PAYLOAD_BYTES + " bytes.");
+                    }
+                    entries.put(name, bytes);
                 } catch (final RuntimeException e) {
                     kryo.reset();
                     if (skippedNames != null) {
@@ -376,19 +421,29 @@ public class SessionDataSerializer {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
+        if (bytes.length > MAX_PAYLOAD_BYTES) {
+            LogUtil.warnOnce(logger, "read:size", "The stored session is ignored because it is larger than {} bytes.", MAX_PAYLOAD_BYTES);
+            return null;
+        }
         final Kryo kryo = kryoThreadLocal.get();
         final Map<String, Object> attributes = new LinkedHashMap<>();
         try {
-            final Input input = new Input(bytes);
+            final Input input = new BoundedInput(bytes, 0, bytes.length);
             if (input.readVarInt(true) != FORMAT_NUMBER || input.readLong() != fingerprint) {
                 return null;
             }
             final int count = input.readVarInt(true);
+            // an entry takes more than a byte: the name and the length
+            checkLength(input, count);
             for (int i = 0; i < count; i++) {
                 final String name = input.readString();
-                final byte[] value = input.readBytes(input.readVarInt(true));
+                final int length = input.readVarInt(true);
+                checkBytes(input, length, 1);
+                // the attribute is read from its own bytes, so that it cannot read into the next one
+                final Input value = new BoundedInput(bytes, input.position(), length);
+                input.skip(length);
                 try {
-                    final Object object = kryo.readClassAndObject(new Input(value));
+                    final Object object = kryo.readClassAndObject(value);
                     if (object != null) {
                         attributes.put(name, object);
                     }
@@ -435,11 +490,247 @@ public class SessionDataSerializer {
         if (size == 0) {
             return null;
         }
+        checkLength(input, size - 1);
         final String[] values = new String[size - 1];
         for (int i = 0; i < values.length; i++) {
             values[i] = input.readString();
         }
         return values;
+    }
+
+    /**
+     * Checks a count read from the stored bytes where each of the elements takes at least a byte, so that a
+     * count larger than the bytes that are left, which cannot be true, is refused before anything is
+     * allocated for it. Serializers of plugins use it for the counts they read.
+     *
+     * @param input the input the count was read from
+     * @param length the count
+     * @throws KryoException if the count is negative, larger than {@link #MAX_ELEMENTS} or than the bytes left
+     */
+    public static void checkLength(final Input input, final int length) {
+        final int remaining = input.limit() - input.position();
+        if (length < 0 || length > MAX_ELEMENTS || length > remaining) {
+            throw new KryoException("Invalid length " + length + " with " + remaining + " bytes left.");
+        }
+    }
+
+    /**
+     * Checks a count of the elements of a collection or a map. It is the same as {@link #checkLength} except
+     * that up to {@link #ZERO_BYTE_ELEMENTS} elements are accepted without bytes, as a list of nulls takes none.
+     *
+     * @param input the input the count was read from
+     * @param length the count
+     * @throws KryoException if the count is not plausible
+     */
+    public static void checkElementCount(final Input input, final int length) {
+        if (length > ZERO_BYTE_ELEMENTS) {
+            checkLength(input, length);
+        } else if (length < 0) {
+            throw new KryoException("Invalid length " + length);
+        }
+    }
+
+    /**
+     * Checks the length of an array in bytes of the bytes that are left.
+     */
+    private static void checkBytes(final Input input, final int length, final int bytesPerElement) {
+        final long remaining = input.limit() - input.position();
+        if (length < 0 || (long) length * bytesPerElement > remaining) {
+            throw new KryoException("Invalid length " + length + " with " + remaining + " bytes left.");
+        }
+    }
+
+    /**
+     * An input that checks the length of what it reads in bulk against the bytes that are left before it
+     * allocates, which Kryo does not: an array of 2 billion elements is allocated before the first byte is read.
+     * It reads from a byte array only.
+     */
+    protected static class BoundedInput extends Input {
+
+        /**
+         * Creates the input.
+         *
+         * @param bytes the bytes
+         * @param offset the first byte to read
+         * @param length the number of bytes to read
+         */
+        protected BoundedInput(final byte[] bytes, final int offset, final int length) {
+            super(bytes, offset, length);
+        }
+
+        @Override
+        public byte[] readBytes(final int length) {
+            checkBytes(this, length, 1);
+            return super.readBytes(length);
+        }
+
+        @Override
+        public String readString() {
+            // A UTF-8 string allocates its characters from the length before it reads them, each takes a byte.
+            if (readVarIntFlag()) {
+                final int start = position();
+                final int charCount = readVarIntFlag(true);
+                if (charCount > 1) {
+                    checkBytes(this, charCount - 1, 1);
+                }
+                setPosition(start);
+            }
+            return super.readString();
+        }
+
+        @Override
+        public int[] readInts(final int length) {
+            checkBytes(this, length, 4);
+            return super.readInts(length);
+        }
+
+        @Override
+        public int[] readInts(final int length, final boolean optimizePositive) {
+            checkBytes(this, length, 1);
+            return super.readInts(length, optimizePositive);
+        }
+
+        @Override
+        public long[] readLongs(final int length) {
+            checkBytes(this, length, 8);
+            return super.readLongs(length);
+        }
+
+        @Override
+        public long[] readLongs(final int length, final boolean optimizePositive) {
+            checkBytes(this, length, 1);
+            return super.readLongs(length, optimizePositive);
+        }
+
+        @Override
+        public float[] readFloats(final int length) {
+            checkBytes(this, length, 4);
+            return super.readFloats(length);
+        }
+
+        @Override
+        public double[] readDoubles(final int length) {
+            checkBytes(this, length, 8);
+            return super.readDoubles(length);
+        }
+
+        @Override
+        public short[] readShorts(final int length) {
+            checkBytes(this, length, 2);
+            return super.readShorts(length);
+        }
+
+        @Override
+        public char[] readChars(final int length) {
+            checkBytes(this, length, 2);
+            return super.readChars(length);
+        }
+
+        @Override
+        public boolean[] readBooleans(final int length) {
+            checkBytes(this, length, 1);
+            return super.readBooleans(length);
+        }
+    }
+
+    /**
+     * A {@link CollectionSerializer} that checks the count before it creates the collection with it.
+     */
+    @SuppressWarnings("rawtypes")
+    protected static class BoundedCollectionSerializer extends CollectionSerializer<Collection> {
+        @Override
+        protected Collection create(final Kryo kryo, final Input input, final Class<? extends Collection> type, final int size) {
+            checkElementCount(input, size);
+            return super.create(kryo, input, type, size);
+        }
+    }
+
+    /**
+     * A {@link MapSerializer} that checks the count before it creates the map with it.
+     */
+    @SuppressWarnings("rawtypes")
+    protected static class BoundedMapSerializer extends MapSerializer<Map> {
+        @Override
+        protected Map create(final Kryo kryo, final Input input, final Class<? extends Map> type, final int size) {
+            checkElementCount(input, size);
+            return super.create(kryo, input, type, size);
+        }
+    }
+
+    /**
+     * The serializer of {@link TreeSet} of Kryo, with the count checked.
+     */
+    @SuppressWarnings("rawtypes")
+    protected static class BoundedTreeSetSerializer extends TreeSetSerializer {
+        @Override
+        protected TreeSet create(final Kryo kryo, final Input input, final Class<? extends TreeSet> type, final int size) {
+            checkElementCount(input, size);
+            return super.create(kryo, input, type, size);
+        }
+    }
+
+    /**
+     * The serializer of {@link TreeMap} of Kryo, with the count checked.
+     */
+    @SuppressWarnings("rawtypes")
+    protected static class BoundedTreeMapSerializer extends TreeMapSerializer {
+        @Override
+        protected TreeMap create(final Kryo kryo, final Input input, final Class<? extends TreeMap> type, final int size) {
+            checkElementCount(input, size);
+            return super.create(kryo, input, type, size);
+        }
+    }
+
+    /**
+     * The serializer of the list of {@link Arrays#asList(Object[])} of Kryo, with the count checked.
+     */
+    @SuppressWarnings("rawtypes")
+    protected static class BoundedArraysAsListSerializer extends ArraysAsListSerializer {
+        @Override
+        protected List create(final Kryo kryo, final Input input, final Class type, final int size) {
+            checkElementCount(input, size);
+            return super.create(kryo, input, type, size);
+        }
+    }
+
+    /**
+     * The serializer of {@code String[]} of Kryo, which allocates the array from the length it reads, with the
+     * length checked. The bytes written are the same.
+     */
+    protected static class BoundedStringArraySerializer extends ObjectArraySerializer {
+
+        /** Creates the serializer. */
+        protected BoundedStringArraySerializer() {
+            super(null, String[].class);
+        }
+
+        @Override
+        public Object[] read(final Kryo kryo, final Input input, final Class type) {
+            final int start = input.position();
+            final int size = input.readVarInt(true);
+            if (size > 0) {
+                checkLength(input, size - 1);
+            }
+            input.setPosition(start);
+            return super.read(kryo, input, type);
+        }
+    }
+
+    /**
+     * The serializer of {@code boolean[]} of Kryo, which allocates the array from the length it reads and
+     * reads the elements one by one, with the length checked. The bytes written are the same.
+     */
+    protected static class BoundedBooleanArraySerializer extends BooleanArraySerializer {
+        @Override
+        public boolean[] read(final Kryo kryo, final Input input, final Class type) {
+            final int start = input.position();
+            final int size = input.readVarInt(true);
+            if (size > 0) {
+                checkLength(input, size - 1);
+            }
+            input.setPosition(start);
+            return super.read(kryo, input, type);
+        }
     }
 
     /**
@@ -517,8 +808,15 @@ public class SessionDataSerializer {
 
         @Override
         public LruHashMap<Object, Object> read(final Kryo kryo, final Input input, final Class<? extends LruHashMap<Object, Object>> type) {
-            final LruHashMap<Object, Object> map = new LruHashMap<>(input.readVarInt(true));
+            // The limit is a capacity that the map allocates on its first entry, so a hostile one is lowered.
+            final int limit = input.readVarInt(true);
+            if (limit < 1) {
+                throw new KryoException("Invalid limit of the map: " + limit);
+            }
+            final LruHashMap<Object, Object> map = new LruHashMap<>(Math.min(limit, MAX_LRU_LIMIT));
             final int size = input.readVarInt(true);
+            // a key and a value take two bytes
+            checkLength(input, size);
             for (int i = 0; i < size; i++) {
                 final Object key = kryo.readClassAndObject(input);
                 map.put(key, kryo.readClassAndObject(input));
@@ -574,13 +872,17 @@ public class SessionDataSerializer {
         public UserMessages read(final Kryo kryo, final Input input, final Class<? extends UserMessages> type) {
             final UserMessages messages = factory.get();
             final int propertyCount = input.readVarInt(true);
+            checkLength(input, propertyCount);
             for (int i = 0; i < propertyCount; i++) {
                 final String property = input.readString();
                 final int messageCount = input.readVarInt(true);
+                checkLength(input, messageCount);
                 for (int j = 0; j < messageCount; j++) {
                     final String key = input.readString();
                     final boolean resource = input.readBoolean();
-                    final Object[] values = new Object[input.readVarInt(true)];
+                    final int valueCount = input.readVarInt(true);
+                    checkLength(input, valueCount);
+                    final Object[] values = new Object[valueCount];
                     for (int k = 0; k < values.length; k++) {
                         values[k] = kryo.readClassAndObject(input);
                     }
@@ -634,6 +936,7 @@ public class SessionDataSerializer {
         public DoubleSubmitTokenMap read(final Kryo kryo, final Input input, final Class<? extends DoubleSubmitTokenMap> type) {
             final DoubleSubmitTokenMap tokens = new DoubleSubmitTokenMap();
             final int size = input.readVarInt(true);
+            checkLength(input, size);
             for (int i = 0; i < size; i++) {
                 final String className = input.readString();
                 final String token = input.readString();
@@ -755,6 +1058,7 @@ public class SessionDataSerializer {
             user.setGroups(readStrings(input));
             final int size = input.readVarInt(true);
             if (size > 0) {
+                checkLength(input, size - 1);
                 final Map<String, String> attributes = new LinkedHashMap<>();
                 for (int i = 1; i < size; i++) {
                     attributes.put(input.readString(), input.readString());

@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.fess.Constants;
@@ -49,6 +50,7 @@ import org.lastaflute.web.login.redirect.LoginRedirectBean;
 import org.lastaflute.web.token.DoubleSubmitTokenMap;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -619,6 +621,376 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
             thread.join();
         }
         assertTrue(errors.toString(), errors.isEmpty());
+    }
+
+    // ===================================================================================
+    //                                                               Untrusted stored bytes
+    //                                                               ======================
+    private Kryo hostileKryo() {
+        serializer.getFormatVersion();
+        return serializer.createKryo();
+    }
+
+    /** The bytes of one attribute: the class, then what the serializer of the class reads. */
+    private byte[] blob(final Class<?> type, final Consumer<Output> body) {
+        final Output output = new Output(64, -1);
+        hostileKryo().writeClass(output, type);
+        body.accept(output);
+        return output.toBytes();
+    }
+
+    /** The bytes of a session with the attributes as they are given, in the layout of the serializer. */
+    private byte[] container(final Map<String, byte[]> blobs) {
+        serializer.getFormatVersion();
+        final Output output = new Output(64, -1);
+        output.writeVarInt(SessionDataSerializer.FORMAT_NUMBER, true);
+        output.writeLong(serializer.fingerprint);
+        output.writeVarInt(blobs.size(), true);
+        blobs.forEach((name, bytes) -> {
+            output.writeString(name);
+            output.writeVarInt(bytes.length, true);
+            output.writeBytes(bytes);
+        });
+        return output.toBytes();
+    }
+
+    private Map<String, byte[]> hostile(final byte[] bad) {
+        final Map<String, byte[]> blobs = new LinkedHashMap<>();
+        blobs.put("bad", bad);
+        blobs.put("good", blob(String.class, o -> o.writeString("ok")));
+        return blobs;
+    }
+
+    /** Asserts that the attribute is dropped, the others are read, and that nothing was allocated from the length. */
+    private void assertDropped(final String what, final byte[] bad) {
+        final Map<String, Object> restored = serializer.fromBytes(container(hostile(bad)));
+        if (restored == null || !"ok".equals(restored.get("good")) || restored.containsKey("bad")) {
+            fail(what + ": " + restored);
+        }
+    }
+
+    private Map<String, Consumer<Output>> countBodies(final int n) {
+        final Map<String, Consumer<Output>> bodies = new LinkedHashMap<>();
+        // a collection: the flag of the type and the count + 1
+        final Consumer<Output> collection = o -> o.writeVarIntFlag(false, n, true);
+        final Consumer<Output> counted = o -> o.writeVarInt(n, true);
+        bodies.put("ArrayList", collection);
+        bodies.put("LinkedList", collection);
+        bodies.put("HashSet", collection);
+        bodies.put("LinkedHashSet", collection);
+        bodies.put("TreeSet", collection);
+        bodies.put("Arrays.asList", collection);
+        bodies.put("HashMap", counted);
+        bodies.put("LinkedHashMap", counted);
+        bodies.put("ConcurrentHashMap", counted);
+        bodies.put("TreeMap", counted);
+        bodies.put("String[]", counted);
+        bodies.put("String", o -> o.writeVarIntFlag(true, n, true));
+        bodies.put("int[]", counted);
+        bodies.put("long[]", counted);
+        bodies.put("double[]", counted);
+        bodies.put("float[]", counted);
+        bodies.put("short[]", counted);
+        bodies.put("char[]", counted);
+        bodies.put("boolean[]", counted);
+        bodies.put("byte[]", counted);
+        bodies.put("BigInteger", counted);
+        bodies.put("LruHashMap.size", o -> {
+            o.writeVarInt(3, true);
+            o.writeVarInt(n, true);
+        });
+        bodies.put("UserMessages.properties", counted);
+        bodies.put("UserMessages.messages", o -> {
+            o.writeVarInt(1, true);
+            o.writeString("p");
+            o.writeVarInt(n, true);
+        });
+        bodies.put("UserMessages.values", o -> {
+            o.writeVarInt(1, true);
+            o.writeString("p");
+            o.writeVarInt(1, true);
+            o.writeString("key");
+            o.writeBoolean(true);
+            o.writeVarInt(n, true);
+        });
+        bodies.put("DoubleSubmitTokenMap", counted);
+        bodies.put("User.roles", o -> o.writeString("alice"));
+        bodies.put("User.groups", o -> o.writeString("alice"));
+        bodies.put("User.attributes", o -> o.writeString("alice"));
+        bodies.put("LdapUser.permissions", o -> {
+            o.writeString("alice");
+            o.writeBoolean(false);
+        });
+        return bodies;
+    }
+
+    private Class<?> typeOf(final String body) {
+        return switch (body.split("\\.")[0]) {
+        case "ArrayList" -> ArrayList.class;
+        case "LinkedList" -> java.util.LinkedList.class;
+        case "HashSet" -> java.util.HashSet.class;
+        case "LinkedHashSet" -> java.util.LinkedHashSet.class;
+        case "TreeSet" -> java.util.TreeSet.class;
+        case "Arrays" -> Arrays.asList().getClass();
+        case "HashMap" -> java.util.HashMap.class;
+        case "LinkedHashMap" -> LinkedHashMap.class;
+        case "ConcurrentHashMap" -> ConcurrentHashMap.class;
+        case "TreeMap" -> java.util.TreeMap.class;
+        case "String[]" -> String[].class;
+        case "String" -> String.class;
+        case "int[]" -> int[].class;
+        case "long[]" -> long[].class;
+        case "double[]" -> double[].class;
+        case "float[]" -> float[].class;
+        case "short[]" -> short[].class;
+        case "char[]" -> char[].class;
+        case "boolean[]" -> boolean[].class;
+        case "byte[]" -> byte[].class;
+        case "BigInteger" -> java.math.BigInteger.class;
+        case "LruHashMap" -> LruHashMap.class;
+        case "UserMessages" -> UserMessages.class;
+        case "DoubleSubmitTokenMap" -> DoubleSubmitTokenMap.class;
+        case "User" -> User.class;
+        case "LdapUser" -> LdapUser.class;
+        default -> throw new IllegalArgumentException(body);
+        };
+    }
+
+    @Test
+    public void test_hostileCounts_areDroppedWithoutAllocating() {
+        for (final int n : new int[] { Integer.MAX_VALUE, 1_000_000_000, 100_000, 1025 }) {
+            countBodies(n).forEach((name, body) -> {
+                final Consumer<Output> full;
+                if (name.startsWith("User.")) {
+                    // the name, the count of the field, then nothing: roles, groups, attributes in turn
+                    final int field = List.of("User.roles", "User.groups", "User.attributes").indexOf(name);
+                    full = o -> {
+                        o.writeString("alice");
+                        for (int i = 0; i < field; i++) {
+                            o.writeVarInt(0, true);
+                        }
+                        o.writeVarInt(n, true);
+                    };
+                } else if (name.equals("LdapUser.permissions")) {
+                    full = o -> {
+                        o.writeString("alice");
+                        o.writeBoolean(false);
+                        o.writeVarInt(n, true);
+                    };
+                } else {
+                    full = body;
+                }
+                assertDropped(name + " " + n, blob(typeOf(name), full));
+            });
+        }
+    }
+
+    @Test
+    public void test_hostileCounts_inTheMessagesOfFessMessages() {
+        assertDropped("FessMessages", blob(FessMessages.class, o -> o.writeVarInt(Integer.MAX_VALUE, true)));
+    }
+
+    @Test
+    public void test_hostileCount_aboveTheAbsoluteCap_evenWithBytesBehindIt() {
+        // 2 MiB of bytes, so the count is no larger than what is left, but it is larger than the cap
+        final byte[] bad = blob(ArrayList.class, o -> {
+            o.writeVarIntFlag(false, SessionDataSerializer.MAX_ELEMENTS + 2, true);
+            o.writeBytes(new byte[2 * 1024 * 1024]);
+        });
+        assertDropped("above the cap", bad);
+    }
+
+    @Test
+    public void test_listOfNulls_isStillRead() {
+        final List<Object> nulls = new ArrayList<>(java.util.Collections.nCopies(500, null));
+        final List<?> restored = (List<?>) roundTrip("nulls", nulls).get("nulls");
+        assertEquals(500, restored.size());
+    }
+
+    @Test
+    public void test_lruHashMap_limitIsLowered_andInvalidLimitIsDropped() {
+        final Map<String, Object> restored = serializer.fromBytes(container(hostile(blob(LruHashMap.class, o -> {
+            o.writeVarInt(1_000_000_000, true);
+            o.writeVarInt(0, true);
+        }))));
+        assertEquals(SessionDataSerializer.MAX_LRU_LIMIT, ((LruHashMap<?, ?>) restored.get("bad")).getLimitSize());
+
+        assertDropped("zero limit", blob(LruHashMap.class, o -> {
+            o.writeVarInt(0, true);
+            o.writeVarInt(0, true);
+        }));
+    }
+
+    @Test
+    public void test_framing_hostileLengths_ignoreTheSession() {
+        final byte[] valid = container(hostile(blob(String.class, o -> o.writeString("x"))));
+        final int header = 1 + Long.BYTES;
+
+        // the count of the attributes
+        final Output count = new Output(64, -1);
+        count.writeVarInt(SessionDataSerializer.FORMAT_NUMBER, true);
+        count.writeLong(serializer.fingerprint);
+        count.writeVarInt(Integer.MAX_VALUE, true);
+        assertNull(serializer.fromBytes(count.toBytes()));
+
+        // the length of the bytes of an attribute
+        final Output length = new Output(64, -1);
+        length.writeVarInt(SessionDataSerializer.FORMAT_NUMBER, true);
+        length.writeLong(serializer.fingerprint);
+        length.writeVarInt(1, true);
+        length.writeString("bad");
+        length.writeVarInt(Integer.MAX_VALUE, true);
+        length.writeBytes(new byte[8]);
+        assertNull(serializer.fromBytes(length.toBytes()));
+
+        // the length of a name
+        final Output name = new Output(64, -1);
+        name.writeVarInt(SessionDataSerializer.FORMAT_NUMBER, true);
+        name.writeLong(serializer.fingerprint);
+        name.writeVarInt(1, true);
+        name.writeVarIntFlag(true, Integer.MAX_VALUE, true);
+        assertNull(serializer.fromBytes(name.toBytes()));
+
+        assertNotNull(serializer.fromBytes(valid));
+        assertTrue(valid.length > header);
+    }
+
+    @Test
+    public void test_payloadSize_isCapped() {
+        final byte[] tooLarge = new byte[SessionDataSerializer.MAX_PAYLOAD_BYTES + 1];
+        assertNull(serializer.fromBytes(tooLarge));
+
+        final Map<String, Object> attributes = new LinkedHashMap<>();
+        attributes.put("huge", "a".repeat(SessionDataSerializer.MAX_PAYLOAD_BYTES + 1));
+        attributes.put("small", "ok");
+        final java.util.Set<String> skipped = new java.util.TreeSet<>();
+        final byte[] bytes = serializer.toBytes(attributes, skipped);
+
+        assertEquals(java.util.Set.of("huge"), skipped);
+        assertTrue(bytes.length <= SessionDataSerializer.MAX_PAYLOAD_BYTES);
+        assertEquals("ok", serializer.fromBytes(bytes).get("small"));
+    }
+
+    @Test
+    public void test_payloadSize_sumOfAttributesIsCapped() {
+        final Map<String, Object> attributes = new LinkedHashMap<>();
+        for (int i = 0; i < 6; i++) {
+            attributes.put("a" + i, new byte[SessionDataSerializer.MAX_PAYLOAD_BYTES / 4]);
+        }
+        final java.util.Set<String> skipped = new java.util.TreeSet<>();
+        final byte[] bytes = serializer.toBytes(attributes, skipped);
+
+        assertFalse(skipped.isEmpty());
+        assertTrue(bytes.length <= SessionDataSerializer.MAX_PAYLOAD_BYTES);
+        assertEquals(attributes.size() - skipped.size(), serializer.fromBytes(bytes).size());
+    }
+
+    @Test
+    public void test_nesting_isLimited_whenWrittenAndRead() {
+        Object nested = new ArrayList<>();
+        for (int i = 0; i < SessionDataSerializer.MAX_DEPTH * 2; i++) {
+            final List<Object> outer = new ArrayList<>();
+            outer.add(nested);
+            nested = outer;
+        }
+        final java.util.Set<String> skipped = new java.util.TreeSet<>();
+        serializer.toBytes(Map.of("deep", nested), skipped);
+        assertEquals(java.util.Set.of("deep"), skipped);
+
+        // written by someone else, 100000 levels deep: a stack overflow is not a RuntimeException
+        final Kryo kryo = hostileKryo();
+        assertDropped("nesting", blob(ArrayList.class, o -> {
+            for (int i = 0; i < 100_000; i++) {
+                o.writeVarIntFlag(false, 2, true);
+                kryo.writeClass(o, ArrayList.class);
+            }
+            o.writeVarIntFlag(false, 1, true);
+        }));
+    }
+
+    @Test
+    public void test_pluginSerializer_canCheckItsLengths() {
+        final Output output = new Output(16, -1);
+        output.writeVarInt(5, true);
+        output.writeBytes(new byte[3]);
+        final Input input = new Input(output.toBytes());
+        final int length = input.readVarInt(true);
+        try {
+            SessionDataSerializer.checkLength(input, length);
+            fail();
+        } catch (final KryoException e) {
+            // 5 elements need 5 bytes, 3 are left
+        }
+        SessionDataSerializer.checkLength(input, 3);
+        try {
+            SessionDataSerializer.checkLength(input, -1);
+            fail();
+        } catch (final KryoException e) {
+            // negative
+        }
+    }
+
+    private Map<String, Object> richAttributes() {
+        final Map<String, Object> attributes = new LinkedHashMap<>();
+        attributes.put("string", "token-日本語");
+        attributes.put("strings", new String[] { "a", "b", "c" });
+        attributes.put("ints", new int[] { 1, 2, 3, 1 << 20 });
+        attributes.put("list", new ArrayList<>(List.of("x", "y", 1, 2L)));
+        final LruHashMap<String, String[]> cache = new LruHashMap<>(5);
+        cache.put("q1", new String[] { "d1", "d2" });
+        attributes.put("cache", cache);
+        final FessMessages messages = new FessMessages();
+        messages.add("name", new UserMessage("errors.required", "{labels.name}"));
+        attributes.put("messages", messages);
+        attributes.put("user", new FessUserBean(newUser()));
+        attributes.put("ldap", new LdapUser("bob", true, new String[] { "1bob", "Rdev" }, PermissionState.PENDING));
+        return attributes;
+    }
+
+    @Test
+    public void test_truncatedBytes_neverFail() {
+        final byte[] bytes = serializer.toBytes(richAttributes());
+        assertEquals(richAttributes().size(), serializer.fromBytes(bytes).size());
+        for (int length = 0; length < bytes.length; length++) {
+            serializer.fromBytes(Arrays.copyOf(bytes, length));
+        }
+    }
+
+    @Test
+    public void test_mutatedBytes_neverFail() {
+        final byte[] bytes = serializer.toBytes(richAttributes());
+        final java.util.Random random = new java.util.Random(20261111L);
+        for (int i = 0; i < 20_000; i++) {
+            final byte[] mutated = bytes.clone();
+            final int changes = 1 + random.nextInt(4);
+            for (int j = 0; j < changes; j++) {
+                // keep the header, which is read before anything else, intact most of the time
+                final int index = random.nextInt(8) == 0 ? random.nextInt(mutated.length) : 9 + random.nextInt(mutated.length - 9);
+                mutated[index] = (byte) (random.nextInt(4) == 0 ? 0xff : random.nextInt(256));
+            }
+            serializer.fromBytes(mutated);
+        }
+    }
+
+    @Test
+    public void test_garbageBehindAValidHeader_neverFails() {
+        serializer.getFormatVersion();
+        final java.util.Random random = new java.util.Random(20261112L);
+        for (int i = 0; i < 20_000; i++) {
+            final Output output = new Output(64, -1);
+            output.writeVarInt(SessionDataSerializer.FORMAT_NUMBER, true);
+            output.writeLong(serializer.fingerprint);
+            output.writeVarInt(1 + random.nextInt(3), true);
+            final byte[] garbage = new byte[random.nextInt(64)];
+            random.nextBytes(garbage);
+            if (garbage.length > 0 && random.nextBoolean()) {
+                // a name and a plausible length make the garbage reach the serializers
+                output.writeString("n");
+                output.writeVarInt(garbage.length, true);
+            }
+            output.writeBytes(garbage);
+            serializer.fromBytes(output.toBytes());
+        }
     }
 
     private static class AtomicIntegerSerializer extends Serializer<AtomicInteger> {
