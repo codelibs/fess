@@ -314,6 +314,92 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("operator", roles[1]);
     }
 
+    @Test
+    public void test_getSearchResultLinkSchemesAsList_normalizesAndCaches() {
+        FessProp.propMap.clear();
+        try {
+            final int[] reads = { 0 };
+            final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchResultLinkSchemes() {
+                    reads[0]++;
+                    return " HTTP, hammerspoon: ,,http ";
+                }
+            };
+
+            assertEquals(java.util.List.of("http", "hammerspoon"), fessConfig.getSearchResultLinkSchemesAsList());
+            assertEquals(java.util.List.of("http", "hammerspoon"), fessConfig.getSearchResultLinkSchemesAsList());
+            assertEquals(1, reads[0]);
+        } finally {
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
+    public void test_isSearchResultLinkAllowed() {
+        FessProp.propMap.clear();
+        try {
+            final FessConfig defaults = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchResultLinkSchemes() {
+                    return "http,https,file";
+                }
+            };
+            assertTrue(defaults.isSearchResultLinkAllowed("https://example.com/a"));
+            assertTrue(defaults.isSearchResultLinkAllowed("FILE:/mnt/a.txt"));
+            assertTrue(defaults.isSearchResultLinkAllowed("relative/path.html"));
+            assertTrue(defaults.isSearchResultLinkAllowed("a b:c"));
+            assertFalse(defaults.isSearchResultLinkAllowed("hammerspoon://fessopen?path=x"));
+            assertFalse(defaults.isSearchResultLinkAllowed("ms-msdt:/id PCWDiagnostic"));
+            // The scheme is read the way a browser reads it.
+            assertFalse(defaults.isSearchResultLinkAllowed("htt\tp-x://example.com/"));
+            assertFalse(defaults.isSearchResultLinkAllowed("  hammerspoon://x"));
+
+            FessProp.propMap.clear();
+            final FessConfig custom = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchResultLinkSchemes() {
+                    return "http,hammerspoon,javascript,data,vbscript";
+                }
+            };
+            assertTrue(custom.isSearchResultLinkAllowed("hammerspoon://fessopen?path=x"));
+            assertFalse(custom.isSearchResultLinkAllowed("file:/mnt/a.txt"));
+            // Script schemes are refused even when the setting lists them.
+            assertFalse(custom.isSearchResultLinkAllowed("javascript:alert(1)"));
+            assertFalse(custom.isSearchResultLinkAllowed("JavaScript:alert(1)"));
+            assertFalse(custom.isSearchResultLinkAllowed("java\tscript:alert(1)"));
+            assertFalse(custom.isSearchResultLinkAllowed("\u0001data:text/html,x"));
+            assertFalse(custom.isSearchResultLinkAllowed(" vbscript:msgbox(1)"));
+        } finally {
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
+    public void test_getSearchResultLinkSchemesAsList_blankAllowsNone() {
+        FessProp.propMap.clear();
+        try {
+            final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchResultLinkSchemes() {
+                    return "";
+                }
+            };
+
+            assertTrue(fessConfig.getSearchResultLinkSchemesAsList().isEmpty());
+        } finally {
+            FessProp.propMap.clear();
+        }
+    }
+
     /**
      * isLdapAdminEnabled refuses to make a reserved name editable in the directory, and reads the same
      * comparison -- so the switch moves that decision too.

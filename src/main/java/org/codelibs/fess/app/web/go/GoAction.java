@@ -138,6 +138,12 @@ public class GoAction extends FessSearchAction {
 
         final String targetUrl = pathMappingHelper.replaceUrl(url);
 
+        if (!fessConfig.isSearchResultLinkAllowed(targetUrl)) {
+            logger.warn("The scheme of the redirect URL is not allowed by search.result.link.schemes: docId={}", form.docId);
+            saveErrorDetailKey("errors.document_not_found");
+            throw responseManager.new404("The URL for the document ID is not found: " + form.docId);
+        }
+
         final String hash = toFragment(form.hash, targetUrl);
 
         if (!isFileSystemPath(targetUrl)) {

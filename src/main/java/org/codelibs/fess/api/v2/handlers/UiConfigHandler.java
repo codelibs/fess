@@ -555,6 +555,7 @@ public class UiConfigHandler {
             // is on it goes only to a signed-in caller, and the key stays present as {} for anyone else.
             payload.put("theme_settings", !cfg.isLoginRequired() || userBean.isPresent() ? cfg.getThemeSettingsMap() : Map.of());
             payload.put("features", features);
+            payload.put("result_link_schemes", cfg.getSearchResultLinkSchemesAsList());
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());
             payload.put("page_size_max", pageMax);
             payload.put("sort_options", sortOptions);

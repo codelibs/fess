@@ -2041,6 +2041,7 @@ components:
                 - features
                 - page_size_default
                 - page_size_max
+                - result_link_schemes
                 - sort_options
                 - num_options
                 - lang_options
@@ -2215,6 +2216,13 @@ components:
                         excludes them).
                 page_size_default: { type: integer }
                 page_size_max: { type: integer }
+                result_link_schemes:
+                  type: array
+                  description: |-
+                    URL schemes (lower-case, without the colon) a search result
+                    link may use, from `search.result.link.schemes`. A result
+                    whose URL has another scheme is shown without a link.
+                  items: { type: string }
                 sort_options:
                   type: array
                   description: |-

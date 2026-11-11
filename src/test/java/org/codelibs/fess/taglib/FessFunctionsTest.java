@@ -18,6 +18,7 @@ package org.codelibs.fess.taglib;
 import java.util.Date;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 public class FessFunctionsTest extends UnitFessTestCase {
@@ -124,5 +125,30 @@ public class FessFunctionsTest extends UnitFessTestCase {
         assertEquals("#", FessFunctions.safeHref(null));
         assertEquals("#", FessFunctions.safeHref(""));
         assertEquals("#", FessFunctions.safeHref("   "));
+    }
+
+    @Test
+    public void test_safeHref_followsSearchResultLinkSchemes() {
+        final org.codelibs.fess.mylasta.direction.FessConfig real = ComponentUtil.getFessConfig();
+        org.codelibs.fess.mylasta.direction.FessProp.propMap.clear();
+        try {
+            ComponentUtil.setFessConfig(new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchResultLinkSchemes() {
+                    return "https,hammerspoon,javascript";
+                }
+            });
+            assertEquals("hammerspoon://fessopen?path=x", FessFunctions.safeHref("hammerspoon://fessopen?path=x"));
+            assertEquals("https://example.com/", FessFunctions.safeHref("https://example.com/"));
+            assertEquals("#", FessFunctions.safeHref("http://example.com/"));
+            // Script schemes stay refused even when the setting lists them: the result is the href itself.
+            assertEquals("#", FessFunctions.safeHref("javascript:window.x=1"));
+            assertEquals("#", FessFunctions.safeHref("java\tscript:window.x=1"));
+        } finally {
+            ComponentUtil.setFessConfig(real);
+            org.codelibs.fess.mylasta.direction.FessProp.propMap.clear();
+        }
     }
 }

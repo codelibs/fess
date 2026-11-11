@@ -40,21 +40,25 @@ const FILETYPE_VALUES = [
 // document.createElement + textContent. No untrusted string is ever
 // passed to innerHTML.
 
+// Schemes a result link may use: result_link_schemes of /api/v2/ui/config, which the server
+// takes from search.result.link.schemes in fess_config.properties. Without the config no
+// scheme is allowed.
+function allowedLinkSchemes() {
+  const list = (api.getConfig() || {}).result_link_schemes;
+  return Array.isArray(list) ? list : [];
+}
+
 /**
- * Return `url` only when its scheme is one Fess serves: the web schemes plus the
- * file-system schemes ProtocolHelper.isFileSystemPath() recognises
- * (file/smb/smb1/storage/s3/gcs). Any other scheme (e.g. javascript:, data:,
- * vbscript:, mailto:) returns "#" so that setAttribute("href", safeHref(u)) can
- * never inject executable content.
+ * Return `url` only when its scheme is one of the configured result link schemes
+ * (search.result.link.schemes). Any other scheme (e.g. javascript:, data:, vbscript:,
+ * or a custom scheme that is not listed) returns "#" so that
+ * setAttribute("href", safeHref(u)) can never inject executable content.
  */
 function safeHref(url) {
   if (!url || typeof url !== "string") return "#";
   try {
     const u = new URL(url, location.href);
-    if (u.protocol === "https:" || u.protocol === "http:" ||
-        u.protocol === "ftp:" || u.protocol === "ftps:" ||
-        u.protocol === "file:" || u.protocol === "smb:" || u.protocol === "smb1:" ||
-        u.protocol === "storage:" || u.protocol === "s3:" || u.protocol === "gcs:") {
+    if (allowedLinkSchemes().includes(u.protocol.slice(0, -1))) {
       return url;
     }
   } catch (e) {
@@ -647,19 +651,8 @@ function copyToClipboard(text) {
  * @returns {string} the /go/ redirect URL, or "#" for unsafe schemes
  */
 function buildGoUrl(originalUrl, docId, queryId, order, rt) {
-  // Validate scheme — same rules as safeHref; only build /go/ for served schemes.
-  if (!originalUrl || typeof originalUrl !== "string") return "#";
-  try {
-    const u = new URL(originalUrl, location.href);
-    if (u.protocol !== "https:" && u.protocol !== "http:" &&
-        u.protocol !== "ftp:" && u.protocol !== "ftps:" &&
-        u.protocol !== "file:" && u.protocol !== "smb:" && u.protocol !== "smb1:" &&
-        u.protocol !== "storage:" && u.protocol !== "s3:" && u.protocol !== "gcs:") {
-      return "#";
-    }
-  } catch (e) {
-    return "#";
-  }
+  // Validate scheme — same rules as safeHref; only build /go/ for the configured schemes.
+  if (safeHref(originalUrl) === "#") return "#";
 
   let goUrl = "go/?rt=" + encodeURIComponent(rt) +
               "&docId=" + encodeURIComponent(docId || "") +

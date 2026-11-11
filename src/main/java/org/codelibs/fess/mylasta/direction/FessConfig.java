@@ -1411,6 +1411,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CLIPBOARD_COPY_ICON_ENABLED = "clipboard.copy.icon.enabled";
 
+    /** The key of the configuration. e.g. http,https,ftp,ftps,file,smb,smb1,storage,s3,gcs */
+    String SEARCH_RESULT_LINK_SCHEMES = "search.result.link.schemes";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
@@ -7494,6 +7497,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isClipboardCopyIconEnabled();
+
+    /**
+     * Get the value for the key 'search.result.link.schemes'. <br>
+     * The value is, e.g. http,https,ftp,ftps,file,smb,smb1,storage,s3,gcs <br>
+     * comment: URL schemes a search result may link to and /go/ may redirect to (comma-separated, no ":"); javascript, data and vbscript are never allowed. A blank value allows none.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSearchResultLinkSchemes();
 
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
@@ -13769,6 +13780,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.CLIPBOARD_COPY_ICON_ENABLED);
         }
 
+        public String getSearchResultLinkSchemes() {
+            return get(FessConfig.SEARCH_RESULT_LINK_SCHEMES);
+        }
+
         public String getAuthenticationAdminUsers() {
             return get(FessConfig.AUTHENTICATION_ADMIN_USERS);
         }
@@ -16025,6 +16040,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
             defaultMap.put(FessConfig.OSDD_LINK_ENABLED, "auto");
             defaultMap.put(FessConfig.CLIPBOARD_COPY_ICON_ENABLED, "true");
+            defaultMap.put(FessConfig.SEARCH_RESULT_LINK_SCHEMES, "http,https,ftp,ftps,file,smb,smb1,storage,s3,gcs");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
             defaultMap.put(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS, "");

@@ -60,7 +60,12 @@ beforeEach(() => {
 });
 afterEach(() => setLocation("/"));
 
+// What the server sends as result_link_schemes with the default search.result.link.schemes.
+const DEFAULT_LINK_SCHEMES = ["http", "https", "ftp", "ftps", "file", "smb", "smb1", "storage", "s3", "gcs"];
+
 describe("buildGoUrl", () => {
+  beforeEach(() => api.getConfig.mockReturnValue({ features: {}, result_link_schemes: DEFAULT_LINK_SCHEMES }));
+
   it("builds a /go/ URL with rt, docId, queryId and order", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", 3, 1700000000000))
       .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=3");
@@ -83,6 +88,14 @@ describe("buildGoUrl", () => {
       .toBe("go/?rt=1700000000000&docId=d2&queryId=q2&order=1");
     expect(buildGoUrl("s3://bucket/key.txt", "d3", "q3", 1, 1700000000000))
       .toBe("go/?rt=1700000000000&docId=d3&queryId=q3&order=1");
+  });
+
+  it("builds a /go/ URL for a scheme listed in result_link_schemes only", () => {
+    const url = "hammerspoon://fessopen?path=smb://h/s/a.pdf";
+    expect(buildGoUrl(url, "d1", "q1", 2, 1)).toBe("#");
+    api.getConfig.mockReturnValue({ result_link_schemes: ["http", "hammerspoon"] });
+    expect(buildGoUrl(url, "d1", "q1", 2, 1)).toBe("go/?rt=1&docId=d1&queryId=q1&order=2");
+    expect(buildGoUrl("smb://h/s/a.pdf", "d1", "q1", 2, 1)).toBe("#");
   });
 
   it("returns # for empty, null and non-string originalUrl", () => {
@@ -128,6 +141,8 @@ describe("ensureOsddLink", () => {
 });
 
 describe("safeHref", () => {
+  beforeEach(() => api.getConfig.mockReturnValue({ features: {}, result_link_schemes: DEFAULT_LINK_SCHEMES }));
+
   it("returns the URL for http/https/ftp/ftps schemes", () => {
     expect(safeHref("https://x.com")).toBe("https://x.com");
     expect(safeHref("http://x.com")).toBe("http://x.com");
@@ -150,7 +165,23 @@ describe("safeHref", () => {
     expect(safeHref("#frag")).toBe("#frag");
   });
 
-  it("returns # for mailto: and tel: (not in the search.js allowlist)", () => {
+  it("follows result_link_schemes from the server config (case of the URL scheme ignored)", () => {
+    api.getConfig.mockReturnValue({ result_link_schemes: ["hammerspoon", "mailto"] });
+    expect(safeHref("hammerspoon://fessopen?path=x")).toBe("hammerspoon://fessopen?path=x");
+    expect(safeHref("HammerSpoon://fessopen")).toBe("HammerSpoon://fessopen");
+    expect(safeHref("mailto:a@b.com")).toBe("mailto:a@b.com");
+    expect(safeHref("https://x.com")).toBe("#");
+    api.getConfig.mockReturnValue({ result_link_schemes: [] });
+    expect(safeHref("relative")).toBe("#");
+  });
+
+  it("returns # for every scheme while the config is not loaded", () => {
+    api.getConfig.mockReturnValue(null);
+    expect(safeHref("https://x.com")).toBe("#");
+    expect(buildGoUrl("https://x.com", "d1", "q1", 1, 1)).toBe("#");
+  });
+
+  it("returns # for mailto: and tel: (not in the default scheme list)", () => {
     expect(safeHref("mailto:a@b.com")).toBe("#");
     expect(safeHref("tel:12345")).toBe("#");
   });
@@ -195,8 +226,9 @@ describe("el", () => {
 });
 
 describe("buildResultCard", () => {
+  beforeEach(() => api.getConfig.mockReturnValue({ features: {}, result_link_schemes: DEFAULT_LINK_SCHEMES }));
+
   it("builds a detached li#result{order-1} with docId/queryId dataset and title/cite", () => {
-    api.getConfig.mockReturnValue({ features: {} });
     _state.requestedTime = 1700000000000;
     const li = buildResultCard(
       { doc_id: "d1", title: "Hello", url: "https://ex.com/p" }, "q1", 1);

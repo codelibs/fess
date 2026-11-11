@@ -88,7 +88,8 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         if (res.status == 200) {
             final String body = res.body();
             for (final String key : new String[] { "\"site_name\"", "\"login_required\"", "\"locales\"", "\"theme\"", "\"features\"",
-                    "\"csrf_required\"", "\"csrf_token\"", "\"page_size_default\"", "\"page_size_max\"", "\"notifications\"" }) {
+                    "\"csrf_required\"", "\"csrf_token\"", "\"page_size_default\"", "\"page_size_max\"", "\"notifications\"",
+                    "\"result_link_schemes\"" }) {
                 assertTrue(body.contains(key), "missing key: " + key + " in " + body);
             }
         } else {
@@ -469,6 +470,14 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             assertEquals(200, res.status, res.body());
             assertTrue(res.body().contains("\"osdd_link\":" + served), res.body());
         }
+    }
+
+    @Test
+    public void test_resultLinkSchemes_sentInConfigPayload() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"result_link_schemes\":[\"http\",\"https\",\"ftp\""), res.body());
     }
 
     @Test
