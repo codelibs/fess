@@ -69,6 +69,10 @@
 	</component>
 	<component name="staticThemeResponder" class="org.codelibs.fess.theme.StaticThemeResponder">
 	</component>
+	<component name="sessionDataSerializer" class="org.codelibs.fess.session.SessionDataSerializer">
+	</component>
+	<component name="sessionStore" class="org.codelibs.fess.session.SessionStore">
+	</component>
 	<component name="staticThemeInstaller" class="org.codelibs.fess.theme.StaticThemeInstaller">
 	</component>
 	<component name="themeArtifactHelper" class="org.codelibs.fess.helper.ThemeArtifactHelper">

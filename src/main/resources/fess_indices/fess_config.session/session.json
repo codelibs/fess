@@ -1,0 +1,37 @@
+{
+    "properties": {
+      "digest": {
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+      },
+      "formatVersion": {
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+      },
+      "data": {
+        "type": "binary",
+        "doc_values": false
+      },
+      "creationTime": {
+        "type": "long",
+        "index": false,
+        "doc_values": false
+      },
+      "lastAccessedTime": {
+        "type": "long",
+        "index": false,
+        "doc_values": false
+      },
+      "maxInactiveInterval": {
+        "type": "integer",
+        "index": false,
+        "doc_values": false
+      },
+      "expiredTime": {
+        "type": "long",
+        "doc_values": false
+      }
+    }
+}

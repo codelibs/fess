@@ -117,6 +117,34 @@ public class LdapUser implements FessUser {
     }
 
     /**
+     * Rebuilds an LDAP user from what a session store kept of it.
+     *
+     * <p>The environment is left empty on purpose: it holds the bind credentials (the user's own
+     * password after a login form, the administrator's after an SSO login), which are never stored.
+     * The permissions must therefore be given, because {@link #getPermissions()} searches the
+     * directory with the environment only while they are null.
+     *
+     * @param name The name of the user.
+     * @param nameFromProvider Whether the name was asserted by an identity provider.
+     * @param permissions The permissions the user had resolved, never null.
+     * @param permissionState How far the permission resolution had got, never null.
+     */
+    public LdapUser(final String name, final boolean nameFromProvider, final String[] permissions, final PermissionState permissionState) {
+        this(new Hashtable<>(), name, nameFromProvider);
+        this.permissions = permissions;
+        this.permissionState = permissionState;
+    }
+
+    /**
+     * Returns the permissions as far as they have been resolved, without searching the directory.
+     *
+     * @return The resolved permissions, or null when {@link #getPermissions()} has not run yet.
+     */
+    public String[] getResolvedPermissions() {
+        return permissions;
+    }
+
+    /**
      * Returns whether this user's name was asserted by an identity provider.
      *
      * @return true when the name came from a provider, false when a user typed it.
