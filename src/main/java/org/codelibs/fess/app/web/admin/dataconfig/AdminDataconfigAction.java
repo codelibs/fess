@@ -321,7 +321,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
-        validate(form, messages -> {}, this::asEditHtml);
+        validate(form, messages -> ComponentUtil.getPermissionHelper().validateEntries(form.permissions, messages), this::asEditHtml);
         verifyToken(this::asEditHtml);
         getDataConfig(form).ifPresent(entity -> {
             try {
@@ -347,7 +347,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
-        validate(form, messages -> {}, this::asEditHtml);
+        validate(form, messages -> ComponentUtil.getPermissionHelper().validateEntries(form.permissions, messages), this::asEditHtml);
         verifyToken(this::asEditHtml);
         getDataConfig(form).ifPresent(entity -> {
             try {

@@ -79,6 +79,22 @@ public class ApiAdminTagtypeActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_post_spaceAfterPermissionPrefixIsRefused() throws Exception {
+        final ApiAdminTagtypeAction action = createAction();
+        final CreateBody body = new CreateBody();
+        body.name = "foo";
+        body.owner = "alice";
+        body.paths = "";
+        body.permissions = "(deny) {user}bob";
+        body.sortOrder = 0;
+
+        assertValidationError(() -> action.post$setting(body)).handle(data -> {
+            data.requiredMessageOf("permissions", "errors.invalid_permission_spacing");
+        });
+        assertTrue(env.service.store.isEmpty());
+    }
+
+    @Test
     public void test_get_returnsPathsAndVersion() throws Exception {
         final ApiAdminTagtypeAction action = createAction();
         final TagType stored = env.put("foo", "alice", "http://a/", "http://b/");

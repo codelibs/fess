@@ -105,6 +105,30 @@ public class AdminTagtypeActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_create_spaceAfterPermissionPrefixIsRefused() throws Exception {
+        final AdminTagtypeAction action = createAction();
+        final CreateForm form = createForm("foo", "alice", "");
+        form.permissions = "{user}alice\n(deny) {user}bob";
+
+        assertValidationError(() -> action.create(form)).handle(data -> {
+            data.requiredMessageOf("permissions", "errors.invalid_permission_spacing");
+        });
+        assertTrue(env.service.store.isEmpty());
+    }
+
+    @Test
+    public void test_create_legacyLeadingSpacePermissionIsRefused() throws Exception {
+        final AdminTagtypeAction action = createAction();
+        final CreateForm form = createForm("foo", "alice", "");
+        form.permissions = " {user}bob";
+
+        assertValidationError(() -> action.create(form)).handle(data -> {
+            data.requiredMessageOf("permissions", "errors.invalid_permission_spacing");
+        });
+        assertTrue(env.service.store.isEmpty());
+    }
+
+    @Test
     public void test_create_featureDisabledQueuesNothing() throws Exception {
         final AdminTagtypeAction action = createAction();
         env.fessConfig.enabled = false;

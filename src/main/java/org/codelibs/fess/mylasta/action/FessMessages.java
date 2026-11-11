@@ -410,6 +410,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Enter at most 100 lines in the form key=value. A key may contain only letters, digits, underscore, dot and hyphen (up to 64 characters). A value may have up to 1000 characters and no control characters. */
     public static final String ERRORS_invalid_theme_settings = "{errors.invalid_theme_settings}";
 
+    /** The key of the message: A permission entry must not have a space after (allow) or (deny), or before the user, group or role name. Write it as {0} or {1}. If the entry was saved by an earlier version of Fess, enter it again. */
+    public static final String ERRORS_invalid_permission_spacing = "{errors.invalid_permission_spacing}";
+
     /** The key of the message: Failed to upload theme: {0} */
     public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
 
@@ -2520,6 +2523,22 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidThemeSettings(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_theme_settings));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_permission_spacing' with parameters.
+     * <pre>
+     * message: A permission entry must not have a space after (allow) or (deny), or before the user, group or role name. Write it as {0} or {1}. If the entry was saved by an earlier version of Fess, enter it again.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidPermissionSpacing(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_permission_spacing, arg0, arg1));
         return this;
     }
 

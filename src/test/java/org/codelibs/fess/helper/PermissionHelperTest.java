@@ -35,6 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.fess.crawler.client.fs.FileSystemClient;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -345,6 +346,8 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("special@chars", permissionHelper.decode("special@chars"));
     }
 
+    // encode stays lenient about whitespace after the prefix: it also parses configuration values read
+    // while searching. Entries typed into a form are rejected before they get here, see test_isSpacedEntry.
     @Test
     public void test_encode_trimsAfterAclPrefix() {
         assertEquals("D1bob", permissionHelper.encode("(deny) {user}bob"));
@@ -406,6 +409,71 @@ public class PermissionHelperTest extends UnitFessTestCase {
     public void test_decode_encode_keepsDeny() {
         assertEquals("D1bob", permissionHelper.encode(permissionHelper.decode("D1bob")));
         assertEquals("(deny){user}bob", permissionHelper.decode(permissionHelper.encode("(deny) {user}bob")));
+    }
+
+    @Test
+    public void test_isSpacedEntry_spaceAfterPrefix() {
+        assertTrue(permissionHelper.isSpacedEntry("(deny) {user}bob"));
+        assertTrue(permissionHelper.isSpacedEntry("(allow) {user}bob"));
+        assertTrue(permissionHelper.isSpacedEntry("(DENY)\t{group}staff"));
+        assertTrue(permissionHelper.isSpacedEntry("(Allow)  {role}admin"));
+        assertTrue(permissionHelper.isSpacedEntry("(deny)\u3000{user}bob"));
+        assertTrue(permissionHelper.isSpacedEntry("  (deny) {user}bob  "));
+        assertTrue(permissionHelper.isSpacedEntry("(deny) foo"));
+        assertTrue(permissionHelper.isSpacedEntry("(allow) guest"));
+    }
+
+    @Test
+    public void test_isSpacedEntry_legacyLeadingSpace() {
+        // how Fess 15.9 stored "(deny) {user}bob" and "(allow) {user}bob", as shown by the edit form
+        assertTrue(permissionHelper.isSpacedEntry(" {user}bob"));
+        assertTrue(permissionHelper.isSpacedEntry(" {group}staff"));
+        assertTrue(permissionHelper.isSpacedEntry("\t{role}admin"));
+        assertTrue(permissionHelper.isSpacedEntry("\u3000{USER}bob"));
+        assertTrue(permissionHelper.isSpacedEntry(permissionHelper.decode(" {user}bob")));
+    }
+
+    @Test
+    public void test_isSpacedEntry_acceptedEntries() {
+        assertFalse(permissionHelper.isSpacedEntry(null));
+        assertFalse(permissionHelper.isSpacedEntry(""));
+        assertFalse(permissionHelper.isSpacedEntry("  "));
+        assertFalse(permissionHelper.isSpacedEntry("{user}bob"));
+        assertFalse(permissionHelper.isSpacedEntry("(deny){user}bob"));
+        assertFalse(permissionHelper.isSpacedEntry("(allow){role}admin"));
+        assertFalse(permissionHelper.isSpacedEntry("(DENY){GROUP}staff"));
+        // trailing whitespace is trimmed as before
+        assertFalse(permissionHelper.isSpacedEntry("{user}bob  "));
+        assertFalse(permissionHelper.isSpacedEntry("(deny){user}bob \r"));
+        // whitespace before the prefix and around a plain value is trimmed as before
+        assertFalse(permissionHelper.isSpacedEntry("  (deny){user}bob"));
+        assertFalse(permissionHelper.isSpacedEntry(" guest "));
+        // a prefix without a name, and whitespace inside a name
+        assertFalse(permissionHelper.isSpacedEntry("(deny)"));
+        assertFalse(permissionHelper.isSpacedEntry("(deny)   "));
+        assertFalse(permissionHelper.isSpacedEntry("(deny){user}user with spaces"));
+        assertFalse(permissionHelper.isSpacedEntry("{user} bob"));
+        assertFalse(permissionHelper.isSpacedEntry("special@chars"));
+    }
+
+    @Test
+    public void test_hasSpacedEntry_checksEveryLine() {
+        assertFalse(permissionHelper.hasSpacedEntry(null));
+        assertFalse(permissionHelper.hasSpacedEntry(""));
+        assertFalse(permissionHelper.hasSpacedEntry("{user}alice\n(deny){group}staff\r\nguest\n\n"));
+        assertTrue(permissionHelper.hasSpacedEntry("{user}alice\n(deny) {group}staff\nguest"));
+        assertTrue(permissionHelper.hasSpacedEntry("{user}alice\r\n {role}admin"));
+    }
+
+    @Test
+    public void test_validateEntries() {
+        final FessMessages ok = new FessMessages();
+        permissionHelper.validateEntries("{user}alice\n(deny){role}guest", ok);
+        assertTrue(ok.isEmpty());
+
+        final FessMessages ng = new FessMessages();
+        permissionHelper.validateEntries("{user}alice\n(deny) {role}guest", ng);
+        assertTrue(ng.hasMessageOf("permissions"));
     }
 
     private static UserPrincipal user(final String name) {
