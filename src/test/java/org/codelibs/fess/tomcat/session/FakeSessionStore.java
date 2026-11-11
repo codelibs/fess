@@ -34,6 +34,7 @@ class FakeSessionStore {
     volatile int touches;
     volatile int gones;
     volatile int purges;
+    volatile int unchangedLoads;
 
     Map<String, Function<Map<String, Object>, Object>> bridge() {
         final Map<String, Function<Map<String, Object>, Object>> ops = new HashMap<>();
@@ -59,7 +60,12 @@ class FakeSessionStore {
             return null;
         }
         final Map<String, Object> result = new HashMap<>(doc);
-        result.put("attributes", new HashMap<>((Map<String, Object>) doc.get("attributes")));
+        if (args.get("digest") == null || !args.get("digest").equals(doc.get("digest"))) {
+            result.put("attributes", new HashMap<>((Map<String, Object>) doc.get("attributes")));
+        } else {
+            result.remove("attributes");
+            unchangedLoads++;
+        }
         return result;
     }
 

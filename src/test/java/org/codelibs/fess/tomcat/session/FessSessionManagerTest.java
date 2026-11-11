@@ -142,6 +142,24 @@ public class FessSessionManagerTest {
     }
 
     @Test
+    public void test_unchangedSession_isLoadedWithoutAttributes() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v"));
+        request(manager, session.getId(), false, null);
+        assertEquals(1, store.unchangedLoads);
+        assertEquals("v", session.getAttribute("k"));
+        // another node holds no copy, so it reads the attributes
+        final FessSessionManager other = newManager(store);
+        final FessSession onOther = request(other, session.getId(), false, null);
+        assertEquals("v", onOther.getAttribute("k"));
+        assertEquals(1, store.unchangedLoads);
+        // a change on the other node reaches the first one with the attributes
+        request(other, session.getId(), false, s -> s.setAttribute("k", "w"));
+        assertEquals("w", request(manager, session.getId(), false, null).getAttribute("k"));
+    }
+
+    @Test
     public void test_unchangedSession_isTouchedAfterInterval() throws Exception {
         final FakeSessionStore store = new FakeSessionStore();
         store.touchIntervalMs = 0L;

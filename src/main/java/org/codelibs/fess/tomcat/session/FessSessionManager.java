@@ -48,7 +48,7 @@ import org.apache.tomcat.util.ExceptionUtils;
  *
  * <p>Bridge operations:</p>
  * <ul>
- * <li>{@value #OP_LOAD}: {@code {id}} to {@code null} (not found) or {@code {creationTime, lastAccessedTime,
+ * <li>{@value #OP_LOAD}: {@code {id}} and optionally the {@code digest} the caller holds (the result has no {@code attributes} if it is unchanged) to {@code null} (not found) or {@code {creationTime, lastAccessedTime,
  * maxInactiveInterval, digest, attributes}}; throws a {@link RuntimeException} if the store is unreachable.</li>
  * <li>{@value #OP_SAVE}: {@code {id, creationTime, lastAccessedTime, maxInactiveInterval, attributes, digest,
  * persistedAt}} to {@code {digest, persistedAt, skippedNames}}, where {@code skippedNames}
@@ -188,7 +188,12 @@ public class FessSessionManager extends ManagerBase {
     protected Session refresh(final FessSession session, final Function<Map<String, Object>, Object> load) {
         final Map<String, Object> state;
         try {
-            state = toMap(load.apply(idArgs(session.getIdInternal())));
+            final Map<String, Object> args = idArgs(session.getIdInternal());
+            if (session.getDigest() != null) {
+                // Lets the store skip the payload if it did not change.
+                args.put("digest", session.getDigest());
+            }
+            state = toMap(load.apply(args));
         } catch (final RuntimeException e) {
             session.setDoNotPersist(true);
             warn("Failed to load the session from the session store. The session is kept in memory only.", e);

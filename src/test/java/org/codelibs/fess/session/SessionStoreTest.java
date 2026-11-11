@@ -455,6 +455,58 @@ public class SessionStoreTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_load_unchangedDigestSkipsDeserialization() throws Exception {
+        final Map<String, Object> saved = store.save(saveArgs(null, null, "a"));
+        store.calls.clear();
+        final SessionDataSerializer failing = new StubSerializer() {
+            @Override
+            public Map<String, Object> fromBytes(final byte[] bytes) {
+                throw new AssertionError("the payload must not be deserialized");
+            }
+        };
+        store.sessionDataSerializer = failing;
+        final Map<String, Object> args = idArgs();
+        args.put("digest", saved.get("digest"));
+
+        final Map<String, Object> session = store.load(args);
+
+        assertNotNull(session);
+        assertEquals(saved.get("digest"), session.get("digest"));
+        assertNull(session.get("attributes"));
+        assertEquals(1800, session.get("maxInactiveInterval"));
+        assertEquals(List.of("get"), store.calls);
+    }
+
+    @Test
+    public void test_load_changedDigestDeserializes() throws Exception {
+        final Map<String, Object> saved = store.save(saveArgs(null, null, "a"));
+        store.calls.clear();
+        final Map<String, Object> args = idArgs();
+        args.put("digest", "stale");
+
+        final Map<String, Object> session = store.load(args);
+
+        assertNotNull(session);
+        assertEquals(saved.get("digest"), session.get("digest"));
+        assertEquals("{name=a}", ((Map<?, ?>) session.get("attributes")).get("raw"));
+        assertEquals(List.of("get"), store.calls);
+    }
+
+    @Test
+    public void test_load_unchangedDigestStillChecksExpiryAndFormat() throws Exception {
+        final Map<String, Object> saved = store.save(saveArgs(null, null, "a"));
+        final Map<String, Object> args = idArgs();
+        args.put("digest", saved.get("digest"));
+
+        serializer.formatVersion = "v2";
+        assertNull(store.load(args));
+        serializer.formatVersion = "v1";
+
+        store.now += 1800 * 1000L;
+        assertNull(store.load(args));
+    }
+
+    @Test
     public void test_load_notFound() throws Exception {
         assertNull(store.load(idArgs()));
         assertEquals(List.of("get"), store.calls);

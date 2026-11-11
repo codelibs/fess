@@ -1,26 +1,37 @@
 {
     "properties": {
       "digest": {
-        "type": "keyword"
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
       },
       "formatVersion": {
-        "type": "keyword"
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
       },
       "data": {
         "type": "binary",
         "doc_values": false
       },
       "creationTime": {
-        "type": "long"
+        "type": "long",
+        "index": false,
+        "doc_values": false
       },
       "lastAccessedTime": {
-        "type": "long"
+        "type": "long",
+        "index": false,
+        "doc_values": false
       },
       "maxInactiveInterval": {
-        "type": "integer"
+        "type": "integer",
+        "index": false,
+        "doc_values": false
       },
       "expiredTime": {
-        "type": "long"
+        "type": "long",
+        "doc_values": false
       }
     }
 }

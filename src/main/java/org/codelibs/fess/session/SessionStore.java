@@ -55,7 +55,7 @@ import jakarta.servlet.ServletContext;
  * travel as opaque objects.</p>
  *
  * <ul>
- *   <li>{@code load}: {@code {id}} to {@code null} (no document, a format mismatch or an expired
+ *   <li>{@code load}: {@code {id, digest}} (the digest is optional) to {@code null} (no document, a format mismatch or an expired
  *   session) or a map of {@code creationTime}, {@code lastAccessedTime}, {@code maxInactiveInterval},
  *   {@code digest} and {@code attributes}. It throws when the store cannot be reached.</li>
  *   <li>{@code save}: {@code {id, creationTime, lastAccessedTime, maxInactiveInterval, attributes,
@@ -219,8 +219,10 @@ public class SessionStore {
     /**
      * Loads a session.
      *
-     * @param args the arguments, which hold the session id as {@code id}.
-     * @return null if there is no usable session, or the session as a map.
+     * @param args the arguments, which hold the session id as {@code id} and, optionally, the {@code digest} of the
+     *        attributes the caller already has.
+     * @return null if there is no usable session, or the session as a map. The map has no {@code attributes}
+     *         if the stored digest equals the one passed in.
      * @throws RuntimeException if the store cannot be read.
      */
     protected Map<String, Object> load(final Map<String, Object> args) {
@@ -238,6 +240,15 @@ public class SessionStore {
         if (!(source.get(EXPIRED_TIME) instanceof final Number expiredTime) || expiredTime.longValue() <= currentTimeMillis()) {
             return null;
         }
+        final Map<String, Object> session = new HashMap<>();
+        session.put(CREATION_TIME, toLong(source.get(CREATION_TIME)));
+        session.put(LAST_ACCESSED_TIME, toLong(source.get(LAST_ACCESSED_TIME)));
+        session.put(MAX_INACTIVE_INTERVAL, ((Number) source.get(MAX_INACTIVE_INTERVAL)).intValue());
+        session.put(DIGEST, source.get(DIGEST));
+        if (source.get(DIGEST) != null && source.get(DIGEST).equals(args.get(DIGEST))) {
+            // The caller already holds this content: it is not decoded and deserialized on every request.
+            return session;
+        }
         if (!(source.get(DATA) instanceof final String data)) {
             return null;
         }
@@ -249,11 +260,6 @@ public class SessionStore {
         if (attributes == null) {
             return null;
         }
-        final Map<String, Object> session = new HashMap<>();
-        session.put(CREATION_TIME, toLong(source.get(CREATION_TIME)));
-        session.put(LAST_ACCESSED_TIME, toLong(source.get(LAST_ACCESSED_TIME)));
-        session.put(MAX_INACTIVE_INTERVAL, ((Number) source.get(MAX_INACTIVE_INTERVAL)).intValue());
-        session.put(DIGEST, source.get(DIGEST));
         session.put("attributes", attributes);
         return session;
     }
