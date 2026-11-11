@@ -180,6 +180,17 @@ public class FessSessionManagerTest {
         }
         assertEquals(2, store.calls.stream().filter("load"::equals).count());
 
+        // a lookup remembered under an id that the session no longer has is not answered with that session
+        assertTrue(manager.beginRequest());
+        try {
+            final String oldId = session.getId();
+            assertSame(session, manager.findSession(oldId));
+            manager.rotateSessionId(session);
+            assertNull(manager.findSession(oldId));
+        } finally {
+            manager.endRequest();
+        }
+
         // the next request reads again
         store.calls.clear();
         assertNotNull(request(manager, session.getId(), false, null));

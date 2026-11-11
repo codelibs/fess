@@ -153,7 +153,7 @@ public class FessSessionManager extends ManagerBase {
                 // Nothing in the store a moment ago; the session may have been created in this request since
                 return sessions.get(id);
             }
-            if (known.isValid()) {
+            if (known.isValid() && id.equals(known.getIdInternal())) {
                 return known;
             }
         }
