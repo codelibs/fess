@@ -581,7 +581,7 @@ public class SessionStoreTest extends UnitFessTestCase {
     @Test
     public void test_purge() throws Exception {
         assertEquals(3L, store.purge(new HashMap<>()));
-        assertEquals(store.now, store.purgedUntil);
+        assertEquals(store.now - SessionStore.PURGE_MARGIN_MS, store.purgedUntil);
     }
 
     @Test

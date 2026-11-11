@@ -160,6 +160,33 @@ public class FessSessionManagerTest {
     }
 
     @Test
+    public void test_lookupsInOneRequest_readTheStoreOnce() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v"));
+        store.calls.clear();
+
+        assertTrue(manager.beginRequest());
+        try {
+            assertSame(session, manager.findSession(session.getId()));
+            assertSame(session, manager.findSession(session.getId()));
+            assertNull(manager.findSession("unknown"));
+            assertNull(manager.findSession("unknown"));
+            // a session created under the id that was missing is found
+            final Session created = manager.createSession("unknown");
+            assertSame(created, manager.findSession("unknown"));
+        } finally {
+            manager.endRequest();
+        }
+        assertEquals(2, store.calls.stream().filter("load"::equals).count());
+
+        // the next request reads again
+        store.calls.clear();
+        assertNotNull(request(manager, session.getId(), false, null));
+        assertEquals(1, store.calls.stream().filter("load"::equals).count());
+    }
+
+    @Test
     public void test_unchangedSession_isTouchedAfterInterval() throws Exception {
         final FakeSessionStore store = new FakeSessionStore();
         store.touchIntervalMs = 0L;

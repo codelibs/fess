@@ -89,6 +89,14 @@ public class FessSessionManager extends ManagerBase {
     /** The sessions that the current request thread touched, while a {@link FessSessionValve} is processing it. */
     protected final ThreadLocal<List<FessSession>> accessed = new ThreadLocal<>();
 
+    /**
+     * The result of {@link #findSession(String)} per session id for the current request, while a
+     * {@link FessSessionValve} is processing it. Tomcat looks the session up again for every
+     * {@code isRequestedSessionIdValid()} and for every {@code getSession(false)} that finds nothing, and each lookup
+     * would be a read of the store. A {@code null} value is a session that the store does not have.
+     */
+    protected final ThreadLocal<Map<String, Session>> lookups = new ThreadLocal<>();
+
     /** The session ids whose store document could not be read and that Tomcat may re-create under the same id. */
     protected final Set<String> doNotPersistIds =
             Collections.newSetFromMap(Collections.synchronizedMap(new LinkedHashMap<String, Boolean>() {
@@ -135,10 +143,29 @@ public class FessSessionManager extends ManagerBase {
             return null;
         }
         final Function<Map<String, Object>, Object> load = operation(OP_LOAD);
-        Session local = sessions.get(id);
         if (load == null) {
-            return local;
+            return sessions.get(id);
         }
+        final Map<String, Session> memo = lookups.get();
+        if (memo != null && memo.containsKey(id)) {
+            final Session known = memo.get(id);
+            if (known == null) {
+                // Nothing in the store a moment ago; the session may have been created in this request since
+                return sessions.get(id);
+            }
+            if (known.isValid()) {
+                return known;
+            }
+        }
+        final Session found = lookup(id, load);
+        if (memo != null) {
+            memo.put(id, found);
+        }
+        return found;
+    }
+
+    private Session lookup(final String id, final Function<Map<String, Object>, Object> load) {
+        Session local = sessions.get(id);
         if (local == null) {
             synchronized (locks[(id.hashCode() & Integer.MAX_VALUE) % LOCK_STRIPES]) {
                 local = sessions.get(id);
@@ -323,6 +350,7 @@ public class FessSessionManager extends ManagerBase {
             return false;
         }
         accessed.set(new ArrayList<>());
+        lookups.set(new HashMap<>());
         return true;
     }
 
@@ -332,6 +360,7 @@ public class FessSessionManager extends ManagerBase {
     protected void endRequest() {
         final List<FessSession> touched = accessed.get();
         accessed.remove();
+        lookups.remove();
         if (touched != null) {
             for (final FessSession session : touched) {
                 persist(session);

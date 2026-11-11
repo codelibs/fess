@@ -92,6 +92,14 @@ public class SessionStore {
     /** How long a session may go unwritten before an unchanged session touches its expiry. */
     protected static final long TOUCH_INTERVAL_MS = 60 * 1000L;
 
+    /**
+     * How long an expired session stays in the index before the purge deletes it. The purge searches a snapshot that
+     * is at most one refresh interval old and deletes by id, so a session that was touched meanwhile would be deleted
+     * with its stale copy. The margin must exceed the refresh interval and the clock skew between the nodes. Documents
+     * that linger cost nothing, because {@code load} ignores the expired ones.
+     */
+    protected static final long PURGE_MARGIN_MS = 5 * 60 * 1000L;
+
     /** The configuration index that holds the sessions, with the default prefix. */
     protected static final String INDEX_NAME = "fess_config.session";
 
@@ -349,13 +357,13 @@ public class SessionStore {
     }
 
     /**
-     * Deletes the sessions that expired.
+     * Deletes the sessions that expired more than {@value #PURGE_MARGIN_MS} ms ago.
      *
      * @param args the arguments, which are not used.
      * @return the number of deleted sessions.
      */
     protected Long purge(final Map<String, Object> args) {
-        return deleteExpiredSessions(currentTimeMillis());
+        return deleteExpiredSessions(currentTimeMillis() - PURGE_MARGIN_MS);
     }
 
     // ===================================================================================
