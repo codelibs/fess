@@ -146,6 +146,11 @@ public class SessionStoreTest extends UnitFessTestCase {
         }
 
         @Override
+        protected void refreshIndex() {
+            calls.add("refresh");
+        }
+
+        @Override
         protected long deleteExpiredSessions(final long time) {
             calls.add("purge");
             purgedUntil = time;
@@ -582,6 +587,7 @@ public class SessionStoreTest extends UnitFessTestCase {
     public void test_purge() throws Exception {
         assertEquals(3L, store.purge(new HashMap<>()));
         assertEquals(store.now - SessionStore.PURGE_MARGIN_MS, store.purgedUntil);
+        assertEquals(List.of("refresh", "purge"), store.calls);
     }
 
     @Test

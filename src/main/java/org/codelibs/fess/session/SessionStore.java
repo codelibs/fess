@@ -93,10 +93,10 @@ public class SessionStore {
     protected static final long TOUCH_INTERVAL_MS = 60 * 1000L;
 
     /**
-     * How long an expired session stays in the index before the purge deletes it. The purge searches a snapshot that
-     * is at most one refresh interval old and deletes by id, so a session that was touched meanwhile would be deleted
-     * with its stale copy. The margin must exceed the refresh interval and the clock skew between the nodes. Documents
-     * that linger cost nothing, because {@code load} ignores the expired ones.
+     * How long an expired session stays in the index before the purge deletes it. The purge deletes by id what its
+     * search found, so a session that another node touches between the search and the delete would be deleted with its
+     * stale copy; the margin keeps every session that was active recently out of reach, whatever the clock skew
+     * between the nodes. Documents that linger cost nothing, because {@code load} ignores the expired ones.
      */
     protected static final long PURGE_MARGIN_MS = 5 * 60 * 1000L;
 
@@ -357,12 +357,13 @@ public class SessionStore {
     }
 
     /**
-     * Deletes the sessions that expired more than {@value #PURGE_MARGIN_MS} ms ago.
+     * Refreshes the index and deletes the sessions that expired more than {@value #PURGE_MARGIN_MS} ms ago.
      *
      * @param args the arguments, which are not used.
      * @return the number of deleted sessions.
      */
     protected Long purge(final Map<String, Object> args) {
+        refreshIndex();
         return deleteExpiredSessions(currentTimeMillis() - PURGE_MARGIN_MS);
     }
 
@@ -587,6 +588,22 @@ public class SessionStore {
      */
     protected void deleteSession(final String id) {
         ComponentUtil.getSearchEngineClient().delete(getIndexName(), id);
+    }
+
+    /**
+     * Makes the writes searchable. The index never refreshes on its own ({@code refresh_interval} is {@code -1}),
+     * because the reads are real-time gets and the purge is the only search; so the purge refreshes just before it
+     * searches, instead of every write or every second paying for it.
+     *
+     * @throws RuntimeException if the search engine fails.
+     */
+    protected void refreshIndex() {
+        ComponentUtil.getSearchEngineClient()
+                .admin()
+                .indices()
+                .prepareRefresh(getIndexName())
+                .execute()
+                .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
     }
 
     /**
