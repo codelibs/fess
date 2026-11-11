@@ -130,6 +130,7 @@ public class AdminGeneralAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse sendmail(final MailForm form) {
         validate(form, messages -> {}, () -> asHtml(path_AdminGeneral_AdminGeneralJsp));
+        verifyToken(() -> asHtml(path_AdminGeneral_AdminGeneralJsp));
 
         final String[] toAddresses = form.notificationTo.split(",");
         final Map<String, Object> dataMap = new HashMap<>();
