@@ -26,6 +26,7 @@ import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFavori
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFessJsonPath;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getUserInfoNdjsonWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.isSessionIndex;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -123,6 +124,11 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
                         SearchEngineUtil.scroll(index, hit -> {
+                            // The HTTP session store joins the fess_config alias, and its documents are the login
+                            // state of the users, so no export carries them (the admin screen skips them too).
+                            if (isSessionIndex(hit.getIndex())) {
+                                return true;
+                            }
                             try {
                                 // The requested id is an alias, and a bulk file naming an alias cannot be
                                 // replayed. Write the index the document actually came from, as the admin
