@@ -34,6 +34,14 @@ import org.codelibs.core.lang.StringUtil;
  * comparison period, and chart interval calculation for search log analytics dashboard.
  */
 public class AnalyticsCondition {
+
+    /**
+     * Default constructor.
+     */
+    public AnalyticsCondition() {
+        // nothing to do
+    }
+
     /**
      * Enum representing the interval for aggregating analytics data.
      */
