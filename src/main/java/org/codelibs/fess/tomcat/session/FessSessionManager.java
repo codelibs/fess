@@ -108,6 +108,20 @@ public class FessSessionManager extends ManagerBase {
                 }
             }));
 
+    /**
+     * The session ids that were invalidated here and whose store document could not be deleted. Without this, the next
+     * request carrying the cookie would read the surviving document and bring the logged-out session back on this node.
+     * Another node cannot know it and accepts the session until the document expires.
+     */
+    protected final Set<String> revokedIds = Collections.newSetFromMap(Collections.synchronizedMap(new LinkedHashMap<String, Boolean>() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<String, Boolean> eldest) {
+            return size() > DO_NOT_PERSIST_LIMIT;
+        }
+    }));
+
     private final Object[] locks = new Object[LOCK_STRIPES];
 
     private volatile Map<String, Function<Map<String, Object>, Object>> bridge;
@@ -140,6 +154,9 @@ public class FessSessionManager extends ManagerBase {
     @Override
     public Session findSession(final String id) throws IOException {
         if (id == null) {
+            return null;
+        }
+        if (revokedIds.contains(id)) {
             return null;
         }
         final Function<Map<String, Object>, Object> load = operation(OP_LOAD);
@@ -336,7 +353,9 @@ public class FessSessionManager extends ManagerBase {
         try {
             delete.apply(idArgs(id));
         } catch (final RuntimeException e) {
-            warn("Failed to delete the session from the session store.", e);
+            revokedIds.add(id);
+            warn("Failed to delete the session from the session store. This node refuses the session from now on, "
+                    + "but other nodes accept it until it expires.", e);
         }
     }
 

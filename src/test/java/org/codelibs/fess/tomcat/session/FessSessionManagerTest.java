@@ -339,6 +339,34 @@ public class FessSessionManagerTest {
     }
 
     @Test
+    public void test_invalidateWhileStoreRejectsDelete_isNotBroughtBackOnThisNode() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("user", "alice"));
+        final String id = session.getId();
+
+        store.down = true;
+        session.invalidate();
+        store.down = false;
+        // the document is still there, because the delete failed
+        assertTrue(store.docs.containsKey(id));
+
+        // the store is back, and the cookie of the logged-out session must not rebuild it
+        assertNull(manager.findSession(id));
+        assertNull(request(manager, id, false, null));
+    }
+
+    @Test
+    public void test_invalidate_withWorkingStore_doesNotRefuseTheIdAfterwards() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("user", "alice"));
+        session.invalidate();
+        assertTrue(store.docs.isEmpty());
+        assertTrue(manager.revokedIds.isEmpty());
+    }
+
+    @Test
     public void test_localExpiry_doesNotDeleteFromStore() throws Exception {
         final FakeSessionStore store = new FakeSessionStore();
         final FessSessionManager manager = newManager(store);
