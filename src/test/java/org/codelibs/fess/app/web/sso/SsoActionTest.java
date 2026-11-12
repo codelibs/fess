@@ -357,6 +357,32 @@ public class SsoActionTest extends UnitFessTestCase {
         assertEquals(List.of(), action.redirectTargets);
     }
 
+    @Test
+    public void test_index_debugLogOfTheLoggedInUserDoesNotStartALine() {
+        final LoginCredential credential = new LoginCredential() {
+            @Override
+            public String toString() {
+                return "{victim@example.com\n2026-01-01 00:00:00,000 [forged] ERROR org.codelibs.fess.FORGED}";
+            }
+        };
+        registerSsoManagerReturning(credential, true);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(new CopyOnWriteArrayList<>(), false);
+        action.runSuccessCall = true;
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SsoAction.class.getName(), Level.DEBUG);
+        try {
+            action.index();
+
+            final List<String> logged = appender.messagesAt(Level.DEBUG).stream().filter(m -> m.startsWith("Logging in user")).toList();
+            assertEquals(1, logged.size());
+            assertTrue(logged.toString(), logged.get(0).contains("victim@example.com"));
+            assertFalse(logged.toString(), logged.get(0).contains("\n"));
+            assertFalse(logged.toString(), logged.get(0).contains("\r"));
+        } finally {
+            appender.detach();
+        }
+    }
+
     private static class TestCredential implements LoginCredential {
     }
 
@@ -576,6 +602,9 @@ public class SsoActionTest extends UnitFessTestCase {
 
         boolean loginRedirectFails;
 
+        /** Runs the success callback of the login, as the real login assist does after it has logged the user in. */
+        boolean runSuccessCall;
+
         int landingPages;
 
         @Override
@@ -634,6 +663,13 @@ public class SsoActionTest extends UnitFessTestCase {
                         final LoginRedirectSuccessCall redirectCall) throws LoginFailureException {
                     if (loginRedirectFails) {
                         throw new LoginFailureException("refused");
+                    }
+                    if (runSuccessCall) {
+                        try {
+                            redirectCall.success();
+                        } catch (final RuntimeException e) {
+                            // what follows the log line needs a logged-in session that this test does not have
+                        }
                     }
                     return REDIRECT_TO_LOGIN;
                 }

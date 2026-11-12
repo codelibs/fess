@@ -32,6 +32,7 @@ import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.credential.LoginCredential;
@@ -153,7 +154,7 @@ public class SsoAction extends FessLoginAction {
         try {
             return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Logging in user: {}", loginCredential);
+                    logger.debug("Logging in user: {}", LogUtil.sanitize(String.valueOf(loginCredential)));
                 }
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
