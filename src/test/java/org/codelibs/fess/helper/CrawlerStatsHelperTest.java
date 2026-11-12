@@ -65,6 +65,16 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_urlWithoutUserInfo() {
+        String key = "http://user:secret@example.com/a.html";
+        crawlerStatsHelper.begin(key);
+        crawlerStatsHelper.done(key);
+        String[] values = localLogMsg.get().split("\t");
+        assertEquals("url:http://example.com/a.html", values[0]);
+        assertFalse(localLogMsg.get().contains("secret"));
+    }
+
+    @Test
     public void test_beginDoneWithRecord1() {
         String key = "test";
         crawlerStatsHelper.begin(key);
