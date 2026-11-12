@@ -638,6 +638,14 @@ public class SessionDataSerializer {
      */
     @SuppressWarnings("rawtypes")
     protected static class BoundedCollectionSerializer extends CollectionSerializer<Collection> {
+
+        /**
+         * Default constructor.
+         */
+        public BoundedCollectionSerializer() {
+            // nothing to do
+        }
+
         @Override
         protected Collection create(final Kryo kryo, final Input input, final Class<? extends Collection> type, final int size) {
             checkElementCount(input, size);
@@ -650,6 +658,14 @@ public class SessionDataSerializer {
      */
     @SuppressWarnings("rawtypes")
     protected static class BoundedMapSerializer extends MapSerializer<Map> {
+
+        /**
+         * Default constructor.
+         */
+        public BoundedMapSerializer() {
+            // nothing to do
+        }
+
         @Override
         protected Map create(final Kryo kryo, final Input input, final Class<? extends Map> type, final int size) {
             checkElementCount(input, size);
@@ -662,6 +678,14 @@ public class SessionDataSerializer {
      */
     @SuppressWarnings("rawtypes")
     protected static class BoundedTreeSetSerializer extends TreeSetSerializer {
+
+        /**
+         * Default constructor.
+         */
+        public BoundedTreeSetSerializer() {
+            // nothing to do
+        }
+
         @Override
         protected TreeSet create(final Kryo kryo, final Input input, final Class<? extends TreeSet> type, final int size) {
             checkElementCount(input, size);
@@ -674,6 +698,14 @@ public class SessionDataSerializer {
      */
     @SuppressWarnings("rawtypes")
     protected static class BoundedTreeMapSerializer extends TreeMapSerializer {
+
+        /**
+         * Default constructor.
+         */
+        public BoundedTreeMapSerializer() {
+            // nothing to do
+        }
+
         @Override
         protected TreeMap create(final Kryo kryo, final Input input, final Class<? extends TreeMap> type, final int size) {
             checkElementCount(input, size);
@@ -686,6 +718,14 @@ public class SessionDataSerializer {
      */
     @SuppressWarnings("rawtypes")
     protected static class BoundedArraysAsListSerializer extends ArraysAsListSerializer {
+
+        /**
+         * Default constructor.
+         */
+        public BoundedArraysAsListSerializer() {
+            // nothing to do
+        }
+
         @Override
         protected List create(final Kryo kryo, final Input input, final Class type, final int size) {
             checkElementCount(input, size);
@@ -721,6 +761,14 @@ public class SessionDataSerializer {
      * reads the elements one by one, with the length checked. The bytes written are the same.
      */
     protected static class BoundedBooleanArraySerializer extends BooleanArraySerializer {
+
+        /**
+         * Default constructor.
+         */
+        public BoundedBooleanArraySerializer() {
+            // nothing to do
+        }
+
         @Override
         public boolean[] read(final Kryo kryo, final Input input, final Class type) {
             final int start = input.position();
@@ -761,6 +809,13 @@ public class SessionDataSerializer {
      */
     protected static class LocaleSerializer extends Serializer<Locale> {
 
+        /**
+         * Default constructor.
+         */
+        public LocaleSerializer() {
+            // nothing to do
+        }
+
         @Override
         public void write(final Kryo kryo, final Output output, final Locale locale) {
             output.writeString(locale.toLanguageTag());
@@ -776,6 +831,13 @@ public class SessionDataSerializer {
      * Writes a {@link LruHashMap} as its limit and its entries from the eldest to the youngest.
      */
     protected static class LruHashMapSerializer extends Serializer<LruHashMap<Object, Object>> {
+
+        /**
+         * Default constructor.
+         */
+        public LruHashMapSerializer() {
+            // nothing to do
+        }
 
         @Override
         public void write(final Kryo kryo, final Output output, final LruHashMap<Object, Object> map) {
@@ -899,6 +961,13 @@ public class SessionDataSerializer {
      */
     protected static class DoubleSubmitTokenMapSerializer extends Serializer<DoubleSubmitTokenMap> {
 
+        /**
+         * Default constructor.
+         */
+        public DoubleSubmitTokenMapSerializer() {
+            // nothing to do
+        }
+
         /** The map of the tokens, which has no accessor to iterate. */
         private static final Field TOKEN_MAP_FIELD = findTokenMapField();
 
@@ -961,6 +1030,13 @@ public class SessionDataSerializer {
      */
     protected static class LoginRedirectBeanSerializer extends Serializer<LoginRedirectBean> {
 
+        /**
+         * Default constructor.
+         */
+        public LoginRedirectBeanSerializer() {
+            // nothing to do
+        }
+
         @Override
         public void write(final Kryo kryo, final Output output, final LoginRedirectBean bean) {
             output.writeString(bean.getRedirectPath());
@@ -977,6 +1053,13 @@ public class SessionDataSerializer {
      * are not written for a local user, they are derived from the roles and groups.
      */
     protected static class FessUserBeanSerializer extends Serializer<FessUserBean> {
+
+        /**
+         * Default constructor.
+         */
+        public FessUserBeanSerializer() {
+            // nothing to do
+        }
 
         @Override
         public void write(final Kryo kryo, final Output output, final FessUserBean bean) {
@@ -1016,6 +1099,13 @@ public class SessionDataSerializer {
      */
     protected static class EmptyFessUserBeanSerializer extends Serializer<FessUserBean> {
 
+        /**
+         * Default constructor.
+         */
+        public EmptyFessUserBeanSerializer() {
+            // nothing to do
+        }
+
         @Override
         public void write(final Kryo kryo, final Output output, final FessUserBean bean) {
             // a marker only
@@ -1033,6 +1123,13 @@ public class SessionDataSerializer {
      * original password are not written.
      */
     protected static class UserSerializer extends Serializer<User> {
+
+        /**
+         * Default constructor.
+         */
+        public UserSerializer() {
+            // nothing to do
+        }
 
         @Override
         public void write(final Kryo kryo, final Output output, final User user) {
@@ -1078,6 +1175,13 @@ public class SessionDataSerializer {
      * not, the attribute is left out and written by a later request.
      */
     protected static class LdapUserSerializer extends Serializer<LdapUser> {
+
+        /**
+         * Default constructor.
+         */
+        public LdapUserSerializer() {
+            // nothing to do
+        }
 
         @Override
         public void write(final Kryo kryo, final Output output, final LdapUser user) {

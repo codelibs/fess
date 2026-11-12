@@ -526,7 +526,12 @@ public class SearchHelper {
         return OptionalEntity.of(documents);
     }
 
-    /** The signature and the URL of the document a similar-document search starts from. */
+    /**
+     * The signature and the URL of the document a similar-document search starts from.
+     *
+     * @param signature the signature of the document
+     * @param url the URL of the document
+     */
     protected record SimilarSource(String signature, String url) {
     }
 

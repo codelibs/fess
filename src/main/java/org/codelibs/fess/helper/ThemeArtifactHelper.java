@@ -106,6 +106,8 @@ public class ThemeArtifactHelper {
         private static final long serialVersionUID = 1L;
 
         /**
+         * Creates an exception with the reason.
+         *
          * @param message the reason, e.g. an HTTP status
          */
         protected RepositoryUnreadableException(final String message) {
@@ -113,6 +115,8 @@ public class ThemeArtifactHelper {
         }
 
         /**
+         * Creates an exception with the reason and the underlying exception.
+         *
          * @param message the reason
          * @param cause the underlying exception
          */

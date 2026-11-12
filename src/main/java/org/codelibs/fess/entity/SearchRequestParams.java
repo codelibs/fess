@@ -240,6 +240,11 @@ public abstract class SearchRequestParams {
         return getRedirectUrl() != null;
     }
 
+    /**
+     * Returns the value of the track_total_hits option of the search.
+     *
+     * @return the track_total_hits value, or null to use the default
+     */
     public String getTrackTotalHits() {
         return null;
     }

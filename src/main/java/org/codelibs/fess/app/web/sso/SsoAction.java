@@ -244,16 +244,6 @@ public class SsoAction extends FessLoginAction {
     }
 
     /**
-     * Attempts to redirect to the search page with preserved search parameters.
-     *
-     * This method checks if there are saved search parameters from a previous
-     * session and redirects the user to the search page with those parameters
-     * restored. This provides a seamless user experience after authentication.
-     *
-     * @return Optional HtmlResponse containing the redirect to search page with parameters,
-     *         or empty if no search parameters were found
-     */
-    /**
      * Resolves how long a query string {@link #redirectToSearchPage()} may build.
      *
      * <p>The bound exists because the container has one: a longer {@code Location} cannot be
@@ -272,6 +262,16 @@ public class SsoAction extends FessLoginAction {
         return value != null ? value : 4096;
     }
 
+    /**
+     * Attempts to redirect to the search page with preserved search parameters.
+     *
+     * This method checks if there are saved search parameters from a previous
+     * session and redirects the user to the search page with those parameters
+     * restored. This provides a seamless user experience after authentication.
+     *
+     * @return Optional HtmlResponse containing the redirect to search page with parameters,
+     *         or empty if no search parameters were found
+     */
     protected OptionalThing<HtmlResponse> redirectToSearchPage() {
         final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
         if (searchParameters.length > 0) {

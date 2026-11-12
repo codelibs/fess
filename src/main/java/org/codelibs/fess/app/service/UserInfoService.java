@@ -26,9 +26,11 @@ import jakarta.annotation.Resource;
  */
 public class UserInfoService {
 
+    /** The behavior of the user info table. */
     @Resource
     protected UserInfoBhv userInfoBhv;
 
+    /** The system helper. */
     @Resource
     protected SystemHelper systemHelper;
 
