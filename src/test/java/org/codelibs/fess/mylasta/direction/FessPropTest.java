@@ -338,6 +338,25 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getSearchResultLinkSchemesAsList_dropsScriptSchemes() {
+        FessProp.propMap.clear();
+        try {
+            final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchResultLinkSchemes() {
+                    return "http,JavaScript:,data,vbscript,hammerspoon";
+                }
+            };
+
+            assertEquals(java.util.List.of("http", "hammerspoon"), fessConfig.getSearchResultLinkSchemesAsList());
+        } finally {
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
     public void test_isSearchResultLinkAllowed() {
         FessProp.propMap.clear();
         try {

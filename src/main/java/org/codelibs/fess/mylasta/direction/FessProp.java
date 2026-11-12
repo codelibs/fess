@@ -1043,7 +1043,9 @@ public interface FessProp {
 
     /**
      * Returns the schemes search.result.link.schemes allows for a search result link, lower-cased and
-     * without the colon. A blank value gives an empty list, so no result link is allowed.
+     * without the colon. A blank value gives an empty list, so no result link is allowed. javascript,
+     * data and vbscript are left out even if the setting lists them, because the list is also handed to
+     * the theme, which trusts it.
      *
      * @return the schemes
      */
@@ -1054,6 +1056,7 @@ public interface FessProp {
             schemes = split(getSearchResultLinkSchemes(), ",").get(stream -> stream.map(s -> s.trim().toLowerCase(Locale.ROOT))
                     .map(s -> s.endsWith(":") ? s.substring(0, s.length() - 1) : s)
                     .filter(StringUtil::isNotBlank)
+                    .filter(s -> !SCRIPT_SCHEMES.contains(s))
                     .distinct()
                     .toList());
             propMap.put(SEARCH_RESULT_LINK_SCHEMES_LIST, schemes);
