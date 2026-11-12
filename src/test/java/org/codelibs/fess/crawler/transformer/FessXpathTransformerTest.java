@@ -202,7 +202,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         // The page1 link sits inside a <NAV>, which is itself nested inside an <H1>. The <H1> is
         // pruned (as "important_content") by the default Fess field-rule wiring (see
         // crawler/transformer.xml), and <NAV> is one of the default crawler.document.html.pruned.tags
-        // (see fess_config.properties: "noscript,script,style,header,footer,aside,nav,a[rel=nofollow]").
+        // (see fess_config.properties: "noscript,script,style,template,header,footer,aside,nav,a[rel=nofollow]").
         // pruneNode/pruneNodeByTags (FessXpathTransformer) only remove descendants that match a
         // configured pruned-tag pattern - a bare <A> matches none of them, so it is never actually
         // removed by pruning. Nesting the link under a genuinely-pruned <NAV> is what makes this
@@ -244,6 +244,33 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String importantContent = (String) dataMap.get("important_content");
         assertEquals("Heading Text", importantContent.trim());
         assertFalse(importantContent.contains("Nav Link"), "important_content should not contain pruned nav text: " + importantContent);
+    }
+
+    @Test
+    public void test_transform_templateContentIsNotIndexed() throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+
+        // The content of a <template> is never shown by a browser (a script copies it into the page, and what
+        // the script shows is in the page itself), so it is one of the default pruned tags like <noscript>.
+        final String html = "<html><head><title>Test</title></head><body>" //
+                + "<p>Shown text.</p>" //
+                + "<template><p>Inert template text.</p></template>" //
+                + "<noscript>Noscript text.</noscript>" //
+                + "</body></html>";
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        transformer.setChildUrlRuleMap(new LinkedHashMap<>());
+
+        final ResultData resultData = transformer.transform(createHtmlResponseData(sessionId, "http://example.com/", html));
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> dataMap = (Map<String, Object>) resultData.getRawData();
+        final String content = (String) dataMap.get("content");
+        assertNotNull(content);
+        assertTrue(content.contains("Shown text."), "content: " + content);
+        assertFalse(content.contains("Inert template text."), "content: " + content);
+        assertFalse(content.contains("Noscript text."), "content: " + content);
     }
 
     @Test
