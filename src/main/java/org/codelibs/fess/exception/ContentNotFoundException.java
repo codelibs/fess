@@ -33,4 +33,18 @@ public class ContentNotFoundException extends FessSystemException {
         super("Not Found: " + url + " Parent: " + parentUrl, false, false);
     }
 
+    /**
+     * Constructs a new ContentNotFoundException for a response with the given HTTP status. The crawler stores
+     * this exception for every status in {@code crawler.failure.url.status.codes} (404, 403, 410, 401, 5xx by
+     * default), so the message names a status other than 404 instead of calling it "Not Found".
+     *
+     * @param parentUrl the URL of the parent document
+     * @param url the URL of the content that was not found
+     * @param httpStatusCode the HTTP status of the response, or null when it is not known
+     */
+    public ContentNotFoundException(final String parentUrl, final String url, final Integer httpStatusCode) {
+        super((httpStatusCode == null || httpStatusCode == 404 ? "Not Found" : "HTTP " + httpStatusCode) + ": " + url + " Parent: "
+                + parentUrl, false, false);
+    }
+
 }

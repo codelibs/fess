@@ -518,9 +518,12 @@ public class FessCrawlerThread extends CrawlerThread {
             final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().get(sessionId);
             final String url = urlQueue.getUrl();
 
+            // the status is the one kept for the failure URL: unknown for a file or smb URL, whose client sets its own code
+            final FailureUrlDetails details = FailureUrlDetails.of(responseData);
+            final Integer httpStatusCode = details != null ? details.httpStatusCode() : null;
             final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
             failureUrlService.store(crawlingConfig, ContentNotFoundException.class.getCanonicalName(), url,
-                    new ContentNotFoundException(urlQueue.getParentUrl(), url), FailureUrlDetails.of(responseData));
+                    new ContentNotFoundException(urlQueue.getParentUrl(), url, httpStatusCode), details);
         }
     }
 
