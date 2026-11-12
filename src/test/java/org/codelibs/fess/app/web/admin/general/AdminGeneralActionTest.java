@@ -456,4 +456,25 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
                 .mapToObj(i -> "k" + i + EQ + "v")
                 .collect(java.util.stream.Collectors.joining(LF));
     }
+
+    /**
+     * A GET or POST that carries no transaction token must not send a mail or change the notification
+     * recipient: the button of the general screen submits the token like the update button does.
+     */
+    @Test
+    public void test_sendmail_withoutToken_isRefusedBeforeAnythingIsSent() throws Exception {
+        suppressBindingOf(org.codelibs.fess.app.web.base.login.FessLoginAssist.class);
+        final AdminGeneralAction action = new AdminGeneralAction();
+        inject(action);
+        final java.lang.reflect.Field sysField = org.codelibs.fess.app.web.base.FessBaseAction.class.getDeclaredField("systemHelper");
+        sysField.setAccessible(true);
+        if (sysField.get(action) == null) {
+            sysField.set(action, new SystemHelper());
+        }
+        final MailForm form = new MailForm();
+        form.notificationTo = "someone@example.com";
+
+        assertException(org.lastaflute.web.token.exception.DoubleSubmittedRequestException.class, () -> action.sendmail(form));
+        assertNull(ComponentUtil.getSystemProperties().getProperty(Constants.NOTIFICATION_TO_PROPERTY));
+    }
 }
