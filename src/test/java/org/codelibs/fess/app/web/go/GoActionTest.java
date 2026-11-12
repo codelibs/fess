@@ -72,6 +72,11 @@ public class GoActionTest extends UnitFessTestCase {
             }
 
             @Override
+            public String getSearchResultLinkSchemes() {
+                return "http,https,ftp,ftps,file,smb,smb1,storage,s3,gcs";
+            }
+
+            @Override
             public String getIndexFieldUrl() {
                 return "url";
             }
@@ -558,6 +563,20 @@ public class GoActionTest extends UnitFessTestCase {
     public void test_go_unsafeRedirectUrl_is404WithDetailKey() throws Exception {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "javascript:alert(1)");
+        goAction.setSearchHelper(new StubSearchHelper(doc));
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 404");
+        } catch (final Exception e) {
+            assertClientError(404, e);
+        }
+        assertEquals("errors.document_not_found", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
+    public void test_go_schemeNotListed_is404WithDetailKey() throws Exception {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "ms-msdt:/id PCWDiagnostic");
         goAction.setSearchHelper(new StubSearchHelper(doc));
         try {
             goAction.index(newGoForm());

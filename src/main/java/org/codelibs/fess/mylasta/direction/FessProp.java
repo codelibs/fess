@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -136,6 +137,14 @@ public interface FessProp {
     String INDEX_ADMIN_DOUBLE_FIELD_SET = "indexAdminDoubleFieldSet";
 
     String AUTHENTICATION_ADMIN_ROLES = "authenticationAdminRoles";
+
+    String SEARCH_RESULT_LINK_SCHEMES_LIST = "searchResultLinkSchemesList";
+
+    /** Schemes that run script; a search result never links to them. */
+    Set<String> SCRIPT_SCHEMES = Set.of("javascript", "data", "vbscript");
+
+    /** The scheme at the start of a URL. */
+    Pattern URL_SCHEME = Pattern.compile("^([A-Za-z][A-Za-z0-9+.-]*):");
 
     String SEARCH_GUEST_ROLE_LIST = "searchGuestPermissionList";
 
@@ -1028,6 +1037,51 @@ public interface FessProp {
             propMap.put(AUTHENTICATION_ADMIN_ROLES, roles);
         }
         return roles;
+    }
+
+    String getSearchResultLinkSchemes();
+
+    /**
+     * Returns the schemes search.result.link.schemes allows for a search result link, lower-cased and
+     * without the colon. A blank value gives an empty list, so no result link is allowed.
+     *
+     * @return the schemes
+     */
+    @SuppressWarnings("unchecked")
+    default List<String> getSearchResultLinkSchemesAsList() {
+        List<String> schemes = (List<String>) propMap.get(SEARCH_RESULT_LINK_SCHEMES_LIST);
+        if (schemes == null) {
+            schemes = split(getSearchResultLinkSchemes(), ",").get(stream -> stream.map(s -> s.trim().toLowerCase(Locale.ROOT))
+                    .map(s -> s.endsWith(":") ? s.substring(0, s.length() - 1) : s)
+                    .filter(StringUtil::isNotBlank)
+                    .distinct()
+                    .toList());
+            propMap.put(SEARCH_RESULT_LINK_SCHEMES_LIST, schemes);
+        }
+        return schemes;
+    }
+
+    /**
+     * Checks whether a search result may link to the URL: it has no scheme (a relative URL), or its
+     * scheme is one of search.result.link.schemes. javascript, data and vbscript are refused even if
+     * the setting lists them. The scheme is read the way a browser reads it: tabs and line breaks
+     * inside the URL and the spaces and control characters before it are ignored.
+     *
+     * @param url the URL of a document
+     * @return true if a result may link to the URL
+     */
+    default boolean isSearchResultLinkAllowed(final String url) {
+        final String cleaned = url.replaceAll("[\\t\\n\\r]", "");
+        int start = 0;
+        while (start < cleaned.length() && cleaned.charAt(start) <= ' ') {
+            start++;
+        }
+        final Matcher matcher = URL_SCHEME.matcher(cleaned.substring(start));
+        if (!matcher.find()) {
+            return true;
+        }
+        final String scheme = matcher.group(1).toLowerCase(Locale.ROOT);
+        return !SCRIPT_SCHEMES.contains(scheme) && getSearchResultLinkSchemesAsList().contains(scheme);
     }
 
     String getJvmChunkOptions();
