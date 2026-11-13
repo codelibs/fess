@@ -121,7 +121,10 @@ public class UserService {
      * credentials do not follow a rename. A failure to remove them fails the store before the user is
      * written.</p>
      *
+     * <p>A rename onto a name another user already holds is refused before anything is removed.</p>
+     *
      * @param user the user entity to store
+     * @throws IllegalArgumentException if the user is renamed to the name of another user
      */
     public void store(final User user) {
         final String username = user.getName();
@@ -171,6 +174,7 @@ public class UserService {
      * its ID yet, and those of the previous and the new name when the stored row has another name.
      *
      * @param user the user about to be stored
+     * @throws IllegalArgumentException if the stored row is renamed to the name of another user
      */
     protected void removeInheritablePasskeys(final User user) {
         final String username = user.getName();
@@ -179,6 +183,9 @@ public class UserService {
         if (previousName == null) {
             passkeyService.deleteByUserName(username);
         } else if (!previousName.equals(username)) {
+            if (getUserByName(username).filter(other -> !user.getId().equals(other.getId())).isPresent()) {
+                throw new IllegalArgumentException("A user named " + username + " already exists");
+            }
             passkeyService.deleteByUserName(previousName);
             passkeyService.deleteByUserName(username);
             if (logger.isInfoEnabled()) {

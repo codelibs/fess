@@ -1013,6 +1013,28 @@ public class UserServiceTest extends UnitFessTestCase {
         assertEquals(List.of("auth:alice", "user:alice"), calls);
     }
 
+    @Test
+    public void test_store_rename_ontoAnotherUsersName_isRefusedBeforeAnythingIsRemoved() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false, storedUser("id-bob", "bob"));
+
+        final IllegalArgumentException e = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> userService.store(storedUser("id-alice", "bob")));
+
+        assertEquals("A user named bob already exists", e.getMessage());
+        assertEquals("neither the passkeys of either name nor the user document may be touched", List.of(), calls);
+    }
+
+    @Test
+    public void test_store_rename_ontoItsOwnRow_isNotRefused() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false, storedUser("id-alice", "alicia"));
+
+        userService.store(storedUser("id-alice", "alicia"));
+
+        assertEquals(List.of("passkeys:alice", "passkeys:alicia", "auth:alicia", "user:alicia"), calls);
+    }
+
     private static User storedUser(final String id, final String name) {
         final User user = new User();
         user.setId(id);
@@ -1025,6 +1047,14 @@ public class UserServiceTest extends UnitFessTestCase {
      * @param storedName the name of the row stored under the user's ID, or null when there is none
      */
     private void installStoreStubs(final List<String> calls, final String storedName, final boolean failPasskeys) {
+        installStoreStubs(calls, storedName, failPasskeys, null);
+    }
+
+    /**
+     * @param holderOfTheNewName the row a lookup by the new name finds, or null when no user holds it
+     */
+    private void installStoreStubs(final List<String> calls, final String storedName, final boolean failPasskeys,
+            final User holderOfTheNewName) {
         userService.passkeyService = new PasskeyService() {
             @Override
             public void deleteByUserName(final String userName) {
@@ -1039,6 +1069,13 @@ public class UserServiceTest extends UnitFessTestCase {
             public org.dbflute.optional.OptionalEntity<User> selectByPK(final String id) {
                 return storedName == null ? org.dbflute.optional.OptionalEntity.empty()
                         : org.dbflute.optional.OptionalEntity.of(storedUser(id, storedName));
+            }
+
+            @Override
+            public org.dbflute.optional.OptionalEntity<User> selectEntity(
+                    final org.dbflute.bhv.readable.CBCall<org.codelibs.fess.opensearch.user.cbean.UserCB> cbLambda) {
+                return holderOfTheNewName == null ? org.dbflute.optional.OptionalEntity.empty()
+                        : org.dbflute.optional.OptionalEntity.of(holderOfTheNewName);
             }
 
             @Override
