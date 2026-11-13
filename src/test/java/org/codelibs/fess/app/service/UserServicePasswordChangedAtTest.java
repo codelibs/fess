@@ -52,6 +52,12 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         userService = new UserService();
+        // store() removes the passkeys a new user would inherit; there is no passkey index here
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+            }
+        };
         stored = new User();
         stored.setName("alice");
         stored.setPassword("{bcrypt}old");
