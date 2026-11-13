@@ -98,6 +98,7 @@
   "profile.success": "Your password has been updated successfully.",
   "profile.error_mismatch": "New password and confirmation do not match.",
   "profile.error_password_length": "Password must be at least {0} characters long.",
+  "profile.error_password_too_long": "Password must be no longer than {0} bytes.",
   "profile.error_password_no_uppercase": "Password must contain at least one uppercase letter.",
   "profile.error_password_no_lowercase": "Password must contain at least one lowercase letter.",
   "profile.error_password_no_digit": "Password must contain at least one digit.",

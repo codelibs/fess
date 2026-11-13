@@ -33,6 +33,7 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
@@ -467,6 +468,8 @@ public class AdminUserAction extends FessAdminAction {
         switch (errorKey) {
         case "errors.password_length" -> messages.addErrorsPasswordLength("password",
                 String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+        case "errors.password_too_long" -> messages.addErrorsPasswordTooLong("password",
+                String.valueOf(PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES));
         case "errors.password_no_uppercase" -> messages.addErrorsPasswordNoUppercase("password");
         case "errors.password_no_lowercase" -> messages.addErrorsPasswordNoLowercase("password");
         case "errors.password_no_digit" -> messages.addErrorsPasswordNoDigit("password");

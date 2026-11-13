@@ -278,6 +278,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Password must be at least {0} characters long. */
     public static final String ERRORS_password_length = "{errors.password_length}";
 
+    /** The key of the message: Password must be no longer than {0} bytes. */
+    public static final String ERRORS_password_too_long = "{errors.password_too_long}";
+
     /** The key of the message: Password must contain at least one uppercase letter. */
     public static final String ERRORS_password_no_uppercase = "{errors.password_no_uppercase}";
 
@@ -1886,6 +1889,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsPasswordLength(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_password_length, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_too_long' with parameters.
+     * <pre>
+     * message: Password must be no longer than {0} bytes.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordTooLong(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_too_long, arg0));
         return this;
     }
 

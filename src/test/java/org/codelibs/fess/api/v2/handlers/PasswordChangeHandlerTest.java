@@ -517,6 +517,38 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_tooLongPassword_returnsReasonAndMaxBytes() throws Exception {
+        // A password over the BCrypt limit gets its own reason, not the minimum-length one,
+        // and carries the limit so the SPA can tell the user what to shorten it to.
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return "errors.password_too_long";
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"long\",\"confirm_password\":\"long\"}"), res);
+            org.junit.jupiter.api.Assertions.assertEquals(400, res.status, res.body());
+            assertTrue(res.body().contains("\"reason\":\"errors.password_too_long\""), res.body());
+            assertTrue(res.body().contains("\"max_bytes\":72"), res.body());
+            assertFalse(res.body().contains("\"min_length\""), res.body());
+            assertFalse(changedCalled[0], "changePassword must NOT be invoked for a too long password");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void passwordChange_currentPasswordWrong_consumesRateLimit() throws Exception {
         // C-3: a wrong current_password must consume exactly one slot in the per-user
         // bucket. The handler reads the limit from FessConfig (default 5/min for the

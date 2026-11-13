@@ -98,6 +98,7 @@
   "profile.success": "Şifreniz başarıyla güncellendi.",
   "profile.error_mismatch": "Yeni şifre ve onay eşleşmiyor.",
   "profile.error_password_length": "Şifre en az {0} karakter uzunluğunda olmalıdır.",
+  "profile.error_password_too_long": "Şifre en fazla {0} bayt uzunluğunda olmalıdır.",
   "profile.error_password_no_uppercase": "Şifre en az bir büyük harf içermelidir.",
   "profile.error_password_no_lowercase": "Şifre en az bir küçük harf içermelidir.",
   "profile.error_password_no_digit": "Şifre en az bir rakam içermelidir.",

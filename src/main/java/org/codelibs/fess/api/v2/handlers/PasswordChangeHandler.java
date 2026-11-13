@@ -27,6 +27,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -83,7 +84,8 @@ import jakarta.servlet.http.HttpSession;
  * developer-facing English strings. Clients MUST use {@code error.code}
  * (the V2ErrorCode token) for user-facing i18n. Handlers also emit a stable
  * {@code error.details.reason} token (and {@code min_length} for
- * {@code errors.password_length}) so clients can localize the specific failure.</p>
+ * {@code errors.password_length}, {@code max_bytes} for {@code errors.password_too_long})
+ * so clients can localize the specific failure.</p>
  */
 public class PasswordChangeHandler {
 
@@ -296,6 +298,8 @@ public class PasswordChangeHandler {
                 if (minLength != null) {
                     details.put("min_length", minLength);
                 }
+            } else if ("errors.password_too_long".equals(validationError)) {
+                details.put("max_bytes", PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES);
             }
             ComponentUtil.getV2EnvelopeWriter()
                     .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "weak password: " + validationError, details);

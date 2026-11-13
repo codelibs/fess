@@ -98,6 +98,7 @@
   "profile.success": "Sua senha foi atualizada com sucesso.",
   "profile.error_mismatch": "A nova senha e a confirmação não correspondem.",
   "profile.error_password_length": "A senha deve ter pelo menos {0} caracteres.",
+  "profile.error_password_too_long": "A senha não pode ter mais de {0} bytes.",
   "profile.error_password_no_uppercase": "A senha deve conter pelo menos uma letra maiúscula.",
   "profile.error_password_no_lowercase": "A senha deve conter pelo menos uma letra minúscula.",
   "profile.error_password_no_digit": "A senha deve conter pelo menos um dígito.",

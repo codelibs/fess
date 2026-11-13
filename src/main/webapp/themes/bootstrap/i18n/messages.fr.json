@@ -98,6 +98,7 @@
   "profile.success": "Votre mot de passe a été mis à jour avec succès.",
   "profile.error_mismatch": "Le nouveau mot de passe et la confirmation ne correspondent pas.",
   "profile.error_password_length": "Le mot de passe doit contenir au moins {0} caractères.",
+  "profile.error_password_too_long": "Le mot de passe ne doit pas dépasser {0} octets.",
   "profile.error_password_no_uppercase": "Le mot de passe doit contenir au moins une lettre majuscule.",
   "profile.error_password_no_lowercase": "Le mot de passe doit contenir au moins une lettre minuscule.",
   "profile.error_password_no_digit": "Le mot de passe doit contenir au moins un chiffre.",

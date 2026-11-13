@@ -269,6 +269,65 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_exceedsBcryptLimit() {
+        assertFalse(systemHelper.exceedsBcryptLimit(null));
+        assertFalse(systemHelper.exceedsBcryptLimit(""));
+        assertFalse(systemHelper.exceedsBcryptLimit("a".repeat(72)));
+        assertTrue(systemHelper.exceedsBcryptLimit("a".repeat(73)));
+        // bytes, not characters: 24 Japanese characters are 72 bytes, 25 are 75
+        assertFalse(systemHelper.exceedsBcryptLimit("あ".repeat(24)));
+        assertTrue(systemHelper.exceedsBcryptLimit("あ".repeat(25)));
+    }
+
+    @Test
+    public void test_reportOverlongInitialPassword_warnsInTheWebappProcess() {
+        assertEquals(1, overlongInitialPasswordWarnings(true, "a".repeat(80)).size());
+        assertEquals(1, overlongInitialPasswordWarnings(true, "あ".repeat(25)).size());
+        assertEquals(0, overlongInitialPasswordWarnings(true, "a".repeat(72)).size());
+        assertEquals(0, overlongInitialPasswordWarnings(true, "admin").size());
+        assertEquals(0, overlongInitialPasswordWarnings(true, null).size());
+    }
+
+    @Test
+    public void test_reportOverlongInitialPassword_doesNotLogThePassword() {
+        final String password = "x".repeat(40) + "SECRET" + "y".repeat(40);
+        final List<String> warnings = overlongInitialPasswordWarnings(true, password);
+        assertEquals(1, warnings.size());
+        assertFalse(warnings.get(0), warnings.get(0).contains("SECRET"));
+        assertTrue(warnings.get(0), warnings.get(0).contains("86 bytes"));
+    }
+
+    @Test
+    public void test_reportOverlongInitialPassword_silentInJobProcesses() {
+        assertEquals(0, overlongInitialPasswordWarnings(false, "a".repeat(80)).size());
+    }
+
+    private List<String> overlongInitialPasswordWarnings(final boolean webapp, final String password) {
+        final SystemHelper helper = new SystemHelper() {
+            @Override
+            protected boolean isWebappProcess() {
+                return webapp;
+            }
+        };
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexUserInitialPassword() {
+                return password;
+            }
+        };
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SystemHelper.class);
+        try {
+            helper.reportOverlongInitialPassword(config);
+            return appender.messagesOnThisThreadAt(Level.WARN)
+                    .stream()
+                    .filter(m -> m.contains("index.user.initial_password"))
+                    .collect(Collectors.toList());
+        } finally {
+            appender.detach();
+        }
+    }
+
     private FessConfig cipherKeyConfig(final String key) {
         return new FessConfig.SimpleImpl() {
             @Override
@@ -1428,15 +1487,15 @@ public class SystemHelperTest extends UnitFessTestCase {
 
         // Up to the BCrypt limit (72 bytes) is valid, below maxLength.
         assertEquals("", systemHelper.validatePassword("a".repeat(72)));
-        // 101 chars exceeds maxLength — returns the same key as minLength violation.
-        assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(101)));
+        // 101 chars exceeds maxLength and the BCrypt limit; the limit it cannot get past is the one reported.
+        assertEquals("errors.password_too_long", systemHelper.validatePassword("a".repeat(101)));
 
         // BCrypt only reads 72 bytes: 72 bytes pass, 73 do not, even though both are below maxLength.
         assertEquals("", systemHelper.validatePassword("a".repeat(72)));
-        assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(73)));
+        assertEquals("errors.password_too_long", systemHelper.validatePassword("a".repeat(73)));
         // The limit counts UTF-8 bytes, not characters: 24 Japanese characters are 72 bytes, 25 are 75.
         assertEquals("", systemHelper.validatePassword("あ".repeat(24)));
-        assertEquals("errors.password_length", systemHelper.validatePassword("あ".repeat(25)));
+        assertEquals("errors.password_too_long", systemHelper.validatePassword("あ".repeat(25)));
     }
 
     @Test
