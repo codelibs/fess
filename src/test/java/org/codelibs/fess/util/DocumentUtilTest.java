@@ -320,6 +320,60 @@ public class DocumentUtilTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_encodeUrl_percent_sign_in_file_name() {
+        // a file name written into the URL as it is: "%" does not start an escape
+        assertEquals("https://git.example.com/repo/blob/main/100%25.txt",
+                DocumentUtil.encodeUrl("https://git.example.com/repo/blob/main/100%.txt"));
+        assertEquals("https://git.example.com/repo/blob/main/50%25off.txt",
+                DocumentUtil.encodeUrl("https://git.example.com/repo/blob/main/50%off.txt"));
+        assertEquals("100%25", DocumentUtil.encodeUrl("100%"));
+        assertEquals("a%25%252", DocumentUtil.encodeUrl("a%%2"));
+    }
+
+    @Test
+    public void test_encodeUrl_percent_followed_by_one_hex_digit() {
+        assertEquals("a%252", DocumentUtil.encodeUrl("a%2"));
+        assertEquals("a%252/b", DocumentUtil.encodeUrl("a%2/b"));
+        assertEquals("a%25g1", DocumentUtil.encodeUrl("a%g1"));
+    }
+
+    @Test
+    public void test_encodeUrl_non_ascii_and_percent() throws Exception {
+        getMockRequest().setCharacterEncoding("UTF-8");
+        assertEquals("http://example.com/%E3%81%82%E3%81%84.txt", DocumentUtil.encodeUrl("http://example.com/\u3042\u3044.txt"));
+        assertEquals("http://example.com/%E3%81%8250%25.txt", DocumentUtil.encodeUrl("http://example.com/\u304250%.txt"));
+        // only an ASCII hex digit makes an escape (these are full-width digits)
+        assertEquals("a%25%EF%BC%91%EF%BC%91", DocumentUtil.encodeUrl("a%\uFF11\uFF11"));
+    }
+
+    @Test
+    public void test_encodeUrl_percent_escape_is_not_encoded_twice() {
+        assertEquals("http://example.com/a%20b/%E3%81%82.txt", DocumentUtil.encodeUrl("http://example.com/a%20b/%E3%81%82.txt"));
+        assertEquals("http://example.com/a%2fb%2Fc", DocumentUtil.encodeUrl("http://example.com/a%2fb%2Fc"));
+        assertEquals("100%25.txt", DocumentUtil.encodeUrl("100%25.txt"));
+        assertEquals("a%23b.txt", DocumentUtil.encodeUrl("a%23b.txt"));
+        // an escape at the very end of the URL
+        assertEquals("a%41", DocumentUtil.encodeUrl("a%41"));
+    }
+
+    @Test
+    public void test_encodeUrl_web_url_with_query_and_fragment() {
+        assertEquals("https://example.com/search?q=fess&page=2#top",
+                DocumentUtil.encodeUrl("https://example.com/search?q=fess&page=2#top"));
+        assertEquals("https://example.com/p?q=a%26b&r=%E3%81%82", DocumentUtil.encodeUrl("https://example.com/p?q=a%26b&r=%E3%81%82"));
+        assertEquals("https://example.com/p?q=100%25&r=a%20b", DocumentUtil.encodeUrl("https://example.com/p?q=100%&r=a b"));
+    }
+
+    @Test
+    public void test_encodeUrl_hash_and_question_mark_are_not_encoded() {
+        // "#" and "?" are URL characters: they cannot be told from the start of a fragment or a query
+        assertEquals("https://git.example.com/repo/blob/main/a#b.txt",
+                DocumentUtil.encodeUrl("https://git.example.com/repo/blob/main/a#b.txt"));
+        assertEquals("https://git.example.com/repo/blob/main/a?b.txt",
+                DocumentUtil.encodeUrl("https://git.example.com/repo/blob/main/a?b.txt"));
+    }
+
+    @Test
     public void test_encodeUrl_unicode() {
         assertEquals("%3F", DocumentUtil.encodeUrl("あ"));
         assertEquals("%3F%3F%3F", DocumentUtil.encodeUrl("あいう"));

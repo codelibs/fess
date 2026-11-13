@@ -204,6 +204,8 @@ public final class DocumentUtil {
      * Encodes a URL by encoding non-URL-safe characters.
      * Uses the request's character encoding if available, otherwise defaults to UTF-8.
      * Only encodes characters that are not considered URL-safe according to CharUtil.
+     * A "%" that is not followed by two hex digits is not a percent escape, so it is written as "%25";
+     * a "%" that starts an escape is left as it is, so an already encoded URL is not encoded twice.
      *
      * @param url the URL to encode
      * @return the encoded URL with non-URL-safe characters properly encoded
@@ -214,8 +216,13 @@ public final class DocumentUtil {
                 .map(HttpServletRequest::getCharacterEncoding)
                 .orElse(Constants.UTF_8);
         final StringBuilder buf = new StringBuilder(url.length() + 100);
-        for (final char c : url.toCharArray()) {
-            if (CharUtil.isUrlChar(c)) {
+        final char[] chars = url.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            final char c = chars[i];
+            if (c == '%' && !isPercentEscape(chars, i)) {
+                // a "%" that does not start an escape is invalid in a URL, so it is a literal percent sign
+                buf.append("%25");
+            } else if (CharUtil.isUrlChar(c)) {
                 buf.append(c);
             } else {
                 try {
@@ -227,5 +234,20 @@ public final class DocumentUtil {
             }
         }
         return buf.toString();
+    }
+
+    /**
+     * Checks whether the "%" at the given position starts a percent escape, that is, is followed by two hex digits.
+     *
+     * @param chars the characters of the URL
+     * @param index the position of the "%"
+     * @return true if the "%" is followed by two hex digits
+     */
+    private static boolean isPercentEscape(final char[] chars, final int index) {
+        return index + 2 < chars.length && isHexDigit(chars[index + 1]) && isHexDigit(chars[index + 2]);
+    }
+
+    private static boolean isHexDigit(final char c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
     }
 }

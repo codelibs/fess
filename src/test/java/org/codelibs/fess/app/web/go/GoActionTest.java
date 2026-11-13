@@ -38,6 +38,7 @@ import org.dbflute.system.DBFluteSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter.RequestClientErrorException;
 import org.lastaflute.web.servlet.request.ResponseManager;
@@ -628,5 +629,31 @@ public class GoActionTest extends UnitFessTestCase {
                         + " @Execute method by RedCardableAssist#assertExecuteMethodResponseDefined, and asEmptyBody() is"
                         + " what pins \"no body, no forward\": a plain HtmlResponse.fromRedirectPathAsIs(...) is also"
                         + " !isUndefined() but is not an empty body");
+    }
+
+    private String redirectLocation(final String url) throws Exception {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", url);
+        goAction.setSearchHelper(new StubSearchHelper(doc));
+        final ActionResponse response = goAction.index(newGoForm());
+        return ((HtmlResponse) response).getRoutingPath();
+    }
+
+    @Test
+    public void test_go_redirect_percentSignInFileNameIsEncoded() throws Exception {
+        assertEquals("https://git.example.com/repo/blob/main/100%25.txt",
+                redirectLocation("https://git.example.com/repo/blob/main/100%.txt"));
+    }
+
+    @Test
+    public void test_go_redirect_spaceIsEncodedAndEscapesAreKept() throws Exception {
+        assertEquals("https://git.example.com/repo/blob/main/a%20b.txt",
+                redirectLocation("https://git.example.com/repo/blob/main/a b.txt"));
+        assertEquals("https://example.com/a%20b/%E3%81%82.txt", redirectLocation("https://example.com/a%20b/%E3%81%82.txt"));
+    }
+
+    @Test
+    public void test_go_redirect_webUrlWithQueryIsNotChanged() throws Exception {
+        assertEquals("https://example.com/search?q=fess&page=2#top", redirectLocation("https://example.com/search?q=fess&page=2#top"));
     }
 }
