@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
-import org.codelibs.fess.app.service.PasskeyException;
+import org.codelibs.fess.exception.PasskeyException;
 import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
@@ -103,6 +103,7 @@ public class PasskeyLoginHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_options_returnsChallengeAndEmptyAllowCredentials() throws Exception {
+        ComponentUtil.register(new org.codelibs.fess.helper.SystemHelper(), "systemHelper");
         // The real createLoginOptions, so the wire shape is the service's own.
         final PasskeyService service = new PasskeyService() {
             {

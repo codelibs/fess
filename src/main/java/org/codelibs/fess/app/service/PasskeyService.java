@@ -32,11 +32,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.PasskeyException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exbhv.PasskeyBhv;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
 import org.codelibs.fess.opensearch.user.exentity.Passkey;
 import org.codelibs.fess.opensearch.user.exentity.User;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalEntity;
 
@@ -97,12 +99,6 @@ public class PasskeyService {
 
     /** The entry of a stored registration challenge holding the user handle it uses. */
     protected static final String CHALLENGE_USER_HANDLE = "userHandle";
-
-    /**
-     * Makes reading and removing a challenge one step, so that two requests of one session cannot
-     * both use it. The step is short and does no I/O, so one lock serves all sessions.
-     */
-    private static final Object CHALLENGE_LOCK = new Object();
 
     /** How long a challenge is valid, in milliseconds. */
     protected static final long CHALLENGE_TTL = 5 * 60 * 1000L;
@@ -236,7 +232,8 @@ public class PasskeyService {
                 .findFirst()
                 .orElseGet(() -> encode(randomBytes()));
         final byte[] challenge = randomBytes();
-        session.setAttribute(REGISTRATION_CHALLENGE_KEY, toSessionValue(challenge, currentTimeMillis(), userName, userHandle));
+        session.setAttribute(REGISTRATION_CHALLENGE_KEY,
+                toSessionValue(challenge, ComponentUtil.getSystemHelper().getCurrentTimeAsLong(), userName, userHandle));
 
         final Map<String, Object> rp = new LinkedHashMap<>();
         rp.put("id", fessConfig.getPasskeyRpId());
@@ -330,7 +327,7 @@ public class PasskeyService {
         passkey.setBackupEligible(registered.backupEligible());
         passkey.setBackupState(registered.backupState());
         passkey.setLabel(trimmedLabel);
-        passkey.setCreatedAt(currentTimeMillis());
+        passkey.setCreatedAt(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         insert(passkey);
         if (logger.isDebugEnabled()) {
             logger.debug("Registered a passkey: credentialId={}", abbreviate(credentialId));
@@ -351,7 +348,8 @@ public class PasskeyService {
      */
     public Map<String, Object> createLoginOptions(final HttpSession session) {
         final byte[] challenge = randomBytes();
-        session.setAttribute(LOGIN_CHALLENGE_KEY, toSessionValue(challenge, currentTimeMillis(), null, null));
+        session.setAttribute(LOGIN_CHALLENGE_KEY,
+                toSessionValue(challenge, ComponentUtil.getSystemHelper().getCurrentTimeAsLong(), null, null));
         final Map<String, Object> options = new LinkedHashMap<>();
         options.put("challenge", encode(challenge));
         options.put("rpId", fessConfig.getPasskeyRpId());
@@ -402,7 +400,7 @@ public class PasskeyService {
             throw new PasskeyException("reason=unknown_user, credentialId=" + abbreviate(credentialId));
         }
 
-        final long usedAt = currentTimeMillis();
+        final long usedAt = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         checkSignCount(passkey, presentedSignCount, credentialId);
         if (!updateAfterLogin(passkey, Math.max(signCountOf(passkey), presentedSignCount), usedAt)) {
             // Another login of the same credential won the race: check against what it stored, once.
@@ -567,15 +565,6 @@ public class PasskeyService {
         return StringUtil.isNotBlank(userName) && userBhv.selectCount(cb -> cb.query().setName_Equal(userName)) > 0;
     }
 
-    /**
-     * Returns the current time in milliseconds.
-     *
-     * @return the current time
-     */
-    protected long currentTimeMillis() {
-        return System.currentTimeMillis();
-    }
-
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
@@ -621,7 +610,7 @@ public class PasskeyService {
      */
     protected PendingChallenge consumeChallenge(final HttpSession session, final String key) {
         final Object value;
-        synchronized (CHALLENGE_LOCK) {
+        synchronized (session) {
             value = session.getAttribute(key);
             if (value != null) {
                 session.removeAttribute(key);
@@ -631,7 +620,7 @@ public class PasskeyService {
         if (challenge == null) {
             throw new PasskeyException("reason=no_challenge");
         }
-        final long age = currentTimeMillis() - challenge.createdAt();
+        final long age = ComponentUtil.getSystemHelper().getCurrentTimeAsLong() - challenge.createdAt();
         if (age < 0L || age > CHALLENGE_TTL) {
             throw new PasskeyException("reason=challenge_expired");
         }

@@ -66,6 +66,7 @@ public class PasskeyServiceLazyInitTest extends UnitFessTestCase {
     @Test
     public void test_theLoaderSeesWhenAVerificationUsesWebAuthn4j() throws Exception {
         // the check above is not vacuous: a verification does reach the holder and webauthn4j
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.SystemHelper(), "systemHelper");
         final IsolatingLoader loader = new IsolatingLoader(getClass().getClassLoader());
         final Class<?> type = loader.loadClass(PasskeyService.class.getName());
         final Object service = newService(type, true);

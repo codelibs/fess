@@ -26,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2ErrorCode;
-import org.codelibs.fess.app.service.PasskeyException;
+import org.codelibs.fess.exception.PasskeyException;
 import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -345,6 +345,8 @@ public class PasskeyAccountHandler {
         if (logger.isInfoEnabled()) {
             logger.info("[v2/passkey] registered a passkey: userId={}, credentialId={}", userName, abbreviate(passkey.getId()));
         }
+        ComponentUtil.getActivityHelper()
+                .passkeyRegistered(ComponentUtil.getFessLoginAssist().getSavedUserBean(), userName, abbreviate(passkey.getId()));
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("passkey", toPayload(passkey));
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
@@ -425,6 +427,8 @@ public class PasskeyAccountHandler {
         if (logger.isInfoEnabled()) {
             logger.info("[v2/passkey] deleted a passkey: userId={}, credentialId={}", userName, abbreviate(credentialId));
         }
+        ComponentUtil.getActivityHelper()
+                .passkeyDeleted(ComponentUtil.getFessLoginAssist().getSavedUserBean(), userName, abbreviate(credentialId));
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("ok", true);
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);

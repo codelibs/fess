@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.codelibs.fess.exception.PasskeyException;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.Passkey;
 import org.codelibs.fess.opensearch.user.exentity.User;
@@ -82,6 +84,12 @@ public class PasskeyServiceTest extends UnitFessTestCase {
         service.users.add("alice");
         service.users.add("bob");
         session = new StubHttpSession();
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return service.now;
+            }
+        }, "systemHelper");
     }
 
     // -----------------------------------------------------------------------
@@ -921,11 +929,6 @@ public class PasskeyServiceTest extends UnitFessTestCase {
                     return origins;
                 }
             };
-        }
-
-        @Override
-        protected long currentTimeMillis() {
-            return now;
         }
 
         @Override

@@ -403,6 +403,7 @@ public class AdminUserAction extends FessAdminAction {
                 return redirectToDetails(id);
             }
             logger.info("Deleted passkey: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId);
+            activityHelper.passkeyDeleted(getUserBean(), user.getName(), credentialId);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         } catch (final Exception e) {
             logger.warn("Failed to delete passkey: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId, e);

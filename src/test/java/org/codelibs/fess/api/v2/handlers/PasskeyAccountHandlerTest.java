@@ -26,7 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.app.service.PasskeyException;
+import org.codelibs.fess.exception.PasskeyException;
+import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
@@ -64,6 +65,32 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
     private static final String VERIFY_BODY = "{\"label\":\"Work laptop\",\"credential\":{\"id\":\"abc\",\"type\":\"public-key\"}}";
 
     private static final String CREDENTIAL_ID = "AAECAwQFBgcICQoLDA0ODw";
+
+    private final List<String> audit = new ArrayList<>();
+
+    @Override
+    protected void setUp(final org.junit.jupiter.api.TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        audit.clear();
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            protected void printByLtsv(final Map<String, String> valueMap) {
+                valueMap.remove("time");
+                valueMap.remove("ip");
+                super.printByLtsv(valueMap);
+            }
+
+            @Override
+            protected void printLog(final String message) {
+                audit.add(message);
+            }
+
+            @Override
+            protected String getClientIp() {
+                return "";
+            }
+        }, "activityHelper");
+    }
 
     // ---------------------------------------------------------------- feature gate
 
@@ -404,6 +431,10 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"id\":\"" + CREDENTIAL_ID + "\""), res.body());
         assertTrue(res.body().contains("\"label\":\"Work laptop\""), res.body());
         assertNoKeyMaterial(res.body());
+        assertEquals(1, audit.size(), audit.toString());
+        assertTrue(audit.get(0).contains("action:REGISTER_PASSKEY"), audit.toString());
+        assertTrue(audit.get(0).contains("target:alice"), audit.toString());
+        assertTrue(audit.get(0).contains("credentialId:" + PasskeyService.abbreviate(CREDENTIAL_ID)), audit.toString());
     }
 
     @Test
@@ -571,6 +602,9 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         handler(new LoginRateLimiter(), service).delete(new Request("DELETE").withSession().proxy(), res.proxy(), CREDENTIAL_ID);
         assertEquals(200, res.status, res.body());
         assertTrue(service.stored.isEmpty());
+        assertEquals(1, audit.size(), audit.toString());
+        assertTrue(audit.get(0).contains("action:DELETE_PASSKEY"), audit.toString());
+        assertTrue(audit.get(0).contains("target:alice"), audit.toString());
     }
 
     @Test
@@ -589,6 +623,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         handler.delete(new Request("DELETE").withSession().proxy(), none.proxy(), CREDENTIAL_ID);
         assertEquals(others.body(), none.body());
         assertEquals(404, none.status);
+        assertTrue(audit.isEmpty(), "a passkey that was not deleted is not audited: " + audit);
     }
 
     @Test

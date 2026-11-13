@@ -249,6 +249,37 @@ public class ActivityHelper {
     }
 
     /**
+     * Log the passkey registered activity.
+     * Only the names and the shortened credential ID are written, never a key.
+     * @param user The user who registered the passkey.
+     * @param target The name of the user the passkey was registered for.
+     * @param credentialId The shortened credential ID of the passkey.
+     */
+    public void passkeyRegistered(final OptionalThing<FessUserBean> user, final String target, final String credentialId) {
+        logPasskey(Action.REGISTER_PASSKEY, user, target, credentialId);
+    }
+
+    /**
+     * Log the passkey deleted activity.
+     * Only the names and the shortened credential ID are written.
+     * @param user The user who deleted the passkey.
+     * @param target The name of the user the passkey belonged to.
+     * @param credentialId The shortened credential ID of the passkey.
+     */
+    public void passkeyDeleted(final OptionalThing<FessUserBean> user, final String target, final String credentialId) {
+        logPasskey(Action.DELETE_PASSKEY, user, target, credentialId);
+    }
+
+    private void logPasskey(final Action action, final OptionalThing<FessUserBean> user, final String target, final String credentialId) {
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", action.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("target", target != null ? target : "-");
+        valueMap.put("credentialId", credentialId != null ? credentialId : "-");
+        log(valueMap);
+    }
+
+    /**
      * Log the script execution activity.
      * @param scriptType The type of script (e.g., "groovy").
      * @param script The script content.
@@ -431,6 +462,14 @@ public class ActivityHelper {
          * The update password action.
          */
         UPDATE_PASSWORD,
+        /**
+         * The register passkey action.
+         */
+        REGISTER_PASSKEY,
+        /**
+         * The delete passkey action.
+         */
+        DELETE_PASSKEY,
         /**
          * The script execution action.
          */

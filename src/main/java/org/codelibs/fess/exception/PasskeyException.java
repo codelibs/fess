@@ -13,15 +13,16 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.service;
+package org.codelibs.fess.exception;
 
 /**
  * Thrown when a passkey registration or login fails verification. The message is a
  * {@code key=value} reason for the log only and must never reach the client, so that a failed
  * passkey login looks like any other failed login. It carries no cause, since the messages of the
- * underlying parser and verifier may quote parts of the client data.
+ * underlying parser and verifier may quote parts of the client data, and no stack trace, since
+ * only the message is logged.
  */
-public class PasskeyException extends RuntimeException {
+public class PasskeyException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,6 +32,6 @@ public class PasskeyException extends RuntimeException {
      * @param message the reason, for the log only
      */
     public PasskeyException(final String message) {
-        super(message);
+        super(message, false, false);
     }
 }
