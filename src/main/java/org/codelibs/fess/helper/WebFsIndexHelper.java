@@ -220,6 +220,7 @@ public class WebFsIndexHelper {
                         if (logger.isInfoEnabled()) {
                             logger.info("Target URL: {}", CredentialUrlUtil.removeUserInfo(u));
                         }
+                        warnUserInfo(u);
                     } else {
                         // Unlike a file crawling path, which falls back to file:, a web URL with an
                         // unusable protocol is dropped, and used to be dropped without a trace: the
@@ -763,4 +764,19 @@ public class WebFsIndexHelper {
         this.crawlerPriority = crawlerPriority;
     }
 
+    /**
+     * Warns that a crawling URL carries a user name and password in front of the host. The crawl of such
+     * a URL fails (the HTTP clients refuse it before a request is sent), and the Target URL line above
+     * does not show the userinfo, so the cause would otherwise not be visible. The credentials of a site
+     * belong in the Web Authentication of the crawl configuration.
+     *
+     * @param url the crawling URL
+     */
+    protected void warnUserInfo(final String url) {
+        if (CredentialUrlUtil.hasUserInfo(url)) {
+            logger.warn(
+                    "The crawling URL {} has a user name and password. They are not supported in a crawling URL and the crawl of this URL fails. Register them in Web Authentication of the crawl configuration instead.",
+                    CredentialUrlUtil.removeUserInfo(url));
+        }
+    }
 }
