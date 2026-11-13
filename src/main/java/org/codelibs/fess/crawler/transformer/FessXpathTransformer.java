@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -78,6 +79,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.codelibs.nekohtml.parsers.DOMParser;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -542,7 +544,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
         // digest
-        final String digest = getSingleNodeValue(document, getDigestXpath(fessConfig, xpathConfigMap), node -> node);
+        // a description that sits in a pruned tag (e.g. a <template>) is not shown, so it is not the digest either
+        final String digest = getSingleNodeValue(document, getDigestXpath(fessConfig, xpathConfigMap), node -> node,
+                prunedContent ? node -> !isInPrunedTag(node, crawlingConfig) : node -> true);
         if (StringUtil.isNotBlank(digest)) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(), digest);
         } else {
@@ -792,11 +796,28 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @return the extracted text content
      */
     protected String getSingleNodeValue(final Document document, final String xpath, final UnaryOperator<Node> pruneFunc) {
+        return getSingleNodeValue(document, xpath, pruneFunc, node -> true);
+    }
+
+    /**
+     * Extracts text content from the nodes selected by an XPath expression that pass a filter.
+     *
+     * @param document the parsed HTML document
+     * @param xpath the XPath expression to evaluate
+     * @param pruneFunc the function to apply for node pruning
+     * @param nodeFilter the filter that decides whether a selected node is used (it is applied to the node in the document)
+     * @return the extracted text content
+     */
+    protected String getSingleNodeValue(final Document document, final String xpath, final UnaryOperator<Node> pruneFunc,
+            final Predicate<Node> nodeFilter) {
         StringBuilder buf = null;
         XPathNodes list = null;
         try {
             list = getXPathAPI().selectNodeList(document, xpath);
             for (int i = 0; i < list.size(); i++) {
+                if (!nodeFilter.test(list.get(i))) {
+                    continue;
+                }
                 if (buf == null) {
                     buf = new StringBuilder(1000);
                 }
@@ -886,13 +907,35 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @return the pruned node
      */
     protected Node pruneNode(final Node node, final CrawlingConfig crawlingConfig) {
-        final PrunedTag[] prunedTags;
+        return pruneNodeByTags(node, getPrunedTags(crawlingConfig));
+    }
+
+    private PrunedTag[] getPrunedTags(final CrawlingConfig crawlingConfig) {
         if (crawlingConfig != null) {
-            prunedTags = prunedTagsCache.computeIfAbsent(crawlingConfig.getConfigId(), id -> resolvePrunedTags(crawlingConfig));
-        } else {
-            prunedTags = fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+            return prunedTagsCache.computeIfAbsent(crawlingConfig.getConfigId(), id -> resolvePrunedTags(crawlingConfig));
         }
-        return pruneNodeByTags(node, prunedTags);
+        return fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+    }
+
+    /**
+     * Checks if a node, which stays in the document, is inside a node that is pruned. A pruned tag only removes the
+     * child nodes of a selected node, so a node that XPath selects from inside a pruned tag (e.g. the content attribute
+     * of a meta element in a template) has to be checked on its own.
+     *
+     * @param node the selected node (an attribute node is checked from its owner element)
+     * @param crawlingConfig the crawling configuration containing pruning rules
+     * @return true if one of the ancestors of the node is pruned
+     */
+    protected boolean isInPrunedTag(final Node node, final CrawlingConfig crawlingConfig) {
+        final PrunedTag[] prunedTags = getPrunedTags(crawlingConfig);
+        Node parent = node instanceof final Attr attr ? attr.getOwnerElement() : node.getParentNode();
+        while (parent != null) {
+            if (isPrunedTag(parent, prunedTags)) {
+                return true;
+            }
+            parent = parent.getParentNode();
+        }
+        return false;
     }
 
     private PrunedTag[] resolvePrunedTags(final CrawlingConfig crawlingConfig) {
