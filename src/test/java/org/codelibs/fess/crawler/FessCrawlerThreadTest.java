@@ -630,6 +630,47 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_processResponse_failureStatusNamesTheStatusInTheMessage() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final List<Throwable> stored = new ArrayList<>();
+        registerFailureUrlServiceRecording(stored);
+
+        env.thread.processResponse(urlQueue(PAGE_URL), headResponse(500, null));
+        env.thread.processResponse(urlQueue(PAGE_URL), headResponse(404, null));
+
+        assertEquals(2, stored.size());
+        assertEquals("HTTP 500: " + PAGE_URL + " Parent: null", stored.get(0).getMessage());
+        assertEquals("Not Found: " + PAGE_URL + " Parent: null", stored.get(1).getMessage());
+    }
+
+    @Test
+    public void test_processResponse_failureStatusOfAFileUrlIsNotNamed() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final List<Throwable> stored = new ArrayList<>();
+        registerFailureUrlServiceRecording(stored);
+
+        // the clients of the other protocols set a code of their own, which is not a status of a server
+        final String smbUrl = "smb://server/share/a.txt";
+        final ResponseData responseData = headResponse(403, null);
+        responseData.setUrl(smbUrl);
+        env.thread.processResponse(urlQueue(smbUrl), responseData);
+
+        assertEquals(1, stored.size());
+        assertEquals("Not Found: " + smbUrl + " Parent: null", stored.get(0).getMessage());
+    }
+
+    private void registerFailureUrlServiceRecording(final List<Throwable> stored) {
+        ComponentUtil.register(new FailureUrlService() {
+            @Override
+            public FailureUrl store(final CrawlingConfig config, final String errorName, final String url, final Throwable e,
+                    final FailureUrlDetails details) {
+                stored.add(e);
+                return null;
+            }
+        }, FailureUrlService.class.getCanonicalName());
+    }
+
+    @Test
     public void test_processResponse_304WithoutPendingStateGoesToTheRule() {
         final CrawlEnvironment env = setUpCrawlEnvironment(null);
         final RecordingCrawlerThread crawlerThread = env.thread;

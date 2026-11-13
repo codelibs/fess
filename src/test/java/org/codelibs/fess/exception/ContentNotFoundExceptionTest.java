@@ -198,4 +198,14 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
             fail("Should have caught as FessSystemException");
         }
     }
+
+    @Test
+    public void test_constructor_withStatus() {
+        final String parentUrl = "http://example.com/";
+        final String url = "http://example.com/a.html";
+        assertEquals("Not Found: " + url + " Parent: " + parentUrl, new ContentNotFoundException(parentUrl, url, 404).getMessage());
+        assertEquals("Not Found: " + url + " Parent: " + parentUrl, new ContentNotFoundException(parentUrl, url, null).getMessage());
+        assertEquals("HTTP 500: " + url + " Parent: " + parentUrl, new ContentNotFoundException(parentUrl, url, 500).getMessage());
+        assertEquals("HTTP 403: " + url + " Parent: " + parentUrl, new ContentNotFoundException(parentUrl, url, 403).getMessage());
+    }
 }
