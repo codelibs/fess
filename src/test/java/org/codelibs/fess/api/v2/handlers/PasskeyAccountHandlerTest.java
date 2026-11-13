@@ -33,6 +33,7 @@ import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.Passkey;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -287,6 +288,81 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_registerOptions_passwordOfAnotherLocalUser_rejected() throws Exception {
+        // findLoginUser answers a local user, but not the one of the session: not this user's password
+        final StubPasskeyService service = new StubPasskeyService(true);
+        final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
+        assist.verifiedUser = localUser("mallory");
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final Response res = new Response();
+        handler(rl, service).registerOptions(new Request("POST").withSession().withBody(OPTIONS_BODY).proxy(), res.proxy());
+        assertEquals(401, res.status, res.body());
+        assertTrue(res.body().contains("\"reason\":\"invalid_current_password\""), res.body());
+        assertEquals(0, service.optionsCalls);
+        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "alice", 1, 60), "the refusal took a user slot");
+    }
+
+    @Test
+    public void test_registerOptions_atThePasskeyLimit_returns400() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        service.optionsFailure = new PasskeyException("reason=too_many_passkeys, count=20");
+        register(new StubLoginAssist(localUser("alice")));
+        final Response res = new Response();
+        handler(new LoginRateLimiter(), service).registerOptions(new Request("POST").withSession().withBody(OPTIONS_BODY).proxy(),
+                res.proxy());
+        assertEquals(400, res.status, res.body());
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("\"reason\":\"too_many_passkeys\""), res.body());
+        assertTrue(res.body().contains("\"max_passkeys\":20"), res.body());
+    }
+
+    @Test
+    public void test_registerOptions_otherPasskeyException_isInternalError() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        service.optionsFailure = new PasskeyException("reason=something_else");
+        register(new StubLoginAssist(localUser("alice")));
+        final Response res = new Response();
+        handler(new LoginRateLimiter(), service).registerOptions(new Request("POST").withSession().withBody(OPTIONS_BODY).proxy(),
+                res.proxy());
+        assertEquals(500, res.status, res.body());
+        assertFalse(res.body().contains("something_else"), res.body());
+    }
+
+    @Test
+    public void test_registerOptions_unsetRateLimitSettings_doNotBreakTheRegistration() throws Exception {
+        final FessConfig original = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public int getPasswordMaxLengthOrDefault() {
+                return original.getPasswordMaxLengthOrDefault();
+            }
+
+            @Override
+            public Integer getThemeApiLoginRateLimitPerUserPerMinuteAsInteger() {
+                return null;
+            }
+
+            @Override
+            public Integer getThemeApiLoginLockoutSecondsAsInteger() {
+                return null;
+            }
+        });
+        try {
+            final StubPasskeyService service = new StubPasskeyService(true);
+            register(new StubLoginAssist(localUser("alice")));
+            final Response res = new Response();
+            handler(new LoginRateLimiter(), service).registerOptions(new Request("POST").withSession().withBody(OPTIONS_BODY).proxy(),
+                    res.proxy());
+            assertEquals(200, res.status, res.body());
+            assertEquals(1, service.optionsCalls);
+        } finally {
+            ComponentUtil.setFessConfig(original);
+        }
+    }
+
+    @Test
     public void test_registerOptions_blankPassword_returns400() throws Exception {
         final StubPasskeyService service = new StubPasskeyService(true);
         final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
@@ -384,6 +460,35 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
                 res.proxy());
         assertEquals(200, res.status, res.body());
         assertEquals(label, service.lastLabel);
+    }
+
+    @Test
+    public void test_registerVerify_labelCountsCodePoints() throws Exception {
+        // 64 characters outside the BMP are 128 UTF-16 units, and still within the limit
+        final StubPasskeyService service = new StubPasskeyService(true);
+        register(new StubLoginAssist(localUser("alice")));
+        final String label = "\uD83D\uDD11".repeat(64);
+        final Response res = new Response();
+        handler(new LoginRateLimiter(), service).registerVerify(
+                new Request("POST").withSession().withBody("{\"label\":\"" + label + "\",\"credential\":{\"id\":\"abc\"}}").proxy(),
+                res.proxy());
+        assertEquals(200, res.status, res.body());
+        assertEquals(label, service.lastLabel);
+    }
+
+    @Test
+    public void test_registerVerify_controlOrBidiCharacterInLabel_returns400() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        register(new StubLoginAssist(localUser("alice")));
+        for (final String label : new String[] { "a\\u0000b", "a\\u0007b", "a\\nb", "invoice\\u202Etxt.exe", "a\\u2066b", "a\\u200Fb" }) {
+            final Response res = new Response();
+            handler(new LoginRateLimiter(), service).registerVerify(
+                    new Request("POST").withSession().withBody("{\"label\":\"" + label + "\",\"credential\":{\"id\":\"abc\"}}").proxy(),
+                    res.proxy());
+            assertEquals(400, res.status, label);
+            assertTrue(res.body().contains("\"reason\":\"label_invalid_characters\""), res.body());
+        }
+        assertEquals(0, service.verifyCalls, "the challenge is not consumed by a refused label");
     }
 
     @Test
@@ -507,15 +612,15 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         final PasskeyAccountHandler handler = handler(new LoginRateLimiter(), service);
         final String expected = notFoundBody(handler, "ZZZZ");
         final int before = service.deleteCalls;
-        for (final String id : new String[] { "", "a+b", "a/b", "a=b", "a%2Fb", "x".repeat(1365) }) {
+        for (final String id : new String[] { "", "a+b", "a/b", "a=b", "a%2Fb", "x".repeat(513) }) {
             final Response res = new Response();
             handler.delete(new Request("DELETE").withSession().proxy(), res.proxy(), id);
             assertEquals(404, res.status, id);
             assertEquals(expected, res.body());
         }
         assertEquals(before, service.deleteCalls);
-        // the longest credential id (1023 bytes) is still looked up
-        handler.delete(new Request("DELETE").withSession().proxy(), new Response().proxy(), "x".repeat(1364));
+        // the longest credential id accepted (384 bytes, 512 characters, the longest document id) is still looked up
+        handler.delete(new Request("DELETE").withSession().proxy(), new Response().proxy(), "x".repeat(512));
         assertEquals(before + 1, service.deleteCalls);
     }
 

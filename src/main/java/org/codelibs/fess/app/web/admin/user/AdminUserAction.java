@@ -395,7 +395,7 @@ public class AdminUserAction extends FessAdminAction {
             return null;
         });
         final String admin = systemHelper.getUsername();
-        final String credentialId = form.credentialId.substring(0, Math.min(8, form.credentialId.length()));
+        final String credentialId = PasskeyService.abbreviate(form.credentialId);
         try {
             if (!passkeyService.delete(user.getName(), form.credentialId)) {
                 logger.warn("Passkey not found: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId);

@@ -64,9 +64,13 @@ import tools.jackson.databind.json.JsonMapper;
  * {@link FessLoginAssist#findLoginUser}, on the {@link LoginRateLimiter.Scope#USER} bucket of the
  * password login (checked on entry, a slot taken by a wrong password, cleared on success). A password
  * the directory accepted instead of the local one does not count as verified. {@code register/verify}
- * takes {@code { "label": "...", "credential": <PublicKeyCredential JSON> }}; the label is required
- * and at most {@value #MAX_LABEL_LENGTH} characters. Whatever makes the registration fail is one
- * {@code 400 invalid_request} with {@code reason=registration_failed}; the cause is logged only.</p>
+ * takes {@code { "label": "...", "credential": <PublicKeyCredential JSON> }}; the label is required,
+ * at most {@value PasskeyService#MAX_LABEL_LENGTH} code points, and has no control or bidirectional
+ * formatting character ({@code reason} {@code label_required}, {@code label_too_long} or
+ * {@code label_invalid_characters}). A user has at most {@value PasskeyService#MAX_PASSKEYS_PER_USER}
+ * passkeys: {@code register/options} answers {@code 400} with {@code reason=too_many_passkeys} beyond
+ * that. Whatever else makes the registration fail is one {@code 400 invalid_request} with
+ * {@code reason=registration_failed}; the cause is logged only.</p>
  *
  * <p>The list answers {@code { "passkeys": [ { "id", "label", "created_at", "last_used_at" } ], "can_register": true }}
  * and never the key material. {@code can_register} is false for a session that cannot register (see
@@ -82,15 +86,17 @@ public class PasskeyAccountHandler {
 
     /**
      * Cap of the {@code register/verify} body. A registration response with attestation {@code none}
-     * is a few hundred bytes, and stays well under it even with a credential id of 1023 bytes.
+     * is a few hundred bytes, and stays well under it even with the longest credential id accepted.
      */
     private static final int MAX_VERIFY_BODY_BYTES = 16 * 1024;
 
-    /** The longest label a passkey can be given. */
-    static final int MAX_LABEL_LENGTH = 64;
-
-    /** A credential id is 1 to 1023 bytes, i.e. at most 1364 characters of unpadded Base64url. */
-    private static final Pattern CREDENTIAL_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]{1,1364}");
+    /**
+     * A credential id accepted is 1 to {@value PasskeyService#MAX_CREDENTIAL_ID_BYTES} bytes, i.e. at
+     * most {@value PasskeyService#MAX_CREDENTIAL_ID_LENGTH} characters of unpadded Base64url, the
+     * longest document id the search engine takes.
+     */
+    private static final Pattern CREDENTIAL_ID_PATTERN =
+            Pattern.compile("[A-Za-z0-9_-]{1," + PasskeyService.MAX_CREDENTIAL_ID_LENGTH + "}");
 
     static final String LIST_PATH = "/auth/passkey";
 
@@ -180,8 +186,17 @@ public class PasskeyAccountHandler {
         // The USER bucket of the password login and the password change: a stolen session must not
         // make this a way around their limits.
         final LoginRateLimiter rate = limiter();
-        final int userLimit = fessConfig.getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
-        final int lockoutSec = fessConfig.getThemeApiLoginLockoutSecondsAsInteger();
+        int userLimit = 0;
+        int lockoutSec = 0;
+        try {
+            final Integer limit = fessConfig.getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+            final Integer lockout = fessConfig.getThemeApiLoginLockoutSecondsAsInteger();
+            userLimit = limit == null ? 0 : limit;
+            lockoutSec = lockout == null ? 0 : lockout;
+        } catch (final RuntimeException e) {
+            // as PasswordChangeHandler: a broken setting disables the gate rather than every registration
+            logger.warn("[v2/passkey] could not read the rate-limit settings; gate disabled", e);
+        }
         if (userLimit > 0 && !rate.peek(LoginRateLimiter.Scope.USER, userName, userLimit, 60)) {
             if (rate.lockOut(LoginRateLimiter.Scope.USER, userName, lockoutSec)) {
                 logger.warn("[v2/passkey] rate limit exceeded; locking out: userId={}, lockoutSec={}, limit={}/min", userName, lockoutSec,
@@ -231,6 +246,19 @@ public class PasskeyAccountHandler {
         final Map<String, Object> options;
         try {
             options = passkeyService.createRegistrationOptions(session, user);
+        } catch (final PasskeyException e) {
+            if (e.getMessage() == null || !e.getMessage().startsWith("reason=too_many_passkeys")) {
+                ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2" + OPTIONS_PATH);
+                return;
+            }
+            if (logger.isInfoEnabled()) {
+                logger.info("[v2/passkey] registration refused: userId={}, {}", userName, e.getMessage());
+            }
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST,
+                            "a user can register at most " + PasskeyService.MAX_PASSKEYS_PER_USER + " passkeys",
+                            Map.of("reason", "too_many_passkeys", "max_passkeys", PasskeyService.MAX_PASSKEYS_PER_USER));
+            return;
         } catch (final RuntimeException e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2" + OPTIONS_PATH);
             return;
@@ -260,15 +288,23 @@ public class PasskeyAccountHandler {
         }
         // Checked before the service runs, because it consumes the challenge whatever the outcome.
         final String label = body.get("label") instanceof final String s ? s.trim() : null;
-        if (StringUtil.isBlank(label)) {
+        final String labelProblem = PasskeyService.labelProblem(label);
+        if ("label_required".equals(labelProblem)) {
             ComponentUtil.getV2EnvelopeWriter()
                     .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "label is required", Map.of("reason", "label_required"));
             return;
         }
-        if (label.length() > MAX_LABEL_LENGTH) {
+        if ("label_too_long".equals(labelProblem)) {
             ComponentUtil.getV2EnvelopeWriter()
-                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "label exceeds the maximum length of " + MAX_LABEL_LENGTH,
-                            Map.of("reason", "label_too_long", "max_length", MAX_LABEL_LENGTH));
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST,
+                            "label exceeds the maximum length of " + PasskeyService.MAX_LABEL_LENGTH,
+                            Map.of("reason", "label_too_long", "max_length", PasskeyService.MAX_LABEL_LENGTH));
+            return;
+        }
+        if (labelProblem != null) {
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "label contains a control or bidirectional character",
+                            Map.of("reason", "label_invalid_characters"));
             return;
         }
         if (!(body.get("credential") instanceof Map)) {
@@ -444,8 +480,8 @@ public class PasskeyAccountHandler {
             return null;
         }
         if (!(userBean.getFessUser() instanceof User)) {
-            if (logger.isInfoEnabled()) {
-                logger.info("[v2/passkey] registration refused: userId={}, reason=not_a_local_user", userBean.getUserId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("[v2/passkey] registration refused: userId={}, reason=not_a_local_user", userBean.getUserId());
             }
             writeLoginRequired(res);
             return null;
@@ -498,11 +534,7 @@ public class PasskeyAccountHandler {
         ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "passkey not found");
     }
 
-    /** The first 8 characters of a credential id, enough to tell passkeys apart in a log. */
     private static String abbreviate(final String credentialId) {
-        if (credentialId == null) {
-            return "-";
-        }
-        return credentialId.length() <= 8 ? credentialId : credentialId.substring(0, 8) + "...";
+        return PasskeyService.abbreviate(credentialId);
     }
 }

@@ -39,10 +39,11 @@ public class DeletePasskeyForm {
     public String id;
 
     /**
-     * The credential ID of the passkey (unpadded Base64url, at most 1023 bytes).
+     * The credential ID of the passkey (unpadded Base64url, at most 512 characters, see
+     * {@link org.codelibs.fess.app.service.PasskeyService#MAX_CREDENTIAL_ID_LENGTH}).
      */
     @Required
-    @Pattern(regexp = "[A-Za-z0-9_-]{1,1364}")
+    @Pattern(regexp = "[A-Za-z0-9_-]{1,512}")
     public String credentialId;
 
 }

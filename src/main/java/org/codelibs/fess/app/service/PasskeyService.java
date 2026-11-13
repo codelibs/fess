@@ -18,6 +18,7 @@ package org.codelibs.fess.app.service;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,10 +57,12 @@ import com.webauthn4j.data.attestation.authenticator.AuthenticatorData;
 import com.webauthn4j.data.attestation.authenticator.COSEKey;
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier;
 import com.webauthn4j.data.attestation.statement.NoneAttestationStatement;
+import com.webauthn4j.data.client.CollectedClientData;
 import com.webauthn4j.data.client.Origin;
 import com.webauthn4j.data.client.challenge.DefaultChallenge;
 import com.webauthn4j.data.extension.authenticator.RegistrationExtensionAuthenticatorOutput;
 import com.webauthn4j.server.ServerProperty;
+import com.webauthn4j.verifier.exception.BadOriginException;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -109,6 +112,27 @@ public class PasskeyService {
 
     /** The number of credential ID characters written to the log. */
     protected static final int LOGGED_ID_LENGTH = 8;
+
+    /**
+     * The longest raw credential ID accepted, in bytes. Its unpadded Base64url form (512 characters)
+     * is the document ID, and 512 bytes is the longest ID the search engine takes.
+     */
+    public static final int MAX_CREDENTIAL_ID_BYTES = 384;
+
+    /** The longest credential ID accepted, in unpadded Base64url characters. */
+    public static final int MAX_CREDENTIAL_ID_LENGTH = 512;
+
+    /** The most passkeys a user can register. */
+    public static final int MAX_PASSKEYS_PER_USER = 20;
+
+    /** The longest label a passkey can be given, in code points. */
+    public static final int MAX_LABEL_LENGTH = 64;
+
+    /** The most transports kept of a registration, and the longest one. */
+    protected static final int MAX_TRANSPORTS = 8;
+
+    /** The longest transport name kept of a registration. */
+    protected static final int MAX_TRANSPORT_LENGTH = 32;
 
     /** The credential type of a passkey. */
     protected static final String PUBLIC_KEY_TYPE = "public-key";
@@ -161,6 +185,32 @@ public class PasskeyService {
         return true;
     }
 
+    /**
+     * Tells what is wrong with a passkey label, if anything. A label is required, at most
+     * {@value #MAX_LABEL_LENGTH} code points long, and has no control character and no bidirectional
+     * formatting character, which would change how the list and the logs read.
+     *
+     * @param label the label, already trimmed
+     * @return {@code label_required}, {@code label_too_long} or {@code label_invalid_characters}, or
+     *         null when the label is fine
+     */
+    public static String labelProblem(final String label) {
+        if (StringUtil.isBlank(label)) {
+            return "label_required";
+        }
+        if (label.codePointCount(0, label.length()) > MAX_LABEL_LENGTH) {
+            return "label_too_long";
+        }
+        if (label.codePoints().anyMatch(cp -> Character.isISOControl(cp) || isBidiControl(cp))) {
+            return "label_invalid_characters";
+        }
+        return null;
+    }
+
+    private static boolean isBidiControl(final int cp) {
+        return cp == 0x061C || cp == 0x200E || cp == 0x200F || cp >= 0x202A && cp <= 0x202E || cp >= 0x2066 && cp <= 0x2069;
+    }
+
     // ===================================================================================
     //                                                                        Registration
     //                                                                        ============
@@ -171,10 +221,15 @@ public class PasskeyService {
      * @param session the HTTP session of the logged-in user
      * @param user the local user registering a passkey
      * @return the options, as JSON-ready values (binary values are Base64url)
+     * @throws PasskeyException with {@code reason=too_many_passkeys} when the user has
+     *         {@value #MAX_PASSKEYS_PER_USER} passkeys already; no challenge is made then
      */
     public Map<String, Object> createRegistrationOptions(final HttpSession session, final User user) {
         final String userName = user.getName();
         final List<Passkey> passkeys = findByUserName(userName);
+        if (passkeys.size() >= MAX_PASSKEYS_PER_USER) {
+            throw new PasskeyException("reason=too_many_passkeys, count=" + passkeys.size());
+        }
         final String userHandle = passkeys.stream()
                 .map(Passkey::getUserHandle)
                 .filter(StringUtil::isNotBlank)
@@ -241,11 +296,28 @@ public class PasskeyService {
         if (user == null || challenge.userName() == null || !challenge.userName().equals(user.getName())) {
             throw new PasskeyException("reason=registration_user_mismatch");
         }
+        final String trimmedLabel = label == null ? null : label.trim();
+        final String labelProblem = labelProblem(trimmedLabel);
+        if (labelProblem != null) {
+            throw new PasskeyException("reason=" + labelProblem);
+        }
 
         final RegisteredCredential registered = WebAuthn.verifyRegistration(responseJson, createServerSide(challenge));
-        final String credentialId = encode(registered.credentialId());
+        final byte[] rawCredentialId = registered.credentialId();
+        if (rawCredentialId == null || rawCredentialId.length == 0 || rawCredentialId.length > MAX_CREDENTIAL_ID_BYTES) {
+            throw new PasskeyException("reason=registration_rejected, error=credential_id_length, length="
+                    + (rawCredentialId == null ? 0 : rawCredentialId.length));
+        }
+        final String[] transports = registered.transports();
+        if (transports.length > MAX_TRANSPORTS || Arrays.stream(transports).anyMatch(t -> t == null || t.length() > MAX_TRANSPORT_LENGTH)) {
+            throw new PasskeyException("reason=registration_rejected, error=transports");
+        }
+        final String credentialId = encode(rawCredentialId);
+        if (findByUserName(challenge.userName()).size() >= MAX_PASSKEYS_PER_USER) {
+            throw new PasskeyException("reason=too_many_passkeys, credentialId=" + abbreviate(credentialId));
+        }
         if (findByCredentialId(credentialId).isPresent()) {
-            throw new PasskeyException("reason=duplicate_credential credentialId=" + abbreviate(credentialId));
+            throw new PasskeyException("reason=duplicate_credential, credentialId=" + abbreviate(credentialId));
         }
 
         final Passkey passkey = new Passkey();
@@ -254,10 +326,10 @@ public class PasskeyService {
         passkey.setUserHandle(challenge.userHandle());
         passkey.setPublicKey(encode(registered.coseKey()));
         passkey.setSignCount(registered.signCount());
-        passkey.setTransports(registered.transports());
+        passkey.setTransports(transports);
         passkey.setBackupEligible(registered.backupEligible());
         passkey.setBackupState(registered.backupState());
-        passkey.setLabel(StringUtil.isBlank(label) ? null : label.trim());
+        passkey.setLabel(trimmedLabel);
         passkey.setCreatedAt(currentTimeMillis());
         insert(passkey);
         if (logger.isDebugEnabled()) {
@@ -303,20 +375,18 @@ public class PasskeyService {
         final PendingChallenge challenge = consumeChallenge(session, LOGIN_CHALLENGE_KEY);
 
         final Assertion assertion = WebAuthn.parseAuthentication(responseJson);
-        if (assertion.credentialId() == null) {
-            throw new PasskeyException("reason=login_rejected error=no_credential_id");
+        final byte[] rawCredentialId = assertion.credentialId();
+        if (rawCredentialId == null || rawCredentialId.length == 0 || rawCredentialId.length > MAX_CREDENTIAL_ID_BYTES) {
+            throw new PasskeyException("reason=login_rejected, error=credential_id_length");
         }
-        final String credentialId = encode(assertion.credentialId());
+        final String credentialId = encode(rawCredentialId);
         final Passkey passkey = findByCredentialId(credentialId)
-                .orElseThrow(() -> new PasskeyException("reason=unknown_credential credentialId=" + abbreviate(credentialId)));
+                .orElseThrow(() -> new PasskeyException("reason=unknown_credential, credentialId=" + abbreviate(credentialId)));
 
         final byte[] userHandle = assertion.userHandle();
         if (userHandle == null || StringUtil.isBlank(passkey.getUserHandle())
-                || !MessageDigest.isEqual(userHandle, decode(passkey.getUserHandle()))) {
-            throw new PasskeyException("reason=user_handle_mismatch credentialId=" + abbreviate(credentialId));
-        }
-        if (!existsUser(passkey.getUserName())) {
-            throw new PasskeyException("reason=unknown_user credentialId=" + abbreviate(credentialId));
+                || !MessageDigest.isEqual(userHandle, decodeStored(passkey.getUserHandle(), "userHandle", credentialId))) {
+            throw new PasskeyException("reason=user_handle_mismatch, credentialId=" + abbreviate(credentialId));
         }
 
         final long presentedSignCount;
@@ -324,7 +394,12 @@ public class PasskeyService {
             presentedSignCount = WebAuthn.verifyAuthentication(assertion, createServerSide(challenge), passkey);
         } catch (final RuntimeException e) {
             throw new PasskeyException(
-                    "reason=login_rejected error=" + e.getClass().getSimpleName() + " credentialId=" + abbreviate(credentialId));
+                    "reason=login_rejected, error=" + e.getClass().getSimpleName() + ", credentialId=" + abbreviate(credentialId));
+        }
+        // Only after the signature: whether the user exists is not to be told by how long a forged
+        // assertion takes to be refused.
+        if (!existsUser(passkey.getUserName())) {
+            throw new PasskeyException("reason=unknown_user, credentialId=" + abbreviate(credentialId));
         }
 
         final long usedAt = currentTimeMillis();
@@ -332,10 +407,10 @@ public class PasskeyService {
         if (!updateAfterLogin(passkey, Math.max(signCountOf(passkey), presentedSignCount), usedAt)) {
             // Another login of the same credential won the race: check against what it stored, once.
             final Passkey current = findByCredentialId(credentialId)
-                    .orElseThrow(() -> new PasskeyException("reason=unknown_credential credentialId=" + abbreviate(credentialId)));
+                    .orElseThrow(() -> new PasskeyException("reason=unknown_credential, credentialId=" + abbreviate(credentialId)));
             checkSignCount(current, presentedSignCount, credentialId);
             if (!updateAfterLogin(current, Math.max(signCountOf(current), presentedSignCount), usedAt)) {
-                throw new PasskeyException("reason=version_conflict credentialId=" + abbreviate(credentialId));
+                throw new PasskeyException("reason=version_conflict, credentialId=" + abbreviate(credentialId));
             }
         }
         if (logger.isDebugEnabled()) {
@@ -365,7 +440,7 @@ public class PasskeyService {
      * @return true if it was deleted; false if there is no such passkey of that user
      */
     public boolean delete(final String userName, final String credentialId) {
-        if (StringUtil.isBlank(userName) || StringUtil.isBlank(credentialId)) {
+        if (StringUtil.isBlank(userName) || StringUtil.isBlank(credentialId) || credentialId.length() > MAX_CREDENTIAL_ID_LENGTH) {
             return false;
         }
         final boolean owned = findByCredentialId(credentialId).filter(p -> userName.equals(p.getUserName())).isPresent();
@@ -429,7 +504,7 @@ public class PasskeyService {
             });
         } catch (final RuntimeException e) {
             if (isVersionConflict(e)) {
-                throw new PasskeyException("reason=duplicate_credential credentialId=" + abbreviate(passkey.getId()));
+                throw new PasskeyException("reason=duplicate_credential, credentialId=" + abbreviate(passkey.getId()));
             }
             throw e;
         }
@@ -447,7 +522,7 @@ public class PasskeyService {
         final Long seqNo = passkey.getSeqNo();
         final Long primaryTerm = passkey.getPrimaryTerm();
         if (seqNo == null || seqNo.longValue() < 0L || primaryTerm == null || primaryTerm.longValue() <= 0L) {
-            throw new PasskeyException("reason=no_version credentialId=" + abbreviate(passkey.getId()));
+            throw new PasskeyException("reason=no_version, credentialId=" + abbreviate(passkey.getId()));
         }
         passkey.setSignCount(signCount);
         passkey.setLastUsedAt(usedAt);
@@ -570,8 +645,8 @@ public class PasskeyService {
     protected void checkSignCount(final Passkey passkey, final long presentedSignCount, final String credentialId) {
         final long storedSignCount = signCountOf(passkey);
         if (storedSignCount != 0L && presentedSignCount != 0L && presentedSignCount <= storedSignCount) {
-            throw new PasskeyException("reason=sign_count_not_increased credentialId=" + abbreviate(credentialId) + " stored="
-                    + storedSignCount + " presented=" + presentedSignCount);
+            throw new PasskeyException("reason=sign_count_not_increased, credentialId=" + abbreviate(credentialId) + ", stored="
+                    + storedSignCount + ", presented=" + presentedSignCount);
         }
     }
 
@@ -596,13 +671,29 @@ public class PasskeyService {
     }
 
     /**
-     * Shortens a credential ID for the log.
+     * Shortens a credential ID for the log: its first {@value #LOGGED_ID_LENGTH} characters, enough
+     * to tell passkeys apart, followed by {@code ...} when it is longer.
+     *
+     * @param credentialId the credential ID, or null
+     * @return the shortened ID, or {@code -} for null
      */
-    protected static String abbreviate(final String credentialId) {
+    public static String abbreviate(final String credentialId) {
         if (credentialId == null) {
-            return "null";
+            return "-";
         }
-        return credentialId.length() <= LOGGED_ID_LENGTH ? credentialId : credentialId.substring(0, LOGGED_ID_LENGTH);
+        return credentialId.length() <= LOGGED_ID_LENGTH ? credentialId : credentialId.substring(0, LOGGED_ID_LENGTH) + "...";
+    }
+
+    /**
+     * Decodes a Base64url value of a stored passkey; a value that is not Base64url is a passkey that
+     * cannot be used.
+     */
+    private static byte[] decodeStored(final String value, final String field, final String credentialId) {
+        try {
+            return decode(value);
+        } catch (final IllegalArgumentException e) {
+            throw new PasskeyException("reason=corrupt_passkey, field=" + field + ", credentialId=" + abbreviate(credentialId));
+        }
     }
 
     private static byte[] randomBytes() {
@@ -714,15 +805,20 @@ public class PasskeyService {
             final RegistrationData registrationData;
             try {
                 registrationData = MANAGER.parseRegistrationResponseJSON(responseJson);
+            } catch (final RuntimeException e) {
+                throw new PasskeyException("reason=registration_rejected, error=" + e.getClass().getSimpleName());
+            }
+            try {
                 MANAGER.verify(registrationData, new RegistrationParameters(toServerProperty(serverSide), PUB_KEY_CRED_PARAMS, true, true));
             } catch (final RuntimeException e) {
-                throw new PasskeyException("reason=registration_rejected error=" + e.getClass().getSimpleName());
+                warnBadOrigin(e, registrationData.getCollectedClientData(), serverSide);
+                throw new PasskeyException("reason=registration_rejected, error=" + e.getClass().getSimpleName());
             }
             final AuthenticatorData<RegistrationExtensionAuthenticatorOutput> authenticatorData =
                     registrationData.getAttestationObject().getAuthenticatorData();
             final AttestedCredentialData attestedCredentialData = authenticatorData.getAttestedCredentialData();
             if (attestedCredentialData == null) {
-                throw new PasskeyException("reason=registration_rejected error=no_attested_credential_data");
+                throw new PasskeyException("reason=registration_rejected, error=no_attested_credential_data");
             }
             final Set<AuthenticatorTransport> transports = registrationData.getTransports();
             return new RegisteredCredential(attestedCredentialData.getCredentialId(),
@@ -737,7 +833,7 @@ public class PasskeyService {
             try {
                 data = MANAGER.parseAuthenticationResponseJSON(responseJson);
             } catch (final RuntimeException e) {
-                throw new PasskeyException("reason=login_rejected error=" + e.getClass().getSimpleName());
+                throw new PasskeyException("reason=login_rejected, error=" + e.getClass().getSimpleName());
             }
             return new Assertion(data.getCredentialId(), data.getUserHandle(), data);
         }
@@ -750,8 +846,31 @@ public class PasskeyService {
          */
         static long verifyAuthentication(final Assertion assertion, final ServerSide serverSide, final Passkey passkey) {
             final AuthenticationData data = (AuthenticationData) assertion.data();
-            MANAGER.verify(data, new AuthenticationParameters(toServerProperty(serverSide), toCredentialRecord(passkey), null, true, true));
+            try {
+                MANAGER.verify(data,
+                        new AuthenticationParameters(toServerProperty(serverSide), toCredentialRecord(passkey), null, true, true));
+            } catch (final RuntimeException e) {
+                warnBadOrigin(e, data.getCollectedClientData(), serverSide);
+                throw e;
+            }
             return data.getAuthenticatorData().getSignCount();
+        }
+
+        /**
+         * Tells, once, the origin a response came from when it is not one of passkey.origins, since a
+         * wrong passkey.origins rejects every ceremony and the client is not told why. The origin is
+         * what the browser reports, not a secret, but it is the client's, so it is cut and sanitized.
+         */
+        private static void warnBadOrigin(final RuntimeException e, final CollectedClientData clientData, final ServerSide serverSide) {
+            if (!(e instanceof BadOriginException)) {
+                return;
+            }
+            final String origin = clientData == null || clientData.getOrigin() == null ? null : clientData.getOrigin().toString();
+            final String logged = origin == null ? "-" : LogUtil.sanitize(origin.length() > 128 ? origin.substring(0, 128) : origin);
+            LogUtil.warnOnce(logger, "passkey:bad_origin",
+                    "A passkey response came from an origin that is not in passkey.origins: origin={}, passkey.origins={}."
+                            + " Add the origin users open Fess at to passkey.origins.",
+                    logged, String.join(",", serverSide.origins()));
         }
 
         private static ServerProperty toServerProperty(final ServerSide serverSide) {

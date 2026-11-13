@@ -535,6 +535,175 @@ public class PasskeyServiceTest extends UnitFessTestCase {
         assertEquals("alice", userEntity.get("name"));
     }
 
+    @Test
+    public void test_login_tamperedSignature_fails() {
+        final ClientPlatform client = newClient(ORIGIN);
+        final Passkey passkey = register(client, user("alice"), "laptop");
+        final String forged = mutateResponse(login(client), "signature", v -> flipLastByte(v));
+
+        assertRejected("error=BadSignatureException", () -> service.verifyLogin(session, forged));
+        assertNull(service.store.get(passkey.getId()).getLastUsedAt());
+    }
+
+    @Test
+    public void test_login_tamperedAuthenticatorData_fails() {
+        final ClientPlatform client = newClient(ORIGIN);
+        register(client, user("alice"), "laptop");
+        // the last byte is the low byte of the sign count, which the signature covers
+        final String forged = mutateResponse(login(client), "authenticatorData", v -> flipLastByte(v));
+
+        assertRejected("error=BadSignatureException", () -> service.verifyLogin(session, forged));
+    }
+
+    @Test
+    public void test_login_staleChallengeWhileAFreshOneExists_fails() {
+        final ClientPlatform client = newClient(ORIGIN);
+        register(client, user("alice"), "laptop");
+        final String stale = login(client);
+        // a second login options call replaces the challenge the response was made for
+        service.createLoginOptions(session);
+
+        assertRejected("error=BadChallengeException", () -> service.verifyLogin(session, stale));
+    }
+
+    @Test
+    public void test_login_assertionWithoutUserHandle_fails() {
+        final ClientPlatform client = newClient(ORIGIN);
+        final Passkey passkey = register(client, user("alice"), "laptop");
+        final String response = mutateResponse(login(client), "userHandle", value -> null);
+
+        assertRejected("reason=user_handle_mismatch", () -> service.verifyLogin(session, response));
+        assertNull(service.store.get(passkey.getId()).getLastUsedAt());
+    }
+
+    @Test
+    public void test_login_corruptStoredUserHandle_fails() {
+        final ClientPlatform client = newClient(ORIGIN);
+        final Passkey passkey = register(client, user("alice"), "laptop");
+        passkey.setUserHandle("not*base64url");
+
+        assertRejected("reason=corrupt_passkey", () -> service.verifyLogin(session, login(client)));
+    }
+
+    @Test
+    public void test_login_userExistenceIsCheckedOnlyAfterTheSignature() {
+        // a forged assertion of a deleted user's passkey is refused for its signature, so its
+        // refusal does not tell whether the user exists
+        final ClientPlatform client = newClient(ORIGIN);
+        register(client, user("alice"), "laptop");
+        service.users.remove("alice");
+        final String forged = mutateResponse(login(client), "signature", v -> flipLastByte(v));
+
+        assertRejected("error=BadSignatureException", () -> service.verifyLogin(session, forged));
+    }
+
+    @Test
+    public void test_login_credentialIdOutOfBounds_failsBeforeLookup() {
+        final ClientPlatform client = newClient(ORIGIN);
+        register(client, user("alice"), "laptop");
+        final String tooLong = Base64.getUrlEncoder().withoutPadding().encodeToString(new byte[PasskeyService.MAX_CREDENTIAL_ID_BYTES + 1]);
+        final String response = login(client);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> json = CONVERTER.getJsonMapper().readValue(response, Map.class);
+        json.put("id", tooLong);
+        json.put("rawId", tooLong);
+        final String forged = CONVERTER.getJsonMapper().writeValueAsString(json);
+        final int lookups = service.lookups.get();
+
+        assertRejected("error=credential_id_length", () -> service.verifyLogin(session, forged));
+        assertEquals(lookups, service.lookups.get());
+    }
+
+    @Test
+    public void test_delete_overlongCredentialId_returnsFalseWithoutLookup() {
+        final int lookups = service.lookups.get();
+        assertFalse(service.delete("alice", "x".repeat(PasskeyService.MAX_CREDENTIAL_ID_LENGTH + 1)));
+        assertEquals(lookups, service.lookups.get());
+    }
+
+    // -----------------------------------------------------------------------
+    // Label and limits
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_labelProblem() {
+        assertEquals("label_required", PasskeyService.labelProblem(null));
+        assertEquals("label_required", PasskeyService.labelProblem(" "));
+        assertNull(PasskeyService.labelProblem("x".repeat(64)));
+        assertEquals("label_too_long", PasskeyService.labelProblem("x".repeat(65)));
+        // 64 characters outside the BMP are 128 UTF-16 units, and still a valid label
+        assertNull(PasskeyService.labelProblem("\uD83D\uDD11".repeat(64)));
+        assertEquals("label_too_long", PasskeyService.labelProblem("\uD83D\uDD11".repeat(65)));
+        assertNull(PasskeyService.labelProblem("Work laptop \u00e9\u6f22"));
+        for (final String bad : new String[] { "a\u0000b", "a\tb", "a\nb", "a\u007fb", "a\u0085b", "a\u202Eb", "a\u202Ab", "a\u2066b",
+                "a\u2069b", "a\u200Eb", "a\u200Fb", "a\u061Cb" }) {
+            org.junit.jupiter.api.Assertions.assertEquals("label_invalid_characters", PasskeyService.labelProblem(bad), bad);
+        }
+    }
+
+    @Test
+    public void test_register_invalidLabel_fails() {
+        for (final String label : new String[] { "", "x".repeat(65), "evil\u202Etxt.exe" }) {
+            final String response = createCredential(newClient(ORIGIN), user("alice"));
+            assertRejected("reason=label_", () -> service.verifyRegistration(session, user("alice"), label, response));
+        }
+        assertTrue(service.store.isEmpty());
+    }
+
+    @Test
+    public void test_registrationOptions_refusedAtTheLimit() {
+        for (int i = 0; i < PasskeyService.MAX_PASSKEYS_PER_USER; i++) {
+            final Passkey passkey = new Passkey();
+            passkey.setId("id" + i);
+            passkey.setUserName("alice");
+            service.store.put(passkey.getId(), passkey);
+        }
+
+        assertRejected("reason=too_many_passkeys", () -> service.createRegistrationOptions(session, user("alice")));
+        assertNull(session.getAttribute(PasskeyService.REGISTRATION_CHALLENGE_KEY), "no challenge is made");
+        // another user is not limited by alice's passkeys
+        assertNotNull(service.createRegistrationOptions(session, user("bob")));
+    }
+
+    @Test
+    public void test_register_refusedWhenTheLimitWasReachedMeanwhile() {
+        final String response = createCredential(newClient(ORIGIN), user("alice"));
+        for (int i = 0; i < PasskeyService.MAX_PASSKEYS_PER_USER; i++) {
+            final Passkey passkey = new Passkey();
+            passkey.setId("id" + i);
+            passkey.setUserName("alice");
+            service.store.put(passkey.getId(), passkey);
+        }
+
+        assertRejected("reason=too_many_passkeys", () -> service.verifyRegistration(session, user("alice"), "laptop", response));
+        assertEquals(PasskeyService.MAX_PASSKEYS_PER_USER, service.store.size());
+    }
+
+    @Test
+    public void test_abbreviate() {
+        assertEquals("-", PasskeyService.abbreviate(null));
+        assertEquals("AbCdEfGh", PasskeyService.abbreviate("AbCdEfGh"));
+        assertEquals("AbCdEfGh...", PasskeyService.abbreviate("AbCdEfGhI"));
+    }
+
+    private String mutateResponse(final String responseJson, final String field, final java.util.function.UnaryOperator<byte[]> mutation) {
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> json = CONVERTER.getJsonMapper().readValue(responseJson, Map.class);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> response = (Map<String, Object>) json.get("response");
+        final Object value = response.get(field);
+        assertNotNull(value, field + " in " + responseJson);
+        final byte[] mutated = mutation.apply(Base64.getUrlDecoder().decode((String) value));
+        response.put(field, mutated == null ? null : Base64.getUrlEncoder().withoutPadding().encodeToString(mutated));
+        return CONVERTER.getJsonMapper().writeValueAsString(json);
+    }
+
+    private static byte[] flipLastByte(final byte[] bytes) {
+        final byte[] copy = bytes.clone();
+        copy[copy.length - 1] ^= 0x01;
+        return copy;
+    }
+
     // -----------------------------------------------------------------------
     // Sign counter
     // -----------------------------------------------------------------------
@@ -714,6 +883,8 @@ public class PasskeyServiceTest extends UnitFessTestCase {
 
         final AtomicInteger updateCalls = new AtomicInteger();
 
+        final AtomicInteger lookups = new AtomicInteger();
+
         String rpId;
 
         String origins = ORIGIN;
@@ -764,6 +935,7 @@ public class PasskeyServiceTest extends UnitFessTestCase {
 
         @Override
         protected OptionalEntity<Passkey> findByCredentialId(final String credentialId) {
+            lookups.incrementAndGet();
             return OptionalEntity.ofNullable(store.get(credentialId), () -> {});
         }
 
