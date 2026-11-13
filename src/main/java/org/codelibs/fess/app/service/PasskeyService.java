@@ -110,10 +110,11 @@ public class PasskeyService {
     /** The number of credential ID characters written to the log. */
     protected static final int LOGGED_ID_LENGTH = 8;
 
-    /** The signature algorithms offered at registration: ES256 and RS256. */
-    protected static final List<PublicKeyCredentialParameters> PUB_KEY_CRED_PARAMS =
-            List.of(new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.ES256),
-                    new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.RS256));
+    /** The credential type of a passkey. */
+    protected static final String PUBLIC_KEY_TYPE = "public-key";
+
+    /** The COSE identifiers of the signature algorithms offered at registration: ES256 and RS256. */
+    protected static final List<Long> PUB_KEY_CRED_ALGS = List.of(-7L, -257L);
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -134,18 +135,6 @@ public class PasskeyService {
      */
     @Resource
     protected UserBhv userBhv;
-
-    /**
-     * Converts the CBOR and JSON data of the ceremonies. It is shared since services are prototypes
-     * and building the mappers is not cheap; it is thread-safe once built.
-     */
-    protected static final ObjectConverter OBJECT_CONVERTER = new ObjectConverter();
-
-    /**
-     * Verifies the ceremonies; attestation is not checked (attestation {@code none}). Shared like
-     * {@link #OBJECT_CONVERTER}; it is not changed after it is built.
-     */
-    protected static final WebAuthnManager WEB_AUTHN_MANAGER = createWebAuthnManager();
 
     /**
      * Constructor.
@@ -202,16 +191,16 @@ public class PasskeyService {
         userEntity.put("name", userName);
         userEntity.put("displayName", userName);
         final List<Map<String, Object>> pubKeyCredParams = new ArrayList<>();
-        for (final PublicKeyCredentialParameters param : PUB_KEY_CRED_PARAMS) {
+        for (final Long alg : PUB_KEY_CRED_ALGS) {
             final Map<String, Object> map = new LinkedHashMap<>();
-            map.put("type", param.getType().getValue());
-            map.put("alg", param.getAlg().getValue());
+            map.put("type", PUBLIC_KEY_TYPE);
+            map.put("alg", alg);
             pubKeyCredParams.add(map);
         }
         final List<Map<String, Object>> excludeCredentials = new ArrayList<>();
         for (final Passkey passkey : passkeys) {
             final Map<String, Object> map = new LinkedHashMap<>();
-            map.put("type", PublicKeyCredentialType.PUBLIC_KEY.getValue());
+            map.put("type", PUBLIC_KEY_TYPE);
             map.put("id", passkey.getId());
             if (passkey.getTransports() != null && passkey.getTransports().length > 0) {
                 map.put("transports", List.of(passkey.getTransports()));
@@ -253,22 +242,8 @@ public class PasskeyService {
             throw new PasskeyException("reason=registration_user_mismatch");
         }
 
-        final RegistrationData registrationData;
-        try {
-            registrationData = WEB_AUTHN_MANAGER.parseRegistrationResponseJSON(responseJson);
-            WEB_AUTHN_MANAGER.verify(registrationData,
-                    new RegistrationParameters(createServerProperty(challenge), PUB_KEY_CRED_PARAMS, true, true));
-        } catch (final RuntimeException e) {
-            throw new PasskeyException("reason=registration_rejected error=" + e.getClass().getSimpleName());
-        }
-
-        final AuthenticatorData<RegistrationExtensionAuthenticatorOutput> authenticatorData =
-                registrationData.getAttestationObject().getAuthenticatorData();
-        final AttestedCredentialData attestedCredentialData = authenticatorData.getAttestedCredentialData();
-        if (attestedCredentialData == null) {
-            throw new PasskeyException("reason=registration_rejected error=no_attested_credential_data");
-        }
-        final String credentialId = encode(attestedCredentialData.getCredentialId());
+        final RegisteredCredential registered = WebAuthn.verifyRegistration(responseJson, createServerSide(challenge));
+        final String credentialId = encode(registered.credentialId());
         if (findByCredentialId(credentialId).isPresent()) {
             throw new PasskeyException("reason=duplicate_credential credentialId=" + abbreviate(credentialId));
         }
@@ -277,13 +252,11 @@ public class PasskeyService {
         passkey.setId(credentialId);
         passkey.setUserName(challenge.userName());
         passkey.setUserHandle(challenge.userHandle());
-        passkey.setPublicKey(encode(OBJECT_CONVERTER.getCborConverter().writeValueAsBytes(attestedCredentialData.getCOSEKey())));
-        passkey.setSignCount(authenticatorData.getSignCount());
-        final Set<AuthenticatorTransport> transports = registrationData.getTransports();
-        passkey.setTransports(
-                transports == null ? new String[0] : transports.stream().map(AuthenticatorTransport::getValue).toArray(String[]::new));
-        passkey.setBackupEligible(authenticatorData.isFlagBE());
-        passkey.setBackupState(authenticatorData.isFlagBS());
+        passkey.setPublicKey(encode(registered.coseKey()));
+        passkey.setSignCount(registered.signCount());
+        passkey.setTransports(registered.transports());
+        passkey.setBackupEligible(registered.backupEligible());
+        passkey.setBackupState(registered.backupState());
         passkey.setLabel(StringUtil.isBlank(label) ? null : label.trim());
         passkey.setCreatedAt(currentTimeMillis());
         insert(passkey);
@@ -329,20 +302,15 @@ public class PasskeyService {
     public String verifyLogin(final HttpSession session, final String responseJson) {
         final PendingChallenge challenge = consumeChallenge(session, LOGIN_CHALLENGE_KEY);
 
-        final AuthenticationData authenticationData;
-        try {
-            authenticationData = WEB_AUTHN_MANAGER.parseAuthenticationResponseJSON(responseJson);
-        } catch (final RuntimeException e) {
-            throw new PasskeyException("reason=login_rejected error=" + e.getClass().getSimpleName());
-        }
-        if (authenticationData.getCredentialId() == null) {
+        final Assertion assertion = WebAuthn.parseAuthentication(responseJson);
+        if (assertion.credentialId() == null) {
             throw new PasskeyException("reason=login_rejected error=no_credential_id");
         }
-        final String credentialId = encode(authenticationData.getCredentialId());
+        final String credentialId = encode(assertion.credentialId());
         final Passkey passkey = findByCredentialId(credentialId)
                 .orElseThrow(() -> new PasskeyException("reason=unknown_credential credentialId=" + abbreviate(credentialId)));
 
-        final byte[] userHandle = authenticationData.getUserHandle();
+        final byte[] userHandle = assertion.userHandle();
         if (userHandle == null || StringUtil.isBlank(passkey.getUserHandle())
                 || !MessageDigest.isEqual(userHandle, decode(passkey.getUserHandle()))) {
             throw new PasskeyException("reason=user_handle_mismatch credentialId=" + abbreviate(credentialId));
@@ -351,15 +319,14 @@ public class PasskeyService {
             throw new PasskeyException("reason=unknown_user credentialId=" + abbreviate(credentialId));
         }
 
+        final long presentedSignCount;
         try {
-            WEB_AUTHN_MANAGER.verify(authenticationData,
-                    new AuthenticationParameters(createServerProperty(challenge), toCredentialRecord(passkey), null, true, true));
+            presentedSignCount = WebAuthn.verifyAuthentication(assertion, createServerSide(challenge), passkey);
         } catch (final RuntimeException e) {
             throw new PasskeyException(
                     "reason=login_rejected error=" + e.getClass().getSimpleName() + " credentialId=" + abbreviate(credentialId));
         }
 
-        final long presentedSignCount = authenticationData.getAuthenticatorData().getSignCount();
         final long usedAt = currentTimeMillis();
         checkSignCount(passkey, presentedSignCount, credentialId);
         if (!updateAfterLogin(passkey, Math.max(signCountOf(passkey), presentedSignCount), usedAt)) {
@@ -538,18 +505,6 @@ public class PasskeyService {
     //                                                                        Assist Logic
     //                                                                        ============
     /**
-     * Creates the verifier. The counter rule of webauthn4j rejects a count that stays at zero
-     * against a non-zero stored one; the rule here is applied in {@link #checkSignCount} instead.
-     *
-     * @return the verifier
-     */
-    private static WebAuthnManager createWebAuthnManager() {
-        final WebAuthnManager manager = WebAuthnManager.createNonStrictWebAuthnManager(OBJECT_CONVERTER);
-        manager.getAuthenticationDataVerifier().setMaliciousCounterValueHandler(authenticationObject -> {});
-        return manager;
-    }
-
-    /**
      * Builds the session value of a challenge. It is a map of strings, a {@code Long} and a byte
      * array only, all of which {@code SessionDataSerializer} registers, so that the OpenSearch
      * session store shares it between nodes: an attribute of a class it does not register stays on
@@ -626,35 +581,18 @@ public class PasskeyService {
 
     /**
      * Builds the server side of a ceremony from the configured relying party ID and origins.
+     *
+     * @param challenge the challenge of the ceremony
+     * @return the relying party ID, the allowed origins and the challenge
      */
-    protected ServerProperty createServerProperty(final PendingChallenge challenge) {
-        final Set<Origin> origins = new LinkedHashSet<>();
+    protected ServerSide createServerSide(final PendingChallenge challenge) {
+        final Set<String> origins = new LinkedHashSet<>();
         for (final String origin : StringUtil.split(fessConfig.getPasskeyOrigins(), ",")) {
             if (StringUtil.isNotBlank(origin)) {
-                origins.add(new Origin(origin.trim()));
+                origins.add(origin.trim());
             }
         }
-        return ServerProperty.builder()
-                .origins(origins)
-                .rpId(fessConfig.getPasskeyRpId())
-                .challenge(new DefaultChallenge(challenge.value()))
-                .build();
-    }
-
-    /**
-     * Rebuilds the webauthn4j credential record of a stored passkey.
-     */
-    protected CredentialRecord toCredentialRecord(final Passkey passkey) {
-        final COSEKey coseKey = OBJECT_CONVERTER.getCborConverter().readValue(decode(passkey.getPublicKey()), COSEKey.class);
-        final AttestedCredentialData attestedCredentialData = new AttestedCredentialData(AAGUID.ZERO, decode(passkey.getId()), coseKey);
-        final Set<AuthenticatorTransport> transports = new HashSet<>();
-        if (passkey.getTransports() != null) {
-            for (final String transport : passkey.getTransports()) {
-                transports.add(AuthenticatorTransport.create(transport));
-            }
-        }
-        return new CredentialRecordImpl(new NoneAttestationStatement(), Boolean.TRUE, passkey.getBackupEligible(), passkey.getBackupState(),
-                signCountOf(passkey), attestedCredentialData, null, null, null, transports);
+        return new ServerSide(fessConfig.getPasskeyRpId(), origins, challenge.value());
     }
 
     /**
@@ -701,6 +639,148 @@ public class PasskeyService {
             cur = next;
         }
         return false;
+    }
+
+    /**
+     * What the server checks a ceremony against.
+     *
+     * @param rpId the relying party ID
+     * @param origins the origins a response may come from
+     * @param challenge the random bytes of the challenge
+     */
+    protected record ServerSide(String rpId, Set<String> origins, byte[] challenge) {
+    }
+
+    /**
+     * A credential whose registration response verified.
+     *
+     * @param credentialId the raw credential ID
+     * @param coseKey the public key, COSE-encoded CBOR
+     * @param signCount the sign count at registration
+     * @param transports the transports the authenticator reported
+     * @param backupEligible the BE flag
+     * @param backupState the BS flag
+     */
+    protected record RegisteredCredential(byte[] credentialId, byte[] coseKey, long signCount, String[] transports, boolean backupEligible,
+            boolean backupState) {
+    }
+
+    /**
+     * A parsed authentication response, not verified yet.
+     *
+     * @param credentialId the raw credential ID, or null
+     * @param userHandle the user handle, or null
+     * @param data the parsed response for {@link WebAuthn#verifyAuthentication}
+     */
+    protected record Assertion(byte[] credentialId, byte[] userHandle, Object data) {
+    }
+
+    /**
+     * Everything that uses webauthn4j. Its classes are loaded and its mappers built only when a
+     * ceremony is verified, the first time this holder is used, never when the service is created
+     * or {@link #isEnabled()} is asked: the service is injected into the login page, the user
+     * deletion and the admin user page, and a broken webauthn4j or Jackson must not break them.
+     */
+    static final class WebAuthn {
+
+        /**
+         * Converts the CBOR and JSON data of the ceremonies. It is shared since services are
+         * prototypes and building the mappers is not cheap; it is thread-safe once built.
+         */
+        static final ObjectConverter OBJECT_CONVERTER = new ObjectConverter();
+
+        /**
+         * Verifies the ceremonies; attestation is not checked (attestation {@code none}). The counter
+         * rule of webauthn4j rejects a count that stays at zero against a non-zero stored one; the
+         * rule of {@link PasskeyService#checkSignCount} is applied instead.
+         */
+        static final WebAuthnManager MANAGER = createManager();
+
+        /** The signature algorithms offered at registration. */
+        static final List<PublicKeyCredentialParameters> PUB_KEY_CRED_PARAMS = PUB_KEY_CRED_ALGS.stream()
+                .map(alg -> new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.create(alg)))
+                .toList();
+
+        private WebAuthn() {
+        }
+
+        private static WebAuthnManager createManager() {
+            final WebAuthnManager manager = WebAuthnManager.createNonStrictWebAuthnManager(OBJECT_CONVERTER);
+            manager.getAuthenticationDataVerifier().setMaliciousCounterValueHandler(authenticationObject -> {});
+            return manager;
+        }
+
+        static RegisteredCredential verifyRegistration(final String responseJson, final ServerSide serverSide) {
+            final RegistrationData registrationData;
+            try {
+                registrationData = MANAGER.parseRegistrationResponseJSON(responseJson);
+                MANAGER.verify(registrationData, new RegistrationParameters(toServerProperty(serverSide), PUB_KEY_CRED_PARAMS, true, true));
+            } catch (final RuntimeException e) {
+                throw new PasskeyException("reason=registration_rejected error=" + e.getClass().getSimpleName());
+            }
+            final AuthenticatorData<RegistrationExtensionAuthenticatorOutput> authenticatorData =
+                    registrationData.getAttestationObject().getAuthenticatorData();
+            final AttestedCredentialData attestedCredentialData = authenticatorData.getAttestedCredentialData();
+            if (attestedCredentialData == null) {
+                throw new PasskeyException("reason=registration_rejected error=no_attested_credential_data");
+            }
+            final Set<AuthenticatorTransport> transports = registrationData.getTransports();
+            return new RegisteredCredential(attestedCredentialData.getCredentialId(),
+                    OBJECT_CONVERTER.getCborConverter().writeValueAsBytes(attestedCredentialData.getCOSEKey()),
+                    authenticatorData.getSignCount(),
+                    transports == null ? new String[0] : transports.stream().map(AuthenticatorTransport::getValue).toArray(String[]::new),
+                    authenticatorData.isFlagBE(), authenticatorData.isFlagBS());
+        }
+
+        static Assertion parseAuthentication(final String responseJson) {
+            final AuthenticationData data;
+            try {
+                data = MANAGER.parseAuthenticationResponseJSON(responseJson);
+            } catch (final RuntimeException e) {
+                throw new PasskeyException("reason=login_rejected error=" + e.getClass().getSimpleName());
+            }
+            return new Assertion(data.getCredentialId(), data.getUserHandle(), data);
+        }
+
+        /**
+         * Verifies an assertion against the stored passkey.
+         *
+         * @return the sign count the authenticator presented
+         * @throws RuntimeException when the assertion does not verify
+         */
+        static long verifyAuthentication(final Assertion assertion, final ServerSide serverSide, final Passkey passkey) {
+            final AuthenticationData data = (AuthenticationData) assertion.data();
+            MANAGER.verify(data, new AuthenticationParameters(toServerProperty(serverSide), toCredentialRecord(passkey), null, true, true));
+            return data.getAuthenticatorData().getSignCount();
+        }
+
+        private static ServerProperty toServerProperty(final ServerSide serverSide) {
+            final Set<Origin> origins = new LinkedHashSet<>();
+            for (final String origin : serverSide.origins()) {
+                origins.add(new Origin(origin));
+            }
+            return ServerProperty.builder()
+                    .origins(origins)
+                    .rpId(serverSide.rpId())
+                    .challenge(new DefaultChallenge(serverSide.challenge()))
+                    .build();
+        }
+
+        /**
+         * Rebuilds the webauthn4j credential record of a stored passkey.
+         */
+        private static CredentialRecord toCredentialRecord(final Passkey passkey) {
+            final COSEKey coseKey = OBJECT_CONVERTER.getCborConverter().readValue(decode(passkey.getPublicKey()), COSEKey.class);
+            final AttestedCredentialData attestedCredentialData = new AttestedCredentialData(AAGUID.ZERO, decode(passkey.getId()), coseKey);
+            final Set<AuthenticatorTransport> transports = new HashSet<>();
+            if (passkey.getTransports() != null) {
+                for (final String transport : passkey.getTransports()) {
+                    transports.add(AuthenticatorTransport.create(transport));
+                }
+            }
+            return new CredentialRecordImpl(new NoneAttestationStatement(), Boolean.TRUE, passkey.getBackupEligible(),
+                    passkey.getBackupState(), signCountOf(passkey), attestedCredentialData, null, null, null, transports);
+        }
     }
 
     /**
