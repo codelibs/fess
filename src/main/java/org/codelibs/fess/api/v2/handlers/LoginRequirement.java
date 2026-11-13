@@ -73,7 +73,8 @@ public class LoginRequirement {
         // login_required flag the page needs in order to show the login form at all.
         case "/auth/me", "/auth/login", "/auth/passkey/login/options", "/auth/passkey/login/verify", "/auth/logout", "/ui/config" -> false;
         // Secure default: everything else — search, scroll, suggest, labels, popular words,
-        // related queries/content, chat, click, favorites, tags, search history, cache and any endpoint added later
+        // related queries/content, chat, click, favorites, tags, search history, cache, the passkeys
+        // of the signed-in user (/auth/passkey, /auth/passkey/register/*, /auth/passkey/{id}) and any endpoint added later
         // — is served only to an authenticated user.
         default -> true;
         };

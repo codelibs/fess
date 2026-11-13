@@ -432,6 +432,66 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_passkeyAccountPathsDispatchToPasskeyAccountHandler() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.passkeyAccountHandler = new org.codelibs.fess.api.v2.handlers.PasskeyAccountHandler() {
+            @Override
+            public void registerOptions(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("registerOptions");
+            }
+
+            @Override
+            public void registerVerify(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("registerVerify");
+            }
+
+            @Override
+            public void list(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("list");
+            }
+
+            @Override
+            public void delete(final HttpServletRequest request, final HttpServletResponse response, final String credentialId) {
+                calls.add("delete:" + credentialId);
+            }
+        };
+        // GET keeps the CSRF layer out of the way; the method check is the handler's own.
+        m.process(new StubRequest("/api/v2/auth/passkey/register/options"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/auth/passkey/register/verify"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/auth/passkey"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/auth/passkey/"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/auth/passkey/AbC-_9"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("registerOptions", "registerVerify", "list", "list", "delete:AbC-_9"), calls);
+        // more than one segment after /auth/passkey/ is not a credential id
+        final CapturingResponse nested = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/auth/passkey/a/b"), nested, new NopChain());
+        assertEquals(404, nested.status);
+        assertTrue(nested.body().contains("endpoint not found: /auth/passkey/a/b"), nested.body());
+        assertEquals(5, calls.size());
+    }
+
+    @Test
+    public void test_process_passkeyAccountPathsAre404WhileDisabled() throws Exception {
+        // The default handler, resolving PasskeyService itself, under the default passkey.enabled=false.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.app.service.PasskeyService() {
+            {
+                fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
+            }
+        }, org.codelibs.fess.app.service.PasskeyService.class.getCanonicalName());
+        // GET: the feature gate runs before the handler's method check, and GET skips the CSRF layer.
+        for (final String path : new String[] { "/auth/passkey", "/auth/passkey/register/options", "/auth/passkey/register/verify",
+                "/auth/passkey/AbC-_9" }) {
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest("/api/v2" + path), res, new NopChain());
+            assertEquals(404, res.status, path);
+            assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+            assertTrue(res.body().contains("endpoint not found: " + path), res.body());
+        }
+    }
+
+    @Test
     public void test_process_invalidAccessTokenMapsTo401() throws Exception {
         // RoleQueryHelper raises this while building the role query, before any handler writes.
         // The generic catch below it produced a 500, so a request presenting an unusable

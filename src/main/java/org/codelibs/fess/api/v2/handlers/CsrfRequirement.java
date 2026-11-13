@@ -80,6 +80,8 @@ public class CsrfRequirement {
             return true;
         case "/auth/password":
             return true;
+        case "/auth/passkey/register/options", "/auth/passkey/register/verify":
+            return true;
         case "/click":
             return true;
         case null:
@@ -96,6 +98,10 @@ public class CsrfRequirement {
             return true;
         }
         if (subPath.startsWith("/chat/sessions/")) {
+            return true;
+        }
+        if (subPath.startsWith("/auth/passkey/")) {
+            // DELETE /auth/passkey/{id}
             return true;
         }
         // Secure default: unknown state-changing sub-paths require a CSRF token.

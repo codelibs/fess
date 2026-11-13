@@ -50,7 +50,7 @@ public class LoginRequirementCompleteCoverageTest {
     private static final Map<String, Boolean> ENDPOINT_DECISIONS;
 
     /** Must equal {@code ENDPOINT_DECISIONS.size()}. */
-    private static final int EXPECTED_ENTRY_COUNT = 27;
+    private static final int EXPECTED_ENTRY_COUNT = 31;
 
     static {
         final Map<String, Boolean> m = new LinkedHashMap<>();
@@ -79,6 +79,10 @@ public class LoginRequirementCompleteCoverageTest {
 
         // --- Per-user state and generative endpoints. ---
         m.put("/auth/password", true);
+        m.put("/auth/passkey", true);
+        m.put("/auth/passkey/register/options", true);
+        m.put("/auth/passkey/register/verify", true);
+        m.put("/auth/passkey/abc123", true);
         m.put("/click", true);
         m.put("/favorites", true);
         m.put("/search-history", true);
