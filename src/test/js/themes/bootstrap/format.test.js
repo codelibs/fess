@@ -16,6 +16,8 @@ import {
   sanitizeAdminHtml,
   renderHighlightedSnippet,
   renderSnippetText,
+  base64urlToBuffer,
+  bufferToBase64url,
 } from "../../../../main/webapp/themes/bootstrap/assets/format.js";
 
 /** Serialise the DocumentFragment sanitizeHtml() returns into an HTML string. */
@@ -309,5 +311,37 @@ describe("sanitizeAdminHtml: script still cannot run", () => {
   it("does not keep id or form controls, which could collide with the page", () => {
     const out = cleanAdmin('<div id="search-form"><form action="/x"><input name="q"><button>go</button></form></div>');
     expect(out).toBe("<div>go</div>");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// base64urlToBuffer / bufferToBase64url: the WebAuthn binary <-> JSON pair.
+// ---------------------------------------------------------------------------
+describe("base64url helpers", () => {
+  const bytes = (...v) => new Uint8Array(v);
+
+  it("encodes without padding and with the URL-safe alphabet", () => {
+    // 0xfb 0xff 0xfe is "+//+" in plain Base64, "-__-" in Base64url.
+    expect(bufferToBase64url(bytes(0xfb, 0xff, 0xfe).buffer)).toBe("-__-");
+    expect(bufferToBase64url(bytes(1).buffer)).toBe("AQ");
+    expect(bufferToBase64url(bytes(1, 2).buffer)).toBe("AQI");
+    expect(bufferToBase64url(new ArrayBuffer(0))).toBe("");
+  });
+
+  it("decodes padded and unpadded input to the same bytes", () => {
+    expect(Array.from(new Uint8Array(base64urlToBuffer("AQI")))).toEqual([1, 2]);
+    expect(Array.from(new Uint8Array(base64urlToBuffer("AQI=")))).toEqual([1, 2]);
+    expect(Array.from(new Uint8Array(base64urlToBuffer("-__-")))).toEqual([0xfb, 0xff, 0xfe]);
+    expect(base64urlToBuffer("").byteLength).toBe(0);
+  });
+
+  it("round-trips every byte value", () => {
+    const all = new Uint8Array(256).map((_, i) => i);
+    expect(Array.from(new Uint8Array(base64urlToBuffer(bufferToBase64url(all.buffer))))).toEqual(Array.from(all));
+  });
+
+  it("encodes a typed-array view by its own window of the buffer, not the whole buffer", () => {
+    const view = new Uint8Array([9, 9, 1, 2, 9]).subarray(2, 4);
+    expect(bufferToBase64url(view)).toBe("AQI");
   });
 });

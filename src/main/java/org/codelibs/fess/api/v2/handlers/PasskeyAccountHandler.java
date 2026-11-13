@@ -68,8 +68,9 @@ import tools.jackson.databind.json.JsonMapper;
  * and at most {@value #MAX_LABEL_LENGTH} characters. Whatever makes the registration fail is one
  * {@code 400 invalid_request} with {@code reason=registration_failed}; the cause is logged only.</p>
  *
- * <p>The list answers {@code { "passkeys": [ { "id", "label", "created_at", "last_used_at" } ] }} and
- * never the key material. Deleting a passkey that is not the caller's answers exactly as deleting one
+ * <p>The list answers {@code { "passkeys": [ { "id", "label", "created_at", "last_used_at" } ], "can_register": true }}
+ * and never the key material. {@code can_register} is false for a session that cannot register (see
+ * above), so a client shows no registration UI for it. Deleting a passkey that is not the caller's answers exactly as deleting one
  * that does not exist.</p>
  */
 public class PasskeyAccountHandler {
@@ -330,7 +331,8 @@ public class PasskeyAccountHandler {
             return;
         }
         final List<Map<String, Object>> passkeys = new ArrayList<>();
-        if (userBean.getFessUser() instanceof User) {
+        final boolean canRegister = userBean.getFessUser() instanceof User;
+        if (canRegister) {
             try {
                 for (final Passkey passkey : passkeyService.getPasskeys(userBean.getUserId())) {
                     passkeys.add(toPayload(passkey));
@@ -342,6 +344,7 @@ public class PasskeyAccountHandler {
         }
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("passkeys", passkeys);
+        payload.put("can_register", canRegister);
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 

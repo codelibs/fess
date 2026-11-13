@@ -42,6 +42,12 @@ import {
   endSession,
   isSessionGone,
   localizePasswordError,
+  isPasskeyEnabled,
+  isPasskeyLoginAvailable,
+  isPasskeyCancel,
+  toPasskeyRequestOptions,
+  toPasskeyCreationOptions,
+  passkeyCredentialToJson,
 } from "../../../../main/webapp/themes/bootstrap/assets/auth.js";
 import { resetDom } from "../../helpers/dom.js";
 import { installFetch, jsonResponse } from "../../helpers/net.js";
@@ -316,6 +322,207 @@ describe("attach — login form submit", () => {
     const err = document.getElementById("login-error");
     expect(err.textContent).toBe("auth.error_invalid_credentials");
     expect(err.classList.contains("d-none")).toBe(false);
+  });
+});
+
+describe("passkey option and credential conversion", () => {
+  const buf = (...v) => new Uint8Array(v).buffer;
+  const arr = (b) => Array.from(new Uint8Array(b));
+
+  it("turns the login options' challenge and allowCredentials ids into ArrayBuffers", () => {
+    const o = toPasskeyRequestOptions({
+      status: 0, challenge: "AQI", rpId: "example.com", timeout: 300000, userVerification: "required",
+      allowCredentials: [{ type: "public-key", id: "_-8", transports: ["usb"] }],
+    });
+    expect(arr(o.challenge)).toEqual([1, 2]);
+    expect(o.allowCredentials[0].type).toBe("public-key");
+    expect(arr(o.allowCredentials[0].id)).toEqual([0xff, 0xef]);
+    expect(o.allowCredentials[0].transports).toEqual(["usb"]);
+    expect(o.rpId).toBe("example.com");
+    expect(o.userVerification).toBe("required");
+    expect("status" in o).toBe(false); // the envelope's status is not a WebAuthn member
+  });
+
+  it("accepts login options with no allowCredentials", () => {
+    expect(toPasskeyRequestOptions({ challenge: "AQ" }).allowCredentials).toEqual([]);
+  });
+
+  it("turns the registration options' challenge, user.id and excludeCredentials ids into ArrayBuffers", () => {
+    const o = toPasskeyCreationOptions({
+      status: 0, challenge: "AQI", rp: { id: "example.com", name: "Fess" },
+      user: { id: "AwQ", name: "alice", displayName: "alice" },
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+      excludeCredentials: [{ type: "public-key", id: "BQ" }],
+      authenticatorSelection: { residentKey: "required" }, attestation: "none",
+    });
+    expect(arr(o.challenge)).toEqual([1, 2]);
+    expect(arr(o.user.id)).toEqual([3, 4]);
+    expect(o.user.name).toBe("alice");
+    expect(arr(o.excludeCredentials[0].id)).toEqual([5]);
+    expect(o.rp).toEqual({ id: "example.com", name: "Fess" });
+    expect(o.pubKeyCredParams).toEqual([{ type: "public-key", alg: -7 }]);
+    expect(o.authenticatorSelection).toEqual({ residentKey: "required" });
+    expect("status" in o).toBe(false);
+  });
+
+  it("encodes a registration credential, with transports inside the response", () => {
+    const json = passkeyCredentialToJson({
+      id: "AQI", rawId: buf(1, 2), type: "public-key",
+      response: { clientDataJSON: buf(3), attestationObject: buf(4, 5), getTransports: () => ["internal", "hybrid"] },
+      getClientExtensionResults: () => ({ credProps: { rk: true } }),
+    });
+    expect(json).toEqual({
+      id: "AQI", rawId: "AQI", type: "public-key",
+      response: { clientDataJSON: "Aw", attestationObject: "BAU", transports: ["internal", "hybrid"] },
+      clientExtensionResults: { credProps: { rk: true } },
+    });
+  });
+
+  it("encodes an assertion credential, with a null userHandle left out", () => {
+    const json = passkeyCredentialToJson({
+      id: "AQ", rawId: buf(1), type: "public-key",
+      response: { clientDataJSON: buf(2), authenticatorData: buf(3), signature: buf(4), userHandle: buf(5, 6) },
+      getClientExtensionResults: () => ({}),
+    });
+    expect(json.response).toEqual({ clientDataJSON: "Ag", authenticatorData: "Aw", signature: "BA", userHandle: "BQY" });
+    expect(passkeyCredentialToJson({
+      id: "AQ", rawId: buf(1), type: "public-key",
+      response: { clientDataJSON: buf(2), authenticatorData: buf(3), signature: buf(4), userHandle: null },
+    }).response.userHandle).toBeUndefined();
+  });
+
+  it("classifies a dismissed prompt as a cancel and nothing else", () => {
+    expect(isPasskeyCancel({ name: "NotAllowedError" })).toBe(true);
+    expect(isPasskeyCancel({ name: "AbortError" })).toBe(true);
+    expect(isPasskeyCancel({ name: "InvalidStateError" })).toBe(false);
+    expect(isPasskeyCancel({ name: "ApiError", httpStatus: 401 })).toBe(false);
+    expect(isPasskeyCancel(null)).toBe(false);
+  });
+});
+
+describe("passkey login button", () => {
+  const FIXTURE = `
+    <ul id="auth-controls"></ul>
+    <form id="login-form">
+      <input id="login-username" value="">
+      <input id="login-password" value="">
+      <button type="button" id="passkey-login-btn" class="d-none"></button>
+    </form>
+    <div id="login-error" class="d-none"></div>`;
+  const OPTIONS = { status: 0, challenge: "AQI", rpId: "example.com", allowCredentials: [] };
+  const CREDENTIAL = {
+    id: "AQ", rawId: new Uint8Array([1]).buffer, type: "public-key",
+    response: { clientDataJSON: new Uint8Array([2]).buffer, authenticatorData: new Uint8Array([3]).buffer,
+      signature: new Uint8Array([4]).buffer, userHandle: new Uint8Array([5]).buffer },
+    getClientExtensionResults: () => ({}),
+  };
+  let get;
+
+  beforeEach(() => {
+    api.get.mockRejectedValue({ code: "AUTH_REQUIRED" });
+    get = vi.fn().mockResolvedValue(CREDENTIAL);
+    vi.stubGlobal("PublicKeyCredential", function PublicKeyCredential() {});
+    Object.defineProperty(navigator, "credentials", { value: { get }, configurable: true });
+  });
+  afterEach(() => {
+    delete navigator.credentials;
+  });
+
+  const enable = (flag) => api.getConfig.mockReturnValue({ features: { passkey_enabled: flag } });
+  const click = () => document.getElementById("passkey-login-btn").dispatchEvent(new Event("click"));
+
+  it("is hidden unless ui-config says passkey_enabled", async () => {
+    enable(false);
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    expect(isPasskeyEnabled()).toBe(false);
+    expect(document.getElementById("passkey-login-btn").classList.contains("d-none")).toBe(true);
+  });
+
+  it("is hidden when the browser has no PublicKeyCredential", async () => {
+    enable(true);
+    vi.stubGlobal("PublicKeyCredential", undefined);
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    expect(isPasskeyLoginAvailable()).toBe(false);
+    expect(document.getElementById("passkey-login-btn").classList.contains("d-none")).toBe(true);
+  });
+
+  it("runs options, navigator.credentials.get and verify, then finishes like a password login", async () => {
+    enable(true);
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    expect(document.getElementById("passkey-login-btn").classList.contains("d-none")).toBe(false);
+    api.post.mockImplementation(async (path) =>
+      path === "/auth/passkey/login/options" ? OPTIONS : { user: { name: "Alice" }, csrf_token: "Z" });
+    let loginEvent = null;
+    document.addEventListener("fess:auth:login", (e) => { loginEvent = e; });
+
+    click();
+    await flush();
+
+    expect(api.post.mock.calls.map((c) => c[0])).toEqual(["/auth/passkey/login/options", "/auth/passkey/login/verify"]);
+    const publicKey = get.mock.calls[0][0].publicKey;
+    expect(Array.from(new Uint8Array(publicKey.challenge))).toEqual([1, 2]);
+    expect(get.mock.calls[0][0].mediation).toBeUndefined(); // modal flow only
+    expect(api.post.mock.calls[1][1]).toEqual({
+      credential: {
+        id: "AQ", rawId: "AQ", type: "public-key", clientExtensionResults: {},
+        response: { clientDataJSON: "Ag", authenticatorData: "Aw", signature: "BA", userHandle: "BQ" },
+      },
+    });
+    expect(api.setCsrfToken).toHaveBeenCalledWith("Z");
+    expect(document.querySelector("#user-dropdown #user-name").textContent).toBe("Alice");
+    expect(loginEvent).not.toBeNull();
+    expect(document.getElementById("passkey-login-btn").disabled).toBe(false);
+  });
+
+  it("stays silent when the user dismisses the browser prompt", async () => {
+    enable(true);
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    api.post.mockResolvedValue(OPTIONS);
+    get.mockRejectedValue(Object.assign(new Error("cancelled"), { name: "NotAllowedError" }));
+
+    click();
+    await flush();
+
+    expect(api.post).toHaveBeenCalledTimes(1); // no verify
+    const err = document.getElementById("login-error");
+    expect(err.classList.contains("d-none")).toBe(true);
+    expect(err.textContent).toBe("");
+    expect(document.getElementById("passkey-login-btn").disabled).toBe(false);
+  });
+
+  it("shows the password form's login-failure message when verify fails", async () => {
+    enable(true);
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    api.post.mockImplementation(async (path) => {
+      if (path === "/auth/passkey/login/options") return OPTIONS;
+      throw { code: "auth_required", httpStatus: 401 };
+    });
+
+    click();
+    await flush();
+
+    const err = document.getElementById("login-error");
+    expect(err.textContent).toBe("auth.error_invalid_credentials");
+    expect(err.classList.contains("d-none")).toBe(false);
+    expect(document.getElementById("user-dropdown")).toBeNull();
+  });
+
+  it("shows the same message when the browser fails for another reason", async () => {
+    enable(true);
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    api.post.mockResolvedValue(OPTIONS);
+    get.mockRejectedValue(Object.assign(new Error("no authenticator"), { name: "NotSupportedError" }));
+
+    click();
+    await flush();
+
+    expect(document.getElementById("login-error").textContent).toBe("auth.error_invalid_credentials");
   });
 });
 

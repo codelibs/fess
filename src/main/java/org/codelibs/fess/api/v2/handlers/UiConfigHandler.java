@@ -31,6 +31,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -199,6 +200,22 @@ public class UiConfigHandler {
             return chatClient != null && chatClient.isAvailable();
         } catch (final Exception e) {
             logger.debug("chat client lookup failed; reporting the chat as unavailable", e);
+            return false;
+        }
+    }
+
+    /**
+     * Tells whether passkey login is available, as {@link PasskeyService#isEnabled()} decides. A seam
+     * so tests decide it without wiring the service; a failed lookup counts as disabled.
+     *
+     * @return true if passkeys can be used to sign in and be registered
+     */
+    protected boolean isPasskeyEnabled() {
+        try {
+            final PasskeyService passkeyService = ComponentUtil.getComponent(PasskeyService.class);
+            return passkeyService != null && passkeyService.isEnabled();
+        } catch (final Exception e) {
+            logger.debug("passkey service lookup failed; reporting passkeys as disabled", e);
             return false;
         }
     }
@@ -453,6 +470,9 @@ public class UiConfigHandler {
             // B.2: login link availability flag.
             features.put("login_link", resolveLoginLink(loginLinkEnabled, ssoEnabled));
             features.put("sso_enabled", ssoEnabled);
+            // passkey_enabled: whether passkey login is available (passkey.enabled with a usable rp.id and
+            // origins), so the theme shows the passkey button and the passkey section of the profile.
+            features.put("passkey_enabled", isPasskeyEnabled());
             // osdd_link: whether an OpenSearch description document is configured, so the
             // theme can render <link rel="search"> only when applicable.
             features.put("osdd_link", hasOpenSearchFile());

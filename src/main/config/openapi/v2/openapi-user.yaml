@@ -2141,6 +2141,7 @@ components:
                     - installation_link
                     - login_link
                     - sso_enabled
+                    - passkey_enabled
                     - osdd_link
                     - rag_chat_enabled
                   properties:
@@ -2203,6 +2204,13 @@ components:
                       description: |-
                         `true` when `sso.type` is configured and the fess-sso-*
                         plugin serving it is installed.
+                    passkey_enabled:
+                      type: boolean
+                      description: |-
+                        `true` when passkey (WebAuthn) login is available
+                        (`passkey.enabled` with `passkey.rp.id` and
+                        `passkey.origins` set): the `/auth/passkey/*`
+                        endpoints answer instead of `404`.
                     osdd_link:
                       type: boolean
                       description: |-

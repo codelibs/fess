@@ -331,6 +331,11 @@
               <label for="login-password" class="form-label" data-i18n="auth.password">Password</label>
               <template class="password-field"><input class="form-control" id="login-password" name="password" type="password" autocomplete="current-password" required></template>
             </div>
+            <!-- Shown by auth.js only when the server offers passkeys and the browser supports them. -->
+            <button type="button" class="btn btn-outline-secondary w-100 d-none" id="passkey-login-btn">
+              <i class="fa fa-fw fa-key" aria-hidden="true"></i>
+              <span data-i18n="auth.passkey_login">Sign in with a passkey</span>
+            </button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="auth.cancel">Cancel</button>

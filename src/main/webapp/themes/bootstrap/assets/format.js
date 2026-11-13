@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Common formatting utilities for the Fess theme SPA.
 // Importing is DOM-free; calling is not. Only formatFileSize / formatDate /
-// escapeHtml are pure — sanitizeHtml, sanitizeAdminHtml, renderHighlightedSnippet
-// and renderSnippetText parse via document, and isSafeHref needs window.location.
+// escapeHtml (and the Base64url pair base64urlToBuffer / bufferToBase64url) are pure —
+// sanitizeHtml, sanitizeAdminHtml, renderHighlightedSnippet and renderSnippetText parse via
+// document, and isSafeHref needs window.location.
 
 // Intl unit identifiers; Intl.NumberFormat supplies the localised unit names.
 const UNITS = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte"];
@@ -54,6 +55,36 @@ export function formatDate(isoString) {
   const pad = (x) => String(x).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
          `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/**
+ * Decode a Base64url string (RFC 4648 section 5, padding optional) to an ArrayBuffer.
+ * WebAuthn carries its binary values (challenge, ids, signatures) as Base64url in JSON.
+ *
+ * @param {string} value
+ * @returns {ArrayBuffer}
+ */
+export function base64urlToBuffer(value) {
+  const base64 = String(value).replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(base64 + "=".repeat((4 - (base64.length % 4)) % 4));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+/**
+ * Encode an ArrayBuffer (or typed array view) as an unpadded Base64url string.
+ *
+ * @param {ArrayBuffer|ArrayBufferView} buffer
+ * @returns {string}
+ */
+export function bufferToBase64url(buffer) {
+  const bytes = ArrayBuffer.isView(buffer)
+    ? new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+    : new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /**

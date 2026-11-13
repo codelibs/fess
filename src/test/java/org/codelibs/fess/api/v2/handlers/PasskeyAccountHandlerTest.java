@@ -438,6 +438,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
                 "\"passkeys\":[{\"id\":\"" + CREDENTIAL_ID + "\",\"label\":\"Work laptop\",\"created_at\":1000,\"last_used_at\":2000}]"),
                 body);
         assertFalse(body.contains("Bob"), body);
+        assertTrue(body.contains("\"can_register\":true"), body);
         assertNoKeyMaterial(body);
     }
 
@@ -450,6 +451,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         handler(new LoginRateLimiter(), service).list(new Request("GET").withSession().proxy(), res.proxy());
         assertEquals(200, res.status, res.body());
         assertTrue(res.body().contains("\"passkeys\":[]"), res.body());
+        assertTrue(res.body().contains("\"can_register\":false"), res.body());
         assertEquals(0, service.listCalls, "the local user of the same name is not looked up");
     }
 
