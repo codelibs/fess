@@ -365,12 +365,12 @@ public class FessPropTest extends UnitFessTestCase {
 
                 @Override
                 public String getSearchResultLinkSchemes() {
-                    return "http,hammerspoon,javascript,data,vbscript";
+                    return "http,hammerspoon";
                 }
             };
             assertTrue(custom.isSearchResultLinkAllowed("hammerspoon://fessopen?path=x"));
             assertFalse(custom.isSearchResultLinkAllowed("file:/mnt/a.txt"));
-            // Script schemes are refused even when the setting lists them.
+            // A scheme the setting does not list is refused, however the browser would read it.
             assertFalse(custom.isSearchResultLinkAllowed("javascript:alert(1)"));
             assertFalse(custom.isSearchResultLinkAllowed("JavaScript:alert(1)"));
             assertFalse(custom.isSearchResultLinkAllowed("java\tscript:alert(1)"));

@@ -7501,7 +7501,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search.result.link.schemes'. <br>
      * The value is, e.g. http,https,ftp,ftps,file,smb,smb1,storage,s3,gcs <br>
-     * comment: URL schemes a search result may link to and /go/ may redirect to (comma-separated, no ":"); javascript, data and vbscript are never allowed. A blank value allows none.
+     * comment: URL schemes a search result may link to and /go/ may redirect to (comma-separated, no ":"). Do not list javascript, data or vbscript. A blank value allows none.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchResultLinkSchemes();

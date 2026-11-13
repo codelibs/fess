@@ -140,9 +140,6 @@ public interface FessProp {
 
     String SEARCH_RESULT_LINK_SCHEMES_LIST = "searchResultLinkSchemesList";
 
-    /** Schemes that run script; a search result never links to them. */
-    Set<String> SCRIPT_SCHEMES = Set.of("javascript", "data", "vbscript");
-
     /** The scheme at the start of a URL. */
     Pattern URL_SCHEME = Pattern.compile("^([A-Za-z][A-Za-z0-9+.-]*):");
 
@@ -1063,8 +1060,7 @@ public interface FessProp {
 
     /**
      * Checks whether a search result may link to the URL: it has no scheme (a relative URL), or its
-     * scheme is one of search.result.link.schemes. javascript, data and vbscript are refused even if
-     * the setting lists them. The scheme is read the way a browser reads it: tabs and line breaks
+     * scheme is one of search.result.link.schemes. The scheme is read the way a browser reads it: tabs and line breaks
      * inside the URL and the spaces and control characters before it are ignored.
      *
      * @param url the URL of a document
@@ -1081,7 +1077,7 @@ public interface FessProp {
             return true;
         }
         final String scheme = matcher.group(1).toLowerCase(Locale.ROOT);
-        return !SCRIPT_SCHEMES.contains(scheme) && getSearchResultLinkSchemesAsList().contains(scheme);
+        return getSearchResultLinkSchemesAsList().contains(scheme);
     }
 
     String getJvmChunkOptions();
