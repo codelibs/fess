@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.dbflute.optional.OptionalThing;
 
 import com.google.common.cache.CacheBuilder;
@@ -281,16 +282,17 @@ public class CrawlerStatsHelper {
     }
 
     /**
-     * Extracts the URL string from a crawler object for logging purposes.
+     * Extracts the URL string from a crawler object for logging purposes. The user name and the
+     * password of a URL are left out, because the statistics log (fess-urls.log) is written at INFO.
      *
      * @param keyObj the crawler object to extract URL from
      * @return the URL string or a default value if not extractable
      */
     protected String getUrl(final Object keyObj) {
         return switch (keyObj) {
-        case final UrlQueue<?> urlQueue -> escapeValue(urlQueue.getUrl());
-        case final StatsKeyObject statsKey -> escapeValue(statsKey.getUrl());
-        case final String key -> escapeValue(key);
+        case final UrlQueue<?> urlQueue -> escapeValue(CredentialUrlUtil.removeUserInfo(urlQueue.getUrl()));
+        case final StatsKeyObject statsKey -> escapeValue(CredentialUrlUtil.removeUserInfo(statsKey.getUrl()));
+        case final String key -> escapeValue(CredentialUrlUtil.removeUserInfo(key));
         case final Number key -> key.toString();
         case null, default -> "-";
         };
