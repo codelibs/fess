@@ -1,0 +1,63 @@
+{
+  "fess_user.passkey" : {
+    "aliases" : { },
+    "mappings" : {
+      "passkey" : {
+        "properties" : {
+          "backupEligible" : {
+            "type" : "boolean"
+          },
+          "backupState" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "long"
+          },
+          "label" : {
+            "type" : "keyword"
+          },
+          "lastUsedAt" : {
+            "type" : "long"
+          },
+          "publicKey" : {
+            "type" : "keyword",
+            "index" : false
+          },
+          "signCount" : {
+            "type" : "long"
+          },
+          "transports" : {
+            "type" : "keyword"
+          },
+          "userHandle" : {
+            "type" : "keyword"
+          },
+          "userName" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "passkey" : {
+            "properties" : {
+              "transports" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "creation_date" : "1509021059090",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "ugUWT7UpRCau5xEMgWOBsw",
+        "version" : {
+          "created" : "6000051"
+        },
+        "provided_name" : "fess_user.passkey"
+      }
+    }
+  }
+}

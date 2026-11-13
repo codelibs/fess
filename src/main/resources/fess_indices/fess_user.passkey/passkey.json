@@ -1,0 +1,35 @@
+{
+    "properties": {
+      "backupEligible": {
+        "type": "boolean"
+      },
+      "backupState": {
+        "type": "boolean"
+      },
+      "createdAt": {
+        "type": "long"
+      },
+      "label": {
+        "type": "keyword"
+      },
+      "lastUsedAt": {
+        "type": "long"
+      },
+      "publicKey": {
+        "type": "keyword",
+        "index": false
+      },
+      "signCount": {
+        "type": "long"
+      },
+      "transports": {
+        "type": "keyword"
+      },
+      "userHandle": {
+        "type": "keyword"
+      },
+      "userName": {
+        "type": "keyword"
+      }
+    }
+}

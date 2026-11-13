@@ -13,6 +13,11 @@ map:{
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_user.xml
         }
+        ; fess_user.passkey = map:{
+            ; package = user
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_user.xml
+        }
         ; fess_user.role = map:{
             ; package = user
             ; esclientDiFile = esclient.xml
