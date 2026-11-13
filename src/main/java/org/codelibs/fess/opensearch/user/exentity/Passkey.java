@@ -32,6 +32,22 @@ public class Passkey extends BsPasskey {
         asDocMeta().id(id);
     }
 
+    public Long getSeqNo() {
+        return asDocMeta().seqNo();
+    }
+
+    public void setSeqNo(final Long seqNo) {
+        asDocMeta().seqNo(seqNo);
+    }
+
+    public Long getPrimaryTerm() {
+        return asDocMeta().primaryTerm();
+    }
+
+    public void setPrimaryTerm(final Long primaryTerm) {
+        asDocMeta().primaryTerm(primaryTerm);
+    }
+
     /**
      * Omits the public key so that an entity written to a log never carries credential material.
      */
