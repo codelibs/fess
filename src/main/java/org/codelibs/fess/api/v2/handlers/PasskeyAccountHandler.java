@@ -148,6 +148,15 @@ public class PasskeyAccountHandler {
     }
 
     /**
+     * Ends the login sessions of the user other than the current one.
+     *
+     * @param userName the name of the user
+     */
+    protected void endOtherSessions(final String userName) {
+        ComponentUtil.getComponent(UserService.class).endOtherSessions(userName);
+    }
+
+    /**
      * Processes one {@code POST /api/v2/auth/passkey/register/options} request.
      *
      * @param req the incoming HTTP request
@@ -429,6 +438,13 @@ public class PasskeyAccountHandler {
         }
         ComponentUtil.getActivityHelper()
                 .passkeyDeleted(ComponentUtil.getFessLoginAssist().getSavedUserBean(), userName, abbreviate(credentialId));
+        // a session opened with the removed passkey must not outlive it; this one stays
+        try {
+            endOtherSessions(userName);
+        } catch (final RuntimeException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2" + LIST_PATH + " endOtherSessions");
+            return;
+        }
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("ok", true);
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);

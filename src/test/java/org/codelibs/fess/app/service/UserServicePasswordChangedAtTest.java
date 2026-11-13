@@ -121,6 +121,44 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_endOtherSessions_recordsTheTimeAndKeepsThePassword() {
+        final long before = System.currentTimeMillis();
+        userService.endOtherSessions("alice");
+        final long after = System.currentTimeMillis();
+
+        assertEquals(1, written.size());
+        assertEquals("{bcrypt}old", written.get(0).getPassword());
+        final long changedAt = written.get(0).getPasswordChangedAt();
+        assertTrue(changedAt >= before && changedAt <= after);
+        assertEquals(List.of("alice@" + changedAt), accepted);
+    }
+
+    @Test
+    public void test_endOtherSessions_neverGoesBackwards() {
+        final long future = System.currentTimeMillis() + 3_600_000L;
+        stored.setPasswordChangedAt(future);
+
+        userService.endOtherSessions("alice");
+
+        assertEquals(Long.valueOf(future + 1), written.get(0).getPasswordChangedAt());
+    }
+
+    @Test
+    public void test_endOtherSessions_unknownUser_changesNothing() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.empty();
+            }
+        };
+
+        userService.endOtherSessions("nobody");
+
+        assertTrue(written.isEmpty());
+        assertTrue(accepted.isEmpty());
+    }
+
+    @Test
     public void test_changePassword_neverGoesBackwards() {
         // a node whose clock is behind must still produce a time later than the one it replaces
         final long future = System.currentTimeMillis() + 3_600_000L;

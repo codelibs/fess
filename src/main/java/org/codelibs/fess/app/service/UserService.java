@@ -240,6 +240,29 @@ public class UserService {
     }
 
     /**
+     * Ends the login sessions of a local user that were opened before now, except the one that makes
+     * the request when it is the user's own. It records a new time in the field a password change
+     * records, so the sessions end the way they do after a password change: when they next check the
+     * user index, within {@code password.changed.check.interval} seconds. A user that is not stored
+     * is left alone.
+     *
+     * <p>Removing a passkey calls this, so a session opened with a lost authenticator does not outlive it.</p>
+     *
+     * @param username the name of the user
+     */
+    public void endOtherSessions(final String username) {
+        userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
+            final long changedAt = nextPasswordChangedAt(entity);
+            entity.setPasswordChangedAt(changedAt);
+            userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
+            acceptPasswordChange(username, changedAt);
+            if (logger.isInfoEnabled()) {
+                logger.info("Ended the login sessions of the user: username={}, id={}", username, entity.getId());
+            }
+        });
+    }
+
+    /**
      * Gets the time to record for a password change of the user: now, but later than the time
      * already recorded, so that a node whose clock is behind still ends the sessions opened before.
      *

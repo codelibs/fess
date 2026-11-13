@@ -72,6 +72,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
     protected void setUp(final org.junit.jupiter.api.TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         audit.clear();
+        ENDED_SESSIONS.clear();
         ComponentUtil.register(new ActivityHelper() {
             @Override
             protected void printByLtsv(final Map<String, String> valueMap) {
@@ -605,6 +606,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         assertEquals(1, audit.size(), audit.toString());
         assertTrue(audit.get(0).contains("action:DELETE_PASSKEY"), audit.toString());
         assertTrue(audit.get(0).contains("target:alice"), audit.toString());
+        assertEquals("the other sessions of the user end with the passkey", List.of("alice"), ENDED_SESSIONS);
     }
 
     @Test
@@ -624,6 +626,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         assertEquals(others.body(), none.body());
         assertEquals(404, none.status);
         assertTrue(audit.isEmpty(), "a passkey that was not deleted is not audited: " + audit);
+        assertTrue(ENDED_SESSIONS.isEmpty(), "and ends no session: " + ENDED_SESSIONS);
     }
 
     @Test
@@ -738,8 +741,15 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
         };
     }
 
+    private static final List<String> ENDED_SESSIONS = new ArrayList<>();
+
     private static PasskeyAccountHandler handler(final LoginRateLimiter rl, final PasskeyService service) {
         return new PasskeyAccountHandler(rl, service) {
+            @Override
+            protected void endOtherSessions(final String userName) {
+                ENDED_SESSIONS.add(userName);
+            }
+
             @Override
             protected OptionalEntity<User> findLocalUser(final String userName) {
                 return OptionalEntity.of(localUser(userName));

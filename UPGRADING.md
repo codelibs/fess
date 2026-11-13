@@ -47,3 +47,7 @@ nodes must share sessions (`FESS_SESSION_STORE=opensearch`) or the balancer must
 to one node. Only a user of the `fess_user` index can register a passkey, and only after entering the
 local password again; a local user whose name and password are also accepted by the directory
 (LDAP) cannot register one, since the password check cannot tell which account it verified.
+
+Removing a passkey, by the user or by an administrator, ends the other login sessions of that user
+the way a password change does: the sessions end when they next check the user index, within
+`password.changed.check.interval` seconds (default 60).
