@@ -20,7 +20,7 @@ path mappings) uses another scheme. If a path mapping rewrites URLs to a custom 
 the colon). Do not list `javascript`, `data` or `vbscript`. A blank value allows no scheme.
 
 **Fess creates a new index, `fess_user.passkey`, when it starts.** Passkey (WebAuthn) login for local
-users is new in 15.10 and is off by default, but the index is created and used whether or not it is
+users is new in 15.10 (fess#3795) and is off by default, but the index is created and used whether or not it is
 on: deleting a user, creating or renaming one, and opening a user's details on the admin screen all
 query it. Where Fess is not allowed to create indices, create `fess_user.passkey` (with the configured
 `index.user.index` prefix in place of `fess_user`) from `fess_indices/fess_user.passkey.json` and
