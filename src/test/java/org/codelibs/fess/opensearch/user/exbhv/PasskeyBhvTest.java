@@ -75,6 +75,21 @@ public class PasskeyBhvTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_passkeyIndexIsCreatedOutsideTheUserBackupAlias() {
+        // fess_user.bulk exports the fess_user alias, and passkeys are not part of a backup: the index
+        // is created from its mapping and settings, and like the fess_log indexes it joins no alias.
+        final ClassLoader loader = getClass().getClassLoader();
+        assertNotNull(loader.getResource("fess_indices/fess_user.passkey.json"));
+        assertNotNull(loader.getResource("fess_indices/fess_user.passkey/passkey.json"));
+        assertNull(loader.getResource("fess_indices/fess_user.passkey/alias"));
+        assertNull(loader.getResource("fess_indices/fess_user.passkey/alias/fess_user.json"));
+        // the indexes that are backed up still join it
+        assertNotNull(loader.getResource("fess_indices/fess_user.user/alias/fess_user.json"));
+        // and an index without an alias directory is a layout SearchEngineClient#createAlias already handles
+        assertNull(loader.getResource("fess_indices/fess_log.search_log/alias"));
+    }
+
+    @Test
     public void test_toString_omitsPublicKey() {
         final Passkey passkey = new Passkey();
         passkey.setUserName("alice");
