@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.Passkey;
 import org.codelibs.fess.opensearch.user.exentity.User;
+import org.codelibs.fess.session.SessionDataSerializer;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -261,6 +262,90 @@ public class PasskeyServiceTest extends UnitFessTestCase {
         service.store.clear();
 
         assertRejected("reason=no_challenge", () -> service.verifyRegistration(session, user("alice"), "laptop", response));
+    }
+
+    @Test
+    public void test_challenges_surviveTheSessionStoreSerializer() {
+        // The OpenSearch session store writes only registered classes; anything else stays on the
+        // node that set it, so a verification served by another node would find no challenge.
+        final SessionDataSerializer serializer = new SessionDataSerializer();
+        final ClientPlatform client = newClient(ORIGIN);
+        final String registration = createCredential(client, user("alice"));
+        final StubHttpSession registrationNode = copyThroughSerializer(serializer, session, PasskeyService.REGISTRATION_CHALLENGE_KEY);
+        assertNotNull(service.verifyRegistration(registrationNode, user("alice"), "laptop", registration));
+
+        final String assertion = login(client);
+        final StubHttpSession loginNode = copyThroughSerializer(serializer, session, PasskeyService.LOGIN_CHALLENGE_KEY);
+        assertEquals("alice", service.verifyLogin(loginNode, assertion));
+    }
+
+    @Test
+    public void test_registrationChallenge_keepsItsUserAcrossTheSessionStore() {
+        final SessionDataSerializer serializer = new SessionDataSerializer();
+        final String response = createCredential(newClient(ORIGIN), user("alice"));
+        final StubHttpSession other = copyThroughSerializer(serializer, session, PasskeyService.REGISTRATION_CHALLENGE_KEY);
+
+        assertRejected("reason=registration_user_mismatch", () -> service.verifyRegistration(other, user("bob"), "x", response));
+    }
+
+    @Test
+    public void test_consumeChallenge_isSingleUseUnderConcurrency() throws Exception {
+        final java.util.concurrent.CountDownLatch firstInside = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final AtomicInteger reads = new AtomicInteger();
+        // The first read parks inside the session, between reading the challenge and removing it.
+        final StubHttpSession parking = new StubHttpSession() {
+            @Override
+            public Object getAttribute(final String name) {
+                final Object value = super.getAttribute(name);
+                if (reads.incrementAndGet() == 1) {
+                    firstInside.countDown();
+                    try {
+                        release.await(5, java.util.concurrent.TimeUnit.SECONDS);
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return value;
+            }
+        };
+        service.createLoginOptions(parking);
+        final List<Object> results = Collections.synchronizedList(new ArrayList<>());
+        final Runnable consume = () -> {
+            try {
+                results.add(service.consumeChallenge(parking, PasskeyService.LOGIN_CHALLENGE_KEY));
+            } catch (final PasskeyException e) {
+                results.add(e.getMessage());
+            }
+        };
+        final Thread first = new Thread(consume);
+        first.start();
+        assertTrue(firstInside.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        final Thread second = new Thread(consume);
+        second.start();
+        // give the second request the time to read the challenge too, if nothing stops it
+        second.join(300L);
+        release.countDown();
+        first.join(5000L);
+        second.join(5000L);
+
+        assertEquals(2, results.size(), results.toString());
+        assertEquals(1, (int) results.stream().filter(r -> r instanceof PasskeyService.PendingChallenge).count(), results.toString());
+        assertTrue(results.contains("reason=no_challenge"), results.toString());
+    }
+
+    private StubHttpSession copyThroughSerializer(final SessionDataSerializer serializer, final StubHttpSession from, final String key) {
+        final Object value = from.getAttribute(key);
+        assertNotNull(value);
+        final Set<String> skipped = new HashSet<>();
+        final byte[] bytes = serializer.toBytes(Map.of(key, value), skipped);
+        assertTrue(skipped.isEmpty(), "not written: " + skipped);
+        final Map<String, Object> read = serializer.fromBytes(bytes);
+        assertNotNull(read);
+        assertTrue(read.containsKey(key), read.toString());
+        final StubHttpSession to = new StubHttpSession();
+        to.setAttribute(key, read.get(key));
+        return to;
     }
 
     // -----------------------------------------------------------------------

@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -83,6 +82,24 @@ public class PasskeyService {
 
     /** The session attribute holding the challenge of a pending login. */
     protected static final String LOGIN_CHALLENGE_KEY = PasskeyService.class.getName() + ".loginChallenge";
+
+    /** The entry of a stored challenge holding its random bytes. */
+    protected static final String CHALLENGE_VALUE = "challenge";
+
+    /** The entry of a stored challenge holding when it was made, in epoch milliseconds. */
+    protected static final String CHALLENGE_CREATED_AT = "createdAt";
+
+    /** The entry of a stored registration challenge holding the name of the user it is for. */
+    protected static final String CHALLENGE_USER_NAME = "userName";
+
+    /** The entry of a stored registration challenge holding the user handle it uses. */
+    protected static final String CHALLENGE_USER_HANDLE = "userHandle";
+
+    /**
+     * Makes reading and removing a challenge one step, so that two requests of one session cannot
+     * both use it. The step is short and does no I/O, so one lock serves all sessions.
+     */
+    private static final Object CHALLENGE_LOCK = new Object();
 
     /** How long a challenge is valid, in milliseconds. */
     protected static final long CHALLENGE_TTL = 5 * 60 * 1000L;
@@ -175,7 +192,7 @@ public class PasskeyService {
                 .findFirst()
                 .orElseGet(() -> encode(randomBytes()));
         final byte[] challenge = randomBytes();
-        session.setAttribute(REGISTRATION_CHALLENGE_KEY, new PendingChallenge(challenge, currentTimeMillis(), userName, userHandle));
+        session.setAttribute(REGISTRATION_CHALLENGE_KEY, toSessionValue(challenge, currentTimeMillis(), userName, userHandle));
 
         final Map<String, Object> rp = new LinkedHashMap<>();
         rp.put("id", fessConfig.getPasskeyRpId());
@@ -232,7 +249,7 @@ public class PasskeyService {
      */
     public Passkey verifyRegistration(final HttpSession session, final User user, final String label, final String responseJson) {
         final PendingChallenge challenge = consumeChallenge(session, REGISTRATION_CHALLENGE_KEY);
-        if (user == null || !challenge.userName.equals(user.getName())) {
+        if (user == null || challenge.userName() == null || !challenge.userName().equals(user.getName())) {
             throw new PasskeyException("reason=registration_user_mismatch");
         }
 
@@ -258,8 +275,8 @@ public class PasskeyService {
 
         final Passkey passkey = new Passkey();
         passkey.setId(credentialId);
-        passkey.setUserName(challenge.userName);
-        passkey.setUserHandle(challenge.userHandle);
+        passkey.setUserName(challenge.userName());
+        passkey.setUserHandle(challenge.userHandle());
         passkey.setPublicKey(encode(OBJECT_CONVERTER.getCborConverter().writeValueAsBytes(attestedCredentialData.getCOSEKey())));
         passkey.setSignCount(authenticatorData.getSignCount());
         final Set<AuthenticatorTransport> transports = registrationData.getTransports();
@@ -289,7 +306,7 @@ public class PasskeyService {
      */
     public Map<String, Object> createLoginOptions(final HttpSession session) {
         final byte[] challenge = randomBytes();
-        session.setAttribute(LOGIN_CHALLENGE_KEY, new PendingChallenge(challenge, currentTimeMillis(), null, null));
+        session.setAttribute(LOGIN_CHALLENGE_KEY, toSessionValue(challenge, currentTimeMillis(), null, null));
         final Map<String, Object> options = new LinkedHashMap<>();
         options.put("challenge", encode(challenge));
         options.put("rpId", fessConfig.getPasskeyRpId());
@@ -533,7 +550,39 @@ public class PasskeyService {
     }
 
     /**
+     * Builds the session value of a challenge. It is a map of strings, a {@code Long} and a byte
+     * array only, all of which {@code SessionDataSerializer} registers, so that the OpenSearch
+     * session store shares it between nodes: an attribute of a class it does not register stays on
+     * the node that set it.
+     *
+     * @param value the random bytes of the challenge
+     * @param createdAt when the challenge was made
+     * @param userName the user a registration is for, or null for a login
+     * @param userHandle the user handle a registration uses, or null for a login
+     * @return the value to store in the session
+     */
+    protected static Map<String, Object> toSessionValue(final byte[] value, final long createdAt, final String userName,
+            final String userHandle) {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put(CHALLENGE_VALUE, value);
+        map.put(CHALLENGE_CREATED_AT, createdAt);
+        if (userName != null) {
+            map.put(CHALLENGE_USER_NAME, userName);
+        }
+        if (userHandle != null) {
+            map.put(CHALLENGE_USER_HANDLE, userHandle);
+        }
+        return map;
+    }
+
+    /**
      * Removes the pending challenge from the session and checks it is not expired.
+     *
+     * <p>Reading and removing it is one step for the sessions of this node, so only one of two
+     * concurrent verifications of a session gets the challenge. With a session store shared by
+     * several nodes, two requests of one session that are served by two nodes at the same time each
+     * read their own copy, so the store does not make the challenge single-use across nodes; the
+     * signature check still binds a response to the challenge it was made for.</p>
      *
      * @param session the HTTP session
      * @param key the session attribute
@@ -541,12 +590,18 @@ public class PasskeyService {
      * @throws PasskeyException when there is no challenge or it is expired
      */
     protected PendingChallenge consumeChallenge(final HttpSession session, final String key) {
-        final Object value = session.getAttribute(key);
-        session.removeAttribute(key);
-        if (!(value instanceof final PendingChallenge challenge)) {
+        final Object value;
+        synchronized (CHALLENGE_LOCK) {
+            value = session.getAttribute(key);
+            if (value != null) {
+                session.removeAttribute(key);
+            }
+        }
+        final PendingChallenge challenge = PendingChallenge.of(value);
+        if (challenge == null) {
             throw new PasskeyException("reason=no_challenge");
         }
-        final long age = currentTimeMillis() - challenge.createdAt;
+        final long age = currentTimeMillis() - challenge.createdAt();
         if (age < 0L || age > CHALLENGE_TTL) {
             throw new PasskeyException("reason=challenge_expired");
         }
@@ -582,7 +637,7 @@ public class PasskeyService {
         return ServerProperty.builder()
                 .origins(origins)
                 .rpId(fessConfig.getPasskeyRpId())
-                .challenge(new DefaultChallenge(challenge.value))
+                .challenge(new DefaultChallenge(challenge.value()))
                 .build();
     }
 
@@ -649,27 +704,33 @@ public class PasskeyService {
     }
 
     /**
-     * A challenge waiting in the session for the response of its ceremony.
+     * A challenge read back from the session for the response of its ceremony. It is never stored
+     * itself: {@link #toSessionValue} is what the session holds.
+     *
+     * @param value the random bytes of the challenge
+     * @param createdAt when the challenge was made
+     * @param userName the user a registration is for; null for a login
+     * @param userHandle the user handle a registration uses; null for a login
      */
-    protected static final class PendingChallenge implements Serializable {
+    protected record PendingChallenge(byte[] value, long createdAt, String userName, String userHandle) {
 
-        private static final long serialVersionUID = 1L;
-
-        final byte[] value;
-
-        final long createdAt;
-
-        /** The user a registration is for; null for a login. */
-        final String userName;
-
-        /** The user handle a registration uses; null for a login. */
-        final String userHandle;
-
-        PendingChallenge(final byte[] value, final long createdAt, final String userName, final String userHandle) {
-            this.value = value;
-            this.createdAt = createdAt;
-            this.userName = userName;
-            this.userHandle = userHandle;
+        /**
+         * Reads a challenge from its session value.
+         *
+         * @param sessionValue the value of the session attribute
+         * @return the challenge, or null when the value is not one
+         */
+        static PendingChallenge of(final Object sessionValue) {
+            if (!(sessionValue instanceof final Map<?, ?> map) || !(map.get(CHALLENGE_VALUE) instanceof final byte[] value)
+                    || value.length == 0 || !(map.get(CHALLENGE_CREATED_AT) instanceof final Long createdAt)) {
+                return null;
+            }
+            final Object userName = map.get(CHALLENGE_USER_NAME);
+            final Object userHandle = map.get(CHALLENGE_USER_HANDLE);
+            if (userName != null && !(userName instanceof String) || userHandle != null && !(userHandle instanceof String)) {
+                return null;
+            }
+            return new PendingChallenge(value, createdAt, (String) userName, (String) userHandle);
         }
     }
 }
