@@ -24,7 +24,7 @@ import org.lastaflute.web.login.credential.LoginCredential;
  * that user in. Creating one is therefore equivalent to proving the user's identity, and the only way to
  * create one is {@link #verified(String)}.</p>
  */
-public class PasskeyCredential implements LoginCredential, FessCredential {
+public final class PasskeyCredential implements LoginCredential, FessCredential {
 
     private final String userName;
 

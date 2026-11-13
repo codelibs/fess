@@ -213,6 +213,7 @@ public class PasskeyLoginHandlerTest extends UnitFessTestCase {
             final Response res = new Response();
             new PasskeyLoginHandler(new LoginRateLimiter(), service).verify(new Request("POST").withSession().withBody(VALID_BODY).proxy(),
                     res.proxy());
+            assertEquals(1, service.verifyCalls, "the failure came from the service");
             assertEquals(password.status, res.status);
             assertEquals(password.body(), res.body());
             assertEquals(List.of("action:LOGIN_FAILURE"), audit);

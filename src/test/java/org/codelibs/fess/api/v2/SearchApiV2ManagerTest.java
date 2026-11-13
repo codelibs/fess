@@ -417,18 +417,28 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         // The unit container finds passkeyService but cannot bind its behavior fields, so the real
         // service is registered with the configuration it reads; its isEnabled() is the production one.
+        final java.util.concurrent.atomic.AtomicInteger gateCalls = new java.util.concurrent.atomic.AtomicInteger();
         org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.app.service.PasskeyService() {
             {
                 fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
             }
+
+            @Override
+            public boolean isEnabled() {
+                gateCalls.incrementAndGet();
+                return super.isEnabled();
+            }
         }, org.codelibs.fess.app.service.PasskeyService.class.getCanonicalName());
-        for (final String path : new String[] { "/auth/passkey/login/options", "/auth/passkey/login/verify" }) {
+        final String[] paths = { "/auth/passkey/login/options", "/auth/passkey/login/verify" };
+        for (final String path : paths) {
             final CapturingResponse res = new CapturingResponse();
             m.process(new StubRequest("/api/v2" + path).withMethod("POST"), res, new NopChain());
             assertEquals(404, res.status, path);
             assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
             assertTrue(res.body().contains("endpoint not found: " + path), res.body());
         }
+        // the 404 is the handler's feature gate, not a path the router does not know
+        assertEquals(paths.length, gateCalls.get());
     }
 
     @Test
@@ -475,20 +485,64 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     public void test_process_passkeyAccountPathsAre404WhileDisabled() throws Exception {
         // The default handler, resolving PasskeyService itself, under the default passkey.enabled=false.
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.concurrent.atomic.AtomicInteger gateCalls = new java.util.concurrent.atomic.AtomicInteger();
         org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.app.service.PasskeyService() {
             {
                 fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
             }
+
+            @Override
+            public boolean isEnabled() {
+                gateCalls.incrementAndGet();
+                return super.isEnabled();
+            }
         }, org.codelibs.fess.app.service.PasskeyService.class.getCanonicalName());
         // GET: the feature gate runs before the handler's method check, and GET skips the CSRF layer.
-        for (final String path : new String[] { "/auth/passkey", "/auth/passkey/register/options", "/auth/passkey/register/verify",
-                "/auth/passkey/AbC-_9" }) {
+        final String[] paths =
+                { "/auth/passkey", "/auth/passkey/register/options", "/auth/passkey/register/verify", "/auth/passkey/AbC-_9" };
+        for (final String path : paths) {
             final CapturingResponse res = new CapturingResponse();
             m.process(new StubRequest("/api/v2" + path), res, new NopChain());
             assertEquals(404, res.status, path);
             assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
             assertTrue(res.body().contains("endpoint not found: " + path), res.body());
         }
+        // the 404 is the handler's feature gate, not a path the router does not know
+        assertEquals(paths.length, gateCalls.get());
+    }
+
+    @Test
+    public void test_process_passkeyAccountChangesRequireCsrfToken() throws Exception {
+        final org.codelibs.fess.api.v2.SessionCsrfTokenManager csrfManager = new org.codelibs.fess.api.v2.SessionCsrfTokenManager();
+        org.codelibs.fess.util.ComponentUtil.register(csrfManager, "sessionCsrfTokenManager");
+        org.codelibs.fess.util.ComponentUtil.register(csrfManager,
+                org.codelibs.fess.api.v2.SessionCsrfTokenManager.class.getCanonicalName());
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.passkeyAccountHandler = new org.codelibs.fess.api.v2.handlers.PasskeyAccountHandler() {
+            @Override
+            public void registerOptions(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("registerOptions");
+            }
+
+            @Override
+            public void registerVerify(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("registerVerify");
+            }
+
+            @Override
+            public void delete(final HttpServletRequest request, final HttpServletResponse response, final String credentialId) {
+                calls.add("delete:" + credentialId);
+            }
+        };
+        for (final String[] call : new String[][] { { "POST", "/auth/passkey/register/options" },
+                { "POST", "/auth/passkey/register/verify" }, { "DELETE", "/auth/passkey/AbC-_9" } }) {
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest("/api/v2" + call[1]).withMethod(call[0]), res, new NopChain());
+            assertEquals(403, res.status, call[0] + " " + call[1]);
+            assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
+        }
+        assertTrue(calls.isEmpty(), calls.toString());
     }
 
     @Test

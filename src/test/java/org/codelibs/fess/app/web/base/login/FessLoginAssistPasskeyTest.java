@@ -44,7 +44,18 @@ import org.lastaflute.web.login.credential.LoginCredential;
  */
 public class FessLoginAssistPasskeyTest extends UnitFessTestCase {
 
-    private static final Set<String> ALLOWED_CALLERS = Set.of("PasskeyLoginHandler.java");
+    /** The files allowed to call PasskeyCredential.verified, by their path under src/main/java. */
+    private static final Set<String> ALLOWED_CALLERS = Set.of("org/codelibs/fess/api/v2/handlers/PasskeyLoginHandler.java");
+
+    private static final String DECLARING_FILE = "org/codelibs/fess/app/web/base/login/PasskeyCredential.java";
+
+    /** A call or a method reference, whatever the spacing: PasskeyCredential.verified(, PasskeyCredential::verified. */
+    private static final java.util.regex.Pattern VERIFIED_USE =
+            java.util.regex.Pattern.compile("PasskeyCredential\\s*(\\.|::)\\s*verified\\b");
+
+    /** A static import of it, which would let a file call verified( without naming the class. */
+    private static final java.util.regex.Pattern VERIFIED_IMPORT =
+            java.util.regex.Pattern.compile("import\\s+static\\s+[\\w.]*PasskeyCredential\\s*\\.\\s*(verified|\\*)\\s*;");
 
     private PasswordHashHelper passwordHashHelper;
 
@@ -183,19 +194,44 @@ public class FessLoginAssistPasskeyTest extends UnitFessTestCase {
         final List<String> offenders;
         try (Stream<Path> files = Files.walk(mainDir)) {
             offenders = files.filter(p -> p.toString().endsWith(".java"))
-                    .filter(p -> !p.getFileName().toString().equals("PasskeyCredential.java"))
-                    .filter(p -> !ALLOWED_CALLERS.contains(p.getFileName().toString()))
-                    .filter(p -> contains(p, "PasskeyCredential.verified("))
-                    .map(p -> mainDir.relativize(p).toString())
+                    .filter(p -> !DECLARING_FILE.equals(relativePath(mainDir, p)))
+                    .filter(p -> !ALLOWED_CALLERS.contains(relativePath(mainDir, p)))
+                    .filter(p -> usesVerified(read(p)))
+                    .map(p -> relativePath(mainDir, p))
                     .collect(Collectors.toList());
         }
         assertTrue("PasskeyCredential.verified( may only be called from " + ALLOWED_CALLERS + ", found in " + offenders,
                 offenders.isEmpty());
     }
 
-    private static boolean contains(final Path path, final String text) {
+    @Test
+    public void test_verifiedUsePatterns() {
+        assertTrue(usesVerified("PasskeyCredential.verified(name)"));
+        assertTrue(usesVerified("PasskeyCredential .\n    verified(name)"));
+        assertTrue(usesVerified("map(PasskeyCredential::verified)"));
+        assertTrue(usesVerified("import static org.codelibs.fess.app.web.base.login.PasskeyCredential.verified;"));
+        assertTrue(usesVerified("import static org.codelibs.fess.app.web.base.login.PasskeyCredential.*;"));
+        assertFalse(usesVerified("PasskeyCredential.verifiedName()"));
+        assertFalse(usesVerified("import org.codelibs.fess.app.web.base.login.PasskeyCredential;"));
+    }
+
+    @Test
+    public void test_passkeyCredentialIsFinal() {
+        // a subclass could otherwise be made without going through verified(String)
+        assertTrue(java.lang.reflect.Modifier.isFinal(PasskeyCredential.class.getModifiers()));
+    }
+
+    private static boolean usesVerified(final String source) {
+        return VERIFIED_USE.matcher(source).find() || VERIFIED_IMPORT.matcher(source).find();
+    }
+
+    private static String relativePath(final Path mainDir, final Path path) {
+        return mainDir.relativize(path).toString().replace('\\', '/');
+    }
+
+    private static String read(final Path path) {
         try {
-            return Files.readString(path).contains(text);
+            return Files.readString(path);
         } catch (final IOException e) {
             throw new IllegalStateException(path.toString(), e);
         }

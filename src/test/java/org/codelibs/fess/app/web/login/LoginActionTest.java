@@ -384,9 +384,19 @@ public class LoginActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_pathsThatStayOnThisHostAreKept() {
+        // the page prefixes its context path and the browser resolves the result on this origin: an
+        // encoded slash is not a separator, and dot segments cannot climb above the host
+        for (final String good : new String[] { "/%2f/evil.example", "/..//evil", "/admin/user/?q=a" }) {
+            final RenderData data = render(passkeyAction(passkeyService(true, "example.com", "https://example.com"), good));
+            assertEquals(good, data.getDataMap().get("passkeyRedirectPath"));
+        }
+    }
+
+    @Test
     public void test_aSavedPathThatIsNotAPlainApplicationPathIsDropped() {
         for (final String bad : new String[] { "//evil.example/x", "/\\evil.example", "https://evil.example/", "admin/", "/a\nb",
-                "/a\u0000b", "" }) {
+                "/a\u0000b", "", "/\t/evil.example", " /x" }) {
             final RenderData data = render(passkeyAction(passkeyService(true, "example.com", "https://example.com"), bad));
             assertEquals(Boolean.TRUE, data.getDataMap().get("passkeyLogin"));
             assertFalse(data.getDataMap().containsKey("passkeyRedirectPath"), bad);
