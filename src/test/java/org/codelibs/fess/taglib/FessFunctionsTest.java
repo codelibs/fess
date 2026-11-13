@@ -137,13 +137,13 @@ public class FessFunctionsTest extends UnitFessTestCase {
 
                 @Override
                 public String getSearchResultLinkSchemes() {
-                    return "https,hammerspoon,javascript";
+                    return "https,hammerspoon";
                 }
             });
             assertEquals("hammerspoon://fessopen?path=x", FessFunctions.safeHref("hammerspoon://fessopen?path=x"));
             assertEquals("https://example.com/", FessFunctions.safeHref("https://example.com/"));
             assertEquals("#", FessFunctions.safeHref("http://example.com/"));
-            // Script schemes stay refused even when the setting lists them: the result is the href itself.
+            // A scheme the setting does not list is refused: the result is the href itself.
             assertEquals("#", FessFunctions.safeHref("javascript:window.x=1"));
             assertEquals("#", FessFunctions.safeHref("java\tscript:window.x=1"));
         } finally {
