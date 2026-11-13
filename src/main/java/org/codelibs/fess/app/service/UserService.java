@@ -114,6 +114,13 @@ public class UserService {
      * Handles user authentication setup and database persistence.
      * If the surname is blank, it will be set to the user's name.
      *
+     * <p>Passkeys are bound to a user name only, so a name that is new to the stored row starts
+     * without any: when the row is created, every passkey left under its name (by a deletion that did
+     * not go through {@link #delete(User)}, or one that raced with a registration) is removed first,
+     * and when the row is renamed the passkeys of both the previous and the new name are removed, since
+     * credentials do not follow a rename. A failure to remove them fails the store before the user is
+     * written.</p>
+     *
      * @param user the user entity to store
      */
     public void store(final User user) {
@@ -129,6 +136,8 @@ public class UserService {
             if (StringUtil.isBlank(user.getSurname())) {
                 user.setSurname(user.getName());
             }
+
+            removeInheritablePasskeys(user);
 
             ComponentUtil.getAuthenticationManager().insert(user);
 
@@ -154,6 +163,28 @@ public class UserService {
             throw e;
         } finally {
             user.clearOriginalPassword();
+        }
+    }
+
+    /**
+     * Removes the passkeys a user would otherwise inherit: those of its name when no row is stored under
+     * its ID yet, and those of the previous and the new name when the stored row has another name.
+     *
+     * @param user the user about to be stored
+     */
+    protected void removeInheritablePasskeys(final User user) {
+        final String username = user.getName();
+        final String previousName =
+                StringUtil.isBlank(user.getId()) ? null : userBhv.selectByPK(user.getId()).map(User::getName).orElse(null);
+        if (previousName == null) {
+            passkeyService.deleteByUserName(username);
+        } else if (!previousName.equals(username)) {
+            passkeyService.deleteByUserName(previousName);
+            passkeyService.deleteByUserName(username);
+            if (logger.isInfoEnabled()) {
+                logger.info("Removed the passkeys of a renamed user: previousName={}, username={}, id={}", previousName, username,
+                        user.getId());
+            }
         }
     }
 
@@ -371,9 +402,11 @@ public class UserService {
     /**
      * Deletes a user from the system.
      * Removes the user's passkeys first, then the user from both the authentication manager and the
-     * database. Passkeys are bound to a user by name only, so they must not outlive the user: a user
-     * created later under the same name would otherwise inherit them. If removing the passkeys
-     * fails the exception propagates and the user is left untouched.
+     * database, then the passkeys once more. Passkeys are bound to a user by name only, so they must
+     * not outlive the user: a user created later under the same name would otherwise inherit them. If
+     * the first removal fails the exception propagates and the user is left untouched. The second one
+     * catches a passkey registered while the user was being deleted; it is best effort, since the user
+     * is gone by then and {@link #store(User)} removes the passkeys of a name again when it is created.
      *
      * @param user the user entity to delete
      */
@@ -393,6 +426,12 @@ public class UserService {
             userBhv.delete(user, op -> {
                 op.setRefreshPolicy(Constants.TRUE);
             });
+
+            try {
+                passkeyService.deleteByUserName(username);
+            } catch (final RuntimeException e) {
+                logger.warn("Failed to remove the passkeys registered while the user was deleted: username={}, id={}", username, userId, e);
+            }
 
             if (logger.isInfoEnabled()) {
                 logger.info("User deleted successfully: username={}, id={}", username, userId);

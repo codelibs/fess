@@ -940,8 +940,119 @@ public class UserServiceTest extends UnitFessTestCase {
         user.setName("alice");
         userService.delete(user);
 
-        // passkeys first, so that a failure cannot leave a passkey for a name that is free again
+        // passkeys first, so that a failure cannot leave a passkey for a name that is free again, and
+        // once more after the user row, for a passkey registered while the user was being deleted
+        assertEquals(List.of("passkeys:alice", "auth:alice", "user:alice", "passkeys:alice"), calls);
+    }
+
+    @Test
+    public void test_delete_secondPasskeyCleanupFailure_doesNotFailTheDeletion() {
+        final List<String> calls = new ArrayList<>();
+        installDeleteStubs(calls, false);
+        final PasskeyService first = userService.passkeyService;
+        userService.passkeyService = new PasskeyService() {
+            private int count;
+
+            @Override
+            public void deleteByUserName(final String userName) {
+                first.deleteByUserName(userName);
+                if (++count == 2) {
+                    throw new IllegalStateException("simulated passkey failure");
+                }
+            }
+        };
+
+        final User user = new User();
+        user.setId("id-1");
+        user.setName("alice");
+        userService.delete(user);
+
+        assertEquals(List.of("passkeys:alice", "auth:alice", "user:alice", "passkeys:alice"), calls);
+    }
+
+    @Test
+    public void test_store_create_removesPasskeysLeftUnderTheName() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+
+        userService.store(storedUser("id-alice", "alice"));
+
+        // a passkey left by a deletion outside this service must not pass to the new user
         assertEquals(List.of("passkeys:alice", "auth:alice", "user:alice"), calls);
+    }
+
+    @Test
+    public void test_store_create_passkeyCleanupFailure_writesNoUser() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, true);
+
+        final IllegalStateException e = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+                () -> userService.store(storedUser("id-alice", "alice")));
+
+        assertEquals("simulated passkey failure", e.getMessage());
+        assertEquals(List.of("passkeys:alice"), calls);
+    }
+
+    @Test
+    public void test_store_rename_removesThePasskeysOfThePreviousName() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+
+        userService.store(storedUser("id-alice", "alicia"));
+
+        assertEquals(List.of("passkeys:alice", "passkeys:alicia", "auth:alicia", "user:alicia"), calls);
+    }
+
+    @Test
+    public void test_store_updateWithoutRename_keepsThePasskeys() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+
+        userService.store(storedUser("id-alice", "alice"));
+
+        assertEquals(List.of("auth:alice", "user:alice"), calls);
+    }
+
+    private static User storedUser(final String id, final String name) {
+        final User user = new User();
+        user.setId(id);
+        user.setName(name);
+        user.setSurname(name);
+        return user;
+    }
+
+    /**
+     * @param storedName the name of the row stored under the user's ID, or null when there is none
+     */
+    private void installStoreStubs(final List<String> calls, final String storedName, final boolean failPasskeys) {
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+                calls.add("passkeys:" + userName);
+                if (failPasskeys) {
+                    throw new IllegalStateException("simulated passkey failure");
+                }
+            }
+        };
+        userService.userBhv = new UserBhv() {
+            @Override
+            public org.dbflute.optional.OptionalEntity<User> selectByPK(final String id) {
+                return storedName == null ? org.dbflute.optional.OptionalEntity.empty()
+                        : org.dbflute.optional.OptionalEntity.of(storedUser(id, storedName));
+            }
+
+            @Override
+            public void insertOrUpdate(final User entity,
+                    final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
+                calls.add("user:" + entity.getName());
+            }
+        };
+        ComponentUtil.register(new org.codelibs.fess.auth.AuthenticationManager() {
+            @Override
+            public void insert(final User user) {
+                calls.add("auth:" + user.getName());
+            }
+        }, "authenticationManager");
     }
 
     @Test
