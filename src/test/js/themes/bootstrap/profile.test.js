@@ -320,6 +320,57 @@ describe("passkey section", () => {
     expect(document.getElementById("passkey-success").classList.contains("d-none")).toBe(true);
   });
 
+  it("clears the current password when the registration fails", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "auth_required", httpStatus: 401, details: { reason: "invalid_current_password" } });
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "wrong");
+    await flush();
+
+    expect(document.getElementById("passkey-current-password").value).toBe("");
+  });
+
+  it("clears the current password when the user dismisses the browser prompt", async () => {
+    api.post.mockResolvedValue({ challenge: "AQI", user: { id: "AwQ" } });
+    create.mockRejectedValue(Object.assign(new Error("cancelled"), { name: "NotAllowedError" }));
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(document.getElementById("passkey-current-password").value).toBe("");
+  });
+
+  it("tells that a name of spaces only is missing, without calling the server", async () => {
+    await mountAndLoad();
+    const labelInput = document.getElementById("passkey-label");
+    const invalid = vi.fn();
+    labelInput.addEventListener("invalid", invalid);
+
+    submitPasskeyForm("   ", "secret");
+    await flush();
+
+    expect(api.post).not.toHaveBeenCalled();
+    expect(labelInput.value).toBe("");
+    expect(invalid).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(labelInput);
+    // the password is kept: nothing was sent yet
+    expect(document.getElementById("passkey-current-password").value).toBe("secret");
+  });
+
+  it("tells a refused name or the passkey limit as a failed registration", async () => {
+    for (const reason of ["label_invalid_characters", "too_many_passkeys"]) {
+      api.post.mockReset();
+      api.post.mockRejectedValue({ name: "ApiError", code: "invalid_request", httpStatus: 400, details: { reason } });
+      await mountAndLoad();
+
+      submitPasskeyForm("My phone", "secret");
+      await flush();
+
+      expect(document.getElementById("passkey-error").textContent).toBe("profile.passkey_error_register");
+    }
+  });
+
   it("shows a registration failure when the authenticator refuses", async () => {
     api.post.mockResolvedValue({ challenge: "AQI", user: { id: "AwQ" } });
     create.mockRejectedValue(Object.assign(new Error("already registered"), { name: "InvalidStateError" }));

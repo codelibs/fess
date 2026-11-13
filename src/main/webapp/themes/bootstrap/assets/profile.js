@@ -77,7 +77,8 @@ function passkeyErrorMessage(err) {
   const reason = err && err.details && err.details.reason;
   if (reason === "invalid_current_password") return t("profile.error_wrong_current");
   if (reason === "current_password_required") return t("profile.error_blank_password");
-  if (reason === "registration_failed" || reason === "label_required" || reason === "label_too_long") {
+  if (reason === "registration_failed" || reason === "label_required" || reason === "label_too_long"
+    || reason === "label_invalid_characters" || reason === "too_many_passkeys") {
     return t("profile.passkey_error_register");
   }
   return t("error.server");
@@ -207,8 +208,15 @@ function buildPasskeySection() {
     ev.preventDefault();
     const label = labelInput.value.trim();
     const passwordInput = document.getElementById("passkey-current-password");
+    if (!label) {
+      // Spaces only pass "required": empty the field so that the browser tells, in its own words,
+      // that the name is missing.
+      labelInput.value = "";
+      labelInput.reportValidity();
+      labelInput.focus();
+      return;
+    }
     const currentPassword = passwordInput.value;
-    if (!label) return;
     addBtn.disabled = true;
     try {
       // The password is checked before any challenge is made; then the browser asks for the authenticator.
@@ -227,6 +235,8 @@ function buildPasskeySection() {
       const fromServer = err && (err.name === "ApiError" || err.name === "NetworkError");
       showError(fromServer ? passkeyErrorMessage(err) : t("profile.passkey_error_register"));
     } finally {
+      // The password is asked for each registration and is not kept, whatever the outcome.
+      passwordInput.value = "";
       addBtn.disabled = false;
     }
   });

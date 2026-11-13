@@ -141,8 +141,14 @@ describe("isSafePath", () => {
   it("accepts only a plain application path", () => {
     const { isSafePath } = window.FessPasskeyLogin;
     expect(isSafePath("/admin/user/?q=a")).toBe(true);
-    for (const bad of ["", null, undefined, "admin/", "//evil.example/", "/\\evil.example", "https://evil.example/", "javascript:alert(1)", "/a\nb", "/a\u0000b"]) {
+    for (const bad of ["", null, undefined, "admin/", "//evil.example/", "/\\evil.example", "https://evil.example/", "javascript:alert(1)", "/a\nb", "/a\u0000b",
+      "/\t/evil.example", " /x"]) {
       expect(isSafePath(bad)).toBe(false);
+    }
+    // These stay on this host once the context path is put in front: an encoded slash is not a
+    // separator, and dot segments cannot climb above the host.
+    for (const good of ["/%2f/evil.example", "/..//evil"]) {
+      expect(isSafePath(good)).toBe(true);
     }
   });
 });
