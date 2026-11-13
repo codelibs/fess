@@ -65,6 +65,10 @@ Register crawling targets on the Web, File, or Data Store configuration pages in
 
 See [MIGRATION.md](MIGRATION.md).
 
+## Upgrading
+
+See [UPGRADING.md](UPGRADING.md).
+
 ## Data Store
 
 Fess can crawl the following [storage locations and APIs](https://fess.codelibs.org/stable/admin/dataconfig-guide.html):
