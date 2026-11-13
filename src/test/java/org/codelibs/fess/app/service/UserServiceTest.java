@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -926,6 +928,60 @@ public class UserServiceTest extends UnitFessTestCase {
         FakeVersionConflictEngineException(final String message) {
             super(message);
         }
+    }
+
+    @Test
+    public void test_delete_removesTheUsersPasskeys() {
+        final List<String> calls = new ArrayList<>();
+        installDeleteStubs(calls, false);
+
+        final User user = new User();
+        user.setId("id-1");
+        user.setName("alice");
+        userService.delete(user);
+
+        // passkeys first, so that a failure cannot leave a passkey for a name that is free again
+        assertEquals(List.of("passkeys:alice", "auth:alice", "user:alice"), calls);
+    }
+
+    @Test
+    public void test_delete_passkeyCleanupFailure_doesNotLeaveUserHalfDeleted() {
+        final List<String> calls = new ArrayList<>();
+        installDeleteStubs(calls, true);
+
+        final User user = new User();
+        user.setId("id-1");
+        user.setName("alice");
+        final IllegalStateException e =
+                org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> userService.delete(user));
+
+        assertEquals("simulated passkey failure", e.getMessage());
+        assertEquals("neither the authentication entry nor the user document may be deleted", List.of("passkeys:alice"), calls);
+    }
+
+    private void installDeleteStubs(final List<String> calls, final boolean failPasskeys) {
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+                calls.add("passkeys:" + userName);
+                if (failPasskeys) {
+                    throw new IllegalStateException("simulated passkey failure");
+                }
+            }
+        };
+        userService.userBhv = new UserBhv() {
+            @Override
+            public void delete(final User entity,
+                    final RequestOptionCall<org.codelibs.fesen.opensearch.action.delete.DeleteRequestBuilder> opLambda) {
+                calls.add("user:" + entity.getName());
+            }
+        };
+        ComponentUtil.register(new org.codelibs.fess.auth.AuthenticationManager() {
+            @Override
+            public void delete(final User user) {
+                calls.add("auth:" + user.getName());
+            }
+        }, "authenticationManager");
     }
 
     @Test

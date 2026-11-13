@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.user;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -29,11 +30,13 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.UserPager;
 import org.codelibs.fess.app.service.GroupService;
+import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.opensearch.user.exentity.Passkey;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -74,6 +77,8 @@ public class AdminUserAction extends FessAdminAction {
     private RoleService roleService;
     @Resource
     private GroupService groupService;
+    @Resource
+    private PasskeyService passkeyService;
     @Resource
     private UserPager userPager;
 
@@ -168,6 +173,20 @@ public class AdminUserAction extends FessAdminAction {
         copyBeanToBean(userPager, form, op -> op.include("id"));
     }
 
+    /**
+     * Registers the passkeys of a user for the details page. The list is read-only information
+     * (never key material). It is shown while the feature is on, and while the user still has
+     * passkeys, so that an administrator can clean up after the feature was turned off.
+     *
+     * @param data the render data container to populate
+     * @param userName the name of the user whose passkeys are listed
+     */
+    protected void registerPasskeys(final RenderData data, final String userName) {
+        final List<Passkey> passkeys = passkeyService.getPasskeys(userName);
+        RenderDataUtil.register(data, "passkeyItems", passkeys);
+        RenderDataUtil.register(data, "passkeyVisible", passkeyService.isEnabled() || !passkeys.isEmpty());
+    }
+
     private void registerForms(final RenderData data) {
         RenderDataUtil.register(data, "roleItems", roleService.getAvailableRoleList());
         RenderDataUtil.register(data, "groupItems", groupService.getAvailableGroupList());
@@ -253,6 +272,7 @@ public class AdminUserAction extends FessAdminAction {
             });
         }).renderWith(data -> {
             registerForms(data);
+            optEntity.ifPresent(entity -> registerPasskeys(data, entity.getName()));
         });
     }
 
@@ -356,6 +376,43 @@ public class AdminUserAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
         });
         return redirect(getClass());
+    }
+
+    /**
+     * Resets (deletes) one passkey of a user, so that the user can register a new one.
+     *
+     * @param form the form containing the user ID and the credential ID of the passkey
+     * @return HTML response redirecting to the details page of the user
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse deletePasskey(final DeletePasskeyForm form) {
+        validate(form, messages -> {}, this::asListHtml);
+        verifyToken(this::asListHtml);
+        final String id = form.id;
+        final User user = userService.getUser(id).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+            return null;
+        });
+        final String admin = systemHelper.getUsername();
+        final String credentialId = form.credentialId.substring(0, Math.min(8, form.credentialId.length()));
+        try {
+            if (!passkeyService.delete(user.getName(), form.credentialId)) {
+                logger.warn("Passkey not found: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId);
+                saveError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.credentialId));
+                return redirectToDetails(id);
+            }
+            logger.info("Deleted passkey: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        } catch (final Exception e) {
+            logger.warn("Failed to delete passkey: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId, e);
+            saveError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
+        }
+        return redirectToDetails(id);
+    }
+
+    private HtmlResponse redirectToDetails(final String id) {
+        return redirectWith(getClass(), moreUrl("details/" + CrudMode.DETAILS + "/" + id));
     }
 
     //===================================================================================

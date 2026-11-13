@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.user;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
@@ -311,5 +312,31 @@ public class AdminUserActionTest extends UnitFessTestCase {
             reported.append(messages.toString());
         });
         return reported.toString();
+    }
+
+    @Test
+    public void test_deletePasskey_requiresAdminRole() throws Exception {
+        final org.codelibs.fess.annotation.Secured reset = AdminUserAction.class.getMethod("deletePasskey", DeletePasskeyForm.class)
+                .getAnnotation(org.codelibs.fess.annotation.Secured.class);
+        final org.codelibs.fess.annotation.Secured delete =
+                AdminUserAction.class.getMethod("delete", EditForm.class).getAnnotation(org.codelibs.fess.annotation.Secured.class);
+        assertNotNull(reset);
+        // the edit role like delete, never the view-only role
+        assertEquals(List.of(AdminUserAction.ROLE), List.of(reset.value()));
+        assertEquals(List.of(delete.value()), List.of(reset.value()));
+    }
+
+    @Test
+    public void test_deletePasskeyForm_validatesTheShapeOfBothIds() throws Exception {
+        assertNotNull(DeletePasskeyForm.class.getField("id").getAnnotation(org.lastaflute.web.validation.Required.class));
+        assertNotNull(DeletePasskeyForm.class.getField("credentialId").getAnnotation(org.lastaflute.web.validation.Required.class));
+        final jakarta.validation.constraints.Pattern pattern =
+                DeletePasskeyForm.class.getField("credentialId").getAnnotation(jakarta.validation.constraints.Pattern.class);
+        assertNotNull(pattern);
+        assertEquals("[A-Za-z0-9_-]{1,1364}", pattern.regexp());
+        assertTrue("abc-DEF_123".matches(pattern.regexp()));
+        assertFalse("abc/def".matches(pattern.regexp()));
+        assertFalse("".matches(pattern.regexp()));
+        assertFalse("a".repeat(1365).matches(pattern.regexp()));
     }
 }

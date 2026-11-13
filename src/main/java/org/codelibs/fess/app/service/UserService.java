@@ -59,6 +59,10 @@ public class UserService {
     @Resource
     protected FessConfig fessConfig;
 
+    /** Passkey service, so that a deleted user does not leave passkeys behind for a later user of the same name */
+    @Resource
+    protected PasskeyService passkeyService;
+
     /**
      * Retrieves a paginated list of users based on the provided pager criteria.
      * Updates the pager with pagination information including total count and page navigation.
@@ -366,7 +370,10 @@ public class UserService {
 
     /**
      * Deletes a user from the system.
-     * Removes the user from both the authentication manager and the database.
+     * Removes the user's passkeys first, then the user from both the authentication manager and the
+     * database. Passkeys are bound to a user by name only, so they must not outlive the user: a user
+     * created later under the same name would otherwise inherit them. If removing the passkeys
+     * fails the exception propagates and the user is left untouched.
      *
      * @param user the user entity to delete
      */
@@ -379,6 +386,8 @@ public class UserService {
         }
 
         try {
+            passkeyService.deleteByUserName(username);
+
             ComponentUtil.getAuthenticationManager().delete(user);
 
             userBhv.delete(user, op -> {
