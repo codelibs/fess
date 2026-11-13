@@ -39,6 +39,7 @@ import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.OriginValidator;
+import org.codelibs.fess.api.v2.handlers.PasskeyLoginHandler;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.RelatedContentHandler;
@@ -180,6 +181,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code POST /api/v2/auth/login}. */
     @Resource
     protected LoginHandler loginHandler;
+
+    /** Handles {@code POST /api/v2/auth/passkey/login/options} and {@code POST /api/v2/auth/passkey/login/verify}. */
+    @Resource
+    protected PasskeyLoginHandler passkeyLoginHandler;
 
     /** Handles {@code GET /api/v2/related-queries} (related query suggestions). */
     @Resource
@@ -369,6 +374,8 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/popular-words" -> popularWordsHandler.handle(request, response);
             case "/auth/me" -> meHandler.handle(request, response);
             case "/auth/login" -> loginHandler.handle(request, response);
+            case "/auth/passkey/login/options" -> passkeyLoginHandler.options(request, response);
+            case "/auth/passkey/login/verify" -> passkeyLoginHandler.verify(request, response);
             case "/auth/logout" -> logoutHandler.handle(request, response);
             case "/auth/password" -> passwordChangeHandler.handle(request, response);
             case "/ui/config" -> uiConfigHandler.handle(request, response);

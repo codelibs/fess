@@ -68,7 +68,7 @@ public class CsrfRequirementCompleteCoverageTest {
      * Must equal {@code ENDPOINT_DECISIONS.size()}. Increment when adding a new endpoint
      * so that the mismatch causes a deliberate compile-time / test-time notice.
      */
-    private static final int EXPECTED_ENTRY_COUNT = 22;
+    private static final int EXPECTED_ENTRY_COUNT = 24;
 
     static {
         // LinkedHashMap preserves insertion order for readable failure messages.
@@ -88,6 +88,8 @@ public class CsrfRequirementCompleteCoverageTest {
         // --- AUTH endpoints ---
         m.put("/auth/me", true); // GET only — secure default
         m.put("/auth/login", false); // POST, but explicitly CSRF-exempt (no token yet)
+        m.put("/auth/passkey/login/options", false); // POST, CSRF-exempt like /auth/login (no token yet)
+        m.put("/auth/passkey/login/verify", false); // POST, CSRF-exempt like /auth/login (no token yet)
         m.put("/auth/logout", true); // POST, CSRF required
         m.put("/auth/password", true); // POST, CSRF required
 

@@ -392,6 +392,46 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_passkeyLoginPathsDispatchToPasskeyLoginHandler() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.passkeyLoginHandler = new org.codelibs.fess.api.v2.handlers.PasskeyLoginHandler() {
+            @Override
+            public void options(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("options");
+            }
+
+            @Override
+            public void verify(final HttpServletRequest request, final HttpServletResponse response) {
+                calls.add("verify");
+            }
+        };
+        m.process(new StubRequest("/api/v2/auth/passkey/login/options"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/auth/passkey/login/verify"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("options", "verify"), calls);
+    }
+
+    @Test
+    public void test_process_passkeyLoginPathsAre404WhileDisabled() throws Exception {
+        // The default handler, resolving PasskeyService itself, under the default passkey.enabled=false.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        // The unit container finds passkeyService but cannot bind its behavior fields, so the real
+        // service is registered with the configuration it reads; its isEnabled() is the production one.
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.app.service.PasskeyService() {
+            {
+                fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
+            }
+        }, org.codelibs.fess.app.service.PasskeyService.class.getCanonicalName());
+        for (final String path : new String[] { "/auth/passkey/login/options", "/auth/passkey/login/verify" }) {
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest("/api/v2" + path).withMethod("POST"), res, new NopChain());
+            assertEquals(404, res.status, path);
+            assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+            assertTrue(res.body().contains("endpoint not found: " + path), res.body());
+        }
+    }
+
+    @Test
     public void test_process_invalidAccessTokenMapsTo401() throws Exception {
         // RoleQueryHelper raises this while building the role query, before any handler writes.
         // The generic catch below it produced a 500, so a request presenting an unusable

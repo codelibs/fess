@@ -31,6 +31,7 @@ import org.codelibs.fess.api.v2.handlers.LabelsHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.OriginValidator;
+import org.codelibs.fess.api.v2.handlers.PasskeyLoginHandler;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
@@ -104,6 +105,7 @@ final class SearchApiV2ManagerTestSupport {
         m.labelsHandler = new LabelsHandler();
         m.popularWordsHandler = new PopularWordsHandler();
         m.loginHandler = new LoginHandler();
+        m.passkeyLoginHandler = new PasskeyLoginHandler();
         // The Origin layer (SearchApiV2Manager.process) calls originValidator.isAllowed(...)
         // for unsafe methods. Mirror the DI wiring: a real OriginValidator whose
         // targetOriginResolver reconstructs the same-origin set from the servlet request

@@ -50,7 +50,7 @@ public class LoginRequirementCompleteCoverageTest {
     private static final Map<String, Boolean> ENDPOINT_DECISIONS;
 
     /** Must equal {@code ENDPOINT_DECISIONS.size()}. */
-    private static final int EXPECTED_ENTRY_COUNT = 25;
+    private static final int EXPECTED_ENTRY_COUNT = 27;
 
     static {
         final Map<String, Boolean> m = new LinkedHashMap<>();
@@ -60,6 +60,8 @@ public class LoginRequirementCompleteCoverageTest {
         m.put("/health", false);
         m.put("/auth/me", false);
         m.put("/auth/login", false);
+        m.put("/auth/passkey/login/options", false);
+        m.put("/auth/passkey/login/verify", false);
         m.put("/auth/logout", false);
         m.put("/ui/config", false);
 
@@ -124,7 +126,8 @@ public class LoginRequirementCompleteCoverageTest {
             }
         }
         Collections.sort(exempt);
-        assertEquals(List.of("/auth/login", "/auth/logout", "/auth/me", "/health", "/ui/config"), exempt);
+        assertEquals(List.of("/auth/login", "/auth/logout", "/auth/me", "/auth/passkey/login/options", "/auth/passkey/login/verify",
+                "/health", "/ui/config"), exempt);
     }
 
     @Test

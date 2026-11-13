@@ -54,8 +54,8 @@ public class CsrfRequirement {
      * pass the CSRF token check.
      *
      * <p>Idempotent methods ({@code GET}, {@code HEAD}, {@code OPTIONS}) are
-     * always exempt. {@code POST /auth/login} is exempt because the client
-     * cannot yet possess a token; all other state-changing endpoints listed in
+     * always exempt. {@code POST /auth/login} and the two passkey login
+     * endpoints are exempt because the client cannot yet possess a token; all other state-changing endpoints listed in
      * the class Javadoc require a valid token. Unknown sub-paths fall through
      * to the secure default ({@code true}) — enforcement required — so that a
      * newly added endpoint is CSRF-gated by default rather than silently
@@ -74,7 +74,7 @@ public class CsrfRequirement {
             return false;
         }
         switch (subPath) {
-        case "/auth/login":
+        case "/auth/login", "/auth/passkey/login/options", "/auth/passkey/login/verify":
             return false;
         case "/auth/logout":
             return true;
