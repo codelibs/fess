@@ -2317,6 +2317,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 15000 */
     String API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS = "api.chat.stream.keepalive.interval.ms";
 
+    /** The key of the configuration. e.g. false */
+    String PASSKEY_ENABLED = "passkey.enabled";
+
+    /** The key of the configuration. e.g.  */
+    String PASSKEY_RP_ID = "passkey.rp.id";
+
+    /** The key of the configuration. e.g. Fess */
+    String PASSKEY_RP_NAME = "passkey.rp.name";
+
+    /** The key of the configuration. e.g.  */
+    String PASSKEY_ORIGINS = "passkey.origins";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -11412,6 +11424,74 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getApiChatStreamKeepaliveIntervalMsAsInteger();
 
     /**
+     * Get the value for the key 'passkey.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: <br>
+     * Passkey (WebAuthn) login for local users. The feature is off by default. It also stays off when<br>
+     * it is enabled but passkey.rp.id or passkey.origins is empty (a warning is logged once), so<br>
+     * the relying party has to be named explicitly.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasskeyEnabled();
+
+    /**
+     * Is the property for the key 'passkey.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: <br>
+     * Passkey (WebAuthn) login for local users. The feature is off by default. It also stays off when<br>
+     * it is enabled but passkey.rp.id or passkey.origins is empty (a warning is logged once), so<br>
+     * the relying party has to be named explicitly.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPasskeyEnabled();
+
+    /**
+     * Get the value for the key 'passkey.rp.id'. <br>
+     * The value is, e.g.  <br>
+     * comment: <br>
+     * Relying party ID: the registrable domain the passkeys are bound to, e.g. example.com. A passkey<br>
+     * works on this host and its subdomains only, and cannot be moved to another ID later.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasskeyRpId();
+
+    /**
+     * Get the value for the key 'passkey.rp.id' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: <br>
+     * Relying party ID: the registrable domain the passkeys are bound to, e.g. example.com. A passkey<br>
+     * works on this host and its subdomains only, and cannot be moved to another ID later.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPasskeyRpIdAsInteger();
+
+    /**
+     * Get the value for the key 'passkey.rp.name'. <br>
+     * The value is, e.g. Fess <br>
+     * comment: Relying party name shown by the browser when a passkey is created.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasskeyRpName();
+
+    /**
+     * Get the value for the key 'passkey.origins'. <br>
+     * The value is, e.g.  <br>
+     * comment: Origins (comma separated) a passkey ceremony is accepted from, e.g. https://fess.example.com.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasskeyOrigins();
+
+    /**
+     * Get the value for the key 'passkey.origins' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: Origins (comma separated) a passkey ceremony is accepted from, e.g. https://fess.example.com.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPasskeyOriginsAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -15640,6 +15720,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
         }
 
+        public String getPasskeyEnabled() {
+            return get(FessConfig.PASSKEY_ENABLED);
+        }
+
+        public boolean isPasskeyEnabled() {
+            return is(FessConfig.PASSKEY_ENABLED);
+        }
+
+        public String getPasskeyRpId() {
+            return get(FessConfig.PASSKEY_RP_ID);
+        }
+
+        public Integer getPasskeyRpIdAsInteger() {
+            return getAsInteger(FessConfig.PASSKEY_RP_ID);
+        }
+
+        public String getPasskeyRpName() {
+            return get(FessConfig.PASSKEY_RP_NAME);
+        }
+
+        public String getPasskeyOrigins() {
+            return get(FessConfig.PASSKEY_ORIGINS);
+        }
+
+        public Integer getPasskeyOriginsAsInteger() {
+            return getAsInteger(FessConfig.PASSKEY_ORIGINS);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -16343,6 +16451,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES, "100000");
             defaultMap.put(FessConfig.API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS, "15000");
+            defaultMap.put(FessConfig.PASSKEY_ENABLED, "false");
+            defaultMap.put(FessConfig.PASSKEY_RP_ID, "");
+            defaultMap.put(FessConfig.PASSKEY_RP_NAME, "Fess");
+            defaultMap.put(FessConfig.PASSKEY_ORIGINS, "");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

@@ -12,4 +12,5 @@
 	<component name="userBhv" class="org.codelibs.fess.opensearch.user.exbhv.UserBhv"/>
 	<component name="roleBhv" class="org.codelibs.fess.opensearch.user.exbhv.RoleBhv"/>
 	<component name="groupBhv" class="org.codelibs.fess.opensearch.user.exbhv.GroupBhv"/>
+	<component name="passkeyBhv" class="org.codelibs.fess.opensearch.user.exbhv.PasskeyBhv"/>
 </components>

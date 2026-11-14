@@ -68,7 +68,7 @@ public class CsrfRequirementCompleteCoverageTest {
      * Must equal {@code ENDPOINT_DECISIONS.size()}. Increment when adding a new endpoint
      * so that the mismatch causes a deliberate compile-time / test-time notice.
      */
-    private static final int EXPECTED_ENTRY_COUNT = 22;
+    private static final int EXPECTED_ENTRY_COUNT = 28;
 
     static {
         // LinkedHashMap preserves insertion order for readable failure messages.
@@ -88,8 +88,14 @@ public class CsrfRequirementCompleteCoverageTest {
         // --- AUTH endpoints ---
         m.put("/auth/me", true); // GET only — secure default
         m.put("/auth/login", false); // POST, but explicitly CSRF-exempt (no token yet)
+        m.put("/auth/passkey/login/options", false); // POST, CSRF-exempt like /auth/login (no token yet)
+        m.put("/auth/passkey/login/verify", false); // POST, CSRF-exempt like /auth/login (no token yet)
         m.put("/auth/logout", true); // POST, CSRF required
         m.put("/auth/password", true); // POST, CSRF required
+        m.put("/auth/passkey", true); // GET only — secure default
+        m.put("/auth/passkey/register/options", true); // POST, CSRF required
+        m.put("/auth/passkey/register/verify", true); // POST, CSRF required
+        m.put("/auth/passkey/abc123", true); // DELETE, CSRF required
 
         // --- UI endpoint ---
         m.put("/ui/config", true); // GET only — secure default
@@ -165,6 +171,11 @@ public class CsrfRequirementCompleteCoverageTest {
             assertTrue(new CsrfRequirement().requiresCsrf(path, "DELETE"),
                     "State-changing endpoint must require CSRF token: DELETE " + path);
         }
+        for (final String path : Arrays.asList("/auth/passkey/register/options", "/auth/passkey/register/verify")) {
+            assertTrue(new CsrfRequirement().requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
+        }
+        assertTrue(new CsrfRequirement().requiresCsrf("/auth/passkey/abc123", "DELETE"),
+                "DELETE /auth/passkey/{id} must require CSRF token");
         // DELETE /chat/sessions/{session_id} is state-changing — CSRF required
         assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/abc", "DELETE"),
                 "DELETE /chat/sessions/{session_id} must require CSRF token");

@@ -44,6 +44,8 @@
 		<relativePath />
 	</parent>
 	<properties>
+		<!-- WebAuthn (passkey) server library -->
+		<webauthn4j.version>0.32.0.RELEASE</webauthn4j.version>
 		<!-- Time stamp of the files in the ZIP, DEB and RPM. The inherited value is fixed (1980-02-01), so every
 			release would carry the same time stamp on its JSP files, and Jasper, which recompiles a JSP only when its
 			time stamp differs from the compiled class, would keep serving a changed JSP from an older install. -->
@@ -1392,6 +1394,17 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
 			<version>${bouncycastle.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.webauthn4j</groupId>
+			<artifactId>webauthn4j-core</artifactId>
+			<version>${webauthn4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.webauthn4j</groupId>
+			<artifactId>webauthn4j-test</artifactId>
+			<version>${webauthn4j.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.esotericsoftware</groupId>

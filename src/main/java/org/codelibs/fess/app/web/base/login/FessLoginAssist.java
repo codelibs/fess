@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -532,6 +533,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             }
             return doAuthenticateLocal(username, password);
         });
+        // a verified passkey logs in the local user of that name: no password, and never the directory
+        resolver.resolve(PasskeyCredential.class, credential -> StringUtil.isBlank(credential.getUserId()) ? OptionalEntity.empty()
+                : doFindLoginUser(credential.getUserId()));
         final LoginCredentialResolver loginResolver = new LoginCredentialResolver(resolver);
         for (final SsoAuthenticator auth : ComponentUtil.getSsoManager().getAuthenticators()) {
             auth.resolveCredential(loginResolver);

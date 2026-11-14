@@ -3,7 +3,11 @@
 // All DOM construction uses createElement/textContent/setAttribute — no innerHTML.
 
 import * as api from "./api.js";
-import { endSession, getCurrentUser, isSessionGone, localizePasswordError, promptLogin } from "./auth.js";
+import {
+  endSession, getCurrentUser, isPasskeyCancel, isPasskeyEnabled, isSessionGone, localizePasswordError,
+  passkeyCredentialToJson, promptLogin, toPasskeyCreationOptions
+} from "./auth.js";
+import { formatDate } from "./format.js";
 import { t } from "./i18n.js";
 import * as router from "./router.js";
 
@@ -65,6 +69,182 @@ function makePasswordField(labelText, inputId, inputAttrs = {}) {
   return wrapper;
 }
 
+/** The localized message for a failed passkey registration or passkey list call. */
+function passkeyErrorMessage(err) {
+  if (err && err.name === "NetworkError") return t("error.network");
+  const code = err && err.code;
+  if (code === "rate_limited" || (err && err.httpStatus === 429)) return t("auth.error_rate_limited");
+  const reason = err && err.details && err.details.reason;
+  if (reason === "invalid_current_password") return t("profile.error_wrong_current");
+  if (reason === "current_password_required") return t("profile.error_blank_password");
+  if (reason === "registration_failed" || reason === "label_required" || reason === "label_too_long"
+    || reason === "label_invalid_characters" || reason === "too_many_passkeys") {
+    return t("profile.passkey_error_register");
+  }
+  return t("error.server");
+}
+
+/**
+ * Build the "Passkeys" card: the user's passkeys with a delete button each, and, for a local
+ * user, a form that registers a new one (name + current password, then navigator.credentials.create).
+ * The card stays hidden for a user who has none and cannot register one (e.g. an LDAP or SSO user).
+ * Every server-supplied text (the passkey name) is rendered with textContent.
+ *
+ * @returns {HTMLElement} the card, filled in once GET /auth/passkey answers
+ */
+function buildPasskeySection() {
+  const card = el("div", { className: "card mt-4 d-none", id: "passkey-card" });
+  const body = el("div", { className: "card-body" });
+  card.appendChild(body);
+  body.appendChild(el("h2", { className: "h5 text-center mb-3", textContent: t("profile.passkey_title") }));
+
+  const errorDiv = el("div", { id: "passkey-error", className: "alert alert-danger d-none" });
+  errorDiv.setAttribute("role", "alert");
+  body.appendChild(errorDiv);
+  const successDiv = el("div", { id: "passkey-success", className: "alert alert-success d-none" });
+  successDiv.setAttribute("role", "status");
+  body.appendChild(successDiv);
+
+  const list = el("ul", { id: "passkey-list", className: "list-group mb-3" });
+  body.appendChild(list);
+
+  const form = el("form", { id: "passkey-form", className: "d-none" });
+  const labelWrap = el("div", { className: "mb-3" });
+  const labelText = t("profile.passkey_label");
+  const labelEl = el("label", { className: "visually-hidden", textContent: labelText });
+  labelEl.setAttribute("for", "passkey-label");
+  labelWrap.appendChild(labelEl);
+  const labelInput = el("input", { id: "passkey-label", className: "form-control" });
+  labelInput.type = "text";
+  labelInput.name = "passkey-label";
+  labelInput.required = true;
+  labelInput.maxLength = 64;
+  labelInput.placeholder = labelText;
+  labelInput.setAttribute("autocomplete", "off");
+  labelWrap.appendChild(labelInput);
+  form.appendChild(labelWrap);
+  form.appendChild(makePasswordField(t("profile.old_password"), "passkey-current-password", { autocomplete: "current-password" }));
+  const addBtn = el("button", { className: "btn btn-success", textContent: " " + t("profile.passkey_register") });
+  addBtn.type = "submit";
+  const addIcon = el("i", { className: "fa fa-key" });
+  addIcon.setAttribute("aria-hidden", "true");
+  addBtn.insertBefore(addIcon, addBtn.firstChild);
+  form.appendChild(el("div", { className: "text-center" })).appendChild(addBtn);
+  body.appendChild(form);
+
+  const showError = (message) => {
+    successDiv.classList.add("d-none");
+    errorDiv.textContent = message;
+    errorDiv.classList.remove("d-none");
+  };
+  const showSuccess = (message) => {
+    errorDiv.classList.add("d-none");
+    successDiv.textContent = message;
+    successDiv.classList.remove("d-none");
+  };
+  // The session ended (the server answers 401 with no reason): same as the password form.
+  const handleSessionGone = async (err) => {
+    if (!isSessionGone(err)) return false;
+    await endSession();
+    promptLogin();
+    return true;
+  };
+
+  const renderList = (passkeys) => {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    if (passkeys.length === 0) {
+      list.appendChild(el("li", { className: "list-group-item text-muted", textContent: t("profile.passkey_none") }));
+      return;
+    }
+    for (const passkey of passkeys) {
+      const item = el("li", { className: "list-group-item d-flex justify-content-between align-items-center" });
+      const text = el("div");
+      text.appendChild(el("div", { className: "fw-bold", textContent: passkey.label || "" }));
+      const lastUsed = passkey.last_used_at ? formatDate(passkey.last_used_at) : t("profile.passkey_never");
+      text.appendChild(el("small", {
+        className: "text-muted",
+        textContent: t("profile.passkey_created", [formatDate(passkey.created_at)]) + " / " + t("profile.passkey_last_used", [lastUsed])
+      }));
+      item.appendChild(text);
+      const delBtn = el("button", { className: "btn btn-sm btn-outline-danger", textContent: t("profile.passkey_delete") });
+      delBtn.type = "button";
+      delBtn.addEventListener("click", () => deletePasskey(passkey, delBtn));
+      item.appendChild(delBtn);
+      list.appendChild(item);
+    }
+  };
+
+  // canRegister: the session is a local user's and this browser can create passkeys.
+  const loadList = async () => {
+    try {
+      const env = await api.get("/auth/passkey");
+      const passkeys = Array.isArray(env.passkeys) ? env.passkeys : [];
+      const canRegister = env.can_register === true && !!window.PublicKeyCredential && !!navigator.credentials;
+      form.classList.toggle("d-none", !canRegister);
+      renderList(passkeys);
+      card.classList.toggle("d-none", passkeys.length === 0 && !canRegister);
+    } catch (err) {
+      if (await handleSessionGone(err)) return;
+      showError(passkeyErrorMessage(err));
+      card.classList.remove("d-none");
+    }
+  };
+
+  async function deletePasskey(passkey, button) {
+    if (!window.confirm(t("profile.passkey_delete_confirm", [passkey.label || ""]))) return;
+    button.disabled = true;
+    try {
+      await api.del("/auth/passkey/" + encodeURIComponent(passkey.id));
+      showSuccess(t("profile.passkey_deleted"));
+    } catch (err) {
+      if (await handleSessionGone(err)) return;
+      // A passkey that is already gone (404) is the state the user wanted: show the list again.
+      if (err && err.httpStatus !== 404) showError(passkeyErrorMessage(err));
+    }
+    await loadList();
+  }
+
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const label = labelInput.value.trim();
+    const passwordInput = document.getElementById("passkey-current-password");
+    if (!label) {
+      // Spaces only pass "required": empty the field so that the browser tells, in its own words,
+      // that the name is missing.
+      labelInput.value = "";
+      labelInput.reportValidity();
+      labelInput.focus();
+      return;
+    }
+    const currentPassword = passwordInput.value;
+    addBtn.disabled = true;
+    try {
+      // The password is checked before any challenge is made; then the browser asks for the authenticator.
+      const options = await api.post("/auth/passkey/register/options", { current_password: currentPassword });
+      const credential = await navigator.credentials.create({ publicKey: toPasskeyCreationOptions(options) });
+      await api.post("/auth/passkey/register/verify", { label, credential: passkeyCredentialToJson(credential) });
+      form.reset();
+      showSuccess(t("profile.passkey_registered"));
+      await loadList();
+    } catch (err) {
+      // The user dismissed the browser's prompt: nothing to report.
+      if (isPasskeyCancel(err)) return;
+      if (await handleSessionGone(err)) return;
+      // A server or network failure is told as it is; anything the browser threw (the
+      // authenticator refused, a passkey of it is already registered) is a failed registration.
+      const fromServer = err && (err.name === "ApiError" || err.name === "NetworkError");
+      showError(fromServer ? passkeyErrorMessage(err) : t("profile.passkey_error_register"));
+    } finally {
+      // The password is asked for each registration and is not kept, whatever the outcome.
+      passwordInput.value = "";
+      addBtn.disabled = false;
+    }
+  });
+
+  loadList();
+  return card;
+}
+
 /**
  * Attach the profile view to the #profile-view container.
  * Clears previous content and rebuilds from scratch each time.
@@ -107,6 +287,7 @@ export function attach() {
   const cardBody = el("div", { className: "card-body" });
   card.appendChild(cardBody);
   col.appendChild(card);
+  if (isPasskeyEnabled()) col.appendChild(buildPasskeySection());
 
   // Card heading
   const heading = el("h1", { className: "h4 text-center mb-3", textContent: t("profile.title") });

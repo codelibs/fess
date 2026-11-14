@@ -39,6 +39,8 @@ import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.OriginValidator;
+import org.codelibs.fess.api.v2.handlers.PasskeyAccountHandler;
+import org.codelibs.fess.api.v2.handlers.PasskeyLoginHandler;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.RelatedContentHandler;
@@ -180,6 +182,18 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code POST /api/v2/auth/login}. */
     @Resource
     protected LoginHandler loginHandler;
+
+    /** Handles {@code POST /api/v2/auth/passkey/login/options} and {@code POST /api/v2/auth/passkey/login/verify}. */
+    @Resource
+    protected PasskeyLoginHandler passkeyLoginHandler;
+
+    /**
+     * Handles the passkeys of the signed-in user: {@code POST /api/v2/auth/passkey/register/options},
+     * {@code POST /api/v2/auth/passkey/register/verify}, {@code GET /api/v2/auth/passkey} and
+     * {@code DELETE /api/v2/auth/passkey/{id}}.
+     */
+    @Resource
+    protected PasskeyAccountHandler passkeyAccountHandler;
 
     /** Handles {@code GET /api/v2/related-queries} (related query suggestions). */
     @Resource
@@ -359,6 +373,13 @@ public class SearchApiV2Manager extends BaseApiManager {
                 tagsHandler.handle(request, response, sub.substring("/tags/".length()));
                 return;
             }
+            // "/auth/passkey/{id}": the credential id is one non-empty segment, so the two-segment
+            // login/* and register/* paths still reach the switch below.
+            if (sub.startsWith("/auth/passkey/") && sub.length() > "/auth/passkey/".length()
+                    && sub.indexOf('/', "/auth/passkey/".length()) < 0) {
+                passkeyAccountHandler.delete(request, response, sub.substring("/auth/passkey/".length()));
+                return;
+            }
             switch (sub) {
             case "/health" -> healthHandler.handle(request, response);
             case "/search" -> searchHandler.handle(request, response);
@@ -369,6 +390,11 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/popular-words" -> popularWordsHandler.handle(request, response);
             case "/auth/me" -> meHandler.handle(request, response);
             case "/auth/login" -> loginHandler.handle(request, response);
+            case "/auth/passkey/login/options" -> passkeyLoginHandler.options(request, response);
+            case "/auth/passkey/login/verify" -> passkeyLoginHandler.verify(request, response);
+            case "/auth/passkey" -> passkeyAccountHandler.list(request, response);
+            case "/auth/passkey/register/options" -> passkeyAccountHandler.registerOptions(request, response);
+            case "/auth/passkey/register/verify" -> passkeyAccountHandler.registerVerify(request, response);
             case "/auth/logout" -> logoutHandler.handle(request, response);
             case "/auth/password" -> passwordChangeHandler.handle(request, response);
             case "/ui/config" -> uiConfigHandler.handle(request, response);

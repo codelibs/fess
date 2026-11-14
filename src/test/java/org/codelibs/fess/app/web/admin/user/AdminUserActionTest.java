@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.user;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
@@ -311,5 +312,73 @@ public class AdminUserActionTest extends UnitFessTestCase {
             reported.append(messages.toString());
         });
         return reported.toString();
+    }
+
+    @Test
+    public void test_deletePasskey_requiresAdminRole() throws Exception {
+        final org.codelibs.fess.annotation.Secured reset = AdminUserAction.class.getMethod("deletePasskey", DeletePasskeyForm.class)
+                .getAnnotation(org.codelibs.fess.annotation.Secured.class);
+        final org.codelibs.fess.annotation.Secured delete =
+                AdminUserAction.class.getMethod("delete", EditForm.class).getAnnotation(org.codelibs.fess.annotation.Secured.class);
+        assertNotNull(reset);
+        // the edit role like delete, never the view-only role
+        assertEquals(List.of(AdminUserAction.ROLE), List.of(reset.value()));
+        assertEquals(List.of(delete.value()), List.of(reset.value()));
+    }
+
+    @Test
+    public void test_deletePasskeyForm_validatesTheShapeOfBothIds() throws Exception {
+        assertNotNull(DeletePasskeyForm.class.getField("id").getAnnotation(org.lastaflute.web.validation.Required.class));
+        assertNotNull(DeletePasskeyForm.class.getField("credentialId").getAnnotation(org.lastaflute.web.validation.Required.class));
+        final jakarta.validation.constraints.Pattern pattern =
+                DeletePasskeyForm.class.getField("credentialId").getAnnotation(jakarta.validation.constraints.Pattern.class);
+        assertNotNull(pattern);
+        assertEquals("[A-Za-z0-9_-]{1,512}", pattern.regexp());
+        assertTrue("abc-DEF_123".matches(pattern.regexp()));
+        assertFalse("abc/def".matches(pattern.regexp()));
+        assertFalse("".matches(pattern.regexp()));
+        // the longest document id the search engine takes
+        assertTrue("a".repeat(org.codelibs.fess.app.service.PasskeyService.MAX_CREDENTIAL_ID_LENGTH).matches(pattern.regexp()));
+        assertFalse("a".repeat(513).matches(pattern.regexp()));
+    }
+
+    @Test
+    public void test_registerPasskeys_visibility() throws Exception {
+        // {enabled, disabled} x {has passkeys, has none}: the card shows while the feature is on, and
+        // while the user still has passkeys to reset after it was turned off
+        for (final boolean enabled : new boolean[] { true, false }) {
+            for (final boolean hasPasskeys : new boolean[] { true, false }) {
+                final List<org.codelibs.fess.opensearch.user.exentity.Passkey> passkeys = new java.util.ArrayList<>();
+                if (hasPasskeys) {
+                    final org.codelibs.fess.opensearch.user.exentity.Passkey passkey =
+                            new org.codelibs.fess.opensearch.user.exentity.Passkey();
+                    passkey.setId("AAEC");
+                    passkey.setUserName("alice");
+                    passkeys.add(passkey);
+                }
+                final List<String> asked = new java.util.ArrayList<>();
+                final AdminUserAction action = new AdminUserAction();
+                final java.lang.reflect.Field field = AdminUserAction.class.getDeclaredField("passkeyService");
+                field.setAccessible(true);
+                field.set(action, new org.codelibs.fess.app.service.PasskeyService() {
+                    @Override
+                    public boolean isEnabled() {
+                        return enabled;
+                    }
+
+                    @Override
+                    public List<org.codelibs.fess.opensearch.user.exentity.Passkey> getPasskeys(final String userName) {
+                        asked.add(userName);
+                        return passkeys;
+                    }
+                });
+                final org.lastaflute.web.response.render.RenderData data = new org.lastaflute.web.response.render.RenderData();
+                action.registerPasskeys(data, "alice");
+                final String label = "enabled=" + enabled + ", hasPasskeys=" + hasPasskeys;
+                assertEquals(label, Boolean.valueOf(enabled || hasPasskeys), data.getDataMap().get("passkeyVisible"));
+                assertEquals(label, passkeys.size(), ((List<?>) data.getDataMap().get("passkeyItems")).size());
+                assertEquals(label, List.of("alice"), asked);
+            }
+        }
     }
 }

@@ -516,6 +516,9 @@
 		<postConstruct name="addIndexConfig">
 			<arg>"fess_user.group/group"</arg>
 		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_user.passkey/passkey"</arg>
+		</postConstruct>
 		<!-- fess_log index -->
 		<postConstruct name="addIndexConfig">
 			<arg>"fess_log.chat_log/chat_log"</arg>

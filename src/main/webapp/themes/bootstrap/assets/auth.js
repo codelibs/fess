@@ -1,5 +1,5 @@
 import * as api from "./api.js";
-import { sanitizeAdminHtml } from "./format.js";
+import { base64urlToBuffer, bufferToBase64url, sanitizeAdminHtml } from "./format.js";
 import { t } from "./i18n.js";
 import * as router from "./router.js";
 
@@ -369,11 +369,97 @@ function currentModalStep() {
   return changeStep && !changeStep.classList.contains("d-none") ? "password" : "login";
 }
 
+/**
+ * Finish a login the server accepted: take the CSRF token of the new session, show the user,
+ * then close the modal and announce the login, unless the password has to be changed first.
+ * Shared by the password form and the passkey button.
+ *
+ * @param {object} env - the success envelope of /auth/login or /auth/passkey/login/verify
+ * @param {{username: string, password: string}} [typed] - what the password form sent;
+ *   undefined for a passkey login, which has no password to change
+ */
+async function finishLogin(env, typed) {
+  // Server rotates the token on login. Echo whichever it returned.
+  if (env.csrf_token) api.setCsrfToken(env.csrf_token);
+  else await rotateCsrf();
+  setLoggedIn(env.user || { username: typed ? typed.username : "" });
+  setLoginLocked(false);
+  // JSP parity (LoginAction): a password listed in password.invalid.admin.passwords has
+  // to be changed, so switch the modal to the new-password step. As on the JSP page the
+  // user may leave it; the login itself already succeeded.
+  if (typed && env.password_change_required === true && env.user && env.user.editable) {
+    pendingPasswordChange = { username: typed.username, password: typed.password };
+    pendingLoginAnnounce = { user: env.user };
+    showModalStep("password");
+  } else {
+    hideLoginModal();
+    announceLogin(env.user);
+  }
+}
+
 /** The localized message for a failed POST /auth/login. */
 function loginErrorMessage(e) {
   // V2ErrorCode emits lowercase snake_case wire codes ("rate_limited").
   if (e.code === "rate_limited" || e.code === "RATE_LIMITED" || e.httpStatus === 429) return t("auth.error_rate_limited");
   return t("auth.error_invalid_credentials");
+}
+
+/** True when the server offers passkeys (features.passkey_enabled from /api/v2/ui/config). */
+export function isPasskeyEnabled() {
+  return api.getConfig()?.features?.passkey_enabled === true;
+}
+
+/** True when passkeys are offered and this browser can use them. */
+export function isPasskeyLoginAvailable() {
+  return isPasskeyEnabled() && !!window.PublicKeyCredential && !!navigator.credentials;
+}
+
+/** True when a navigator.credentials call failed because the user dismissed the prompt (or it timed out). */
+export function isPasskeyCancel(e) {
+  return !!e && (e.name === "NotAllowedError" || e.name === "AbortError");
+}
+
+/**
+ * Turn the options JSON of POST /auth/passkey/login/options (binary values as Base64url) into
+ * the publicKey argument of navigator.credentials.get.
+ */
+export function toPasskeyRequestOptions(json) {
+  const { status, ...options } = json;
+  options.challenge = base64urlToBuffer(options.challenge);
+  options.allowCredentials = (options.allowCredentials || []).map(c => ({ ...c, id: base64urlToBuffer(c.id) }));
+  return options;
+}
+
+/**
+ * Turn the options JSON of POST /auth/passkey/register/options (binary values as Base64url) into
+ * the publicKey argument of navigator.credentials.create.
+ */
+export function toPasskeyCreationOptions(json) {
+  const { status, ...options } = json;
+  options.challenge = base64urlToBuffer(options.challenge);
+  options.user = { ...options.user, id: base64urlToBuffer(options.user.id) };
+  options.excludeCredentials = (options.excludeCredentials || []).map(c => ({ ...c, id: base64urlToBuffer(c.id) }));
+  return options;
+}
+
+/**
+ * Turn the PublicKeyCredential navigator.credentials.create/get returned into the JSON the
+ * passkey verify endpoints read: binary values as Base64url, transports inside the response.
+ */
+export function passkeyCredentialToJson(credential) {
+  const r = credential.response;
+  const response = { clientDataJSON: bufferToBase64url(r.clientDataJSON) };
+  for (const key of ["attestationObject", "authenticatorData", "signature", "userHandle"]) {
+    if (r[key]) response[key] = bufferToBase64url(r[key]);
+  }
+  if (typeof r.getTransports === "function") response.transports = r.getTransports();
+  return {
+    id: credential.id,
+    rawId: bufferToBase64url(credential.rawId),
+    type: credential.type,
+    response,
+    clientExtensionResults: typeof credential.getClientExtensionResults === "function" ? credential.getClientExtensionResults() : {}
+  };
 }
 
 /**
@@ -530,25 +616,35 @@ export function attach() {
     const password = document.getElementById("login-password").value;
     try {
       const env = await api.post("/auth/login", { username, password });
-      // Server rotates the token on login. Echo whichever it returned.
-      if (env.csrf_token) api.setCsrfToken(env.csrf_token);
-      else await rotateCsrf();
-      setLoggedIn(env.user || { username });
-      setLoginLocked(false);
-      // JSP parity (LoginAction): a password listed in password.invalid.admin.passwords has
-      // to be changed, so switch the modal to the new-password step. As on the JSP page the
-      // user may leave it; the login itself already succeeded.
-      if (env.password_change_required === true && env.user && env.user.editable) {
-        pendingPasswordChange = { username, password };
-        pendingLoginAnnounce = { user: env.user };
-        showModalStep("password");
-      } else {
-        hideLoginModal();
-        announceLogin(env.user);
-      }
+      await finishLogin(env, { username, password });
     } catch (e) {
       err.textContent = loginErrorMessage(e);
       err.classList.remove("d-none");
+    }
+  }
+
+  const passkeyBtn = document.getElementById("passkey-login-btn");
+  if (passkeyBtn && isPasskeyLoginAvailable()) {
+    passkeyBtn.classList.remove("d-none");
+    passkeyBtn.addEventListener("click", submitPasskeyLogin);
+  }
+
+  async function submitPasskeyLogin() {
+    err.classList.add("d-none");
+    err.textContent = "";
+    passkeyBtn.disabled = true;
+    try {
+      const options = await api.post("/auth/passkey/login/options", {});
+      const credential = await navigator.credentials.get({ publicKey: toPasskeyRequestOptions(options) });
+      const env = await api.post("/auth/passkey/login/verify", { credential: passkeyCredentialToJson(credential) });
+      await finishLogin(env);
+    } catch (e) {
+      // The user dismissed the browser's passkey prompt: nothing to report.
+      if (isPasskeyCancel(e)) return;
+      err.textContent = loginErrorMessage(e);
+      err.classList.remove("d-none");
+    } finally {
+      passkeyBtn.disabled = false;
     }
   }
 

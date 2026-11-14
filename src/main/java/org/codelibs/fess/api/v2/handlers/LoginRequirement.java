@@ -32,7 +32,7 @@ package org.codelibs.fess.api.v2.handlers;
  * default rather than being silently reachable by anonymous callers.</p>
  *
  * <p>The exempt set is the minimum a browser needs to render the login page and authenticate:
- * the health probe, the three anonymous-capable auth endpoints and the UI configuration the
+ * the health probe, the anonymous-capable auth endpoints (including the passkey login) and the UI configuration the
  * single-page application reads before it knows whether anyone is signed in. Note that this
  * table describes the policy only; it applies solely when {@code login.required} is enabled.</p>
  *
@@ -71,9 +71,10 @@ public class LoginRequirement {
         // The single-page application calls these before it can know whether anyone is signed
         // in. /auth/me answers "nobody" for an anonymous caller, and /ui/config carries the
         // login_required flag the page needs in order to show the login form at all.
-        case "/auth/me", "/auth/login", "/auth/logout", "/ui/config" -> false;
+        case "/auth/me", "/auth/login", "/auth/passkey/login/options", "/auth/passkey/login/verify", "/auth/logout", "/ui/config" -> false;
         // Secure default: everything else — search, scroll, suggest, labels, popular words,
-        // related queries/content, chat, click, favorites, tags, search history, cache and any endpoint added later
+        // related queries/content, chat, click, favorites, tags, search history, cache, the passkeys
+        // of the signed-in user (/auth/passkey, /auth/passkey/register/*, /auth/passkey/{id}) and any endpoint added later
         // — is served only to an authenticated user.
         default -> true;
         };

@@ -52,6 +52,12 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         userService = new UserService();
+        // store() removes the passkeys a new user would inherit; there is no passkey index here
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+            }
+        };
         stored = new User();
         stored.setName("alice");
         stored.setPassword("{bcrypt}old");
@@ -112,6 +118,44 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         final long changedAt = written.get(0).getPasswordChangedAt();
         assertTrue(changedAt >= before && changedAt <= after);
         assertEquals(List.of("alice@" + changedAt), accepted);
+    }
+
+    @Test
+    public void test_endOtherSessions_recordsTheTimeAndKeepsThePassword() {
+        final long before = System.currentTimeMillis();
+        userService.endOtherSessions("alice");
+        final long after = System.currentTimeMillis();
+
+        assertEquals(1, written.size());
+        assertEquals("{bcrypt}old", written.get(0).getPassword());
+        final long changedAt = written.get(0).getPasswordChangedAt();
+        assertTrue(changedAt >= before && changedAt <= after);
+        assertEquals(List.of("alice@" + changedAt), accepted);
+    }
+
+    @Test
+    public void test_endOtherSessions_neverGoesBackwards() {
+        final long future = System.currentTimeMillis() + 3_600_000L;
+        stored.setPasswordChangedAt(future);
+
+        userService.endOtherSessions("alice");
+
+        assertEquals(Long.valueOf(future + 1), written.get(0).getPasswordChangedAt());
+    }
+
+    @Test
+    public void test_endOtherSessions_unknownUser_changesNothing() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.empty();
+            }
+        };
+
+        userService.endOtherSessions("nobody");
+
+        assertTrue(written.isEmpty());
+        assertTrue(accepted.isEmpty());
     }
 
     @Test

@@ -33,6 +33,14 @@ ${fe:html(true)}
 						<div class="alert alert-info">${msg}</div>
 					</la:info>
 					<la:errors />
+					<%-- Shown by js/login.js when a passkey login fails: the text of a failed password login. --%>
+					<c:if test="${passkeyLogin}">
+						<div id="passkey-error" class="d-none">
+							<ul class="has-error" role="alert">
+								<li><i class="fa fa-exclamation-circle"></i> <la:message key="errors.login_error" /></li>
+							</ul>
+						</div>
+					</c:if>
 				</div>
 				<la:form action="/login/" styleId="login" method="post">
 					<div class="input-group mb-3">
@@ -72,6 +80,17 @@ ${fe:html(true)}
 						</button>
 					</div>
 				</la:form>
+				<%-- Hidden until js/login.js finds WebAuthn in the browser. --%>
+				<c:if test="${passkeyLogin}">
+					<div class="text-center mt-3">
+						<button type="button" id="passkey-login-btn"
+							class="btn btn-outline-secondary btn-block d-none"
+							data-redirect="<c:out value="${passkeyRedirectPath}" />">
+							<i class="fa fa-key" aria-hidden="true"></i>
+							<la:message key="labels.login_passkey" />
+						</button>
+					</div>
+				</c:if>
 			</div>
 		</div>
 	</div>

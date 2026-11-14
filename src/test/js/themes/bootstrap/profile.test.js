@@ -7,7 +7,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { resetDom } from "../../helpers/dom.js";
 
 // vi.mock is hoisted, so the paths must be string literals (not the consts below).
-vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({ post: vi.fn() }));
+vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
+  post: vi.fn(), get: vi.fn(), del: vi.fn(), getConfig: vi.fn(),
+}));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({ navigate: vi.fn() }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/auth.js", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -24,6 +26,9 @@ import { attach } from "../../../../main/webapp/themes/bootstrap/assets/profile.
 beforeEach(() => {
   resetDom();
   api.post.mockReset();
+  api.get.mockReset();
+  api.del.mockReset();
+  api.getConfig.mockReset();
   router.navigate.mockReset();
   auth.getCurrentUser.mockReset().mockReturnValue({ name: "Al", editable: true });
   auth.promptLogin.mockReset();
@@ -178,5 +183,221 @@ describe("attach (submit)", () => {
     await vi.waitFor(() => expect(err.classList.contains("d-none")).toBe(false));
     expect(err.textContent).toBe("auth.error_rate_limited");
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Passkeys section.
+// ---------------------------------------------------------------------------
+describe("passkey section", () => {
+  const flush = () => new Promise((r) => setTimeout(r));
+  const LIST = {
+    can_register: true,
+    passkeys: [
+      { id: "AQ", label: "<img src=x onerror=alert(1)>", created_at: 1700000000000, last_used_at: null },
+      { id: "Ag", label: "Work laptop", created_at: 1700000000000, last_used_at: 1700003600000 },
+    ],
+  };
+  let create;
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue({ features: { passkey_enabled: true } });
+    api.get.mockResolvedValue(LIST);
+    create = vi.fn();
+    vi.stubGlobal("PublicKeyCredential", function PublicKeyCredential() {});
+    Object.defineProperty(navigator, "credentials", { value: { create }, configurable: true });
+  });
+  afterEach(() => {
+    delete navigator.credentials;
+  });
+
+  const mountAndLoad = async () => {
+    mountProfile();
+    await flush();
+  };
+  const submitPasskeyForm = (label, password) => {
+    document.getElementById("passkey-label").value = label;
+    document.getElementById("passkey-current-password").value = password;
+    document.getElementById("passkey-form").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+  };
+
+  it("renders no section when passkeys are disabled", async () => {
+    api.getConfig.mockReturnValue({ features: { passkey_enabled: false } });
+    await mountAndLoad();
+    expect(document.getElementById("passkey-card")).toBeNull();
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it("lists passkeys with label as text, never as markup", async () => {
+    await mountAndLoad();
+    const items = document.querySelectorAll("#passkey-list li");
+    expect(items.length).toBe(2);
+    expect(document.getElementById("passkey-card").classList.contains("d-none")).toBe(false);
+    expect(items[0].querySelector(".fw-bold").textContent).toBe("<img src=x onerror=alert(1)>");
+    expect(document.querySelector("#passkey-list img")).toBeNull();
+    // i18n is empty in the tests, so t() returns the keys: created and last-used are both shown.
+    expect(items[0].querySelector("small").textContent).toBe("profile.passkey_created / profile.passkey_last_used");
+    expect(document.getElementById("passkey-form").classList.contains("d-none")).toBe(false);
+  });
+
+  it("hides the registration form when the session cannot register", async () => {
+    api.get.mockResolvedValue({ can_register: false, passkeys: LIST.passkeys });
+    await mountAndLoad();
+    expect(document.getElementById("passkey-form").classList.contains("d-none")).toBe(true);
+    expect(document.querySelectorAll("#passkey-list li").length).toBe(2);
+  });
+
+  it("hides the whole section for a session with no passkeys that cannot register", async () => {
+    api.get.mockResolvedValue({ can_register: false, passkeys: [] });
+    await mountAndLoad();
+    expect(document.getElementById("passkey-card").classList.contains("d-none")).toBe(true);
+  });
+
+  it("hides the registration form when the browser has no PublicKeyCredential", async () => {
+    vi.stubGlobal("PublicKeyCredential", undefined);
+    await mountAndLoad();
+    expect(document.getElementById("passkey-form").classList.contains("d-none")).toBe(true);
+  });
+
+  it("registers: options with the password, credentials.create, verify with label and credential, then reloads", async () => {
+    api.post.mockImplementation(async (path) =>
+      path === "/auth/passkey/register/options"
+        ? { status: 0, challenge: "AQI", rp: { id: "example.com", name: "Fess" }, user: { id: "AwQ", name: "al", displayName: "al" }, excludeCredentials: [] }
+        : { passkey: { id: "AQ" } });
+    create.mockResolvedValue({
+      id: "AQ", rawId: new Uint8Array([1]).buffer, type: "public-key",
+      response: { clientDataJSON: new Uint8Array([2]).buffer, attestationObject: new Uint8Array([3]).buffer, getTransports: () => ["internal"] },
+      getClientExtensionResults: () => ({}),
+    });
+    await mountAndLoad();
+
+    submitPasskeyForm("  My phone ", "secret");
+    await flush();
+
+    expect(api.post.mock.calls[0]).toEqual(["/auth/passkey/register/options", { current_password: "secret" }]);
+    expect(Array.from(new Uint8Array(create.mock.calls[0][0].publicKey.user.id))).toEqual([3, 4]);
+    expect(api.post.mock.calls[1][0]).toBe("/auth/passkey/register/verify");
+    expect(api.post.mock.calls[1][1].label).toBe("My phone");
+    expect(api.post.mock.calls[1][1].credential.response).toEqual({ clientDataJSON: "Ag", attestationObject: "Aw", transports: ["internal"] });
+    expect(document.getElementById("passkey-success").textContent).toBe("profile.passkey_registered");
+    expect(api.get).toHaveBeenCalledTimes(2); // reloaded
+    expect(document.getElementById("passkey-current-password").value).toBe(""); // password not kept
+  });
+
+  it("tells a wrong current password without asking the browser or ending the session", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "auth_required", httpStatus: 401, details: { reason: "invalid_current_password" } });
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "wrong");
+    await flush();
+
+    expect(create).not.toHaveBeenCalled();
+    expect(document.getElementById("passkey-error").textContent).toBe("profile.error_wrong_current");
+    expect(auth.endSession).not.toHaveBeenCalled();
+  });
+
+  it("treats a 401 without a reason as an ended session", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "auth_required", httpStatus: 401 });
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+  });
+
+  it("is silent when the user dismisses the browser prompt", async () => {
+    api.post.mockResolvedValue({ challenge: "AQI", user: { id: "AwQ" } });
+    create.mockRejectedValue(Object.assign(new Error("cancelled"), { name: "NotAllowedError" }));
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(true);
+    expect(document.getElementById("passkey-success").classList.contains("d-none")).toBe(true);
+  });
+
+  it("clears the current password when the registration fails", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "auth_required", httpStatus: 401, details: { reason: "invalid_current_password" } });
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "wrong");
+    await flush();
+
+    expect(document.getElementById("passkey-current-password").value).toBe("");
+  });
+
+  it("clears the current password when the user dismisses the browser prompt", async () => {
+    api.post.mockResolvedValue({ challenge: "AQI", user: { id: "AwQ" } });
+    create.mockRejectedValue(Object.assign(new Error("cancelled"), { name: "NotAllowedError" }));
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(document.getElementById("passkey-current-password").value).toBe("");
+  });
+
+  it("tells that a name of spaces only is missing, without calling the server", async () => {
+    await mountAndLoad();
+    const labelInput = document.getElementById("passkey-label");
+    const invalid = vi.fn();
+    labelInput.addEventListener("invalid", invalid);
+
+    submitPasskeyForm("   ", "secret");
+    await flush();
+
+    expect(api.post).not.toHaveBeenCalled();
+    expect(labelInput.value).toBe("");
+    expect(invalid).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(labelInput);
+    // the password is kept: nothing was sent yet
+    expect(document.getElementById("passkey-current-password").value).toBe("secret");
+  });
+
+  it("tells a refused name or the passkey limit as a failed registration", async () => {
+    for (const reason of ["label_invalid_characters", "too_many_passkeys"]) {
+      api.post.mockReset();
+      api.post.mockRejectedValue({ name: "ApiError", code: "invalid_request", httpStatus: 400, details: { reason } });
+      await mountAndLoad();
+
+      submitPasskeyForm("My phone", "secret");
+      await flush();
+
+      expect(document.getElementById("passkey-error").textContent).toBe("profile.passkey_error_register");
+    }
+  });
+
+  it("shows a registration failure when the authenticator refuses", async () => {
+    api.post.mockResolvedValue({ challenge: "AQI", user: { id: "AwQ" } });
+    create.mockRejectedValue(Object.assign(new Error("already registered"), { name: "InvalidStateError" }));
+    await mountAndLoad();
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(document.getElementById("passkey-error").textContent).toBe("profile.passkey_error_register");
+  });
+
+  it("deletes after a confirmation, and not when the confirmation is declined", async () => {
+    api.del.mockResolvedValue({ ok: true });
+    await mountAndLoad();
+    const button = () => document.querySelectorAll("#passkey-list li button")[1];
+
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(false));
+    button().click();
+    await flush();
+    expect(api.del).not.toHaveBeenCalled();
+
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(true));
+    button().click();
+    await flush();
+    expect(window.confirm).toHaveBeenCalledWith("profile.passkey_delete_confirm");
+    expect(api.del).toHaveBeenCalledWith("/auth/passkey/Ag");
+    expect(document.getElementById("passkey-success").textContent).toBe("profile.passkey_deleted");
+    expect(api.get).toHaveBeenCalledTimes(2);
   });
 });

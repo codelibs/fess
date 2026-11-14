@@ -43,6 +43,8 @@
 	<component name="labelsHandler" class="org.codelibs.fess.api.v2.handlers.LabelsHandler"/>
 	<component name="popularWordsHandler" class="org.codelibs.fess.api.v2.handlers.PopularWordsHandler"/>
 	<component name="loginHandler" class="org.codelibs.fess.api.v2.handlers.LoginHandler"/>
+	<component name="passkeyLoginHandler" class="org.codelibs.fess.api.v2.handlers.PasskeyLoginHandler"/>
+	<component name="passkeyAccountHandler" class="org.codelibs.fess.api.v2.handlers.PasskeyAccountHandler"/>
 	<component name="relatedQueriesHandler" class="org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler"/>
 	<component name="relatedContentHandler" class="org.codelibs.fess.api.v2.handlers.RelatedContentHandler"/>
 	<component name="targetOriginResolver" class="org.codelibs.fess.api.v2.handlers.TargetOriginResolver"/>

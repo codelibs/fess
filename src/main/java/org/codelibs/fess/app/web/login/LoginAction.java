@@ -21,17 +21,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
+import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
+import org.lastaflute.web.login.redirect.LoginRedirectBean;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.validation.VaErrorHook;
 
 import jakarta.annotation.Resource;
@@ -61,6 +65,10 @@ public class LoginAction extends FessLoginAction {
     @Resource
     private UserService userService;
 
+    /** Tells whether passkey login is effectively available (enabled and configured). */
+    @Resource
+    protected PasskeyService passkeyService;
+
     // ===================================================================================
     //                                                                       Login Execute
     //                                                                      ==============
@@ -80,7 +88,48 @@ public class LoginAction extends FessLoginAction {
         if (form != null) {
             form.clearSecurityInfo();
         }
-        return asHtml(path_AdminLogin_IndexJsp).renderWith(data -> saveToken());
+        return asHtml(path_AdminLogin_IndexJsp).renderWith(data -> {
+            saveToken();
+            registerPasskeyLogin(data);
+        });
+    }
+
+    /**
+     * Tells the login page whether to offer the passkey button, and where the passkey login goes. The button
+     * follows {@link PasskeyService#isEnabled()}, not the raw flag, so a half-configured feature shows nothing.
+     * The target is the path the password login would redirect to, the one saved when a secured page sent the
+     * user here, if there is a safe one; without it the page goes to the admin top.
+     *
+     * @param data the render data of the login page
+     */
+    protected void registerPasskeyLogin(final RenderData data) {
+        final boolean enabled = passkeyService.isEnabled();
+        data.register("passkeyLogin", enabled);
+        if (enabled) {
+            fessLoginAssist.getLoginRedirectBean()
+                    .filter(LoginRedirectBean::hasRedirectPath)
+                    .ifPresent(bean -> RenderDataUtil.register(data, "passkeyRedirectPath", toSafeRedirectPath(bean.getRedirectPath())));
+        }
+    }
+
+    /**
+     * Narrows a saved request path to what a browser may be sent to: a path of this application, starting with
+     * a single slash. The saved path is relative to the context path, so a leading {@code //} or a backslash
+     * would turn into another host once the page prefixes its context path.
+     *
+     * @param path the saved request path and query
+     * @return the path, or {@code null} when it is not a plain application path
+     */
+    protected static String toSafeRedirectPath(final String path) {
+        if (path == null || !path.startsWith("/") || path.startsWith("//") || path.indexOf('\\') >= 0) {
+            return null;
+        }
+        for (int i = 0; i < path.length(); i++) {
+            if (Character.isISOControl(path.charAt(i))) {
+                return null;
+            }
+        }
+        return path;
     }
 
     /**

@@ -133,28 +133,11 @@ public class LoginHandler {
         }
         final LoginRateLimiter limiter = limiter();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int ipLimit = fessConfig.getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
         final int userLimit = fessConfig.getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
         final int lockoutSec = fessConfig.getThemeApiLoginLockoutSecondsAsInteger();
         final String clientIp = resolveClientIp(req);
 
-        if (!limiter.allow(LoginRateLimiter.Scope.IP, clientIp, ipLimit, 60)) {
-            // The rate-limit gates used to be completely silent, so an operator investigating
-            // "login stopped working" had nothing in fess.log to go on. ActivityHelper has no
-            // activity type for a throttled attempt and inventing one would change the audit
-            // schema, so the record goes to the ordinary log instead.
-            //
-            // Only the request that actually arms the lockout is a new security event. Every
-            // later request during the same lockout also reaches this branch, so logging them
-            // all at WARN would let a client that keeps retrying pump the log without bound.
-            if (limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec)) {
-                logger.warn("[v2/login] ip rate limit exceeded; locking out for {}s: clientIp={}, limit={}/min", lockoutSec, clientIp,
-                        ipLimit);
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("[v2/login] refused a retry during the active ip lockout: clientIp={}", clientIp);
-            }
-            res.setHeader("Retry-After", Integer.toString(lockoutSec));
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (ip)");
+        if (!takeIpSlot(limiter, clientIp, res)) {
             return;
         }
 
@@ -212,7 +195,7 @@ public class LoginHandler {
             } else if (logger.isDebugEnabled()) {
                 logger.debug("[v2/login] refused a retry during the active user lockout: username={}, clientIp={}", loggedName, clientIp);
             }
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
+            writeInvalidCredentials(res);
             return;
         }
 
@@ -277,7 +260,7 @@ public class LoginHandler {
                             loggedName, clientIp);
                 }
             }
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
+            writeInvalidCredentials(res);
             return;
         } catch (final RuntimeException e) {
             // Anything else (DI binding failure, transient lookup error, etc.) is a system
@@ -289,6 +272,51 @@ public class LoginHandler {
             return;
         }
 
+        // MJ-5: clear the USER rate-limit bucket on successful login so that a legitimate user
+        // who exhausted the window (e.g. typo run) is not penalized on their next attempt after
+        // providing the correct credentials. The USER bucket is the (clientIp, username)
+        // composite, so only this user's own failures are forgiven.
+        // The IP bucket is NOT cleared: it also counts the guesses other users made from the same
+        // address, and wiping it would let anyone holding one valid account reset the per-address
+        // allowance with each success and spray passwords without limit. Only the slot this
+        // very request consumed on entry is given back.
+        final Map<String, Object> payload = completeLogin(req, res, assist, username, prevUserId, returnTo, () -> {
+            limiter.clear(LoginRateLimiter.Scope.USER, userKey);
+            limiter.release(LoginRateLimiter.Scope.IP, clientIp);
+        });
+        if (payload == null) {
+            return;
+        }
+        if (!fessConfig.isValidAdminPassword(password)) {
+            // Mirrors LoginAction.login(): a password on password.invalid.admin.passwords signs the
+            // user in and asks for a new one. The session is already live, so this is a prompt for
+            // the client, not an enforcement.
+            payload.put("password_change_required", true);
+        }
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
+    }
+
+    /**
+     * Completes a login whose credential {@link FessLoginAssist#login} has just accepted. Shared by
+     * this handler and {@link PasskeyLoginHandler}, so both ways of signing in end the same way:
+     * the permissions of the user are resolved (the login is undone if that fails), the
+     * {@code LOGIN} activity is recorded, the session id is rotated, the CSRF token is rotated and
+     * re-issued, and the success payload is built.
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response, written to only when the login cannot be completed
+     * @param assist the login assist holding the freshly bound user bean
+     * @param userId the id of the user who has just signed in
+     * @param prevUserId the id of the user the session was bound to before the login, or {@code null}
+     * @param returnTo the requested {@code return_to}, echoed only when it is a safe relative path
+     * @param onSessionStarted the rate-limit bookkeeping of a successful login, run after the CSRF
+     *        token is issued and before the payload is built
+     * @return the success payload, mutable, or {@code null} when an error response has been written
+     * @throws IOException if writing the error envelope fails
+     */
+    static Map<String, Object> completeLogin(final HttpServletRequest req, final HttpServletResponse res, final FessLoginAssist assist,
+            final String userId, final String prevUserId, final String returnTo, final Runnable onSessionStarted) throws IOException {
+        final String loggedName = LogUtil.sanitize(userId);
         // Resolve the permissions of the bound user while a failure can still be answered. The
         // user bean reads them lazily, and for an LDAP user that is a directory search that can
         // fail even though the bind just succeeded, e.g. when the directory ACL lets the user read
@@ -309,7 +337,7 @@ public class LoginHandler {
             } else {
                 ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/login");
             }
-            return;
+            return null;
         }
 
         // Mirror LoginAction.login(): write the LOGIN record to audit.log as soon as the
@@ -320,7 +348,7 @@ public class LoginHandler {
         // A-1: emit account-switch audit log AFTER successful credential verification so
         // that an unauthenticated attacker with a stolen session cookie cannot trigger a
         // false-positive audit line by posting bad credentials for a different username.
-        if (prevUserId != null && !username.equals(prevUserId)) {
+        if (prevUserId != null && !userId.equals(prevUserId)) {
             logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", prevUserId, loggedName);
         }
 
@@ -340,16 +368,7 @@ public class LoginHandler {
         csrf.rotate(session);
         final String token = csrf.issue(session);
 
-        // MJ-5: clear the USER rate-limit bucket on successful login so that a legitimate user
-        // who exhausted the window (e.g. typo run) is not penalized on their next attempt after
-        // providing the correct credentials. The USER bucket is the (clientIp, username)
-        // composite, so only this user's own failures are forgiven.
-        // The IP bucket is NOT cleared: it also counts the guesses other users made from the same
-        // address, and wiping it would let anyone holding one valid account reset the per-address
-        // allowance with each success and spray passwords without limit. Only the slot this
-        // very request consumed on entry is given back.
-        limiter.clear(LoginRateLimiter.Scope.USER, userKey);
-        limiter.release(LoginRateLimiter.Scope.IP, clientIp);
+        onSessionStarted.run();
 
         final OptionalThing<FessUserBean> userBean = assist.getSavedUserBean();
         final Map<String, Object> payload;
@@ -360,13 +379,56 @@ public class LoginHandler {
             payload.put("csrf_token", token);
             addReturnTo(payload, returnTo);
         }
-        if (!fessConfig.isValidAdminPassword(password)) {
-            // Mirrors LoginAction.login(): a password on password.invalid.admin.passwords signs the
-            // user in and asks for a new one. The session is already live, so this is a prompt for
-            // the client, not an enforcement.
-            payload.put("password_change_required", true);
+        return payload;
+    }
+
+    /**
+     * Takes one slot of the {@link LoginRateLimiter.Scope#IP} bucket for a login attempt, or answers
+     * {@code 429 rate_limited} with {@code Retry-After} when the bucket is exhausted or locked out.
+     * The slot is kept by a failed attempt and given back by a successful one, so it is what counts
+     * the failures from one address. Shared with {@link PasskeyLoginHandler}, which uses the same
+     * {@code theme.api.login.*} limits.
+     *
+     * @param limiter the rate limiter
+     * @param clientIp the resolved client IP (see {@link #resolveClientIp})
+     * @param res the HTTP response, written to only when the attempt is refused
+     * @return {@code true} if the attempt may proceed
+     * @throws IOException if writing the error envelope fails
+     */
+    static boolean takeIpSlot(final LoginRateLimiter limiter, final String clientIp, final HttpServletResponse res) throws IOException {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int ipLimit = fessConfig.getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int lockoutSec = fessConfig.getThemeApiLoginLockoutSecondsAsInteger();
+        if (limiter.allow(LoginRateLimiter.Scope.IP, clientIp, ipLimit, 60)) {
+            return true;
         }
-        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
+        // The rate-limit gates used to be completely silent, so an operator investigating
+        // "login stopped working" had nothing in fess.log to go on. ActivityHelper has no
+        // activity type for a throttled attempt and inventing one would change the audit
+        // schema, so the record goes to the ordinary log instead.
+        //
+        // Only the request that actually arms the lockout is a new security event. Every
+        // later request during the same lockout also reaches this branch, so logging them
+        // all at WARN would let a client that keeps retrying pump the log without bound.
+        if (limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec)) {
+            logger.warn("[v2/login] ip rate limit exceeded; locking out for {}s: clientIp={}, limit={}/min", lockoutSec, clientIp, ipLimit);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("[v2/login] refused a retry during the active ip lockout: clientIp={}", clientIp);
+        }
+        res.setHeader("Retry-After", Integer.toString(lockoutSec));
+        ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (ip)");
+        return false;
+    }
+
+    /**
+     * Writes the generic {@code 401 auth_required} answer of a rejected login. Every login failure
+     * a client can see, password or passkey, is this one response, so the reason never leaks.
+     *
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the error envelope fails
+     */
+    static void writeInvalidCredentials(final HttpServletResponse res) throws IOException {
+        ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
     }
 
     /**
@@ -377,7 +439,7 @@ public class LoginHandler {
      * @param req the incoming HTTP request
      * @param assist the login assist holding the freshly bound user bean
      */
-    private void abandonLogin(final HttpServletRequest req, final FessLoginAssist assist) {
+    private static void abandonLogin(final HttpServletRequest req, final FessLoginAssist assist) {
         try {
             assist.logout();
         } catch (final RuntimeException e) {
@@ -404,7 +466,7 @@ public class LoginHandler {
      *
      * @param assist the login assist holding the freshly bound user bean
      */
-    private void recordLoginActivity(final FessLoginAssist assist) {
+    private static void recordLoginActivity(final FessLoginAssist assist) {
         try {
             ComponentUtil.getActivityHelper().login(assist.getSavedUserBean());
         } catch (final RuntimeException e) {
@@ -436,7 +498,7 @@ public class LoginHandler {
      * Uses {@link UserPayloads#toJson(FessUserBean)} to guarantee shape parity
      * with MeHandler (MJ-28).
      */
-    private Map<String, Object> buildUserPayload(final FessUserBean u, final String token, final String returnTo) {
+    private static Map<String, Object> buildUserPayload(final FessUserBean u, final String token, final String returnTo) {
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("user", ComponentUtil.getV2UserPayloads().toJson(u));
         payload.put("csrf_token", token);
@@ -450,7 +512,7 @@ public class LoginHandler {
      * any ASCII control character. The pattern requires a leading '/' so relative
      * paths below the app root are always safe.
      */
-    private void addReturnTo(final Map<String, Object> payload, final String returnTo) {
+    private static void addReturnTo(final Map<String, Object> payload, final String returnTo) {
         // Silent-drop oversized return_to values before any further validation.
         if ((returnTo == null) || (returnTo.length() > 10000)) {
             return;
@@ -514,7 +576,7 @@ public class LoginHandler {
      * falling back to {@link HttpServletRequest#getRemoteAddr()} when the helper
      * is not available — e.g. in slim test DI graphs.
      */
-    private String resolveClientIp(final HttpServletRequest req) {
+    static String resolveClientIp(final HttpServletRequest req) {
         try {
             return ComponentUtil.getRateLimitHelper().getClientIp(req);
         } catch (final RuntimeException e) {

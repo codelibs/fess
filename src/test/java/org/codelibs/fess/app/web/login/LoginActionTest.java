@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.login;
 
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
+import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
@@ -27,6 +28,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.login.redirect.LoginRedirectBean;
+import org.lastaflute.web.response.render.RenderData;
 
 public class LoginActionTest extends UnitFessTestCase {
 
@@ -140,6 +143,7 @@ public class LoginActionTest extends UnitFessTestCase {
         // POST to /login/changePassword after it arrives with no old password to look the user up by.
         suppressBindingOf(FessLoginAssist.class);
         suppressBindingOf(UserService.class);
+        suppressBindingOf(PasskeyService.class);
         final LoginAction changeAction = new LoginAction() {
             {
                 fessConfig = ComponentUtil.getFessConfig();
@@ -298,5 +302,104 @@ public class LoginActionTest extends UnitFessTestCase {
             ldapAction.recordFailure(limiter, "198.51.100.25", "adminxyz");
         }
         assertFalse(ldapAction.isThrottled(limiter, "198.51.100.25", "admin"));
+    }
+
+    // -----------------------------------------------------------------------
+    // Passkey button of the login page
+    // -----------------------------------------------------------------------
+
+    private PasskeyService passkeyService(final boolean enabled, final String rpId, final String origins) {
+        return new PasskeyService() {
+            {
+                fessConfig = new FessConfig.SimpleImpl() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public boolean isPasskeyEnabled() {
+                        return enabled;
+                    }
+
+                    @Override
+                    public String getPasskeyRpId() {
+                        return rpId;
+                    }
+
+                    @Override
+                    public String getPasskeyOrigins() {
+                        return origins;
+                    }
+                };
+            }
+        };
+    }
+
+    private LoginAction passkeyAction(final PasskeyService service, final String savedPath) {
+        return new LoginAction() {
+            {
+                passkeyService = service;
+                fessLoginAssist = new FessLoginAssist() {
+                    @Override
+                    public OptionalThing<LoginRedirectBean> getLoginRedirectBean() {
+                        return OptionalThing.ofNullable(savedPath == null ? null : new LoginRedirectBean(savedPath), () -> {
+                            throw new IllegalStateException("no saved path");
+                        });
+                    }
+                };
+            }
+        };
+    }
+
+    private RenderData render(final LoginAction passkeyAction) {
+        final RenderData data = new RenderData();
+        passkeyAction.registerPasskeyLogin(data);
+        return data;
+    }
+
+    @Test
+    public void test_thePasskeyButtonIsOfferedWhenPasskeysAreEffectivelyEnabled() {
+        final RenderData data = render(passkeyAction(passkeyService(true, "example.com", "https://example.com"), null));
+        assertEquals(Boolean.TRUE, data.getDataMap().get("passkeyLogin"));
+        assertFalse(data.getDataMap().containsKey("passkeyRedirectPath"));
+    }
+
+    @Test
+    public void test_thePasskeyButtonIsNotOfferedWhenTheFeatureIsOff() {
+        final RenderData data = render(passkeyAction(passkeyService(false, "example.com", "https://example.com"), "/admin/user/"));
+        assertEquals(Boolean.FALSE, data.getDataMap().get("passkeyLogin"));
+        assertFalse(data.getDataMap().containsKey("passkeyRedirectPath"));
+    }
+
+    /** The flag alone is not enough: a feature without its relying party id or origins is not available. */
+    @Test
+    public void test_thePasskeyButtonFollowsTheEffectiveStateNotTheRawFlag() {
+        assertEquals(Boolean.FALSE,
+                render(passkeyAction(passkeyService(true, "", "https://example.com"), null)).getDataMap().get("passkeyLogin"));
+        assertEquals(Boolean.FALSE, render(passkeyAction(passkeyService(true, "example.com", " "), null)).getDataMap().get("passkeyLogin"));
+    }
+
+    @Test
+    public void test_theSavedRequestPathIsHandedToThePage() {
+        final RenderData data = render(passkeyAction(passkeyService(true, "example.com", "https://example.com"), "/admin/user/?q=a"));
+        assertEquals("/admin/user/?q=a", data.getDataMap().get("passkeyRedirectPath"));
+    }
+
+    @Test
+    public void test_pathsThatStayOnThisHostAreKept() {
+        // the page prefixes its context path and the browser resolves the result on this origin: an
+        // encoded slash is not a separator, and dot segments cannot climb above the host
+        for (final String good : new String[] { "/%2f/evil.example", "/..//evil", "/admin/user/?q=a" }) {
+            final RenderData data = render(passkeyAction(passkeyService(true, "example.com", "https://example.com"), good));
+            assertEquals(good, data.getDataMap().get("passkeyRedirectPath"));
+        }
+    }
+
+    @Test
+    public void test_aSavedPathThatIsNotAPlainApplicationPathIsDropped() {
+        for (final String bad : new String[] { "//evil.example/x", "/\\evil.example", "https://evil.example/", "admin/", "/a\nb",
+                "/a\u0000b", "", "/\t/evil.example", " /x" }) {
+            final RenderData data = render(passkeyAction(passkeyService(true, "example.com", "https://example.com"), bad));
+            assertEquals(Boolean.TRUE, data.getDataMap().get("passkeyLogin"));
+            assertFalse(data.getDataMap().containsKey("passkeyRedirectPath"), bad);
+        }
     }
 }

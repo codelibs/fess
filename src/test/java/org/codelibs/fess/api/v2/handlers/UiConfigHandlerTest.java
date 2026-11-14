@@ -457,6 +457,27 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_features_passkeyEnabled_followsPasskeyService() throws Exception {
+        for (final boolean enabled : new boolean[] { true, false }) {
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler() {
+                @Override
+                protected boolean isPasskeyEnabled() {
+                    return enabled;
+                }
+            }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"passkey_enabled\":" + enabled), res.body());
+        }
+    }
+
+    @Test
+    public void test_isPasskeyEnabled_falseWithoutPasskeyService() {
+        // test_app.xml defines no passkey service, so the lookup fails and passkeys stay off.
+        assertFalse(new UiConfigHandler().isPasskeyEnabled());
+    }
+
+    @Test
     public void test_features_osddLink_followsOsddHelper() throws Exception {
         for (final boolean served : new boolean[] { true, false }) {
             ComponentUtil.register(new OsddHelper() {

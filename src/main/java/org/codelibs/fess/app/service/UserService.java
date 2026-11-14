@@ -59,6 +59,10 @@ public class UserService {
     @Resource
     protected FessConfig fessConfig;
 
+    /** Passkey service, so that a deleted user does not leave passkeys behind for a later user of the same name */
+    @Resource
+    protected PasskeyService passkeyService;
+
     /**
      * Retrieves a paginated list of users based on the provided pager criteria.
      * Updates the pager with pagination information including total count and page navigation.
@@ -110,7 +114,17 @@ public class UserService {
      * Handles user authentication setup and database persistence.
      * If the surname is blank, it will be set to the user's name.
      *
+     * <p>Passkeys are bound to a user name only, so a name that is new to the stored row starts
+     * without any: when the row is created, every passkey left under its name (by a deletion that did
+     * not go through {@link #delete(User)}, or one that raced with a registration) is removed first,
+     * and when the row is renamed the passkeys of both the previous and the new name are removed, since
+     * credentials do not follow a rename. A failure to remove them fails the store before the user is
+     * written.</p>
+     *
+     * <p>A rename onto a name another user already holds is refused before anything is removed.</p>
+     *
      * @param user the user entity to store
+     * @throws IllegalArgumentException if the user is renamed to the name of another user
      */
     public void store(final User user) {
         final String username = user.getName();
@@ -125,6 +139,8 @@ public class UserService {
             if (StringUtil.isBlank(user.getSurname())) {
                 user.setSurname(user.getName());
             }
+
+            removeInheritablePasskeys(user);
 
             ComponentUtil.getAuthenticationManager().insert(user);
 
@@ -150,6 +166,32 @@ public class UserService {
             throw e;
         } finally {
             user.clearOriginalPassword();
+        }
+    }
+
+    /**
+     * Removes the passkeys a user would otherwise inherit: those of its name when no row is stored under
+     * its ID yet, and those of the previous and the new name when the stored row has another name.
+     *
+     * @param user the user about to be stored
+     * @throws IllegalArgumentException if the stored row is renamed to the name of another user
+     */
+    protected void removeInheritablePasskeys(final User user) {
+        final String username = user.getName();
+        final String previousName =
+                StringUtil.isBlank(user.getId()) ? null : userBhv.selectByPK(user.getId()).map(User::getName).orElse(null);
+        if (previousName == null) {
+            passkeyService.deleteByUserName(username);
+        } else if (!previousName.equals(username)) {
+            if (getUserByName(username).filter(other -> !user.getId().equals(other.getId())).isPresent()) {
+                throw new IllegalArgumentException("A user named " + username + " already exists");
+            }
+            passkeyService.deleteByUserName(previousName);
+            passkeyService.deleteByUserName(username);
+            if (logger.isInfoEnabled()) {
+                logger.info("Removed the passkeys of a renamed user: previousName={}, username={}, id={}", previousName, username,
+                        user.getId());
+            }
         }
     }
 
@@ -195,6 +237,29 @@ public class UserService {
             logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
             throw e;
         }
+    }
+
+    /**
+     * Ends the login sessions of a local user that were opened before now, except the one that makes
+     * the request when it is the user's own. It records a new time in the field a password change
+     * records, so the sessions end the way they do after a password change: when they next check the
+     * user index, within {@code password.changed.check.interval} seconds. A user that is not stored
+     * is left alone.
+     *
+     * <p>Removing a passkey calls this, so a session opened with a lost authenticator does not outlive it.</p>
+     *
+     * @param username the name of the user
+     */
+    public void endOtherSessions(final String username) {
+        userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
+            final long changedAt = nextPasswordChangedAt(entity);
+            entity.setPasswordChangedAt(changedAt);
+            userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
+            acceptPasswordChange(username, changedAt);
+            if (logger.isInfoEnabled()) {
+                logger.info("Ended the login sessions of the user: username={}, id={}", username, entity.getId());
+            }
+        });
     }
 
     /**
@@ -366,7 +431,12 @@ public class UserService {
 
     /**
      * Deletes a user from the system.
-     * Removes the user from both the authentication manager and the database.
+     * Removes the user's passkeys first, then the user from both the authentication manager and the
+     * database, then the passkeys once more. Passkeys are bound to a user by name only, so they must
+     * not outlive the user: a user created later under the same name would otherwise inherit them. If
+     * the first removal fails the exception propagates and the user is left untouched. The second one
+     * catches a passkey registered while the user was being deleted; it is best effort, since the user
+     * is gone by then and {@link #store(User)} removes the passkeys of a name again when it is created.
      *
      * @param user the user entity to delete
      */
@@ -379,11 +449,19 @@ public class UserService {
         }
 
         try {
+            passkeyService.deleteByUserName(username);
+
             ComponentUtil.getAuthenticationManager().delete(user);
 
             userBhv.delete(user, op -> {
                 op.setRefreshPolicy(Constants.TRUE);
             });
+
+            try {
+                passkeyService.deleteByUserName(username);
+            } catch (final RuntimeException e) {
+                logger.warn("Failed to remove the passkeys registered while the user was deleted: username={}, id={}", username, userId, e);
+            }
 
             if (logger.isInfoEnabled()) {
                 logger.info("User deleted successfully: username={}, id={}", username, userId);

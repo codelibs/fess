@@ -54,8 +54,8 @@ public class CsrfRequirement {
      * pass the CSRF token check.
      *
      * <p>Idempotent methods ({@code GET}, {@code HEAD}, {@code OPTIONS}) are
-     * always exempt. {@code POST /auth/login} is exempt because the client
-     * cannot yet possess a token; all other state-changing endpoints listed in
+     * always exempt. {@code POST /auth/login} and the two passkey login
+     * endpoints are exempt because the client cannot yet possess a token; all other state-changing endpoints listed in
      * the class Javadoc require a valid token. Unknown sub-paths fall through
      * to the secure default ({@code true}) — enforcement required — so that a
      * newly added endpoint is CSRF-gated by default rather than silently
@@ -74,11 +74,13 @@ public class CsrfRequirement {
             return false;
         }
         switch (subPath) {
-        case "/auth/login":
+        case "/auth/login", "/auth/passkey/login/options", "/auth/passkey/login/verify":
             return false;
         case "/auth/logout":
             return true;
         case "/auth/password":
+            return true;
+        case "/auth/passkey/register/options", "/auth/passkey/register/verify":
             return true;
         case "/click":
             return true;
@@ -96,6 +98,10 @@ public class CsrfRequirement {
             return true;
         }
         if (subPath.startsWith("/chat/sessions/")) {
+            return true;
+        }
+        if (subPath.startsWith("/auth/passkey/")) {
+            // DELETE /auth/passkey/{id}
             return true;
         }
         // Secure default: unknown state-changing sub-paths require a CSRF token.

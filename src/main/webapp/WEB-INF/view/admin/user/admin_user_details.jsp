@@ -263,6 +263,62 @@ ${fe:html(true)}
                     </div>
                 </div>
             </la:form>
+            <c:if test="${passkeyVisible}">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-outline card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title"><la:message key="labels.passkey_title"/></h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered" aria-label="<la:message key="labels.passkey_title" />">
+                                    <thead>
+                                    <tr>
+                                        <th><la:message key="labels.passkey_label"/></th>
+                                        <th><la:message key="labels.createdTime"/></th>
+                                        <th><la:message key="labels.passkey_last_used"/></th>
+                                        <c:if test="${editable}">
+                                            <th></th>
+                                        </c:if>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="passkey" items="${passkeyItems}">
+                                        <tr>
+                                            <td>${f:h(passkey.label)}</td>
+                                            <td><fmt:formatDate value="${fe:date(passkey.createdAt)}"
+                                                                pattern="yyyy-MM-dd'T'HH:mm:ss"/></td>
+                                            <td><c:choose>
+                                                <c:when test="${passkey.lastUsedAt != null && passkey.lastUsedAt > 0}"><fmt:formatDate
+                                                        value="${fe:date(passkey.lastUsedAt)}"
+                                                        pattern="yyyy-MM-dd'T'HH:mm:ss"/></c:when>
+                                                <c:otherwise><la:message key="labels.passkey_never_used"/></c:otherwise>
+                                            </c:choose></td>
+                                            <c:if test="${editable}">
+                                                <td class="text-center">
+                                                    <la:form action="/admin/user/">
+                                                        <input type="hidden" name="id" value="${f:h(id)}"/>
+                                                        <input type="hidden" name="credentialId" value="${f:h(passkey.id)}"/>
+                                                        <button type="submit" class="btn btn-danger btn-xs"
+                                                                name="deletePasskey"
+                                                                data-confirm="<la:message key="labels.passkey_reset_confirmation"/>"
+                                                                onclick="return confirm(this.getAttribute('data-confirm'));"
+                                                                value="<la:message key="labels.crud_button_reset" />">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                                            <la:message key="labels.crud_button_reset"/>
+                                                        </button>
+                                                    </la:form>
+                                                </td>
+                                            </c:if>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:if>
         </section>
     </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
