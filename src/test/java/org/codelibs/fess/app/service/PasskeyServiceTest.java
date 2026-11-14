@@ -153,6 +153,8 @@ public class PasskeyServiceTest extends UnitFessTestCase {
     public void test_isEnabled_falseWhenAnOriginIsNotAnHttpOrigin() {
         assertFalse(createService(true, "example.com", "https://exa mple.com").isEnabled());
         assertFalse(createService(true, "example.com", "example.com").isEnabled());
+        // java.net.URI, which webauthn4j reads origins with too, finds no host in a name with an underscore
+        assertFalse(createService(true, "example.com", "http://fess_host:8080").isEnabled());
         assertFalse(createService(true, "example.com", "https://example.com,ftp://example.com").isEnabled());
     }
 
