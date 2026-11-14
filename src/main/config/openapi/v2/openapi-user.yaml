@@ -896,7 +896,10 @@ paths:
 
         While passkeys are disabled (`features.passkey_enabled` of
         `/ui/config` is false) every `/auth/passkey*` endpoint answers
-        `404 not_found`, as an unknown path does.
+        `404 not_found`, as an unknown path does, once the request passes
+        the checks every v2 endpoint has first: a call that needs a CSRF
+        token and has none answers `403`, and with `login.required` an
+        anonymous call to a login-only endpoint answers `401`.
 
         Exempt from CSRF, like `/auth/login`. During a per-IP lockout of
         the login it answers `429 rate_limited`; it takes no rate-limit slot
@@ -982,8 +985,10 @@ paths:
       summary: Start registering a passkey
       description: |-
         Re-checks `current_password` against the local password, on the
-        per-user bucket of the password login (`429 rate_limited` when it
-        is spent), and returns the options for `navigator.credentials.create`.
+        per-user bucket of the password change (`429 rate_limited` when it
+        is spent; the bucket is keyed by the user name alone, so wrong
+        passwords here also lock `POST /auth/password`, but not the
+        password login), and returns the options for `navigator.credentials.create`.
         A wrong password answers `401` with `reason=invalid_current_password`;
         a session that is not a local user's answers `401` as no session
         does. A user has at most 20 passkeys: beyond that it answers `400`
