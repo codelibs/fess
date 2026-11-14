@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -645,6 +646,7 @@ public class IndexUpdater extends Thread {
         }
         final long execTime = systemHelper.getCurrentTimeAsLong();
         final List<OpenSearchAccessResult> arList = ((OpenSearchDataService) dataService).getAccessResultList(cb);
+        deleteUnreadableAccessResults(arList);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!arList.isEmpty()) {
             final long commitMarginTime = fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue();
@@ -681,6 +683,31 @@ public class IndexUpdater extends Thread {
             intervalControlHelper.setCrawlerRunning(false);
         }
         return arList;
+    }
+
+    /**
+     * Deletes the access results that OpenSearch could not read.
+     * OpenSearch leaves such a document out of the page and counts it in the total hits, so it would stay at the head
+     * of the unprocessed list for ever, and the indexer would wait for the page to fill up. The document cannot be indexed,
+     * and cannot be updated either, so it is deleted. When the deletion fails, it is tried again with the next page.
+     *
+     * @param arList the page of access results
+     */
+    private void deleteUnreadableAccessResults(final List<OpenSearchAccessResult> arList) {
+        if (!(arList instanceof OpenSearchResultList)) {
+            return;
+        }
+        final List<OpenSearchAccessResult> unreadableList = ((OpenSearchResultList<OpenSearchAccessResult>) arList).getUnreadableList();
+        if (unreadableList == null || unreadableList.isEmpty()) {
+            return;
+        }
+        try {
+            ((OpenSearchDataService) dataService).deleteAccessResults(unreadableList);
+            logger.warn("Deleted the access results that OpenSearch cannot read, which are not indexed: count={}, ids={}",
+                    unreadableList.size(), unreadableList.stream().map(OpenSearchAccessResult::getId).collect(Collectors.toList()));
+        } catch (final Exception e) {
+            logger.warn("Failed to delete the access results that OpenSearch cannot read: count={}", unreadableList.size(), e);
+        }
     }
 
     /**
