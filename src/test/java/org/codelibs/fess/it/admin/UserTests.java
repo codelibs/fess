@@ -15,7 +15,11 @@
  */
 package org.codelibs.fess.it.admin;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
@@ -72,6 +76,37 @@ public class UserTests extends CrudTestBase {
         final Map<String, Object> updateMap = new HashMap<>();
         updateMap.put("name", NAME_PREFIX + "new");
         return updateMap;
+    }
+
+    /**
+     * Renames every user. A user cannot take the name of another user, so each one gets a name of its
+     * own (the base class would give all of them the same name), and the refusal is checked too.
+     */
+    @Override
+    protected void testUpdate() {
+        final List<Map<String, Object>> users = getItemList(createSearchBody(SEARCH_ALL_NUM));
+        final String idKey = getIdKey();
+        for (int i = 0; i < users.size(); i++) {
+            final Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("version_no", 1);
+            requestBody.put(idKey, users.get(i).get(idKey));
+            requestBody.put(KEY_PROPERTY, NAME_PREFIX + "new" + i);
+            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+            refresh();
+        }
+
+        final List<String> names = getPropList(createSearchBody(SEARCH_ALL_NUM), KEY_PROPERTY);
+        assertEquals(users.size(), names.size());
+        for (final String name : names) {
+            assertEquals(true, name.startsWith(NAME_PREFIX + "new"), name);
+        }
+
+        // the first user cannot take the name of the second
+        final Map<String, Object> refused = new HashMap<>();
+        refused.put("version_no", 1);
+        refused.put(idKey, users.get(0).get(idKey));
+        refused.put(KEY_PROPERTY, NAME_PREFIX + "new1");
+        checkPutMethod(refused, getItemEndpointSuffix()).then().body("response.status", equalTo(1));
     }
 
     @Test
