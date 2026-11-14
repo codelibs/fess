@@ -399,7 +399,7 @@ public class AdminUserAction extends FessAdminAction {
         try {
             if (!passkeyService.delete(user.getName(), form.credentialId)) {
                 logger.warn("Passkey not found: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId);
-                saveError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.credentialId));
+                saveError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, credentialId));
                 return redirectToDetails(id);
             }
             logger.info("Deleted passkey: admin={}, userName={}, credentialId={}", admin, user.getName(), credentialId);
