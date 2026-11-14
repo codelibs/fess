@@ -44,8 +44,8 @@ public class UserService {
 
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
-    /** How many times ending the sessions of a user is tried when the user is changed in between. */
-    private static final int END_OTHER_SESSIONS_ATTEMPTS = 3;
+    /** How many times a change of a user is tried when the user is changed in between. */
+    private static final int CONDITIONAL_WRITE_ATTEMPTS = 3;
 
     /**
      * Default constructor for UserService.
@@ -126,8 +126,14 @@ public class UserService {
      *
      * <p>A rename onto a name another user already holds is refused before anything is removed.</p>
      *
+     * <p>A user that was read (it carries the sequence number and primary term it was read with) is written
+     * on the condition that it has not been changed since. The passkeys that a rename removes and the
+     * external authentication manager are handled before that write, so a refused save does not
+     * undo them.</p>
+     *
      * @param user the user entity to store
      * @throws IllegalArgumentException if the user is renamed to the name of another user
+     * @throws IllegalStateException if the user was read and has been changed by someone else since
      */
     public void store(final User user) {
         final String username = user.getName();
@@ -153,9 +159,18 @@ public class UserService {
                 user.setPasswordChangedAt(passwordChangedAt);
             }
 
-            userBhv.insertOrUpdate(user, op -> {
-                op.setRefreshPolicy(Constants.TRUE);
-            });
+            if (hasVersion(user)) {
+                // The user was read, and the whole document is written back: a change made in between
+                // (a password change, for one) must not be put back to what was read.
+                if (!updateIfUnchanged(user)) {
+                    throw new IllegalStateException(
+                            "The user was changed by someone else, so it was not saved. Load it again and retry: username=" + username);
+                }
+            } else {
+                userBhv.insertOrUpdate(user, op -> {
+                    op.setRefreshPolicy(Constants.TRUE);
+                });
+            }
             if (passwordChangedAt != null) {
                 acceptPasswordChange(username, passwordChangedAt);
             }
@@ -205,6 +220,7 @@ public class UserService {
      * @param username the username of the user
      * @param password the new password in plain text
      * @throws FessUserNotFoundException if the user is not found
+     * @throws IllegalStateException if the user was changed concurrently on each of the attempts
      */
     public void changePassword(final String username, final String password) {
         if (logger.isDebugEnabled()) {
@@ -214,23 +230,30 @@ public class UserService {
         try {
             final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
             if (changed) {
-                userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
-                    final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
+                final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
+                for (int attempt = 0; attempt < CONDITIONAL_WRITE_ATTEMPTS; attempt++) {
+                    final OptionalEntity<User> found = userBhv.selectEntity(cb -> cb.query().setName_Equal(username));
+                    if (!found.isPresent()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to change password - user not found: username={}", username);
+                        }
+                        throw new FessUserNotFoundException(username);
+                    }
+                    final User entity = found.get();
                     entity.setPassword(encodedPassword);
                     final long passwordChangedAt = nextPasswordChangedAt(entity);
                     entity.setPasswordChangedAt(passwordChangedAt);
-                    userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
+                    if (!updateIfUnchanged(entity)) {
+                        continue;
+                    }
                     acceptPasswordChange(username, passwordChangedAt);
 
                     if (logger.isInfoEnabled()) {
                         logger.info("Password changed successfully for user: username={}, id={}", username, entity.getId());
                     }
-                }).orElse(() -> {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Failed to change password - user not found: username={}", username);
-                    }
-                    throw new FessUserNotFoundException(username);
-                });
+                    return;
+                }
+                throw new IllegalStateException("The user was changed concurrently, so its password was not changed: username=" + username);
             } else {
                 logger.warn("Password change not applied by authentication manager: username={}", username);
             }
@@ -254,7 +277,7 @@ public class UserService {
      * @param username the name of the user
      */
     public void endOtherSessions(final String username) {
-        for (int attempt = 0; attempt < END_OTHER_SESSIONS_ATTEMPTS; attempt++) {
+        for (int attempt = 0; attempt < CONDITIONAL_WRITE_ATTEMPTS; attempt++) {
             final OptionalEntity<User> found = userBhv.selectEntity(cb -> cb.query().setName_Equal(username));
             if (!found.isPresent()) {
                 return;
@@ -265,23 +288,8 @@ public class UserService {
             // The whole document is written back, so the write is conditional on what was read: without
             // it a password change that lands between the read and the write would be put back to the
             // old hash.
-            final Long seqNo = entity.asDocMeta().seqNo();
-            final Long primaryTerm = entity.asDocMeta().primaryTerm();
-            try {
-                userBhv.update(entity, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                    if (seqNo != null && seqNo.longValue() >= 0L) {
-                        op.setIfSeqNo(seqNo);
-                    }
-                    if (primaryTerm != null && primaryTerm.longValue() >= 0L) {
-                        op.setIfPrimaryTerm(primaryTerm);
-                    }
-                });
-            } catch (final RuntimeException e) {
-                if (isVersionConflict(e)) {
-                    continue;
-                }
-                throw e;
+            if (!updateIfUnchanged(entity)) {
+                continue;
             }
             acceptPasswordChange(username, changedAt);
             if (logger.isInfoEnabled()) {
@@ -290,6 +298,47 @@ public class UserService {
             return;
         }
         throw new IllegalStateException("The user was changed concurrently, so its sessions were not ended: username=" + username);
+    }
+
+    /**
+     * Tells whether the user was read from the index, so that its sequence number and primary term are known.
+     *
+     * @param user the user
+     * @return true if the user carries them
+     */
+    private static boolean hasVersion(final User user) {
+        final Long seqNo = user.asDocMeta().seqNo();
+        final Long primaryTerm = user.asDocMeta().primaryTerm();
+        return seqNo != null && seqNo.longValue() >= 0L && primaryTerm != null && primaryTerm.longValue() > 0L;
+    }
+
+    /**
+     * Writes a user that was read, on the condition that it has not been changed since: the sequence number
+     * and primary term it was read with go into the request, which the index rejects with a version conflict
+     * otherwise. A user that carries no version is written without the condition.
+     *
+     * @param user the user, as read and changed
+     * @return false if the stored user was changed in the meantime, true if it was written
+     */
+    private boolean updateIfUnchanged(final User user) {
+        final boolean versioned = hasVersion(user);
+        final Long seqNo = user.asDocMeta().seqNo();
+        final Long primaryTerm = user.asDocMeta().primaryTerm();
+        try {
+            userBhv.update(user, op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+                if (versioned) {
+                    op.setIfSeqNo(seqNo);
+                    op.setIfPrimaryTerm(primaryTerm);
+                }
+            });
+            return true;
+        } catch (final RuntimeException e) {
+            if (isVersionConflict(e)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     /**
