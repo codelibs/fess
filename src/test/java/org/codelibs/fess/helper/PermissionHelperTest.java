@@ -476,6 +476,26 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertTrue(ng.hasMessageOf("permissions"));
     }
 
+    @Test
+    public void test_validateEntries_firstEntryWithLeadingSpace() {
+        // the admin API reads a JSON body: no parameter, the given text is judged
+        final FessMessages api = new FessMessages();
+        permissionHelper.validateEntries("{user}bob\n {role}admin", api);
+        assertTrue(api.hasMessageOf("permissions"));
+
+        // the form mapping trims the parameter, so the form holds "{user}bob..." while the request still has the space
+        getMockRequest().setParameter("permissions", " {user}bob\r\nDevelopers");
+        final FessMessages ng = new FessMessages();
+        permissionHelper.validateEntries("{user}bob\nDevelopers", ng);
+        assertTrue(ng.hasMessageOf("permissions"));
+
+        // a request parameter that is some other text is not used
+        getMockRequest().setParameter("permissions", " {user}carol");
+        final FessMessages ok = new FessMessages();
+        permissionHelper.validateEntries("{user}bob\nDevelopers", ok);
+        assertTrue(ok.isEmpty());
+    }
+
     private static UserPrincipal user(final String name) {
         return new UserPrincipal() {
             @Override
