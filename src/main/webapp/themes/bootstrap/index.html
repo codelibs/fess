@@ -26,7 +26,7 @@
        SHARED HEADER — tag-parity with WEB-INF/view/header.jsp.
        header > nav.navbar… > div#content.container with the brand logo,
        the search input-group (#query / #searchButton / #searchOptionsButton),
-       and the right-side ul.nav.navbar-nav.d-none.d-md-flex of li.nav-item
+       and the right-side ul.nav.navbar-nav.collapse.d-md-flex of li.nav-item (a menu behind #headerNavToggle below 768px)
        entries (warnings + auth + chat + help).  The search box is shown on
        EVERY view (only hidden on /chat — toggled by app.js setSearchFormVisible).
        =================================================================== -->
@@ -56,7 +56,11 @@
             <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions" data-bs-theme="light"></ul>
           </form>
         </div>
-        <ul class="nav navbar-nav d-none d-md-flex ms-auto" id="header-nav">
+        <!-- Below 768px the nav (sign-in, AI search, help) is a menu behind this button. -->
+        <button type="button" class="navbar-toggler d-md-none ms-auto" id="headerNavToggle"
+                data-bs-toggle="collapse" data-bs-target="#header-nav" aria-expanded="false" aria-controls="header-nav"
+                aria-label="Menu" data-i18n-aria-label="nav.menu"><span class="navbar-toggler-icon"></span></button>
+        <ul class="nav navbar-nav collapse d-md-flex ms-auto" id="header-nav">
           <!-- Warning indicators (EOL / dev-mode) rendered by app.js as li.nav-item -->
           <!-- Auth entry (login nav-link OR user dropdown) rendered by auth.js -->
           <li class="nav-item" id="auth-controls" data-i18n-aria-label="aria.auth_controls"></li>

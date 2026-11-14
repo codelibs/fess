@@ -306,3 +306,13 @@ footer[role="contentinfo"] {
   #result .more { display: block; }
   #result .description { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* Below 768px the nav (sign-in, AI search, help, the user menu) is a menu: #headerNavToggle opens #header-nav as a panel
+   under the header, and the search box gives way to the button instead of pushing the options button off the screen. */
+@media (max-width: 767.98px) {
+  header > nav > .container { gap: .5rem; }
+  #search-form-wrap { flex: 1 1 0; width: auto; min-width: 0; max-width: none; }
+  #header-nav.show { position: absolute; top: 100%; right: .75rem; z-index: 1056; flex-direction: column; align-items: stretch; min-width: 12rem;
+    padding: .35rem; background: var(--bs-dark); border: 1px solid var(--bs-border-color-translucent); border-radius: var(--fess-card-radius); box-shadow: 0 .25rem .75rem rgba(0,0,0,.3); }
+  #header-nav.show .nav-link { padding: .6rem .75rem; }
+}

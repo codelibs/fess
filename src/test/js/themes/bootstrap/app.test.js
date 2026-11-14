@@ -13,6 +13,8 @@
 // text/sanitize construction. The real i18n.t() is replaced by an identity
 // stub, so text assertions target the caller-supplied string / i18n key.
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { resetDom, setLocation } from "../../helpers/dom.js";
 
@@ -776,6 +778,53 @@ describe("auth events", () => {
     await flush();
     expect(auth.endSession).not.toHaveBeenCalled();
     expect(auth.promptLogin).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The header nav below 768px: a menu behind #headerNavToggle (it was d-none with no way to open it).
+// ---------------------------------------------------------------------------
+describe("header menu below 768px", () => {
+  const html = readFileSync(resolve(import.meta.dirname, "../../../../main/webapp/themes/bootstrap/index.html"), "utf-8");
+
+  it("index.html: the nav is a collapse on phones and a flex row from md up, opened by a menu button that names the target", () => {
+    document.body.innerHTML = html.slice(html.indexOf("<body>"));
+    const nav = document.getElementById("header-nav");
+    expect(nav.classList.contains("collapse")).toBe(true);
+    expect(nav.classList.contains("d-md-flex")).toBe(true);
+    expect(nav.classList.contains("d-none")).toBe(false);
+    const toggle = document.getElementById("headerNavToggle");
+    expect(toggle.classList.contains("d-md-none")).toBe(true);
+    expect(toggle.getAttribute("data-bs-toggle")).toBe("collapse");
+    expect(toggle.getAttribute("data-bs-target")).toBe("#header-nav");
+    expect(toggle.getAttribute("aria-controls")).toBe("header-nav");
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(toggle.getAttribute("data-i18n-aria-label")).toBe("nav.menu");
+    expect(toggle.getAttribute("aria-label")).toBeTruthy();
+  });
+
+  it("closes the open menu when a view opens or the sign-in dialog opens", async () => {
+    mountFullDom();
+    document.getElementById("header-nav").classList.add("collapse", "show");
+    const hide = vi.fn();
+    const getOrCreateInstance = vi.fn(() => ({ hide }));
+    window.bootstrap = { Collapse: { getOrCreateInstance } };
+    try {
+      await main();
+      for (const type of ["fess:route:change", "show.bs.modal"]) {
+        hide.mockClear(); getOrCreateInstance.mockClear();
+        document.dispatchEvent(new Event(type));
+        expect(getOrCreateInstance.mock.calls.some(([el]) => el.id === "header-nav")).toBe(true);
+        expect(hide).toHaveBeenCalled();
+      }
+      // a menu that is already closed is left alone
+      document.getElementById("header-nav").classList.remove("show");
+      getOrCreateInstance.mockClear();
+      document.dispatchEvent(new Event("show.bs.modal"));
+      expect(getOrCreateInstance.mock.calls.some(([el]) => el.id === "header-nav")).toBe(false);
+    } finally {
+      delete window.bootstrap;
+    }
   });
 });
 

@@ -670,6 +670,17 @@ export async function main() {
     }
   });
 
+  // Below 768px #header-nav is a menu behind #headerNavToggle: close it when a view opens (Help, the profile) or the
+  // sign-in dialog opens, so it does not stay open over the new content.
+  const closeHeaderMenu = () => {
+    const nav = document.getElementById("header-nav");
+    if (nav && nav.classList.contains("show") && window.bootstrap && window.bootstrap.Collapse) {
+      window.bootstrap.Collapse.getOrCreateInstance(nav, { toggle: false }).hide();
+    }
+  };
+  document.addEventListener("fess:route:change", closeHeaderMenu);
+  document.addEventListener("show.bs.modal", closeHeaderMenu);
+
   // Wire back-to-top button.
   attachBackToTop();
 
