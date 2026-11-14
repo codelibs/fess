@@ -99,6 +99,7 @@
   "profile.success": "आपका पासवर्ड सफलतापूर्वक अपडेट किया गया।",
   "profile.error_mismatch": "नया पासवर्ड और पुष्टि मेल नहीं खाती।",
   "profile.error_password_length": "पासवर्ड कम से कम {0} वर्णों का होना चाहिए।",
+  "profile.error_password_too_long": "पासवर्ड {0} बाइट से अधिक लंबा नहीं होना चाहिए।",
   "profile.error_password_no_uppercase": "पासवर्ड में कम से कम एक बड़ा अक्षर होना चाहिए।",
   "profile.error_password_no_lowercase": "पासवर्ड में कम से कम एक छोटा अक्षर होना चाहिए।",
   "profile.error_password_no_digit": "पासवर्ड में कम से कम एक अंक होना चाहिए।",

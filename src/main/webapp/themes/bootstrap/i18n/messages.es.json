@@ -99,6 +99,7 @@
   "profile.success": "Su contraseña ha sido actualizada exitosamente.",
   "profile.error_mismatch": "La nueva contraseña y la confirmación no coinciden.",
   "profile.error_password_length": "La contraseña debe tener al menos {0} caracteres.",
+  "profile.error_password_too_long": "La contraseña no debe superar los {0} bytes.",
   "profile.error_password_no_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
   "profile.error_password_no_lowercase": "La contraseña debe contener al menos una letra minúscula.",
   "profile.error_password_no_digit": "La contraseña debe contener al menos un dígito.",

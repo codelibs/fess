@@ -509,6 +509,8 @@ export function localizePasswordError(err) {
   switch (reason) {
     case "errors.password_length":
       return t("profile.error_password_length", [details.min_length]);
+    case "errors.password_too_long":
+      return t("profile.error_password_too_long", [details.max_bytes]);
     case "errors.password_no_uppercase":
       return t("profile.error_password_no_uppercase");
     case "errors.password_no_lowercase":

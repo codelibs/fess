@@ -99,6 +99,7 @@
   "profile.success": "パスワードを更新しました。",
   "profile.error_mismatch": "新しいパスワードと確認用パスワードが一致しません。",
   "profile.error_password_length": "パスワードは{0}文字以上である必要があります。",
+  "profile.error_password_too_long": "パスワードは{0}バイト以内である必要があります。",
   "profile.error_password_no_uppercase": "パスワードには少なくとも1つの大文字を含める必要があります。",
   "profile.error_password_no_lowercase": "パスワードには少なくとも1つの小文字を含める必要があります。",
   "profile.error_password_no_digit": "パスワードには少なくとも1つの数字を含める必要があります。",

@@ -207,6 +207,7 @@ public class SystemHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         reportSearchRolePrefixProblems(fessConfig);
         reportDefaultCipherKey(fessConfig);
+        reportOverlongInitialPassword(fessConfig);
         reportRetiredTikaConfig(ResourceUtil.getConfPath("tika.xml"));
         // the ZIP of 15.9 and earlier shipped tika.xml in app/WEB-INF/classes, not in app/WEB-INF/conf
         reportRetiredTikaConfig(ResourceUtil.getClassesPath("tika.xml"));
@@ -785,6 +786,35 @@ public class SystemHelper {
     }
 
     /**
+     * Warns when {@code index.user.initial_password} is longer than BCrypt reads. Only the webapp process warns.
+     *
+     * <p>Only warns: an installation that has run on such a value since its first start has an
+     * {@code admin} user whose hash covers the first 72 bytes only, and that is the password its
+     * operator uses. Refusing to start would lock that installation out on upgrade. The password
+     * itself is not logged.
+     *
+     * @param fessConfig The configuration to check.
+     * @return true if the warning was written.
+     */
+    protected boolean reportOverlongInitialPassword(final FessConfig fessConfig) {
+        // The crawler, thumbnail, suggest and chunk processes run init() too, and never create the user index.
+        if (!isWebappProcess()) {
+            return false;
+        }
+        final String password = fessConfig.getIndexUserInitialPassword();
+        if (!exceedsBcryptLimit(password)) {
+            return false;
+        }
+        logger.warn(
+                "index.user.initial_password is {} bytes long, but BCrypt reads only the first {} bytes. The admin user is created with"
+                        + " a password that accepts any ending after them. Set a password of at most {} bytes in fess_config.properties,"
+                        + " or change the admin password on the Users page after the first start, which refuses a longer one.",
+                password.getBytes(StandardCharsets.UTF_8).length, PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES,
+                PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES);
+        return true;
+    }
+
+    /**
      * Gets the search role for a given user.
      *
      * @param name The username.
@@ -1356,6 +1386,17 @@ public class SystemHelper {
     }
 
     /**
+     * Checks whether BCrypt would ignore the end of a password, which it does after the first
+     * {@link PasswordHashHelper#BCRYPT_MAX_PASSWORD_BYTES} bytes of its UTF-8 form.
+     *
+     * @param password The password to check.
+     * @return true if the password is longer than BCrypt takes into account.
+     */
+    protected boolean exceedsBcryptLimit(final String password) {
+        return password != null && password.getBytes(StandardCharsets.UTF_8).length > PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES;
+    }
+
+    /**
      * Validates a password against configured password policy requirements.
      *
      * @param password The password to validate.
@@ -1373,6 +1414,13 @@ public class SystemHelper {
             return "errors.password_length";
         }
 
+        // BCrypt ignores everything after the first 72 bytes, so a longer password would be
+        // accepted with any ending. Refuse it when a password is set instead. This comes before the
+        // configured maximum so that a password over both limits is told the limit it cannot get past.
+        if (exceedsBcryptLimit(password)) {
+            return "errors.password_too_long";
+        }
+
         try {
             final int maxLength = fessConfig.getPasswordMaxLengthOrDefault();
             if (maxLength > 0 && password.length() > maxLength) {
@@ -1380,12 +1428,6 @@ public class SystemHelper {
             }
         } catch (final Exception e) {
             // getPasswordMaxLengthOrDefault is unavailable in slim test harnesses — skip the check.
-        }
-
-        // BCrypt ignores everything after the first 72 bytes, so a longer password would be
-        // accepted with any ending. Refuse it when a password is set instead.
-        if (password.getBytes(StandardCharsets.UTF_8).length > PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES) {
-            return "errors.password_length";
         }
 
         if (fessConfig.isPasswordRequireUppercase() && !containsUppercase(password)) {

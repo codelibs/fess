@@ -99,6 +99,7 @@
   "profile.success": "Ваш пароль успешно обновлён.",
   "profile.error_mismatch": "Новый пароль и подтверждение не совпадают.",
   "profile.error_password_length": "Пароль должен содержать не менее {0} символов.",
+  "profile.error_password_too_long": "Пароль не должен быть длиннее {0} байт.",
   "profile.error_password_no_uppercase": "Пароль должен содержать хотя бы одну заглавную букву.",
   "profile.error_password_no_lowercase": "Пароль должен содержать хотя бы одну строчную букву.",
   "profile.error_password_no_digit": "Пароль должен содержать хотя бы одну цифру.",

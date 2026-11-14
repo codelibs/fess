@@ -25,6 +25,7 @@ import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
@@ -324,6 +325,8 @@ public class LoginAction extends FessLoginAction {
         switch (errorKey) {
         case "errors.password_length" -> messages.addErrorsPasswordLength(GLOBAL,
                 String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+        case "errors.password_too_long" -> messages.addErrorsPasswordTooLong(GLOBAL,
+                String.valueOf(PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES));
         case "errors.password_no_uppercase" -> messages.addErrorsPasswordNoUppercase(GLOBAL);
         case "errors.password_no_lowercase" -> messages.addErrorsPasswordNoLowercase(GLOBAL);
         case "errors.password_no_digit" -> messages.addErrorsPasswordNoDigit(GLOBAL);

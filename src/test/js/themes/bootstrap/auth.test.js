@@ -768,6 +768,7 @@ describe("localizePasswordError", () => {
     [{ httpStatus: 429 }, "auth.error_rate_limited"],
     [{ details: { reason: "invalid_current_password" } }, "profile.error_wrong_current"],
     [{ details: { reason: "errors.password_length", min_length: 8 } }, "profile.error_password_length"],
+    [{ details: { reason: "errors.password_too_long", max_bytes: 72 } }, "profile.error_password_too_long"],
     [{ details: { reason: "errors.password_no_uppercase" } }, "profile.error_password_no_uppercase"],
     [{ details: { reason: "errors.password_no_lowercase" } }, "profile.error_password_no_lowercase"],
     [{ details: { reason: "errors.password_no_digit" } }, "profile.error_password_no_digit"],

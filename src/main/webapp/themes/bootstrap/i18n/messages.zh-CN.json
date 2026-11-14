@@ -99,6 +99,7 @@
   "profile.success": "您的密码已成功更新。",
   "profile.error_mismatch": "新密码与确认密码不匹配。",
   "profile.error_password_length": "密码长度必须至少为 {0} 个字符。",
+  "profile.error_password_too_long": "密码长度不能超过 {0} 个字节。",
   "profile.error_password_no_uppercase": "密码必须包含至少一个大写字母。",
   "profile.error_password_no_lowercase": "密码必须包含至少一个小写字母。",
   "profile.error_password_no_digit": "密码必须包含至少一个数字。",
