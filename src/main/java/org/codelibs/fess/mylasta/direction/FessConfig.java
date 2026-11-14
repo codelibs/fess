@@ -11477,7 +11477,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'passkey.origins'. <br>
      * The value is, e.g.  <br>
-     * comment: Origins (comma separated) a passkey ceremony is accepted from, e.g. https://fess.example.com.
+     * comment: <br>
+     * Origins (comma separated) a passkey ceremony is accepted from, e.g. https://fess.example.com.<br>
+     * Each is an http or https origin with a host name; with none, or an entry that is not, the feature stays off.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPasskeyOrigins();
@@ -11485,7 +11487,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'passkey.origins' as {@link Integer}. <br>
      * The value is, e.g.  <br>
-     * comment: Origins (comma separated) a passkey ceremony is accepted from, e.g. https://fess.example.com.
+     * comment: <br>
+     * Origins (comma separated) a passkey ceremony is accepted from, e.g. https://fess.example.com.<br>
+     * Each is an http or https origin with a host name; with none, or an entry that is not, the feature stays off.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
