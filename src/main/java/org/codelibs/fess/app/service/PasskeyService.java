@@ -17,6 +17,8 @@ package org.codelibs.fess.app.service;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -164,8 +166,10 @@ public class PasskeyService {
     }
 
     /**
-     * Returns whether the passkey feature is available. It is when passkey.enabled is set and both
-     * passkey.rp.id and passkey.origins are not blank.
+     * Returns whether the passkey feature is available. It is when passkey.enabled is set, passkey.rp.id
+     * is not blank and passkey.origins holds at least one origin and nothing else than http or https
+     * origins (scheme and host). A configuration that cannot work is reported once in the log and
+     * leaves the feature off, rather than offering a login that every ceremony then rejects.
      *
      * @return true if passkeys can be registered and used to log in
      */
@@ -178,7 +182,39 @@ public class PasskeyService {
                     "passkey.enabled is true but passkey.rp.id or passkey.origins is empty, so passkeys are disabled.");
             return false;
         }
+        final Set<String> origins = configuredOrigins();
+        if (origins.isEmpty()) {
+            LogUtil.warnOnce(logger, "misconfigured_origins",
+                    "passkey.enabled is true but passkey.origins holds no origin, so passkeys are disabled.");
+            return false;
+        }
+        for (final String origin : origins) {
+            if (!isHttpOrigin(origin)) {
+                LogUtil.warnOnce(logger, "misconfigured_origins",
+                        "passkey.origins holds an entry that is not an http or https origin, so passkeys are disabled: entry={}", origin);
+                return false;
+            }
+        }
         return true;
+    }
+
+    private Set<String> configuredOrigins() {
+        final Set<String> origins = new LinkedHashSet<>();
+        for (final String origin : StringUtil.split(fessConfig.getPasskeyOrigins(), ",")) {
+            if (StringUtil.isNotBlank(origin)) {
+                origins.add(origin.trim());
+            }
+        }
+        return origins;
+    }
+
+    private static boolean isHttpOrigin(final String origin) {
+        try {
+            final URI uri = new URI(origin);
+            return ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) && uri.getHost() != null;
+        } catch (final URISyntaxException e) {
+            return false;
+        }
     }
 
     /**
@@ -650,13 +686,7 @@ public class PasskeyService {
      * @return the relying party ID, the allowed origins and the challenge
      */
     protected ServerSide createServerSide(final PendingChallenge challenge) {
-        final Set<String> origins = new LinkedHashSet<>();
-        for (final String origin : StringUtil.split(fessConfig.getPasskeyOrigins(), ",")) {
-            if (StringUtil.isNotBlank(origin)) {
-                origins.add(origin.trim());
-            }
-        }
-        return new ServerSide(fessConfig.getPasskeyRpId(), origins, challenge.value());
+        return new ServerSide(fessConfig.getPasskeyRpId(), configuredOrigins(), challenge.value());
     }
 
     /**
