@@ -43,6 +43,7 @@ import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.jcifs.smb.SID;
+import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.annotation.Resource;
 
@@ -153,10 +154,29 @@ public class PermissionHelper {
      * @param messages the messages to add the error to
      */
     public void validateEntries(final String permissionsText, final FessMessages messages) {
-        if (hasSpacedEntry(permissionsText)) {
+        if (hasSpacedEntry(typedPermissions(permissionsText))) {
             messages.addErrorsInvalidPermissionSpacing(Constants.PERMISSIONS, denyPrefix + userPrefix + "name",
                     allowPrefix + userPrefix + "name");
         }
+    }
+
+    /**
+     * Returns the permission entries as they were typed. The form mapping of the admin screens trims every
+     * parameter, which removes the space in front of the first entry, so a screen that shows such an entry
+     * (' {user}bob', saved by an earlier version) would pass the check with it. The request parameter keeps
+     * the space; it is used when it is the same text apart from that trimming.
+     *
+     * @param mapped the permission entries as the form holds them (may be null)
+     * @return the typed text, or the mapped text when the request carries no such parameter
+     */
+    protected String typedPermissions(final String mapped) {
+        if (mapped == null) {
+            return null;
+        }
+        return LaRequestUtil.getOptionalRequest()
+                .map(request -> request.getParameter(Constants.PERMISSIONS))
+                .filter(raw -> raw.trim().replace("\r\n", "\n").replace('\r', '\n').equals(mapped))
+                .orElse(mapped);
     }
 
     /**
