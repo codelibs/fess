@@ -156,10 +156,11 @@ function buildPasskeySection() {
       list.appendChild(el("li", { className: "list-group-item text-muted", textContent: t("profile.passkey_none") }));
       return;
     }
-    for (const passkey of passkeys) {
+    passkeys.forEach((passkey, index) => {
       const item = el("li", { className: "list-group-item d-flex justify-content-between align-items-center" });
       const text = el("div");
-      text.appendChild(el("div", { className: "fw-bold", textContent: passkey.label || "" }));
+      const nameEl = el("div", { className: "fw-bold", id: "passkey-name-" + index, textContent: passkey.label || "" });
+      text.appendChild(nameEl);
       const lastUsed = passkey.last_used_at ? formatDate(passkey.last_used_at) : t("profile.passkey_never");
       text.appendChild(el("small", {
         className: "text-muted",
@@ -168,10 +169,13 @@ function buildPasskeySection() {
       item.appendChild(text);
       const delBtn = el("button", { className: "btn btn-sm btn-outline-danger", textContent: t("profile.passkey_delete") });
       delBtn.type = "button";
+      // "Delete <name>": with several passkeys a screen reader user must be told which one a button removes.
+      delBtn.id = "passkey-delete-" + index;
+      delBtn.setAttribute("aria-labelledby", delBtn.id + " " + nameEl.id);
       delBtn.addEventListener("click", () => deletePasskey(passkey, delBtn));
       item.appendChild(delBtn);
       list.appendChild(item);
-    }
+    });
   };
 
   // canRegister: the session is a local user's and this browser can create passkeys.

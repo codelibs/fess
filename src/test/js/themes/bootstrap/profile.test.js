@@ -400,4 +400,12 @@ describe("passkey section", () => {
     expect(document.getElementById("passkey-success").textContent).toBe("profile.passkey_deleted");
     expect(api.get).toHaveBeenCalledTimes(2);
   });
+
+  it("names each Delete button after its passkey, so a screen reader can tell them apart", async () => {
+    await mountAndLoad();
+    const buttons = Array.from(document.querySelectorAll("#passkey-list li button"));
+    const names = buttons.map((b) => b.getAttribute("aria-labelledby").split(" ").map((id) => document.getElementById(id).textContent).join(" "));
+    expect(names).toEqual(["profile.passkey_delete <img src=x onerror=alert(1)>", "profile.passkey_delete Work laptop"]);
+    expect(new Set(buttons.map((b) => b.id)).size).toBe(2);
+  });
 });
