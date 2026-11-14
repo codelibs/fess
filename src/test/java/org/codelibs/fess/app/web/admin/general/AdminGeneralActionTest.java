@@ -477,4 +477,22 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
         assertException(org.lastaflute.web.token.exception.DoubleSubmittedRequestException.class, () -> action.sendmail(form));
         assertNull(ComponentUtil.getSystemProperties().getProperty(Constants.NOTIFICATION_TO_PROPERTY));
     }
+
+    /**
+     * The general page needs the edit form. A refused test mail (no token, an empty address) shows the page
+     * again, and a page that is forwarded to without the form stops half way (a 500 or a cut-off page).
+     * The action needs a session and a search engine, so the check reads the source.
+     */
+    @Test
+    public void test_sendmail_showsThePageAgainWithTheEditForm() throws Exception {
+        final String source = java.nio.file.Files.readString(
+                java.nio.file.Paths.get("src/main/java/org/codelibs/fess/app/web/admin/general/AdminGeneralAction.java"),
+                java.nio.charset.StandardCharsets.UTF_8);
+        final int start = source.indexOf("public HtmlResponse sendmail(");
+        final int end = source.indexOf("\n    }\n", start);
+        final String body = source.substring(start, end);
+        assertTrue(body.contains("validate(form, messages -> {}, this::asIndexHtml);"));
+        assertTrue(body.contains("verifyToken(this::asIndexHtml);"));
+        assertFalse(body.contains("asHtml(path_AdminGeneral_AdminGeneralJsp)"));
+    }
 }
