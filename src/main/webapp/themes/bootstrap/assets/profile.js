@@ -150,28 +150,41 @@ function buildPasskeySection() {
     return true;
   };
 
+  // Put the focus on `target` unless it is somewhere useful already (a dialog may have opened, e.g. the sign-in
+  // prompt of an ended session); a disabled or removed control drops it to the page body.
+  const keepFocus = (target) => {
+    if (!target || document.querySelector(".modal.show")) return;
+    const active = document.activeElement;
+    if (!active || active === document.body || active === document.documentElement) target.focus();
+  };
+
   const renderList = (passkeys) => {
     while (list.firstChild) list.removeChild(list.firstChild);
     if (passkeys.length === 0) {
       list.appendChild(el("li", { className: "list-group-item text-muted", textContent: t("profile.passkey_none") }));
       return;
     }
-    for (const passkey of passkeys) {
+    passkeys.forEach((passkey, index) => {
       const item = el("li", { className: "list-group-item d-flex justify-content-between align-items-center" });
       const text = el("div");
-      text.appendChild(el("div", { className: "fw-bold", textContent: passkey.label || "" }));
+      const nameEl = el("div", { className: "fw-bold", id: "passkey-name-" + index, textContent: passkey.label || "" });
+      text.appendChild(nameEl);
       const lastUsed = passkey.last_used_at ? formatDate(passkey.last_used_at) : t("profile.passkey_never");
       text.appendChild(el("small", {
         className: "text-muted",
         textContent: t("profile.passkey_created", [formatDate(passkey.created_at)]) + " / " + t("profile.passkey_last_used", [lastUsed])
       }));
       item.appendChild(text);
-      const delBtn = el("button", { className: "btn btn-sm btn-outline-danger", textContent: t("profile.passkey_delete") });
+      // flex-shrink-0 + text-nowrap: at phone width a two-character label (削除) was squeezed to one character per line.
+      const delBtn = el("button", { className: "btn btn-sm btn-outline-danger flex-shrink-0 text-nowrap ms-2", textContent: t("profile.passkey_delete") });
       delBtn.type = "button";
+      // "Delete <name>": with several passkeys a screen reader user must be told which one a button removes.
+      delBtn.id = "passkey-delete-" + index;
+      delBtn.setAttribute("aria-labelledby", delBtn.id + " " + nameEl.id);
       delBtn.addEventListener("click", () => deletePasskey(passkey, delBtn));
       item.appendChild(delBtn);
       list.appendChild(item);
-    }
+    });
   };
 
   // canRegister: the session is a local user's and this browser can create passkeys.
@@ -202,6 +215,8 @@ function buildPasskeySection() {
       if (err && err.httpStatus !== 404) showError(passkeyErrorMessage(err));
     }
     await loadList();
+    // The button that was pressed went with its line: keep the keyboard user inside the card.
+    keepFocus(list.querySelector("button") || (form.classList.contains("d-none") ? null : labelInput));
   }
 
   form.addEventListener("submit", async (ev) => {
@@ -238,6 +253,8 @@ function buildPasskeySection() {
       // The password is asked for each registration and is not kept, whatever the outcome.
       passwordInput.value = "";
       addBtn.disabled = false;
+      // The button lost the focus when it was disabled for the request: give it back.
+      keepFocus(addBtn);
     }
   });
 

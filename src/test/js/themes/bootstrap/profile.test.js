@@ -400,4 +400,90 @@ describe("passkey section", () => {
     expect(document.getElementById("passkey-success").textContent).toBe("profile.passkey_deleted");
     expect(api.get).toHaveBeenCalledTimes(2);
   });
+
+  it("names each Delete button after its passkey, so a screen reader can tell them apart", async () => {
+    await mountAndLoad();
+    const buttons = Array.from(document.querySelectorAll("#passkey-list li button"));
+    const names = buttons.map((b) => b.getAttribute("aria-labelledby").split(" ").map((id) => document.getElementById(id).textContent).join(" "));
+    expect(names).toEqual(["profile.passkey_delete <img src=x onerror=alert(1)>", "profile.passkey_delete Work laptop"]);
+    expect(new Set(buttons.map((b) => b.id)).size).toBe(2);
+  });
+
+  it("keeps the Delete label on one line when the line is narrow (no shrinking, no wrapping)", async () => {
+    await mountAndLoad();
+    for (const b of document.querySelectorAll("#passkey-list li button")) {
+      expect(b.classList.contains("flex-shrink-0")).toBe(true);
+      expect(b.classList.contains("text-nowrap")).toBe(true);
+    }
+  });
+
+  it("gives the focus back to the Register button after a registration took it away", async () => {
+    api.post.mockImplementation(async (path) =>
+      path === "/auth/passkey/register/options" ? { challenge: "AQI", user: { id: "AwQ" }, excludeCredentials: [] } : { passkey: { id: "AQ" } });
+    create.mockImplementation(async () => {
+      // the button was disabled for the request and the browser dropped the focus (jsdom keeps it on a disabled control, so take it away)
+      const stray = document.createElement("button");
+      document.body.appendChild(stray);
+      stray.focus();
+      stray.remove();
+      expect(document.activeElement).toBe(document.body);
+      return { id: "AQ", rawId: new Uint8Array([1]).buffer, type: "public-key", response: { clientDataJSON: new Uint8Array([2]).buffer, attestationObject: new Uint8Array([3]).buffer }, getClientExtensionResults: () => ({}) };
+    });
+    await mountAndLoad();
+    const add = document.querySelector("#passkey-form button[type=submit]");
+    add.focus();
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(document.activeElement).toBe(add);
+  });
+
+  it("does not take the focus from a dialog that opened because the session had ended", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "auth_required", httpStatus: 401 });
+    await mountAndLoad();
+    const dialog = document.createElement("div");
+    dialog.className = "modal show";
+    const field = document.createElement("input");
+    dialog.appendChild(field);
+    document.body.appendChild(dialog);
+    auth.promptLogin.mockImplementation(() => {});   // the real one opens the dialog; the focus moves into it a moment later
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(document.activeElement).not.toBe(document.querySelector("#passkey-form button[type=submit]"));
+    dialog.remove();
+  });
+
+  it("keeps the focus inside the card after a deletion removed the pressed button", async () => {
+    api.del.mockResolvedValue({ ok: true });
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(true));
+    await mountAndLoad();
+    const first = document.querySelectorAll("#passkey-list li button")[0];
+    first.focus();
+    api.get.mockResolvedValue({ can_register: true, passkeys: [LIST.passkeys[1]] });
+
+    first.click();
+    await flush();
+
+    const rest = document.querySelectorAll("#passkey-list li button");
+    expect(rest.length).toBe(1);
+    expect(document.activeElement).toBe(rest[0]);
+  });
+
+  it("falls back to the name field when the last passkey was deleted and registration is possible", async () => {
+    api.del.mockResolvedValue({ ok: true });
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(true));
+    api.get.mockResolvedValue({ can_register: true, passkeys: [LIST.passkeys[0]] });
+    await mountAndLoad();
+    const only = document.querySelector("#passkey-list li button");
+    only.focus();
+    api.get.mockResolvedValue({ can_register: true, passkeys: [] });
+
+    only.click();
+    await flush();
+
+    expect(document.activeElement).toBe(document.getElementById("passkey-label"));
+  });
 });
