@@ -79,7 +79,7 @@ ${fe:html(true)}
         if (!form) {
             return;
         }
-        var maxBytes = ${fessConfig.themeUploadMaxSizeAsInteger};
+        var maxBytes = ${maxBytes};
         var tooLargeMsg = '<la:message key="errors.failed_to_upload_theme" arg0="(file too large)"/>';
         form.addEventListener('submit', function (e) {
             var fileInput = document.getElementById('themeFile');

@@ -163,7 +163,7 @@ public class AdminThemeAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse uploadpage() {
         saveToken();
-        return asHtml(path_AdminTheme_AdminThemeUploadJsp).useForm(ThemeUploadForm.class, op -> op.setup(f -> {}));
+        return asUploadHtml().useForm(ThemeUploadForm.class, op -> op.setup(f -> {}));
     }
 
     /**
@@ -185,15 +185,15 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final ThemeUploadForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
-        verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        validate(form, messages -> {}, () -> asUploadHtml());
+        verifyToken(() -> asUploadHtml());
         // C-2: normalize null fileName (multipart parts without a filename= attribute return null
         // from getFileName()). Using the normalized local everywhere prevents a literal "null"
         // from appearing in error/success messages and prevents NPE in hasZipExtension.
         final String rawFileName = form.themeFile.getFileName();
         final String fileName = rawFileName != null ? rawFileName : "";
         if (!hasZipExtension(fileName)) {
-            throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+            throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asUploadHtml());
         }
         // M-1: server-side size guard. The JSP enforces the same limit client-side
         // but untrusted clients can post past it. The installer also enforces
@@ -207,19 +207,17 @@ public class AdminThemeAction extends FessAdminAction {
                     maxBytes);
             final String maxStr = Long.toString(maxBytes);
             final String actualStr = Long.toString(actualBytes);
-            throwValidationError(m -> m.addErrorsThemeUploadTooLarge(GLOBAL, maxStr, actualStr),
-                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+            throwValidationError(m -> m.addErrorsThemeUploadTooLarge(GLOBAL, maxStr, actualStr), () -> asUploadHtml());
         }
         try (InputStream in = form.themeFile.getInputStream()) {
             staticThemeInstaller.installZip(in);
             saveInfo(m -> m.addSuccessUploadTheme(GLOBAL, fileName));
         } catch (final StaticThemeInstaller.InstallException ex) {
             logger.warn("Theme upload rejected", ex);
-            throwValidationError(m -> mapInstallExceptionToMessage(m, ex), () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+            throwValidationError(m -> mapInstallExceptionToMessage(m, ex), () -> asUploadHtml());
         } catch (final IOException ex) {
             logger.warn("Failed to read upload stream", ex);
-            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage())),
-                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage())), () -> asUploadHtml());
         }
         return redirect(getClass());
     }
@@ -377,6 +375,17 @@ public class AdminThemeAction extends FessAdminAction {
     }
 
     // ---- list rendering ----
+
+    /**
+     * The upload page. The page checks the size of the chosen file before it is sent, against the limit
+     * the server applies, so the limit is handed to it here: a view has no access to the configuration.
+     *
+     * @return HTML response of the upload page
+     */
+    private HtmlResponse asUploadHtml() {
+        return asHtml(path_AdminTheme_AdminThemeUploadJsp).renderWith(
+                data -> RenderDataUtil.register(data, "maxBytes", ComponentUtil.getFessConfig().getThemeUploadMaxSizeAsInteger()));
+    }
 
     private HtmlResponse asListHtml(final ThemeListForm form) {
         return asHtml(path_AdminTheme_AdminThemeJsp).renderWith(data -> {
