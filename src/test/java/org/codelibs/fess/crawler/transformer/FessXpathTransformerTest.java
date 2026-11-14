@@ -274,6 +274,38 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_transform_templateMetaDescriptionIsNotTheDigest() throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+
+        // The digest is read from <meta name="description"> by an XPath that selects the content attribute, and a
+        // pruned tag only removes the child nodes of a selected node, so a description that sits in a <template> (in
+        // the head or in the body) has to be left out on its own
+        final String[] templates = { //
+                "<html><head><title>Test</title><template><meta name=\"description\" content=\"Inert digest.\"></template>" //
+                        + "<meta name=\"description\" content=\"Real digest.\"></head><body><p>Shown text.</p></body></html>", //
+                "<html><head><title>Test</title><template><meta name=\"description\" content=\"Inert digest.\"></template>" //
+                        + "</head><body><p>Shown text.</p></body></html>", //
+                "<html><head><title>Test</title></head><body><p>Shown text.</p>" //
+                        + "<template><meta name=\"description\" content=\"Inert digest.\"></template></body></html>" };
+        final String[] expected = { "Real digest.", "Shown text.", "Shown text." };
+
+        for (int i = 0; i < templates.length; i++) {
+            final FessXpathTransformer transformer = new FessXpathTransformer();
+            transformer.init();
+            transformer.setChildUrlRuleMap(new LinkedHashMap<>());
+
+            final ResultData resultData = transformer.transform(createHtmlResponseData(sessionId, "http://example.com/" + i, templates[i]));
+
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> dataMap = (Map<String, Object>) resultData.getRawData();
+            final String digest = (String) dataMap.get("digest");
+            assertNotNull(digest, "case " + i);
+            assertFalse(digest.contains("Inert digest."), "case " + i + ", digest: " + digest);
+            assertEquals("case " + i, expected[i], digest);
+        }
+    }
+
+    @Test
     public void test_transform_parsesBodyOnce() throws Exception {
         final String sessionId = registerCrawlingHelpers();
 
