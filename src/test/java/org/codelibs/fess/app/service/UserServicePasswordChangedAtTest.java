@@ -187,6 +187,146 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         assertTrue(accepted.isEmpty());
     }
 
+    private static User versioned(final String name, final String password) {
+        final User u = new User();
+        u.setName(name);
+        u.setPassword(password);
+        u.asDocMeta().seqNo(5L).primaryTerm(1L);
+        return u;
+    }
+
+    @Test
+    public void test_changePassword_retriesAfterAConcurrentChange() {
+        final int[] updates = { 0 };
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}old"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                if (updates[0]++ == 0) {
+                    throw new RuntimeException("type=version_conflict_engine_exception");
+                }
+                written.add(entity);
+            }
+        };
+
+        userService.changePassword("alice", "new-password");
+
+        assertEquals(2, updates[0]);
+        assertEquals(1, written.size());
+        assertEquals("{bcrypt}new-password", written.get(0).getPassword());
+        assertEquals(1, accepted.size());
+    }
+
+    @Test
+    public void test_changePassword_givesUpAfterRepeatedConflicts() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}old"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("type=version_conflict_engine_exception");
+            }
+        };
+
+        try {
+            userService.changePassword("alice", "new-password");
+            fail();
+        } catch (final IllegalStateException e) {
+            // expected
+        }
+        assertTrue(written.isEmpty());
+        assertTrue(accepted.isEmpty());
+    }
+
+    @Test
+    public void test_store_ofAReadUser_isConditionalAndRefusedWhenTheUserChanged() {
+        final List<String> calls = new ArrayList<>();
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}old"));
+            }
+
+            @Override
+            public void insertOrUpdate(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                calls.add("insertOrUpdate");
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                calls.add("update");
+                throw new RuntimeException("type=version_conflict_engine_exception");
+            }
+        };
+        final User edited = versioned("alice", "{bcrypt}old");
+        edited.setId("YWxpY2U");
+
+        try {
+            userService.store(edited);
+            fail();
+        } catch (final IllegalStateException e) {
+            // expected
+        }
+        assertEquals(List.of("update"), calls);
+        assertTrue(accepted.isEmpty());
+    }
+
+    @Test
+    public void test_store_ofAReadUser_writesWithTheUpdate() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}old"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                written.add(entity);
+            }
+        };
+        final User edited = versioned("alice", "{bcrypt}old");
+        edited.setId("YWxpY2U");
+
+        userService.store(edited);
+
+        assertEquals(1, written.size());
+    }
+
+    @Test
+    public void test_store_ofANewUser_isNotConditional() {
+        final List<String> calls = new ArrayList<>();
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return OptionalEntity.empty();
+            }
+
+            @Override
+            public void insertOrUpdate(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                calls.add("insertOrUpdate");
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                calls.add("update");
+            }
+        };
+        final User created = new User();
+        created.setName("carol");
+        created.setId("Y2Fyb2w");
+
+        userService.store(created);
+
+        assertEquals(List.of("insertOrUpdate"), calls);
+    }
+
     @Test
     public void test_endOtherSessions_neverGoesBackwards() {
         final long future = System.currentTimeMillis() + 3_600_000L;
