@@ -234,6 +234,69 @@ public class IndexUpdaterTest extends UnitFessTestCase {
         // assertFalse(indexUpdater.isAlive());
     }
 
+    private OpenSearchResultList<OpenSearchAccessResult> newPage(final long totalHits, final String... unreadableIds) {
+        final OpenSearchResultList<OpenSearchAccessResult> page = new OpenSearchResultList<>();
+        page.setTotalHits(totalHits);
+        final List<OpenSearchAccessResult> unreadableList = new ArrayList<>();
+        for (final String id : unreadableIds) {
+            final OpenSearchAccessResult accessResult = new OpenSearchAccessResult();
+            accessResult.setId(id);
+            unreadableList.add(accessResult);
+        }
+        page.setUnreadableList(unreadableList);
+        return page;
+    }
+
+    // OpenSearch leaves out an access result that it cannot read, and the page stays empty for ever unless it is deleted
+    @Test
+    public void test_run_deletesUnreadableAccessResults() throws Exception {
+        // The FessConfig of the container takes precedence over a registered one, and would have the indexer wait for 10 seconds.
+        // UnitFessTestCase#tearDown resets it.
+        ComponentUtil.setFessConfig(fessConfig);
+        indexUpdater.setSessionIdList(Arrays.asList("session1"));
+        final TestDataService testDataService = (TestDataService) dataService;
+        testDataService.accessResultQueue.add(newPage(1, "session1.aHR0cDovL2V4YW1wbGUuY29tLw"));
+        final AtomicBoolean errorOccurred = new AtomicBoolean(false);
+        indexUpdater.setUncaughtExceptionHandler((t, e) -> errorOccurred.set(true));
+
+        indexUpdater.start();
+        for (int i = 0; i < 30 && testDataService.deleteCalls.get() == 0; i++) {
+            Thread.sleep(100);
+        }
+        indexUpdater.setFinishCrawling(true);
+        indexUpdater.join(3000);
+
+        assertEquals(1, testDataService.deletedAccessResults.size());
+        assertEquals("session1.aHR0cDovL2V4YW1wbGUuY29tLw", testDataService.deletedAccessResults.get(0).getId());
+        assertFalse(errorOccurred.get());
+    }
+
+    // The indexer is not to die when it cannot delete: it tries again with the next page
+    @Test
+    public void test_run_deleteFailureDoesNotStopTheIndexer() throws Exception {
+        ComponentUtil.setFessConfig(fessConfig);
+        indexUpdater.setSessionIdList(Arrays.asList("session1"));
+        final TestDataService testDataService = (TestDataService) dataService;
+        testDataService.throwOnDelete = true;
+        indexUpdater.maxErrorCount = 0;
+        testDataService.accessResultQueue.add(newPage(1, "session1.a"));
+        testDataService.accessResultQueue.add(newPage(1, "session1.a"));
+        testDataService.accessResultQueue.add(newPage(0));
+        final AtomicBoolean errorOccurred = new AtomicBoolean(false);
+        indexUpdater.setUncaughtExceptionHandler((t, e) -> errorOccurred.set(true));
+
+        indexUpdater.start();
+        for (int i = 0; i < 30 && testDataService.getCalls.get() < 3; i++) {
+            Thread.sleep(100);
+        }
+        indexUpdater.setFinishCrawling(true);
+        indexUpdater.join(3000);
+
+        assertTrue(testDataService.deleteCalls.get() >= 2);
+        assertTrue(testDataService.getCalls.get() >= 3);
+        assertFalse(errorOccurred.get());
+    }
+
     // Test updateDocument with boost matcher
     @Test
     public void test_updateDocument_withBoostMatcher() {
@@ -738,8 +801,29 @@ public class IndexUpdaterTest extends UnitFessTestCase {
         private boolean throwContainerNotAvailable = false;
         private boolean throwRuntimeException = false;
 
+        private final java.util.Queue<OpenSearchResultList<OpenSearchAccessResult>> accessResultQueue =
+                new java.util.concurrent.ConcurrentLinkedQueue<>();
+        private final List<OpenSearchAccessResult> deletedAccessResults = java.util.Collections.synchronizedList(new ArrayList<>());
+        private final AtomicInteger deleteCalls = new AtomicInteger();
+        private final AtomicInteger getCalls = new AtomicInteger();
+        private boolean throwOnDelete = false;
+
+        @Override
+        public void deleteAccessResults(List<OpenSearchAccessResult> accessResults) {
+            deleteCalls.incrementAndGet();
+            if (throwOnDelete) {
+                throw new RuntimeException("Test delete exception");
+            }
+            deletedAccessResults.addAll(accessResults);
+        }
+
         @Override
         public List<OpenSearchAccessResult> getAccessResultList(Consumer<SearchRequestBuilder> cb) {
+            getCalls.incrementAndGet();
+            final OpenSearchResultList<OpenSearchAccessResult> next = accessResultQueue.poll();
+            if (next != null) {
+                return next;
+            }
             if (throwContainerNotAvailable) {
                 throw new ContainerNotAvailableException("");
             }
