@@ -134,6 +134,60 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_endOtherSessions_retriesAfterAConcurrentChangeAndKeepsTheNewPassword() {
+        final int[] updates = { 0 };
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                // the second read sees the password another request has just changed
+                final User u = new User();
+                u.setName("alice");
+                u.setPassword(updates[0] == 0 ? "{bcrypt}old" : "{bcrypt}changed");
+                return OptionalEntity.of(u);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                if (updates[0]++ == 0) {
+                    throw new RuntimeException("type=version_conflict_engine_exception");
+                }
+                written.add(entity);
+            }
+        };
+
+        userService.endOtherSessions("alice");
+
+        assertEquals(2, updates[0]);
+        assertEquals(1, written.size());
+        assertEquals("{bcrypt}changed", written.get(0).getPassword());
+        assertEquals(1, accepted.size());
+    }
+
+    @Test
+    public void test_endOtherSessions_givesUpAfterRepeatedConflicts() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("type=version_conflict_engine_exception");
+            }
+        };
+
+        try {
+            userService.endOtherSessions("alice");
+            fail();
+        } catch (final IllegalStateException e) {
+            // expected
+        }
+        assertTrue(written.isEmpty());
+        assertTrue(accepted.isEmpty());
+    }
+
+    @Test
     public void test_endOtherSessions_neverGoesBackwards() {
         final long future = System.currentTimeMillis() + 3_600_000L;
         stored.setPasswordChangedAt(future);

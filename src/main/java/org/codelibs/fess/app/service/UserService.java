@@ -44,6 +44,9 @@ public class UserService {
 
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
+    /** How many times ending the sessions of a user is tried when the user is changed in between. */
+    private static final int END_OTHER_SESSIONS_ATTEMPTS = 3;
+
     /**
      * Default constructor for UserService.
      */
@@ -251,15 +254,42 @@ public class UserService {
      * @param username the name of the user
      */
     public void endOtherSessions(final String username) {
-        userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
+        for (int attempt = 0; attempt < END_OTHER_SESSIONS_ATTEMPTS; attempt++) {
+            final OptionalEntity<User> found = userBhv.selectEntity(cb -> cb.query().setName_Equal(username));
+            if (!found.isPresent()) {
+                return;
+            }
+            final User entity = found.get();
             final long changedAt = nextPasswordChangedAt(entity);
             entity.setPasswordChangedAt(changedAt);
-            userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
+            // The whole document is written back, so the write is conditional on what was read: without
+            // it a password change that lands between the read and the write would be put back to the
+            // old hash.
+            final Long seqNo = entity.asDocMeta().seqNo();
+            final Long primaryTerm = entity.asDocMeta().primaryTerm();
+            try {
+                userBhv.update(entity, op -> {
+                    op.setRefreshPolicy(Constants.TRUE);
+                    if (seqNo != null && seqNo.longValue() >= 0L) {
+                        op.setIfSeqNo(seqNo);
+                    }
+                    if (primaryTerm != null && primaryTerm.longValue() >= 0L) {
+                        op.setIfPrimaryTerm(primaryTerm);
+                    }
+                });
+            } catch (final RuntimeException e) {
+                if (isVersionConflict(e)) {
+                    continue;
+                }
+                throw e;
+            }
             acceptPasswordChange(username, changedAt);
             if (logger.isInfoEnabled()) {
                 logger.info("Ended the login sessions of the user: username={}, id={}", username, entity.getId());
             }
-        });
+            return;
+        }
+        throw new IllegalStateException("The user was changed concurrently, so its sessions were not ended: username=" + username);
     }
 
     /**
