@@ -112,6 +112,17 @@ public class AdminGeneralAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
+        return asIndexHtml();
+    }
+
+    /**
+     * Builds the general settings page with a new transaction token and the form filled from the current settings.
+     * The page needs the edit form, so a response that shows it again after a refused request (for example the
+     * test mail without a valid token) has to carry the form too: without it the page stops half way.
+     *
+     * @return HTML response for the general settings page
+     */
+    protected HtmlResponse asIndexHtml() {
         saveToken();
         return asHtml(path_AdminGeneral_AdminGeneralJsp).useForm(EditForm.class, setup -> {
             setup.setup(form -> {
@@ -129,8 +140,8 @@ public class AdminGeneralAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse sendmail(final MailForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_AdminGeneral_AdminGeneralJsp));
-        verifyToken(() -> asHtml(path_AdminGeneral_AdminGeneralJsp));
+        validate(form, messages -> {}, this::asIndexHtml);
+        verifyToken(this::asIndexHtml);
 
         final String[] toAddresses = form.notificationTo.split(",");
         final Map<String, Object> dataMap = new HashMap<>();
