@@ -62,7 +62,8 @@ import tools.jackson.databind.json.JsonMapper;
  * <p>{@code register/options} takes {@code { "current_password": "..." }} and re-authenticates the
  * user before any challenge is made, as {@link PasswordChangeHandler} does: through
  * {@link FessLoginAssist#findLoginUser}, on the {@link LoginRateLimiter.Scope#USER} bucket of the
- * password login (checked on entry, a slot taken by a wrong password, cleared on success). A password
+ * password change, which is keyed by the user name alone (the password login keys by address and name)
+ * (checked on entry, a slot taken by a wrong password, cleared on success). A password
  * the directory accepted instead of the local one does not count as verified. {@code register/verify}
  * takes {@code { "label": "...", "credential": <PublicKeyCredential JSON> }}; the label is required,
  * at most {@value PasskeyService#MAX_LABEL_LENGTH} code points, and has no control or bidirectional
@@ -192,8 +193,8 @@ public class PasskeyAccountHandler {
             return;
         }
 
-        // The USER bucket of the password login and the password change: a stolen session must not
-        // make this a way around their limits.
+        // The USER bucket of the password change, keyed by the user name alone: a stolen session must not
+        // make this a way around its limit.
         final LoginRateLimiter rate = limiter();
         int userLimit = 0;
         int lockoutSec = 0;
