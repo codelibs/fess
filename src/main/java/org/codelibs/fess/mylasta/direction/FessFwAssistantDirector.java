@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
@@ -162,12 +163,12 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
      * which does not name the setting.</p>
      *
      * @return The cipher key.
-     * @throws IllegalStateException If the key is empty.
+     * @throws FessConfigurationException If the key is empty.
      */
     protected String getCipherKey() {
         final String cipherKey = fessConfig.getAppCipherKey();
         if (cipherKey == null || cipherKey.isEmpty()) {
-            throw new IllegalStateException("app.cipher.key in fess_config.properties is empty, so Fess cannot start. "
+            throw new FessConfigurationException("app.cipher.key in fess_config.properties is empty, so Fess cannot start. "
                     + "Set it to a key of 16, 24 or 32 characters, or run bin/fess-setup init before the first start to generate one.");
         }
         return cipherKey;

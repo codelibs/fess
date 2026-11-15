@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.exception.InvalidExportException;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -89,16 +90,16 @@ public class IndexExportJob {
      *
      * @param format the format name
      * @return the formatter instance
-     * @throws IllegalArgumentException if the format is null, empty, or not supported
+     * @throws InvalidExportException if the format is null, empty, or not supported
      */
     protected IndexExportFormatter createFormatter(final String format) {
         if (format == null || format.trim().isEmpty()) {
-            throw new IllegalArgumentException("Export format must not be null or empty");
+            throw new InvalidExportException("Export format must not be null or empty");
         }
         return switch (format.trim().toLowerCase()) {
         case "html" -> new HtmlIndexExportFormatter();
         case "json" -> new JsonIndexExportFormatter();
-        default -> throw new IllegalArgumentException("Unsupported export format: " + format);
+        default -> throw new InvalidExportException("Unsupported export format: " + format);
         };
     }
 

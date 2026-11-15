@@ -39,6 +39,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.SerializeUtil;
+import org.codelibs.fess.exception.FessConfigurationException;
+import org.codelibs.fess.exception.SerializerStateException;
 import org.codelibs.fess.util.ComponentUtil;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -132,18 +134,18 @@ public class DataSerializer {
      *
      * @param type the class to register
      * @param serializer the serializer that writes and reads the class
-     * @throws IllegalArgumentException if the type or the serializer is null, or the type is already registered
-     * @throws IllegalStateException if a serialization has already started
+     * @throws FessConfigurationException if the type or the serializer is null
+     * @throws SerializerStateException if a serialization has already started, or the type is already registered
      */
     public synchronized void register(final Class<?> type, final Serializer<?> serializer) {
         if (type == null || serializer == null) {
-            throw new IllegalArgumentException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
+            throw new FessConfigurationException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
         }
         if (kryoCreated) {
-            throw new IllegalStateException("Cannot register " + type.getName() + " because serialization has already started.");
+            throw new SerializerStateException("Cannot register " + type.getName() + " because serialization has already started.");
         }
         if (pluginSerializerMap.containsKey(type)) {
-            throw new IllegalArgumentException(type.getName() + " is already registered.");
+            throw new SerializerStateException(type.getName() + " is already registered.");
         }
         pluginSerializerMap.put(type, serializer);
         if (logger.isDebugEnabled()) {
@@ -255,7 +257,7 @@ public class DataSerializer {
      *
      * @param obj the object to serialize
      * @return the serialized object as a byte array
-     * @throws IllegalArgumentException if an unsupported serializer type is configured
+     * @throws FessConfigurationException if an unsupported serializer type is configured
      * @throws IORuntimeException if an I/O error occurs during serialization
      */
     public byte[] fromObjectToBinary(final Object obj) {
@@ -263,7 +265,7 @@ public class DataSerializer {
         return switch (serializer) {
         case KRYO -> serializeWithKryo(obj);
         case JAVABIN -> SerializeUtil.fromObjectToBinary(obj);
-        default -> throw new IllegalArgumentException("Unexpected value: " + serializer);
+        default -> throw new FessConfigurationException("Unexpected value: " + serializer);
         };
     }
 
@@ -276,7 +278,7 @@ public class DataSerializer {
      *
      * @param bytes the byte array to deserialize
      * @return the deserialized object
-     * @throws IllegalArgumentException if an unsupported serializer type is configured
+     * @throws FessConfigurationException if an unsupported serializer type is configured
      * @throws IORuntimeException if an I/O error occurs during deserialization
      */
     public Object fromBinaryToObject(final byte[] bytes) {
@@ -284,7 +286,7 @@ public class DataSerializer {
         return switch (serializer) {
         case KRYO -> deserializeWithKryo(bytes);
         case JAVABIN -> SerializeUtil.fromBinaryToObject(bytes);
-        default -> throw new IllegalArgumentException("Unexpected value: " + serializer);
+        default -> throw new FessConfigurationException("Unexpected value: " + serializer);
         };
     }
 

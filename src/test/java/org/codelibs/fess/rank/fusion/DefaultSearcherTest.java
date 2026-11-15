@@ -33,6 +33,7 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -281,10 +282,10 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         searcher.failure = engineError("index_closed_exception", "closed");
         assertThrows(InvalidQueryException.class,
                 () -> searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
-        searcher.failure = new IllegalStateException("The keyword condition did not produce a query to fuse.");
+        searcher.failure = new SearchQueryException("The keyword condition did not produce a query to fuse.");
         // anything that is not the engine's answer is left to the caller, which falls back to
         // Fess for this search only
-        assertThrows(IllegalStateException.class,
+        assertThrows(SearchQueryException.class,
                 () -> searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
         searcher.failure = null;
         assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
@@ -387,8 +388,8 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         searcher.failure = engineError("search_phase_execution_exception", "all shards failed", RestStatus.SERVICE_UNAVAILABLE);
         assertThrows(InvalidQueryException.class,
                 () -> searcher.searchWithSubQueries("q", params(10, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
-        searcher.failure = new IllegalStateException("The keyword condition did not produce a query to fuse.");
-        assertThrows(IllegalStateException.class,
+        searcher.failure = new SearchQueryException("The keyword condition did not produce a query to fuse.");
+        assertThrows(SearchQueryException.class,
                 () -> searcher.searchWithSubQueries("q", params(10, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
         assertEquals(4, searcher.calls);
     }

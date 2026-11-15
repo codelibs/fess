@@ -39,8 +39,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.exception.ThumbnailGenerationException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -166,7 +166,7 @@ public class ThumbnailManager {
             logger.info("Created thumbnail directory: {}", baseDir.getAbsolutePath());
         }
         if (!baseDir.isDirectory()) {
-            throw new FessSystemException("Not found: " + baseDir.getAbsolutePath());
+            throw new ThumbnailGenerationException("Not found: " + baseDir.getAbsolutePath());
         }
 
         if (logger.isDebugEnabled()) {

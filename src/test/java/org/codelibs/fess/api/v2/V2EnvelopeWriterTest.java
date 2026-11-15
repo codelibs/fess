@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.codelibs.fess.exception.EnvelopeException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -115,8 +116,8 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("status", 99); // reserved — must be rejected
-        assertThrows(IllegalStateException.class, () -> new V2EnvelopeWriter().writeSuccess(res, payload),
-                "payload containing 'status' should throw IllegalStateException");
+        assertThrows(EnvelopeException.class, () -> new V2EnvelopeWriter().writeSuccess(res, payload),
+                "payload containing 'status' should throw EnvelopeException");
     }
 
     @Test

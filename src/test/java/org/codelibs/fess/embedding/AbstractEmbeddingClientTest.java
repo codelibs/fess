@@ -527,15 +527,15 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getHttpClient_afterDestroy_throwsIllegalStateException() {
+    public void test_getHttpClient_afterDestroy_throwsEmbeddingException() {
         final TestEmbeddingClient client = new TestEmbeddingClient();
         client.init();
         client.destroy();
         try {
             client.getHttpClient();
-            fail("getHttpClient() must throw IllegalStateException once the client has been destroyed, "
+            fail("getHttpClient() must throw EmbeddingException once the client has been destroyed, "
                     + "not silently recreate an HTTP client");
-        } catch (final IllegalStateException e) {
+        } catch (final EmbeddingException e) {
             // expected
         }
     }

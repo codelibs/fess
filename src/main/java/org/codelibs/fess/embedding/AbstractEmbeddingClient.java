@@ -403,11 +403,11 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
      * leak) their own client.</p>
      *
      * @return the HTTP client
-     * @throws IllegalStateException if this client has already been {@link #destroy() destroyed}
+     * @throws EmbeddingException if this client has already been {@link #destroy() destroyed}
      */
     public synchronized CloseableHttpClient getHttpClient() {
         if (destroyed) {
-            throw new IllegalStateException(getName() + " embedding client has already been destroyed");
+            throw new EmbeddingException(getName() + " embedding client has already been destroyed");
         }
         if (httpClient == null) {
             init();

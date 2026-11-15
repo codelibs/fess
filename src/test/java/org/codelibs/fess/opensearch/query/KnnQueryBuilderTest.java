@@ -17,6 +17,7 @@ package org.codelibs.fess.opensearch.query;
 
 import java.util.List;
 
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.codelibs.fesen.opensearch.common.io.stream.BytesStreamOutput;
@@ -71,13 +72,13 @@ public class KnnQueryBuilderTest extends UnitFessTestCase {
         try {
             new KnnQueryBuilder("v", new float[] { 0.1f }, 0);
             fail("k=0 must be rejected");
-        } catch (final IllegalArgumentException e) {
+        } catch (final SearchQueryException e) {
             assertTrue(e.getMessage().contains("k must be positive"), e.getMessage());
         }
         try {
             new KnnQueryBuilder("v", new float[] { 0.1f }, -1);
             fail("a negative k must be rejected");
-        } catch (final IllegalArgumentException e) {
+        } catch (final SearchQueryException e) {
             assertTrue(e.getMessage().contains("k must be positive"), e.getMessage());
         }
     }

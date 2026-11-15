@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.admin.AdminAction;
+import org.codelibs.fess.exception.InvalidFilePathException;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -175,13 +176,13 @@ public abstract class FessAdminAction extends FessBaseAction {
      */
     protected void validateFilePath(final String path) {
         if (StringUtil.isBlank(path)) {
-            throw new IllegalArgumentException("File path cannot be blank.");
+            throw new InvalidFilePathException("File path cannot be blank.");
         }
         try {
             final Path filePath = Paths.get(path).normalize();
             final String normalizedPath = filePath.toString();
             if (normalizedPath.contains("..")) {
-                throw new IllegalArgumentException("Invalid file path: path=" + path);
+                throw new InvalidFilePathException("Invalid file path: path=" + path);
             }
             final File file = filePath.toFile();
             final String canonicalPath = file.getCanonicalPath();
@@ -200,11 +201,11 @@ public abstract class FessAdminAction extends FessBaseAction {
                 }
             }
             if (!allowedPaths.isEmpty() && !isAllowed) {
-                throw new IllegalArgumentException(
+                throw new InvalidFilePathException(
                         "File path is outside allowed directory: path=" + canonicalPath + ", allowed=" + allowedPaths);
             }
         } catch (final IOException e) {
-            throw new IllegalArgumentException("Invalid file path: path=" + path, e);
+            throw new InvalidFilePathException("Invalid file path: path=" + path, e);
         }
     }
 

@@ -17,6 +17,7 @@ package org.codelibs.fess.script;
 
 import java.util.Map;
 
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
@@ -93,8 +94,8 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
         TestScriptEngine engine = new TestScriptEngine();
         try {
             scriptEngineFactory.add(null, engine);
-            fail("Should throw IllegalArgumentException for null name");
-        } catch (IllegalArgumentException e) {
+            fail("Should throw FessConfigurationException for null name");
+        } catch (FessConfigurationException e) {
             assertTrue(e.getMessage().contains("Both name and scriptEngine parameters are required"));
             assertTrue(e.getMessage().contains("name: null"));
         }
@@ -105,8 +106,8 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     public void test_add_nullEngine() {
         try {
             scriptEngineFactory.add("test", null);
-            fail("Should throw IllegalArgumentException for null engine");
-        } catch (IllegalArgumentException e) {
+            fail("Should throw FessConfigurationException for null engine");
+        } catch (FessConfigurationException e) {
             assertTrue(e.getMessage().contains("Both name and scriptEngine parameters are required"));
             assertTrue(e.getMessage().contains("scriptEngine: null"));
         }
@@ -117,8 +118,8 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     public void test_add_bothNull() {
         try {
             scriptEngineFactory.add(null, null);
-            fail("Should throw IllegalArgumentException for null parameters");
-        } catch (IllegalArgumentException e) {
+            fail("Should throw FessConfigurationException for null parameters");
+        } catch (FessConfigurationException e) {
             assertEquals("Both name and scriptEngine parameters are required. name: null, scriptEngine: null", e.getMessage());
         }
     }

@@ -22,6 +22,7 @@ import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.exception.ScriptEngineException;
 
 /**
@@ -48,7 +49,7 @@ public class ScriptEngineFactory {
      */
     public void add(final String name, final ScriptEngine scriptEngine) {
         if (name == null || scriptEngine == null) {
-            throw new IllegalArgumentException(
+            throw new FessConfigurationException(
                     "Both name and scriptEngine parameters are required. name: " + name + ", scriptEngine: " + scriptEngine);
         }
         if (logger.isDebugEnabled()) {

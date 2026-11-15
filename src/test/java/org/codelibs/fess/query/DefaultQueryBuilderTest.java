@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.query;
 
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
@@ -25,7 +26,7 @@ public class DefaultQueryBuilderTest extends UnitFessTestCase {
         try {
             new DefaultQueryBuilder(null);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (SearchQueryException e) {
             // nothing
         }
     }
@@ -35,7 +36,7 @@ public class DefaultQueryBuilderTest extends UnitFessTestCase {
         try {
             new DefaultQueryBuilder(QueryBuilders.matchAllQuery());
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (SearchQueryException e) {
             // nothing
         }
     }

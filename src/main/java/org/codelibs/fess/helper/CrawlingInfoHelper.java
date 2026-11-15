@@ -33,7 +33,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.security.MessageDigestUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.CrawlingInfoException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
@@ -115,7 +115,7 @@ public class CrawlingInfoHelper {
      *
      * @param sessionId the session ID for the crawling information
      * @param create if true, creates a new crawling info regardless of existing records
-     * @throws FessSystemException if unable to store the crawling session
+     * @throws CrawlingInfoException if unable to store the crawling session
      */
     public synchronized void store(final String sessionId, final boolean create) {
         CrawlingInfo crawlingInfo = create ? null : getCrawlingInfoService().getLast(sessionId);
@@ -124,7 +124,7 @@ public class CrawlingInfoHelper {
             try {
                 getCrawlingInfoService().store(crawlingInfo);
             } catch (final Exception e) {
-                throw new FessSystemException("No crawling session.", e);
+                throw new CrawlingInfoException("No crawling session.", e);
             }
         }
 
@@ -165,7 +165,7 @@ public class CrawlingInfoHelper {
      * @param sessionId the session ID to update
      * @param name the name to set for the crawling session (uses system name if blank)
      * @param dayForCleanup number of days until cleanup (sets expiration if >= 0)
-     * @throws FessSystemException if unable to store the updated crawling session
+     * @throws CrawlingInfoException if unable to store the updated crawling session
      */
     public void updateParams(final String sessionId, final String name, final int dayForCleanup) {
         final CrawlingInfo crawlingInfo = getCrawlingInfoService().getLast(sessionId);
@@ -186,7 +186,7 @@ public class CrawlingInfoHelper {
         try {
             getCrawlingInfoService().store(crawlingInfo);
         } catch (final Exception e) {
-            throw new FessSystemException("No crawling session.", e);
+            throw new CrawlingInfoException("No crawling session.", e);
         }
 
     }

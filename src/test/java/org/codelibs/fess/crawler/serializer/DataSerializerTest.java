@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.codelibs.fess.exception.FessConfigurationException;
+import org.codelibs.fess.exception.SerializerStateException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
@@ -662,7 +664,7 @@ public class DataSerializerTest extends UnitFessTestCase {
         try {
             registerPluginValue(serializer);
             fail("A second registration of the same class must be rejected");
-        } catch (final IllegalArgumentException e) {
+        } catch (final SerializerStateException e) {
             // expected
         }
     }
@@ -676,13 +678,13 @@ public class DataSerializerTest extends UnitFessTestCase {
         try {
             serializer.register(null, textSerializer(PluginValue::new, v -> v.text));
             fail("A null type must be rejected");
-        } catch (final IllegalArgumentException e) {
+        } catch (final FessConfigurationException e) {
             // expected
         }
         try {
             serializer.register(PluginValue.class, null);
             fail("A null serializer must be rejected");
-        } catch (final IllegalArgumentException e) {
+        } catch (final FessConfigurationException e) {
             // expected
         }
     }
@@ -697,7 +699,7 @@ public class DataSerializerTest extends UnitFessTestCase {
         try {
             registerPluginValue(serializer);
             fail("A registration after the first serialization must be rejected");
-        } catch (final IllegalStateException e) {
+        } catch (final SerializerStateException e) {
             // expected
         }
     }

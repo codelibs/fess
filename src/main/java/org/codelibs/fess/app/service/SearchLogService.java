@@ -33,7 +33,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SearchLogPager;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.SearchLogException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.allcommon.EsPagingResultBean;
@@ -538,7 +538,7 @@ public class SearchLogService {
      * Deletes a search log entry based on its type.
      *
      * @param e The log entity to delete (ClickLog, FavoriteLog, UserInfo, or SearchLog)
-     * @throws FessSystemException if the entity type is not recognized
+     * @throws SearchLogException if the entity type is not recognized
      */
     public void deleteSearchLog(final Object e) {
         switch (e) {
@@ -546,7 +546,7 @@ public class SearchLogService {
         case final FavoriteLog favoriteLog -> favoriteLogBhv.delete(favoriteLog);
         case final UserInfo userInfo -> userInfoBhv.delete(userInfo);
         case final SearchLog searchLog -> searchLogBhv.delete(searchLog);
-        case null, default -> throw new FessSystemException("Unknown log entity: " + e);
+        case null, default -> throw new SearchLogException("Unknown log entity: " + e);
         }
     }
 }

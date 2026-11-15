@@ -66,7 +66,7 @@ import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -229,7 +229,7 @@ public class SystemHelper {
      * Parses project properties from the given path.
      *
      * @param propPath The path to the project properties file.
-     * @throws FessSystemException if the properties file cannot be parsed.
+     * @throws FessConfigurationException if the properties file cannot be parsed.
      */
     protected void parseProjectProperties(final Path propPath) {
         try (final InputStream in = Files.newInputStream(propPath)) {
@@ -243,7 +243,7 @@ public class SystemHelper {
             System.setProperty("fess.version", version);
             System.setProperty("fess.product.version", productVersion);
         } catch (final Exception e) {
-            throw new FessSystemException("Failed to parse project.properties.", e);
+            throw new FessConfigurationException("Failed to parse project.properties.", e);
         }
     }
 

@@ -54,6 +54,7 @@ import org.codelibs.fess.entity.AnalyticsReport.Chart;
 import org.codelibs.fess.entity.AnalyticsReport.Kpi;
 import org.codelibs.fess.entity.AnalyticsReport.Notice;
 import org.codelibs.fess.entity.AnalyticsReport.Series;
+import org.codelibs.fess.exception.InvalidExportException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.allcommon.EsPagingResultBean;
@@ -349,11 +350,11 @@ public class SearchLogAnalyticsService {
      * @param item the item, see {@link #isExportable(String, String)}
      * @param writer the writer to write the CSV to
      * @throws IOException if writing fails
-     * @throws IllegalArgumentException if the tab does not have the item
+     * @throws InvalidExportException if the tab does not have the item
      */
     public void exportCsv(final AnalyticsReport report, final String tab, final String item, final Writer writer) throws IOException {
         if (!isExportable(tab, item)) {
-            throw new IllegalArgumentException("Unknown export item: " + tab + "/" + item);
+            throw new InvalidExportException("Unknown export item: " + tab + "/" + item);
         }
         // not closed: that would close the writer of the caller
         @SuppressWarnings("resource")

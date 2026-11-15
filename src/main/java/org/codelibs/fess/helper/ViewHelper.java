@@ -55,7 +55,7 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.HighlightInfo;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.ContentViewException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
@@ -756,7 +756,7 @@ public class ViewHelper {
      *
      * @param doc the document data map
      * @return the stream response containing document content
-     * @throws FessSystemException if content cannot be retrieved
+     * @throws ContentViewException if content cannot be retrieved
      */
     public StreamResponse asContentResponse(final Map<String, Object> doc) {
         if (logger.isDebugEnabled()) {
@@ -767,21 +767,21 @@ public class ViewHelper {
         final String configId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldConfigId(), String.class);
         if (configId == null) {
             final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
-            throw new FessSystemException("configId is null in document. docId: " + docId);
+            throw new ContentViewException("configId is null in document. docId: " + docId);
         }
         if (configId.length() < 2) {
-            throw new FessSystemException("Invalid configId length: " + configId + ". ConfigId must be at least 2 characters long.");
+            throw new ContentViewException("Invalid configId length: " + configId + ". ConfigId must be at least 2 characters long.");
         }
         final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
         if (config == null) {
-            throw new FessSystemException("No crawlingConfig: " + configId);
+            throw new ContentViewException("No crawlingConfig: " + configId);
         }
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         final CrawlerClientFactory crawlerClientFactory =
                 config.initializeClientFactory(() -> ComponentUtil.getComponent(CrawlerClientFactory.class));
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
-            throw new FessSystemException("No CrawlerClient: " + configId + ", url: " + url);
+            throw new ContentViewException("No CrawlerClient: " + configId + ", url: " + url);
         }
         return writeContent(configId, url, client);
     }
@@ -810,7 +810,7 @@ public class ViewHelper {
                 out.write(is);
             } catch (final IOException e) {
                 if (!(e.getCause() instanceof ClientAbortException)) {
-                    throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
+                    throw new ContentViewException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
             } finally {
                 CloseableUtil.closeQuietly(responseData);

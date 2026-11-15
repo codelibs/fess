@@ -36,6 +36,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.admin.badword.AdminBadwordAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.FessUser.PermissionState;
+import org.codelibs.fess.exception.FessConfigurationException;
+import org.codelibs.fess.exception.SerializerStateException;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -548,7 +550,7 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
         try {
             serializer.register(AtomicInteger.class, new AtomicIntegerSerializer());
             fail();
-        } catch (final IllegalStateException e) {
+        } catch (final SerializerStateException e) {
             // expected
         }
         final SessionDataSerializer other = new SessionDataSerializer();
@@ -556,7 +558,7 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
         try {
             other.register(AtomicInteger.class, new AtomicIntegerSerializer());
             fail();
-        } catch (final IllegalStateException e) {
+        } catch (final SerializerStateException e) {
             // expected
         }
     }
@@ -566,26 +568,26 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
         try {
             serializer.register(null, new AtomicIntegerSerializer());
             fail();
-        } catch (final IllegalArgumentException e) {
+        } catch (final FessConfigurationException e) {
             // expected
         }
         try {
             serializer.register(AtomicInteger.class, null);
             fail();
-        } catch (final IllegalArgumentException e) {
+        } catch (final FessConfigurationException e) {
             // expected
         }
         try {
             serializer.register(String.class, new AtomicIntegerSerializer());
             fail();
-        } catch (final IllegalArgumentException e) {
+        } catch (final SerializerStateException e) {
             // expected: registered already
         }
         serializer.register(AtomicInteger.class, new AtomicIntegerSerializer());
         try {
             serializer.register(AtomicInteger.class, new AtomicIntegerSerializer());
             fail();
-        } catch (final IllegalArgumentException e) {
+        } catch (final SerializerStateException e) {
             // expected: registered twice
         }
     }

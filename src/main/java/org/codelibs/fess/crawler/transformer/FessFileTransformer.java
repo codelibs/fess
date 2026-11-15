@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.ExtractorNotFoundException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -83,13 +83,13 @@ public class FessFileTransformer extends AbstractFessFileTransformer {
      *
      * @param responseData the response data containing the file to extract
      * @return the extractor instance for processing the file
-     * @throws FessSystemException if no suitable extractor factory can be found
+     * @throws ExtractorNotFoundException if no suitable extractor factory can be found
      */
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
         final ExtractorFactory extractorFactory = ComponentUtil.getExtractorFactory();
         if (extractorFactory == null) {
-            throw new FessSystemException("Could not find extractorFactory.");
+            throw new ExtractorNotFoundException("Could not find extractorFactory.");
         }
         final Extractor extractor = extractorFactory.getExtractor(responseData.getMimeType());
         if (logger.isDebugEnabled()) {

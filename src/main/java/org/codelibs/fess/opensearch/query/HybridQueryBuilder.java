@@ -25,6 +25,7 @@ import org.codelibs.fesen.opensearch.core.common.io.stream.StreamOutput;
 import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
 import org.codelibs.fesen.opensearch.index.query.AbstractQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fess.exception.SearchQueryException;
 
 /**
  * Client-side {@link QueryBuilder} for the OpenSearch Neural Search plugin's {@code hybrid}
@@ -91,7 +92,7 @@ public class HybridQueryBuilder extends AbstractQueryBuilder<HybridQueryBuilder>
     public HybridQueryBuilder add(final QueryBuilder query) {
         Objects.requireNonNull(query, "query");
         if (queries.size() >= MAX_SUB_QUERIES) {
-            throw new IllegalArgumentException("hybrid accepts at most " + MAX_SUB_QUERIES + " subqueries.");
+            throw new SearchQueryException("hybrid accepts at most " + MAX_SUB_QUERIES + " subqueries.");
         }
         queries.add(query);
         return this;
@@ -152,7 +153,7 @@ public class HybridQueryBuilder extends AbstractQueryBuilder<HybridQueryBuilder>
     @Override
     protected void doXContent(final XContentBuilder builder, final Params params) throws IOException {
         if (queries.isEmpty()) {
-            throw new IllegalStateException("hybrid requires at least one subquery.");
+            throw new SearchQueryException("hybrid requires at least one subquery.");
         }
         builder.startObject(NAME);
         if (paginationDepth != null) {

@@ -35,6 +35,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.TagChange;
 import org.codelibs.fess.exception.TagTypeConflictException;
+import org.codelibs.fess.exception.TagTypeStateException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.TagTypeHelper;
@@ -551,7 +552,7 @@ public class AdminTagtypeAction extends FessAdminAction {
     protected static void copyToEntity(final CreateForm form, final TagType tagType, final String username, final long currentTime) {
         final TagTypeHelper tagTypeHelper = ComponentUtil.getTagTypeHelper();
         final String owner = form.owner.trim();
-        tagType.setName(tagTypeHelper.normalizeName(form.name).orElseThrow(() -> new IllegalArgumentException("invalid tag name")));
+        tagType.setName(tagTypeHelper.normalizeName(form.name).orElseThrow(() -> new TagTypeStateException("invalid tag name")));
         tagType.setOwner(owner);
         tagType.setId(tagTypeHelper.toId(tagType.getTagValue()));
         tagType.setPaths(splitPaths(form.paths));

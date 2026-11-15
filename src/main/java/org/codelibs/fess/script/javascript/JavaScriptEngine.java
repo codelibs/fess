@@ -225,7 +225,7 @@ public class JavaScriptEngine extends AbstractScriptEngine {
             if (cause instanceof RuntimeException) {
                 throw (RuntimeException) cause;
             }
-            throw new IllegalStateException("Failed to compile the script.", cause);
+            throw new ScriptEngineException("Failed to compile the script.", cause);
         }
     }
 

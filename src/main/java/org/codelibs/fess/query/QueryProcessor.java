@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.lastaflute.core.message.UserMessages;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
@@ -94,11 +95,11 @@ public class QueryProcessor {
      *
      * @param name the name to associate with the command (typically the query class simple name)
      * @param queryCommand the query command implementation to add
-     * @throws IllegalArgumentException if name or queryCommand is null
+     * @throws FessConfigurationException if name or queryCommand is null
      */
     public void add(final String name, final QueryCommand queryCommand) {
         if (name == null || queryCommand == null) {
-            throw new IllegalArgumentException(
+            throw new FessConfigurationException(
                     "Both name and queryCommand parameters are required. name: " + name + ", queryCommand: " + queryCommand);
         }
         if (logger.isDebugEnabled()) {

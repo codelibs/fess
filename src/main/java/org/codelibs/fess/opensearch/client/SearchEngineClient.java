@@ -64,6 +64,7 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
@@ -318,13 +319,13 @@ public class SearchEngineClient implements Client {
      *
      * @param host the hostname to resolve
      * @return the resolved InetAddress
-     * @throws FessSystemException if hostname resolution fails
+     * @throws SearchEngineClientException if hostname resolution fails
      */
     protected InetAddress getInetAddressByName(final String host) {
         try {
             return InetAddress.getByName(host);
         } catch (final UnknownHostException e) {
-            throw new FessSystemException("Failed to resolve the hostname: " + host, e);
+            throw new SearchEngineClientException("Failed to resolve the hostname: " + host, e);
         }
     }
 
@@ -375,7 +376,7 @@ public class SearchEngineClient implements Client {
             httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
         }
         if (StringUtil.isBlank(httpAddress)) {
-            throw new FessSystemException("""
+            throw new FessConfigurationException("""
                     No search engine address is configured, and Fess needs an OpenSearch server to run. \
                     Set SEARCH_ENGINE_HTTP_URL in bin/fess.in.sh, the -Dfess.search_engine.http_address option \
                     in bin\\fess.in.bat on Windows, or search_engine.http.url in fess_config.properties. \
@@ -414,7 +415,7 @@ public class SearchEngineClient implements Client {
                         final String name = fessConfig.getIndexLogIndex();
                         indexName = configIndex.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), name);
                     } else {
-                        throw new FessSystemException("Unknown config index: " + configIndex);
+                        throw new SearchEngineClientException("Unknown config index: " + configIndex);
                     }
                     final boolean exists = existsIndex(indexName);
                     if (!exists) {
@@ -699,7 +700,7 @@ public class SearchEngineClient implements Client {
      *
      * @param indexName the name of the index to check
      * @return true if the index exists, false if the search engine reports that it does not exist
-     * @throws FessSystemException if the existence of the index could not be determined
+     * @throws SearchEngineClientException if the existence of the index could not be determined
      */
     public boolean existsIndex(final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -708,7 +709,8 @@ public class SearchEngineClient implements Client {
                     client.admin().indices().prepareExists(indexName).execute().actionGet(fessConfig.getIndexSearchTimeout());
             return response.isExists();
         } catch (final Exception e) {
-            throw new FessSystemException("Failed to check index status: indexName=" + indexName + ", reason=" + getFailureReason(e), e);
+            throw new SearchEngineClientException(
+                    "Failed to check index status: indexName=" + indexName + ", reason=" + getFailureReason(e), e);
         }
     }
 
@@ -2050,7 +2052,7 @@ public class SearchEngineClient implements Client {
     /**
      * Waits for the configuration synchronization service to become available.
      *
-     * @throws FessSystemException if ConfigSync doesn't become available
+     * @throws SearchEngineClientException if ConfigSync doesn't become available
      */
     protected void waitForConfigSyncStatus() {
         FessSystemException cause = null;
@@ -2065,11 +2067,11 @@ public class SearchEngineClient implements Client {
                 lastHttpStatus = httpStatusCode;
                 final String message = "Configsync is not available. HTTP Status is " + httpStatusCode;
                 if (response.getContentException() != null) {
-                    throw new FessSystemException(message, response.getContentException());
+                    throw new SearchEngineClientException(message, response.getContentException());
                 }
-                throw new FessSystemException(message);
+                throw new SearchEngineClientException(message);
             } catch (final Exception e) {
-                cause = new FessSystemException(buildConfigSyncUnavailableMessage(lastHttpStatus, e), e);
+                cause = new SearchEngineClientException(buildConfigSyncUnavailableMessage(lastHttpStatus, e), e);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to access to configsync:{}", i, cause);
@@ -3458,10 +3460,10 @@ public class SearchEngineClient implements Client {
      * Rejects a backend Fess cannot walk result sets on.
      *
      * @param engineType the engine the backend reported
-     * @throws FessSystemException always
+     * @throws SearchEngineClientException always
      */
     protected void reportUnsupportedEngine(final EngineType engineType) {
-        throw new FessSystemException("The search engine reports " + engineType
+        throw new SearchEngineClientException("The search engine reports " + engineType
                 + ", but Fess requires OpenSearch 3.x or later. Operations that walk every matching document "
                 + "(document export, purge, label update, backup, the scroll search API and suggest dictionary "
                 + "builds) sort by _shard_doc, which earlier engines do not implement; over HTTP they hang "

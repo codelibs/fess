@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.LogFileException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -187,7 +187,7 @@ public class AdminLogAction extends FessAdminAction {
                     logFileItems.add(map);
                 });
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to access log files: logFilePath=" + logFilePath, e);
+                throw new LogFileException("Failed to access log files: logFilePath=" + logFilePath, e);
             }
         }
         return logFileItems;

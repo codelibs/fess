@@ -18,6 +18,7 @@ package org.codelibs.fess.chat;
 import java.util.Arrays;
 import java.util.List;
 
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -126,7 +127,7 @@ public class DocumentPartSplitterTest extends UnitFessTestCase {
 
     @Test
     public void test_splitText_rejectsNonPositiveLimit() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> DocumentPartSplitter.splitText("abc", 0));
+        Assertions.assertThrows(FessConfigurationException.class, () -> DocumentPartSplitter.splitText("abc", 0));
     }
 
     // ===================================================================================

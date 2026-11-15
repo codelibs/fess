@@ -36,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
@@ -96,11 +97,11 @@ public class DataStoreFactory {
      *
      * @param name the name to register the data store under, must not be null
      * @param dataStore the data store instance to register, must not be null
-     * @throws IllegalArgumentException if either name or dataStore is null
+     * @throws FessConfigurationException if either name or dataStore is null
      */
     public void add(final String name, final DataStore dataStore) {
         if (name == null || dataStore == null) {
-            throw new IllegalArgumentException(
+            throw new FessConfigurationException(
                     "Both name and dataStore parameters are required. name: " + name + ", dataStore: " + dataStore);
         }
         if (logger.isDebugEnabled()) {

@@ -27,6 +27,7 @@ import java.util.Map;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.exception.InvalidFilePathException;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -88,19 +89,19 @@ public class FessAdminActionTest extends UnitFessTestCase {
     @Test
     public void test_validateFilePath_blankPath() {
         final FessAdminAction action = createAction();
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(""));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(""));
     }
 
     @Test
     public void test_validateFilePath_nullPath() {
         final FessAdminAction action = createAction();
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(null));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(null));
     }
 
     @Test
     public void test_validateFilePath_whitespaceOnlyPath() {
         final FessAdminAction action = createAction();
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath("   "));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath("   "));
     }
 
     // ===================================================================================
@@ -111,14 +112,14 @@ public class FessAdminActionTest extends UnitFessTestCase {
     public void test_validateFilePath_pathTraversal_dotdot() {
         final FessAdminAction action = createAction();
         System.setProperty("fess.var.path", varDir.toString());
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(varDir.toString() + "/../../../etc/passwd"));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(varDir.toString() + "/../../../etc/passwd"));
     }
 
     @Test
     public void test_validateFilePath_pathTraversal_middleDotdot() {
         final FessAdminAction action = createAction();
         System.setProperty("fess.var.path", varDir.toString());
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(varDir.toString() + "/subdir/../../.."));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(varDir.toString() + "/subdir/../../.."));
     }
 
     // ===================================================================================
@@ -143,7 +144,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         System.setProperty("fess.var.path", varDir.toString());
         final File outsideFile = new File(tempDir.toFile(), "outside/test.txt");
 
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
     }
 
     // ===================================================================================
@@ -168,7 +169,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         System.setProperty("fess.webapp.path", webappDir.toString());
         final File outsideFile = new File(tempDir.toFile(), "outside/test.txt");
 
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
     }
 
     // ===================================================================================
@@ -192,7 +193,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         System.setProperty("fess.conf.path", confDir.toString());
         final File outsideFile = new File(tempDir.toFile(), "outside/test.txt");
 
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
     }
 
     // ===================================================================================
@@ -236,7 +237,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
 
         final File outsideFile = new File(tempDir.toFile(), "outside/test.txt");
 
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(outsideFile.getAbsolutePath()));
     }
 
     @Test
@@ -250,7 +251,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         webappFile.createNewFile();
 
         // Should throw because only fess.var.path is set and the file is not under it
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(webappFile.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(webappFile.getAbsolutePath()));
     }
 
     @Test
@@ -264,7 +265,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         varFile.createNewFile();
 
         // Should throw because only fess.webapp.path is set and the file is not under it
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(varFile.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(varFile.getAbsolutePath()));
     }
 
     // ===================================================================================
@@ -301,8 +302,8 @@ public class FessAdminActionTest extends UnitFessTestCase {
 
         try {
             action.validateFilePath(outsideFile.getAbsolutePath());
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected InvalidFilePathException");
+        } catch (final InvalidFilePathException e) {
             final String message = e.getMessage();
             assertTrue("Error message should contain var path: " + message, message.contains(varDir.toFile().getCanonicalPath()));
             assertTrue("Error message should contain webapp path: " + message, message.contains(webappDir.toFile().getCanonicalPath()));
@@ -315,8 +316,8 @@ public class FessAdminActionTest extends UnitFessTestCase {
         final FessAdminAction action = createAction();
         try {
             action.validateFilePath("");
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected InvalidFilePathException");
+        } catch (final InvalidFilePathException e) {
             assertTrue("Error message should indicate blank path: " + e.getMessage(), e.getMessage().contains("blank"));
         }
     }
@@ -365,7 +366,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         fileInOther.createNewFile();
 
         // Should throw because "other" is not under "vardata"
-        assertThrows(IllegalArgumentException.class, () -> action.validateFilePath(fileInOther.getAbsolutePath()));
+        assertThrows(InvalidFilePathException.class, () -> action.validateFilePath(fileInOther.getAbsolutePath()));
     }
 
     // ===================================================================================

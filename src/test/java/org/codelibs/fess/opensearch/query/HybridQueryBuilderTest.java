@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.opensearch.query;
 
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
@@ -74,7 +75,7 @@ public class HybridQueryBuilderTest extends UnitFessTestCase {
         try {
             builder.add(QueryBuilders.matchAllQuery());
             fail("the engine accepts at most " + HybridQueryBuilder.MAX_SUB_QUERIES + " subqueries");
-        } catch (final IllegalArgumentException e) {
+        } catch (final SearchQueryException e) {
             assertTrue(e.getMessage().contains(String.valueOf(HybridQueryBuilder.MAX_SUB_QUERIES)), e.getMessage());
         }
     }
@@ -84,7 +85,7 @@ public class HybridQueryBuilderTest extends UnitFessTestCase {
         try {
             new HybridQueryBuilder().toString();
             fail("a hybrid query with no branch is not a query");
-        } catch (final IllegalStateException e) {
+        } catch (final SearchQueryException e) {
             assertTrue(e.getMessage().contains("subquery"), e.getMessage());
         }
     }

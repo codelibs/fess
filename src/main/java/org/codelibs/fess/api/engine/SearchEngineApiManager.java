@@ -35,9 +35,9 @@ import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
@@ -279,12 +279,12 @@ public class SearchEngineApiManager extends BaseApiManager {
      * Gets the server path with access token for API requests.
      *
      * @return the complete server path including the access token
-     * @throws FessSystemException if no access token is available
+     * @throws SearchEngineClientException if no access token is available
      */
     public String getServerPath() {
         return getSessionManager().getAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, String.class)
                 .map(token -> ADMIN_SERVER + token)
-                .orElseThrow(() -> new FessSystemException("Cannot create an access token."));
+                .orElseThrow(() -> new SearchEngineClientException("Cannot create an access token."));
     }
 
     /**
