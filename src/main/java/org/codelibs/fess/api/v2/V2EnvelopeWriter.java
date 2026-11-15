@@ -30,7 +30,7 @@ import org.codelibs.fesen.client.node.NodeUnavailableException;
 import org.codelibs.fesen.opensearch.OpenSearchException;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.SearchEngineUnavailableException;
-import org.codelibs.fess.exception.V2EnvelopeException;
+import org.codelibs.fess.exception.EnvelopeException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
@@ -112,7 +112,7 @@ public class V2EnvelopeWriter {
      * @param res the HTTP response to write to
      * @param payload key/value fields to merge into the envelope; {@code null} is treated as empty
      * @throws IOException if writing to the response fails
-     * @throws V2EnvelopeException if {@code payload} contains a reserved envelope key ({@code "status"})
+     * @throws EnvelopeException if {@code payload} contains a reserved envelope key ({@code "status"})
      */
     public void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
         if (res.isCommitted()) {
@@ -125,7 +125,7 @@ public class V2EnvelopeWriter {
         if (payload != null) {
             for (final String reserved : RESERVED_KEYS) {
                 if (payload.containsKey(reserved)) {
-                    throw new V2EnvelopeException(
+                    throw new EnvelopeException(
                             "payload must not contain reserved envelope key '" + reserved + "': use a different key name");
                 }
             }

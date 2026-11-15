@@ -18,7 +18,7 @@ package org.codelibs.fess.exception;
 /**
  * Thrown when a payload cannot be put into the envelope of the v2 API, such as a payload with a reserved key.
  */
-public class V2EnvelopeException extends FessSystemException {
+public class EnvelopeException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,7 +27,7 @@ public class V2EnvelopeException extends FessSystemException {
      *
      * @param message The detail message.
      */
-    public V2EnvelopeException(final String message) {
+    public EnvelopeException(final String message) {
         super(message);
     }
 }
