@@ -388,6 +388,20 @@ public class FessSessionManager extends ManagerBase {
     }
 
     /**
+     * Saves the sessions the current thread touched so far and keeps collecting, so that {@link #endRequest()} saves
+     * what changed afterwards. {@link FessSessionFilter} calls it before the response is committed: once the client has
+     * the response, its next request may reach another node, which must find the session in the store.
+     */
+    protected void persistTouched() {
+        final List<FessSession> touched = accessed.get();
+        if (touched != null) {
+            for (final FessSession session : new ArrayList<>(touched)) {
+                persist(session);
+            }
+        }
+    }
+
+    /**
      * Records that the current thread touched a session.
      *
      * @param session the session

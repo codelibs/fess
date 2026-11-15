@@ -65,6 +65,14 @@ public class FessBootSessionStoreTest {
     }
 
     @Test
+    public void test_opensearch_installsTheFilterThatSavesBeforeTheResponseIsCommitted() {
+        FessBoot.setupSessionStore(context, "opensearch");
+        assertNotNull(context.findFilterDef("fessSessionFilter"));
+        assertEquals("fessSessionFilter", context.findFilterMaps()[0].getFilterName());
+        assertEquals("/*", context.findFilterMaps()[0].getURLPatterns()[0]);
+    }
+
+    @Test
     public void test_opensearch_isCaseInsensitiveAndTrimmed() {
         FessBoot.setupSessionStore(context, " OpenSearch ");
         assertInstanceOf(FessSessionManager.class, context.getManager());
@@ -77,6 +85,7 @@ public class FessBootSessionStoreTest {
         FessBoot.setupSessionStore(context, "memory");
         assertNull(context.getManager());
         assertFalse(hasSessionValve());
+        assertNull(context.findFilterDef("fessSessionFilter"));
     }
 
     @Test
