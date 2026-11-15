@@ -28,12 +28,15 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Service;
 import org.apache.catalina.Host;
 import org.apache.catalina.connector.Connector;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.http.CookieProcessorBase;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
+import org.codelibs.fess.tomcat.session.FessSessionFilter;
 import org.codelibs.fess.tomcat.session.FessSessionManager;
 import org.codelibs.fess.tomcat.session.FessSessionValve;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
@@ -80,6 +83,9 @@ public class FessBoot extends TomcatBoot {
 
     /** Environment variable that selects the HTTP session store ({@code opensearch}); unset keeps Tomcat's in-memory sessions */
     protected static final String FESS_SESSION_STORE = "FESS_SESSION_STORE";
+
+    /** The name of the filter that saves the sessions before a response is committed */
+    protected static final String SESSION_FILTER_NAME = "fessSessionFilter";
 
     /**
      * Constructs a new FessBoot instance with the specified port and context path.
@@ -327,8 +333,19 @@ public class FessBoot extends TomcatBoot {
         }
         final String value = sessionStore.trim();
         if ("opensearch".equalsIgnoreCase(value)) {
-            context.setManager(new FessSessionManager());
+            final FessSessionManager manager = new FessSessionManager();
+            context.setManager(manager);
             context.getPipeline().addValve(new FessSessionValve());
+            // saves the sessions before a response is committed, which the valve cannot do (see FessSessionFilter)
+            final FilterDef filterDef = new FilterDef();
+            filterDef.setFilterName(SESSION_FILTER_NAME);
+            filterDef.setFilter(new FessSessionFilter(manager));
+            filterDef.setAsyncSupported("true");
+            context.addFilterDef(filterDef);
+            final FilterMap filterMap = new FilterMap();
+            filterMap.setFilterName(SESSION_FILTER_NAME);
+            filterMap.addURLPattern("/*");
+            context.addFilterMapBefore(filterMap);
         } else if (!"memory".equalsIgnoreCase(value)) {
             System.err.println("Unknown " + FESS_SESSION_STORE + " value: " + value + ". Sessions are kept in memory.");
         }

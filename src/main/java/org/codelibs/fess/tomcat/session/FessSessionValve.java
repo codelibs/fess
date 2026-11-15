@@ -28,11 +28,12 @@ import jakarta.servlet.ServletException;
 /**
  * A valve for the Context pipeline that writes the sessions a request touched to the shared session store.
  *
- * <p>It saves after the rest of the chain has run, which for a response that fits the buffer is before Tomcat
- * commits it, so the next request of the client, possibly on another node, sees the change. The sessions to save are
- * collected by {@link FessSession#access()} instead of asking the request for its session, which would read the
- * store for requests that never use the session. It does nothing if the Context does not use a
- * {@link FessSessionManager}.</p>
+ * <p>It saves after the rest of the chain has run. A handler that writes and closes the response itself has sent it
+ * by then, so {@link FessSessionFilter} saves the sessions before the response is committed, which is what lets the
+ * next request of the client, possibly on another node, see the change; the valve writes what changed after that and
+ * the sessions of the responses that were not committed earlier. The sessions to save are collected by
+ * {@link FessSession#access()} instead of asking the request for its session, which would read the store for requests
+ * that never use the session. It does nothing if the Context does not use a {@link FessSessionManager}.</p>
  */
 public class FessSessionValve extends ValveBase {
 
