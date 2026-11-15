@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.curl.CurlRequest;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
@@ -373,10 +373,10 @@ public class ThemeArtifactHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_compareVersions_refusesWhatIsNotAVersion() {
-        assertThrows(FessSystemException.class, () -> ThemeArtifactHelper.compareVersions("1.0", "1.0.0"));
-        assertThrows(FessSystemException.class, () -> ThemeArtifactHelper.compareVersions("1.0.0", "latest"));
-        assertThrows(FessSystemException.class, () -> ThemeArtifactHelper.compareVersions("1.0.0", "1.0.0/../x"));
-        assertThrows(FessSystemException.class, () -> ThemeArtifactHelper.compareVersions(null, "1.0.0"));
+        assertThrows(ThemeException.class, () -> ThemeArtifactHelper.compareVersions("1.0", "1.0.0"));
+        assertThrows(ThemeException.class, () -> ThemeArtifactHelper.compareVersions("1.0.0", "latest"));
+        assertThrows(ThemeException.class, () -> ThemeArtifactHelper.compareVersions("1.0.0", "1.0.0/../x"));
+        assertThrows(ThemeException.class, () -> ThemeArtifactHelper.compareVersions(null, "1.0.0"));
     }
 
     @Test

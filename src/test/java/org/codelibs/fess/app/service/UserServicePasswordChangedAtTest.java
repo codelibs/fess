@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.auth.AuthenticationManager;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.UserConflictException;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
@@ -181,7 +181,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         try {
             userService.endOtherSessions("alice");
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final UserConflictException e) {
             // expected
         }
         assertTrue(written.isEmpty());
@@ -239,7 +239,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         try {
             userService.changePassword("alice", "new-password");
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final UserConflictException e) {
             // expected
         }
         assertTrue(written.isEmpty());
@@ -272,7 +272,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         try {
             userService.store(edited);
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final UserConflictException e) {
             // expected
         }
         assertEquals(List.of("update"), calls);

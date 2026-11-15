@@ -43,7 +43,7 @@ import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.crawler.Constants;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.util.ComponentUtil;
@@ -341,7 +341,7 @@ public class ThemeArtifactHelper {
      * @param b the second version
      * @return a negative number, zero or a positive number as {@code a} is older than, equal to
      *         or newer than {@code b}
-     * @throws FessSystemException if either is not a {@link ThemeManifest#SEMVER_PATTERN} version
+     * @throws ThemeException if either is not a {@link ThemeManifest#SEMVER_PATTERN} version
      */
     public static int compareVersions(final String a, final String b) {
         requireVersion(a);
@@ -364,7 +364,7 @@ public class ThemeArtifactHelper {
 
     private static void requireVersion(final String version) {
         if (version == null || !VERSION_PATTERN.matcher(version).matches()) {
-            throw new FessSystemException("Not a theme version: " + version);
+            throw new ThemeException("Not a theme version: " + version);
         }
     }
 

@@ -31,7 +31,7 @@ import java.util.Set;
 
 import org.codelibs.fess.entity.AnalyticsCondition;
 import org.codelibs.fess.entity.AnalyticsReport;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.InvalidExportException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.CsvUtil;
 import org.junit.jupiter.api.Test;
@@ -373,13 +373,13 @@ public class SearchLogAnalyticsServiceTest extends UnitFessTestCase {
         try {
             export(new AnalyticsReport(), "overview", "weekHour");
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final InvalidExportException e) {
             // expected
         }
         try {
             export(new AnalyticsReport(), "nothing", "kpis");
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final InvalidExportException e) {
             // expected
         }
     }

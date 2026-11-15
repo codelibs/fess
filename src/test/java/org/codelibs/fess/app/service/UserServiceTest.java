@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.pager.UserPager;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.UserConflictException;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
 import org.codelibs.fess.opensearch.user.exentity.User;
@@ -1019,7 +1019,7 @@ public class UserServiceTest extends UnitFessTestCase {
         final List<String> calls = new ArrayList<>();
         installStoreStubs(calls, "alice", false, storedUser("id-bob", "bob"));
 
-        final FessSystemException e = org.junit.jupiter.api.Assertions.assertThrows(FessSystemException.class,
+        final UserConflictException e = org.junit.jupiter.api.Assertions.assertThrows(UserConflictException.class,
                 () -> userService.store(storedUser("id-alice", "bob")));
 
         assertEquals("A user named bob already exists", e.getMessage());

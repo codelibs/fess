@@ -39,6 +39,7 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.ChatDocumentNotFoundException;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.llm.ChatIntent;
@@ -660,12 +661,12 @@ public class ChatClient {
      * @param docId the document ID
      * @return the document map; {@code content} is a list of chunk texts for a chunked document and
      *         a string otherwise
-     * @throws FessSystemException if the document could not be fetched
+     * @throws ChatDocumentNotFoundException if the document could not be fetched
      */
     protected Map<String, Object> fetchWholeDocument(final String docId) {
         return ComponentUtil.getChatContentFetcher()
                 .fetchWholeDocument(docId)
-                .orElseThrow(() -> new FessSystemException("Document not found. docId=" + docId));
+                .orElseThrow(() -> new ChatDocumentNotFoundException("Document not found. docId=" + docId));
     }
 
     /**
