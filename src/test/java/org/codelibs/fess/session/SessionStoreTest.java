@@ -634,6 +634,14 @@ public class SessionStoreTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_init_ignoresSurroundingWhitespace() throws Exception {
+        // FessBoot trims the value before it installs the session manager, so this side must agree
+        store.env.put(SessionStore.ENV_NAME, " opensearch ");
+        store.init();
+        assertNotNull(store.contextAttributes.get(SessionStore.CONTEXT_ATTRIBUTE));
+    }
+
+    @Test
     public void test_init_doesNothingByDefault() throws Exception {
         store.init();
         assertTrue(store.contextAttributes.isEmpty());

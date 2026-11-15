@@ -176,12 +176,14 @@ public class SessionStore {
     /**
      * Tells whether the environment selects the OpenSearch session store.
      *
-     * @return true in the webapp process if {@value #ENV_NAME} equals {@value #ENV_VALUE}, ignoring the case.
+     * @return true in the webapp process if {@value #ENV_NAME} equals {@value #ENV_VALUE}, ignoring the case and the
+     *         whitespace around it, as {@code FessBoot} does when it installs the session manager.
      *         The job processes (crawler and the others) boot this component too and inherit the environment,
      *         but they have no sessions.
      */
     protected boolean isEnabled() {
-        return SystemUtil.isWebappProcess() && ENV_VALUE.equalsIgnoreCase(getEnv(ENV_NAME));
+        final String value = getEnv(ENV_NAME);
+        return SystemUtil.isWebappProcess() && value != null && ENV_VALUE.equalsIgnoreCase(value.trim());
     }
 
     /**
