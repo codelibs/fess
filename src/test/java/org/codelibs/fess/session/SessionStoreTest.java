@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.SessionStoreException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -440,7 +440,7 @@ public class SessionStoreTest extends UnitFessTestCase {
         try {
             store.save(args);
             fail();
-        } catch (final FessSystemException e) {
+        } catch (final SessionStoreException e) {
             // ok
         }
         assertEquals(List.of(), store.calls);

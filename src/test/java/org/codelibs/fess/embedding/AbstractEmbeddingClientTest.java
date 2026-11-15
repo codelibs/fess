@@ -35,7 +35,6 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.codelibs.core.timer.TimeoutTask;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -528,15 +527,15 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getHttpClient_afterDestroy_throwsFessSystemException() {
+    public void test_getHttpClient_afterDestroy_throwsEmbeddingException() {
         final TestEmbeddingClient client = new TestEmbeddingClient();
         client.init();
         client.destroy();
         try {
             client.getHttpClient();
-            fail("getHttpClient() must throw FessSystemException once the client has been destroyed, "
+            fail("getHttpClient() must throw EmbeddingException once the client has been destroyed, "
                     + "not silently recreate an HTTP client");
-        } catch (final FessSystemException e) {
+        } catch (final EmbeddingException e) {
             // expected
         }
     }

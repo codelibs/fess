@@ -28,8 +28,8 @@ import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
 import org.codelibs.fesen.opensearch.search.aggregations.metrics.ValueCount;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.TagTypePager;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.TagTypeConflictException;
+import org.codelibs.fess.exception.TagTypeStateException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.allcommon.EsPagingResultBean;
 import org.codelibs.fess.opensearch.config.cbean.TagTypeCB;
@@ -235,14 +235,14 @@ public class TagTypeService extends FessAppService {
      * stored tag type changed since it was read.
      *
      * @param tagType The tag type to update, carrying the sequence number and primary term it was read with.
-     * @throws FessSystemException When the tag type carries no sequence number or primary term.
+     * @throws TagTypeStateException When the tag type carries no sequence number or primary term.
      * @throws TagTypeConflictException When the stored tag type changed since it was read.
      */
     public void update(final TagType tagType) {
         final Long seqNo = tagType.getSeqNo();
         final Long primaryTerm = tagType.getPrimaryTerm();
         if (seqNo == null || seqNo.longValue() < 0L || primaryTerm == null || primaryTerm.longValue() <= 0L) {
-            throw new FessSystemException("The tag type has no sequence number or primary term: id=" + tagType.getId());
+            throw new TagTypeStateException("The tag type has no sequence number or primary term: id=" + tagType.getId());
         }
         try {
             tagTypeBhv.update(tagType, op -> {
@@ -264,14 +264,14 @@ public class TagTypeService extends FessAppService {
      * its paths, is not dropped unseen.
      *
      * @param tagType The tag type to delete, carrying the sequence number and primary term it was read with.
-     * @throws FessSystemException When the tag type carries no sequence number or primary term.
+     * @throws TagTypeStateException When the tag type carries no sequence number or primary term.
      * @throws TagTypeConflictException When the stored tag type changed since it was read.
      */
     public void delete(final TagType tagType) {
         final Long seqNo = tagType.getSeqNo();
         final Long primaryTerm = tagType.getPrimaryTerm();
         if (seqNo == null || seqNo.longValue() < 0L || primaryTerm == null || primaryTerm.longValue() <= 0L) {
-            throw new FessSystemException("The tag type has no sequence number or primary term: id=" + tagType.getId());
+            throw new TagTypeStateException("The tag type has no sequence number or primary term: id=" + tagType.getId());
         }
         try {
             tagTypeBhv.delete(tagType, op -> {

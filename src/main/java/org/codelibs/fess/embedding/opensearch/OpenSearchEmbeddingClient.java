@@ -42,7 +42,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingException;
 import org.codelibs.fess.embedding.RetryableEmbeddingException;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -933,7 +932,7 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
             }
         }
         if (lastIo == null) {
-            throw new FessSystemException("executeWithRetry exited without exception or success");
+            throw new EmbeddingException("executeWithRetry exited without exception or success");
         }
         throw lastIo;
     }

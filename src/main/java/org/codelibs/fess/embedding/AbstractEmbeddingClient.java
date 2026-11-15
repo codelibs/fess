@@ -34,7 +34,6 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -404,11 +403,11 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
      * leak) their own client.</p>
      *
      * @return the HTTP client
-     * @throws FessSystemException if this client has already been {@link #destroy() destroyed}
+     * @throws EmbeddingException if this client has already been {@link #destroy() destroyed}
      */
     public synchronized CloseableHttpClient getHttpClient() {
         if (destroyed) {
-            throw new FessSystemException(getName() + " embedding client has already been destroyed");
+            throw new EmbeddingException(getName() + " embedding client has already been destroyed");
         }
         if (httpClient == null) {
             init();

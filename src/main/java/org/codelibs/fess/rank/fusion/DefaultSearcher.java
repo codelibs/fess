@@ -29,8 +29,8 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
@@ -274,7 +274,7 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
                 // Fusing means wrapping the keyword query, so there has to be one. Failing here
                 // sends the search back to Fess-side fusion instead of quietly issuing a request
                 // that has lost every other branch.
-                throw new FessSystemException("The keyword condition did not produce a query to fuse.");
+                throw new SearchQueryException("The keyword condition did not produce a query to fuse.");
             }
             final HybridQueryBuilder hybridQuery = new HybridQueryBuilder().add(source.query().queryName(getName()));
             subQueries.forEach(hybridQuery::add);

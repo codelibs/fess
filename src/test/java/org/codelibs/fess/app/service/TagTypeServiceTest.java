@@ -22,7 +22,7 @@ import org.codelibs.fesen.opensearch.action.index.IndexAction;
 import org.codelibs.fesen.opensearch.action.index.IndexRequest;
 import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
 import org.codelibs.fesen.opensearch.action.support.WriteRequest.RefreshPolicy;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.TagTypeStateException;
 import org.codelibs.fess.exception.TagTypeConflictException;
 import org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.opensearch.config.exbhv.TagTypeBhv;
@@ -154,7 +154,7 @@ public class TagTypeServiceTest extends UnitFessTestCase {
         // An update without the sequence number would overwrite a concurrent change unseen.
         final RecordingTagTypeBhv bhv = new RecordingTagTypeBhv();
 
-        assertThrows(FessSystemException.class, () -> createService(bhv).update(createTagType()));
+        assertThrows(TagTypeStateException.class, () -> createService(bhv).update(createTagType()));
         assertNull(bhv.updateRequest);
     }
 
@@ -211,7 +211,7 @@ public class TagTypeServiceTest extends UnitFessTestCase {
         // A delete without the sequence number would drop a concurrent change unseen.
         final RecordingTagTypeBhv bhv = new RecordingTagTypeBhv();
 
-        assertThrows(FessSystemException.class, () -> createService(bhv).delete(createTagType()));
+        assertThrows(TagTypeStateException.class, () -> createService(bhv).delete(createTagType()));
         assertNull(bhv.deleteRequest);
     }
 

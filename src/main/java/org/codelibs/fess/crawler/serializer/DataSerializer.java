@@ -39,7 +39,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.SerializeUtil;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.SerializerStateException;
 import org.codelibs.fess.util.ComponentUtil;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -134,14 +134,14 @@ public class DataSerializer {
      * @param type the class to register
      * @param serializer the serializer that writes and reads the class
      * @throws IllegalArgumentException if the type or the serializer is null, or the type is already registered
-     * @throws FessSystemException if a serialization has already started
+     * @throws SerializerStateException if a serialization has already started
      */
     public synchronized void register(final Class<?> type, final Serializer<?> serializer) {
         if (type == null || serializer == null) {
             throw new IllegalArgumentException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
         }
         if (kryoCreated) {
-            throw new FessSystemException("Cannot register " + type.getName() + " because serialization has already started.");
+            throw new SerializerStateException("Cannot register " + type.getName() + " because serialization has already started.");
         }
         if (pluginSerializerMap.containsKey(type)) {
             throw new IllegalArgumentException(type.getName() + " is already registered.");

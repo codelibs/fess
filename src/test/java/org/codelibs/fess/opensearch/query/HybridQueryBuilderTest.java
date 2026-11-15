@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.opensearch.query;
 
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
@@ -85,7 +85,7 @@ public class HybridQueryBuilderTest extends UnitFessTestCase {
         try {
             new HybridQueryBuilder().toString();
             fail("a hybrid query with no branch is not a query");
-        } catch (final FessSystemException e) {
+        } catch (final SearchQueryException e) {
             assertTrue(e.getMessage().contains("subquery"), e.getMessage());
         }
     }

@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.SerializerStateException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
@@ -698,7 +698,7 @@ public class DataSerializerTest extends UnitFessTestCase {
         try {
             registerPluginValue(serializer);
             fail("A registration after the first serialization must be rejected");
-        } catch (final FessSystemException e) {
+        } catch (final SerializerStateException e) {
             // expected
         }
     }
