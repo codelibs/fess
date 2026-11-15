@@ -75,7 +75,7 @@ public class HybridQueryBuilderTest extends UnitFessTestCase {
         try {
             builder.add(QueryBuilders.matchAllQuery());
             fail("the engine accepts at most " + HybridQueryBuilder.MAX_SUB_QUERIES + " subqueries");
-        } catch (final IllegalArgumentException e) {
+        } catch (final SearchQueryException e) {
             assertTrue(e.getMessage().contains(String.valueOf(HybridQueryBuilder.MAX_SUB_QUERIES)), e.getMessage());
         }
     }

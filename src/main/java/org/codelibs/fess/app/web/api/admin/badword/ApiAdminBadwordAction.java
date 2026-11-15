@@ -40,7 +40,7 @@ import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.DataImportException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.opensearch.config.exentity.BadWord;
 import org.codelibs.fess.util.ComponentUtil;
@@ -209,7 +209,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to import data.", e);
+                throw new DataImportException("Failed to import data.", e);
             }
         });
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());

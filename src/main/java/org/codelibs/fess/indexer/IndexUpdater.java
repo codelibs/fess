@@ -38,7 +38,6 @@ import org.codelibs.fess.crawler.service.impl.OpenSearchDataService;
 import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.crawler.util.OpenSearchResultList;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -237,7 +236,7 @@ public class IndexUpdater extends Thread {
     @Override
     public void run() {
         if (dataService == null) {
-            throw new FessSystemException("DataService is null. IndexUpdater cannot proceed without a DataService instance.");
+            throw new ContainerNotAvailableException("dataService");
         }
 
         if (logger.isDebugEnabled()) {

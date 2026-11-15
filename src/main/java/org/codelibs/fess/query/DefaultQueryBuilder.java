@@ -25,6 +25,7 @@ import org.codelibs.fesen.opensearch.index.query.DisMaxQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilderVisitor;
 import org.codelibs.fesen.opensearch.index.query.QueryRewriteContext;
+import org.codelibs.fess.exception.SearchQueryException;
 
 /**
  * Default implementation of QueryBuilder that wraps other QueryBuilder instances
@@ -43,7 +44,7 @@ public class DefaultQueryBuilder implements QueryBuilder {
      * Creates a new DefaultQueryBuilder wrapping the specified QueryBuilder.
      *
      * @param queryBuilder the query builder to wrap (must be BoolQueryBuilder or DisMaxQueryBuilder)
-     * @throws IllegalArgumentException if the query builder type is not supported
+     * @throws SearchQueryException if the query builder type is not supported
      */
     public DefaultQueryBuilder(final QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
@@ -52,7 +53,7 @@ public class DefaultQueryBuilder implements QueryBuilder {
         } else if (queryBuilder instanceof DisMaxQueryBuilder) {
             queryType = QueryType.DISMAX;
         } else {
-            throw new IllegalArgumentException("Unknown query builder: " + queryBuilder);
+            throw new SearchQueryException("Unknown query builder: " + queryBuilder);
         }
     }
 

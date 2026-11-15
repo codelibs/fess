@@ -42,7 +42,7 @@ import org.codelibs.fess.app.service.ElevateWordService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.DataImportException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -435,7 +435,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 suggestHelper.deleteAllElevateWord(false);
                 suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to import elevate word data: fileName=" + form.elevateWordFile.getFileName(), e);
+                throw new DataImportException("Failed to import elevate word data: fileName=" + form.elevateWordFile.getFileName(), e);
             }
         });
         saveInfo(messages -> messages.addSuccessUploadElevateWord(GLOBAL));

@@ -31,4 +31,14 @@ public class FessConfigurationException extends FessSystemException {
     public FessConfigurationException(final String message) {
         super(message);
     }
+
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message The detail message, which names the setting.
+     * @param cause The cause of this exception.
+     */
+    public FessConfigurationException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

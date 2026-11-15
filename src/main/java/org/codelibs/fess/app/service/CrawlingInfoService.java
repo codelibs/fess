@@ -35,7 +35,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.CrawlingInfoException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.cbean.CrawlingInfoCB;
 import org.codelibs.fess.opensearch.config.exbhv.CrawlingInfoBhv;
@@ -129,7 +129,7 @@ public class CrawlingInfoService {
      * then performs an insert or update operation with immediate refresh.
      *
      * @param crawlingInfo the crawling information entity to store
-     * @throws FessSystemException if the crawling information is null
+     * @throws CrawlingInfoException if the crawling information is null
      */
     public void store(final CrawlingInfo crawlingInfo) {
         setupStoreCondition(crawlingInfo);
@@ -176,11 +176,11 @@ public class CrawlingInfoService {
      * Validates that the entity is not null and sets the creation time if not already present.
      *
      * @param crawlingInfo the crawling information entity to prepare for storage
-     * @throws FessSystemException if the crawling information is null
+     * @throws CrawlingInfoException if the crawling information is null
      */
     protected void setupStoreCondition(final CrawlingInfo crawlingInfo) {
         if (crawlingInfo == null) {
-            throw new FessSystemException("Crawling Session is null.");
+            throw new CrawlingInfoException("Crawling Session is null.");
         }
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         if (crawlingInfo.getCreatedTime() == null) {
@@ -239,11 +239,11 @@ public class CrawlingInfoService {
      * then performs a batch insert operation with immediate refresh.
      *
      * @param crawlingInfoParamList the list of crawling information parameters to store
-     * @throws FessSystemException if the parameter list is null
+     * @throws CrawlingInfoException if the parameter list is null
      */
     public void storeInfo(final List<CrawlingInfoParam> crawlingInfoParamList) {
         if (crawlingInfoParamList == null) {
-            throw new FessSystemException("Crawling Session Info is null.");
+            throw new CrawlingInfoException("Crawling Session Info is null.");
         }
 
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

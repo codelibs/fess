@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.ExtractorNotFoundException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -83,19 +83,19 @@ public class FessStandardTransformer extends AbstractFessFileTransformer {
      *
      * @param responseData the response data containing the document to extract
      * @return the extractor instance for processing the document
-     * @throws FessSystemException if no suitable extractor can be found
+     * @throws ExtractorNotFoundException if no suitable extractor can be found
      */
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
         final ExtractorFactory extractorFactory = ComponentUtil.getExtractorFactory();
         if (extractorFactory == null) {
-            throw new FessSystemException("Could not find extractorFactory.");
+            throw new ExtractorNotFoundException("Could not find extractorFactory.");
         }
         Extractor extractor = extractorFactory.getExtractor(responseData.getMimeType());
         if (extractor == null) {
             extractor = ComponentUtil.getComponent("tikaExtractor");
             if (extractor == null) {
-                throw new FessSystemException("Could not find tikaExtractor.");
+                throw new ExtractorNotFoundException("Could not find tikaExtractor.");
             }
         }
 

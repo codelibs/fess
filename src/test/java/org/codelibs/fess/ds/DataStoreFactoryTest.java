@@ -25,6 +25,7 @@ import java.util.jar.JarOutputStream;
 
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.entity.DataStoreParams;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -100,8 +101,8 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
         TestDataStore dataStore = new TestDataStore("TestStore");
         try {
             dataStoreFactory.add(null, dataStore);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
+            fail("Should throw FessConfigurationException");
+        } catch (FessConfigurationException e) {
             assertTrue(e.getMessage().contains("Both name and dataStore parameters are required"));
             assertTrue(e.getMessage().contains("name: null"));
         }
@@ -112,8 +113,8 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     public void test_add_nullDataStore() {
         try {
             dataStoreFactory.add("testName", null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
+            fail("Should throw FessConfigurationException");
+        } catch (FessConfigurationException e) {
             assertTrue(e.getMessage().contains("Both name and dataStore parameters are required"));
             assertTrue(e.getMessage().contains("dataStore: null"));
         }
@@ -124,8 +125,8 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     public void test_add_bothNull() {
         try {
             dataStoreFactory.add(null, null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
+            fail("Should throw FessConfigurationException");
+        } catch (FessConfigurationException e) {
             assertEquals("Both name and dataStore parameters are required. name: null, dataStore: null", e.getMessage());
         }
     }

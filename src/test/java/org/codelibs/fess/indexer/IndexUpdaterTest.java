@@ -39,7 +39,6 @@ import org.codelibs.fess.crawler.service.impl.OpenSearchDataService;
 import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.crawler.util.OpenSearchResultList;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.LanguageHelper;
@@ -193,9 +192,9 @@ public class IndexUpdaterTest extends UnitFessTestCase {
         indexUpdater.dataService = null;
         try {
             indexUpdater.run();
-            fail("Should throw FessSystemException");
-        } catch (FessSystemException e) {
-            assertEquals("DataService is null. IndexUpdater cannot proceed without a DataService instance.", e.getMessage());
+            fail("Should throw ContainerNotAvailableException");
+        } catch (ContainerNotAvailableException e) {
+            assertEquals("dataService is not available.", e.getMessage());
         }
     }
 

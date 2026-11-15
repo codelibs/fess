@@ -24,6 +24,7 @@ import org.codelibs.fesen.opensearch.core.common.io.stream.StreamOutput;
 import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
 import org.codelibs.fesen.opensearch.index.query.AbstractQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fess.exception.SearchQueryException;
 
 /**
  * Client-side {@link QueryBuilder} for the OpenSearch k-NN plugin's {@code knn}
@@ -63,7 +64,7 @@ public class KnnQueryBuilder extends AbstractQueryBuilder<KnnQueryBuilder> {
      */
     public KnnQueryBuilder(final String fieldName, final float[] vector, final int k) {
         if (k <= 0) {
-            throw new IllegalArgumentException("k must be positive: " + k);
+            throw new SearchQueryException("k must be positive: " + k);
         }
         this.fieldName = Objects.requireNonNull(fieldName, "fieldName");
         this.vector = Objects.requireNonNull(vector, "vector").clone();

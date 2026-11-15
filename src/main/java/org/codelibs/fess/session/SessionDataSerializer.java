@@ -51,6 +51,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.FessUser.PermissionState;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.exception.HashAlgorithmUnavailableException;
 import org.codelibs.fess.exception.SerializerStateException;
 import org.codelibs.fess.ldap.LdapUser;
@@ -201,18 +202,18 @@ public class SessionDataSerializer {
      *
      * @param type the class to register
      * @param serializer the serializer that writes and reads the class
-     * @throws IllegalArgumentException if the type or the serializer is null, or the type is registered already
-     * @throws SerializerStateException if the registrations are fixed already
+     * @throws FessConfigurationException if the type or the serializer is null
+     * @throws SerializerStateException if the registrations are fixed already, or the type is already registered
      */
     public synchronized void register(final Class<?> type, final Serializer<?> serializer) {
         if (type == null || serializer == null) {
-            throw new IllegalArgumentException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
+            throw new FessConfigurationException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
         }
         if (locked) {
             throw new SerializerStateException("Cannot register " + type.getName() + " because the registrations are fixed already.");
         }
         if (pluginSerializerMap.containsKey(type) || coreRegistrations().stream().anyMatch(r -> r.type().equals(type))) {
-            throw new IllegalArgumentException(type.getName() + " is already registered.");
+            throw new SerializerStateException(type.getName() + " is already registered.");
         }
         pluginSerializerMap.put(type, serializer);
         if (logger.isDebugEnabled()) {

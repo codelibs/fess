@@ -17,6 +17,7 @@ package org.codelibs.fess.chat;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.codelibs.fess.exception.FessConfigurationException;
 
 /**
  * Splits the content of a long document into parts that each fit a character budget, so every part
@@ -106,7 +107,7 @@ public final class DocumentPartSplitter {
 
     private static void checkMaxChars(final int maxChars) {
         if (maxChars < 1) {
-            throw new IllegalArgumentException("maxChars must be positive: " + maxChars);
+            throw new FessConfigurationException("maxChars must be positive: " + maxChars);
         }
     }
 

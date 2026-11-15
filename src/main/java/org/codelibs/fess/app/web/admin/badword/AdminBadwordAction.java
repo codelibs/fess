@@ -35,7 +35,7 @@ import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.DataImportException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.BadWord;
@@ -400,7 +400,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to import bad word data: fileName=" + form.badWordFile.getFileName(), e);
+                throw new DataImportException("Failed to import bad word data: fileName=" + form.badWordFile.getFileName(), e);
             }
         });
         saveInfo(messages -> messages.addSuccessUploadBadWord(GLOBAL));

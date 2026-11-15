@@ -92,7 +92,7 @@ public class HybridQueryBuilder extends AbstractQueryBuilder<HybridQueryBuilder>
     public HybridQueryBuilder add(final QueryBuilder query) {
         Objects.requireNonNull(query, "query");
         if (queries.size() >= MAX_SUB_QUERIES) {
-            throw new IllegalArgumentException("hybrid accepts at most " + MAX_SUB_QUERIES + " subqueries.");
+            throw new SearchQueryException("hybrid accepts at most " + MAX_SUB_QUERIES + " subqueries.");
         }
         queries.add(query);
         return this;

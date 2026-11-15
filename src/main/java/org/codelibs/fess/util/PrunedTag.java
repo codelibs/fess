@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.w3c.dom.Node;
 
 /**
@@ -156,7 +156,7 @@ public class PrunedTag {
      *
      * @param value the comma-separated string of pruned tag configurations
      * @return an array of PrunedTag objects parsed from the input string
-     * @throws FessSystemException if the input string contains invalid tag patterns
+     * @throws FessConfigurationException if the input string contains invalid tag patterns
      */
     public static PrunedTag[] parse(final String value) {
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
@@ -179,7 +179,7 @@ public class PrunedTag {
                 }
                 return tag;
             }
-            throw new FessSystemException("Invalid pruned tag format: '" + v
+            throw new FessConfigurationException("Invalid pruned tag format: '" + v
                     + "'. Expected format: tagname[attr=value].classname#id (e.g., div.content, span#header, p[data-type=ad])");
         }).toArray(n -> new PrunedTag[n]));
     }
