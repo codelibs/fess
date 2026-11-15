@@ -39,6 +39,7 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.llm.ChatIntent;
 import org.codelibs.fess.llm.IntentDetectionResult;
@@ -659,12 +660,12 @@ public class ChatClient {
      * @param docId the document ID
      * @return the document map; {@code content} is a list of chunk texts for a chunked document and
      *         a string otherwise
-     * @throws IllegalStateException if the document could not be fetched
+     * @throws FessSystemException if the document could not be fetched
      */
     protected Map<String, Object> fetchWholeDocument(final String docId) {
         return ComponentUtil.getChatContentFetcher()
                 .fetchWholeDocument(docId)
-                .orElseThrow(() -> new IllegalStateException("Document not found. docId=" + docId));
+                .orElseThrow(() -> new FessSystemException("Document not found. docId=" + docId));
     }
 
     /**
@@ -962,7 +963,7 @@ public class ChatClient {
         case "full" -> msg.getContent();
         case "smart_summary" -> // smart_summary is handled by extractHistoryForIntent / extractHistoryForAnswer;
                 // it must never reach this per-message renderer.
-                throw new IllegalStateException("smart_summary mode is not handled per-message");
+                throw new FessSystemException("smart_summary mode is not handled per-message");
         case "source_titles" -> buildSourceTitlesContent(msg, summaryMaxChars);
         case "source_titles_and_urls" -> buildSourceTitlesAndUrlsContent(msg);
         case "truncated" -> buildTruncatedContent(msg, assistantMaxChars);

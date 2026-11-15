@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.mylasta.direction.sponsor.FessSecurityResourceProvider;
 import org.codelibs.fess.servlet.ErrorPageServlet;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -64,7 +65,7 @@ public class FessFwAssistantDirectorTest extends UnitFessTestCase {
             try {
                 director.createSecurityResourceProvider();
                 fail("an empty app.cipher.key should stop the start: " + algorithm);
-            } catch (final IllegalStateException e) {
+            } catch (final FessConfigurationException e) {
                 assertTrue(e.getMessage(), e.getMessage().contains("app.cipher.key"));
                 assertTrue(e.getMessage(), e.getMessage().contains("fess-setup init"));
             }
@@ -76,7 +77,7 @@ public class FessFwAssistantDirectorTest extends UnitFessTestCase {
         try {
             newDirector("aes", null).createSecurityResourceProvider();
             fail();
-        } catch (final IllegalStateException e) {
+        } catch (final FessConfigurationException e) {
             assertTrue(e.getMessage(), e.getMessage().contains("app.cipher.key"));
         }
     }

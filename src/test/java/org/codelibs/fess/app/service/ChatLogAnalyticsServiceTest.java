@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 
 import org.codelibs.fess.entity.AnalyticsCondition;
 import org.codelibs.fess.entity.AnalyticsReport;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.cbean.ChatLogCB;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -187,7 +188,7 @@ public class ChatLogAnalyticsServiceTest extends UnitFessTestCase {
         try {
             new ChatLogAnalyticsService().exportCsv(new AnalyticsReport(), "weekHour", new StringWriter());
             fail();
-        } catch (final IllegalArgumentException e) {
+        } catch (final FessSystemException e) {
             // expected
         }
     }

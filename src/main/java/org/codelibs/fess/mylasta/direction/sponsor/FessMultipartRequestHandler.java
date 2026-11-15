@@ -31,6 +31,7 @@ import org.apache.commons.fileupload2.core.FileUploadException;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletDiskFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.helper.message.ExceptionMessageBuilder;
 import org.lastaflute.core.message.UserMessages;
@@ -270,10 +271,10 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
                 try {
                     value = item.getString();
                 } catch (final IOException e) {
-                    throw new IllegalStateException("Failed to get string from the item: " + item, e);
+                    throw new FessSystemException("Failed to get string from the item: " + item, e);
                 }
             } catch (final IOException e) {
-                throw new IllegalStateException("Failed to get string from the item: " + item, e);
+                throw new FessSystemException("Failed to get string from the item: " + item, e);
             }
             haveValue = true;
         }
@@ -405,7 +406,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             try {
                 fileItem.delete();
             } catch (final IOException e) {
-                throw new IllegalStateException("Failed to delete the fileItem: " + fileItem, e);
+                throw new FessSystemException("Failed to delete the fileItem: " + fileItem, e);
             }
         }
 

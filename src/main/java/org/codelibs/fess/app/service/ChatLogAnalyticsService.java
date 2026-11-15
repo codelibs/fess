@@ -42,6 +42,7 @@ import org.codelibs.fess.entity.AnalyticsReport.Chart;
 import org.codelibs.fess.entity.AnalyticsReport.Kpi;
 import org.codelibs.fess.entity.AnalyticsReport.Notice;
 import org.codelibs.fess.entity.AnalyticsReport.Series;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.allcommon.EsPagingResultBean;
 import org.codelibs.fess.opensearch.log.cbean.ChatLogCB;
@@ -201,11 +202,11 @@ public class ChatLogAnalyticsService {
      * @param item the item, see {@link #isExportable(String)}
      * @param writer the writer to write the CSV to
      * @throws IOException if writing fails
-     * @throws IllegalArgumentException if the tab does not have the item
+     * @throws FessSystemException if the tab does not have the item
      */
     public void exportCsv(final AnalyticsReport report, final String item, final Writer writer) throws IOException {
         if (!isExportable(item)) {
-            throw new IllegalArgumentException("Unknown export item: " + TAB_CHAT + "/" + item);
+            throw new FessSystemException("Unknown export item: " + TAB_CHAT + "/" + item);
         }
         // not closed: that would close the writer of the caller
         @SuppressWarnings("resource")

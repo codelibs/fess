@@ -33,6 +33,7 @@ import org.codelibs.fesen.opensearch.action.DocWriteRequest.OpType;
 import org.codelibs.fesen.opensearch.action.get.GetResponse;
 import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -412,14 +413,14 @@ public class SessionStore {
         try {
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
         } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available.", e);
+            throw new FessSystemException("SHA-256 is not available.", e);
         }
     }
 
     private String getId(final Map<String, Object> args) {
         final Object id = args.get("id");
         if (!(id instanceof final String sessionId) || sessionId.isEmpty()) {
-            throw new IllegalArgumentException("The session id is required.");
+            throw new FessSystemException("The session id is required.");
         }
         return sessionId;
     }

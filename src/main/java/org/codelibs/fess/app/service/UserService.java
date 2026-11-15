@@ -23,6 +23,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserPager;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.FessUserNotFoundException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
@@ -132,8 +133,8 @@ public class UserService {
      * undo them.</p>
      *
      * @param user the user entity to store
-     * @throws IllegalArgumentException if the user is renamed to the name of another user
-     * @throws IllegalStateException if the user was read and has been changed by someone else since
+     * @throws FessSystemException if the user is renamed to the name of another user
+     * @throws FessSystemException if the user was read and has been changed by someone else since
      */
     public void store(final User user) {
         final String username = user.getName();
@@ -163,7 +164,7 @@ public class UserService {
                 // The user was read, and the whole document is written back: a change made in between
                 // (a password change, for one) must not be put back to what was read.
                 if (!updateIfUnchanged(user)) {
-                    throw new IllegalStateException(
+                    throw new FessSystemException(
                             "The user was changed by someone else, so it was not saved. Load it again and retry: username=" + username);
                 }
             } else {
@@ -192,7 +193,7 @@ public class UserService {
      * its ID yet, and those of the previous and the new name when the stored row has another name.
      *
      * @param user the user about to be stored
-     * @throws IllegalArgumentException if the stored row is renamed to the name of another user
+     * @throws FessSystemException if the stored row is renamed to the name of another user
      */
     protected void removeInheritablePasskeys(final User user) {
         final String username = user.getName();
@@ -202,7 +203,7 @@ public class UserService {
             passkeyService.deleteByUserName(username);
         } else if (!previousName.equals(username)) {
             if (getUserByName(username).filter(other -> !user.getId().equals(other.getId())).isPresent()) {
-                throw new IllegalArgumentException("A user named " + username + " already exists");
+                throw new FessSystemException("A user named " + username + " already exists");
             }
             passkeyService.deleteByUserName(previousName);
             passkeyService.deleteByUserName(username);
@@ -220,7 +221,7 @@ public class UserService {
      * @param username the username of the user
      * @param password the new password in plain text
      * @throws FessUserNotFoundException if the user is not found
-     * @throws IllegalStateException if the user was changed concurrently on each of the attempts
+     * @throws FessSystemException if the user was changed concurrently on each of the attempts
      */
     public void changePassword(final String username, final String password) {
         if (logger.isDebugEnabled()) {
@@ -253,7 +254,7 @@ public class UserService {
                     }
                     return;
                 }
-                throw new IllegalStateException("The user was changed concurrently, so its password was not changed: username=" + username);
+                throw new FessSystemException("The user was changed concurrently, so its password was not changed: username=" + username);
             } else {
                 logger.warn("Password change not applied by authentication manager: username={}", username);
             }
@@ -297,7 +298,7 @@ public class UserService {
             }
             return;
         }
-        throw new IllegalStateException("The user was changed concurrently, so its sessions were not ended: username=" + username);
+        throw new FessSystemException("The user was changed concurrently, so its sessions were not ended: username=" + username);
     }
 
     /**

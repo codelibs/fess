@@ -51,6 +51,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.FessUser.PermissionState;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -200,14 +201,14 @@ public class SessionDataSerializer {
      * @param type the class to register
      * @param serializer the serializer that writes and reads the class
      * @throws IllegalArgumentException if the type or the serializer is null, or the type is registered already
-     * @throws IllegalStateException if the registrations are fixed already
+     * @throws FessSystemException if the registrations are fixed already
      */
     public synchronized void register(final Class<?> type, final Serializer<?> serializer) {
         if (type == null || serializer == null) {
             throw new IllegalArgumentException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
         }
         if (locked) {
-            throw new IllegalStateException("Cannot register " + type.getName() + " because the registrations are fixed already.");
+            throw new FessSystemException("Cannot register " + type.getName() + " because the registrations are fixed already.");
         }
         if (pluginSerializerMap.containsKey(type) || coreRegistrations().stream().anyMatch(r -> r.type().equals(type))) {
             throw new IllegalArgumentException(type.getName() + " is already registered.");
@@ -250,7 +251,7 @@ public class SessionDataSerializer {
             }
             fingerprint = value;
         } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available.", e);
+            throw new FessSystemException("SHA-256 is not available.", e);
         }
         formatVersion = FORMAT_NUMBER + "-" + String.format("%016x", fingerprint);
         registrations = list;
@@ -986,13 +987,13 @@ public class SessionDataSerializer {
         @SuppressWarnings("unchecked")
         public void write(final Kryo kryo, final Output output, final DoubleSubmitTokenMap tokens) {
             if (TOKEN_MAP_FIELD == null) {
-                throw new IllegalStateException("The token map of DoubleSubmitTokenMap is not accessible.");
+                throw new FessSystemException("The token map of DoubleSubmitTokenMap is not accessible.");
             }
             final Map<Class<?>, String> map;
             try {
                 map = new HashMap<>((Map<Class<?>, String>) TOKEN_MAP_FIELD.get(tokens));
             } catch (final IllegalAccessException e) {
-                throw new IllegalStateException(e);
+                throw new FessSystemException(e);
             }
             output.writeVarInt(map.size(), true);
             map.forEach((groupType, token) -> {
@@ -1188,7 +1189,7 @@ public class SessionDataSerializer {
             final String[] permissions = user.getResolvedPermissions();
             if (permissions == null) {
                 // getPermissions() would search the directory in the thread that closes a request
-                throw new IllegalStateException("The permissions of the LDAP user are not resolved yet.");
+                throw new FessSystemException("The permissions of the LDAP user are not resolved yet.");
             }
             output.writeString(user.getName());
             output.writeBoolean(user.isNameFromProvider());

@@ -53,6 +53,7 @@ import org.codelibs.fesen.opensearch.script.ScriptType;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.TagChange;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.cbean.TagTypeCB;
@@ -171,7 +172,7 @@ public class TagTypeHelper {
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
             return HexFormat.of().formatHex(digest.digest(tagValue.getBytes(StandardCharsets.UTF_8)));
         } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available.", e);
+            throw new FessSystemException("SHA-256 is not available.", e);
         }
     }
 

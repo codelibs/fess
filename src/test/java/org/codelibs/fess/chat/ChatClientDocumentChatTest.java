@@ -25,6 +25,7 @@ import java.util.TreeMap;
 
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.llm.LlmClientManager;
 import org.codelibs.fess.llm.LlmException;
@@ -466,7 +467,7 @@ public class ChatClientDocumentChatTest extends UnitFessTestCase {
         f.document = null;
         final RecordingCallback callback = new RecordingCallback();
 
-        Assertions.assertThrows(IllegalStateException.class, () -> f.stream(null, callback));
+        Assertions.assertThrows(FessSystemException.class, () -> f.stream(null, callback));
 
         assertEquals("unknown", callback.errorCode);
         assertTrue(f.partCalls.isEmpty());

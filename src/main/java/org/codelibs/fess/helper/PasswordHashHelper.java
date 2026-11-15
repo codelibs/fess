@@ -27,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crypto.bcrypt.BCrypt;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -214,7 +215,7 @@ public class PasswordHashHelper {
      * @param rawPassword the plain-text password (must not be {@code null})
      * @return the encoded password prefixed with <code>{id}</code>
      * @throws NullPointerException if {@code rawPassword} is null
-     * @throws IllegalStateException if the configured algorithm is unknown
+     * @throws FessConfigurationException if the configured algorithm is unknown
      */
     public String encode(final String rawPassword) {
         if (rawPassword == null) {
@@ -223,7 +224,7 @@ public class PasswordHashHelper {
         final String idForEncode = resolveIdForEncode();
         final PasswordEncoder encoder = getEncoders().get(idForEncode);
         if (encoder == null) {
-            throw new IllegalStateException("Unknown password algorithm: " + idForEncode);
+            throw new FessConfigurationException("Unknown password algorithm: " + idForEncode);
         }
         return PREFIX + idForEncode + SUFFIX + encoder.encode(rawPassword);
     }
@@ -313,11 +314,11 @@ public class PasswordHashHelper {
     protected String resolveIdForEncode() {
         final String configured = ComponentUtil.getFessConfig().getAppPasswordAlgorithm();
         if (StringUtil.isBlank(configured)) {
-            throw new IllegalStateException("app.password.algorithm is not configured");
+            throw new FessConfigurationException("app.password.algorithm is not configured");
         }
         final String id = configured.toLowerCase(Locale.ROOT);
         if (!getEncoders().containsKey(id)) {
-            throw new IllegalStateException("Unsupported password algorithm: " + id);
+            throw new FessConfigurationException("Unsupported password algorithm: " + id);
         }
         return id;
     }

@@ -18,6 +18,7 @@ package org.codelibs.fess.helper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -162,8 +163,8 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
         testConfig.passwordAlgorithm = "unknown-algo";
         try {
             passwordHashHelper.init();
-            fail("init() must throw IllegalStateException for unknown algorithm");
-        } catch (final IllegalStateException expected) {
+            fail("init() must throw FessConfigurationException for unknown algorithm");
+        } catch (final FessConfigurationException expected) {
             assertTrue(
                     expected.getMessage().toLowerCase().contains("unsupported") || expected.getMessage().toLowerCase().contains("unknown"));
         }
@@ -174,15 +175,15 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
         testConfig.passwordAlgorithm = "";
         try {
             passwordHashHelper.init();
-            fail("init() must throw IllegalStateException for blank algorithm");
-        } catch (final IllegalStateException expected) {
+            fail("init() must throw FessConfigurationException for blank algorithm");
+        } catch (final FessConfigurationException expected) {
             // expected
         }
         testConfig.passwordAlgorithm = "   ";
         try {
             passwordHashHelper.init();
-            fail("init() must throw IllegalStateException for whitespace-only algorithm");
-        } catch (final IllegalStateException expected) {
+            fail("init() must throw FessConfigurationException for whitespace-only algorithm");
+        } catch (final FessConfigurationException expected) {
             // expected
         }
     }

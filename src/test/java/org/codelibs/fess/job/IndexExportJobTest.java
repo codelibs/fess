@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -896,8 +897,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     public void test_format_unsupportedFormat() {
         try {
             indexExportJob.format("xml");
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected FessSystemException");
+        } catch (final FessSystemException e) {
             assertTrue(e.getMessage().contains("xml"));
         }
     }
@@ -1293,8 +1294,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     public void test_createFormatter_unsupported() {
         try {
             indexExportJob.createFormatter("xml");
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected FessSystemException");
+        } catch (final FessSystemException e) {
             assertTrue(e.getMessage().contains("xml"));
         }
     }
@@ -1303,8 +1304,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     public void test_createFormatter_null() {
         try {
             indexExportJob.createFormatter(null);
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected FessSystemException");
+        } catch (final FessSystemException e) {
             assertTrue(e.getMessage().contains("null or empty"));
         }
     }
@@ -1313,8 +1314,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     public void test_createFormatter_empty() {
         try {
             indexExportJob.createFormatter("");
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected FessSystemException");
+        } catch (final FessSystemException e) {
             assertTrue(e.getMessage().contains("null or empty"));
         }
     }
@@ -1323,8 +1324,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     public void test_createFormatter_whitespace() {
         try {
             indexExportJob.createFormatter("  ");
-            fail("Expected IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
+            fail("Expected FessSystemException");
+        } catch (final FessSystemException e) {
             assertTrue(e.getMessage().contains("null or empty"));
         }
     }
