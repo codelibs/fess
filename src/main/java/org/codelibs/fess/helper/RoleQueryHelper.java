@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.AccessTokenService;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -64,6 +65,9 @@ public class RoleQueryHelper {
      * The key for user roles in the request attribute.
      */
     protected static final String USER_ROLES = "userRoles";
+
+    /** The request attribute that is set when the roles of the request were built from a user whose permissions are not all resolved yet. */
+    protected static final String USER_ROLES_PENDING = "userRolesPending";
 
     /**
      * The cached cipher for encryption and decryption.
@@ -184,6 +188,12 @@ public class RoleQueryHelper {
             try {
                 findUserBean(requestManager).ifPresent(fessUserBean -> {
                     loggedIn[0] = true;
+                    // Read before the permissions: a user that reports RESOLVED here has its whole set when
+                    // getPermissions() is read next, and one that reports PENDING may not have it yet.
+                    final FessUser fessUser = fessUserBean.getFessUser();
+                    if (request != null && fessUser != null && fessUser.getPermissionState() == FessUser.PermissionState.PENDING) {
+                        request.setAttribute(USER_ROLES_PENDING, Boolean.TRUE);
+                    }
                     stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add));
                 }).orElse(() -> {
                     if (!hasAccessToken || roleSet.isEmpty()) {
@@ -237,6 +247,19 @@ public class RoleQueryHelper {
             request.setAttribute(USER_ROLES, roleSet);
         }
         return roleSet;
+    }
+
+    /**
+     * Tells whether the roles built for the current request are those of a user whose groups are still being
+     * resolved (for example the nested groups of a directory user, which are walked in the background after the
+     * login). The roles of such a user can be missing a group that a document denies, and a denied group that is
+     * missing from the roles lets that document through, so the role filter must not return a document that carries
+     * a deny entry in that case.
+     *
+     * @return true if the roles of the current request were built while the permissions were not resolved
+     */
+    public boolean isPermissionPending() {
+        return LaRequestUtil.getOptionalRequest().map(request -> request.getAttribute(USER_ROLES_PENDING) != null).orElse(false);
     }
 
     /**

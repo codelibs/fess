@@ -1033,6 +1033,39 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleQuery.filter().size());
     }
 
+    @Test
+    public void test_buildRoleQuery_hidesDocumentsWithADenyEntryWhilePermissionsArePending() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String roleField = fessConfig.getIndexFieldRole();
+        final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
+        final Set<String> roles = Set.of("2direct");
+
+        // not pending: only the denied copies of the roles are excluded
+        final BoolQueryBuilder resolved = QueryBuilders.boolQuery();
+        queryHelper.buildRoleQuery(roles, resolved);
+        assertEquals(1, ((BoolQueryBuilder) resolved.filter().get(0)).mustNot().size());
+
+        final RoleQueryHelper pendingHelper = new RoleQueryHelper() {
+            @Override
+            public boolean isPermissionPending() {
+                return true;
+            }
+        };
+        ComponentUtil.register(pendingHelper, "roleQueryHelper");
+        final BoolQueryBuilder pending = QueryBuilders.boolQuery();
+        queryHelper.buildRoleQuery(roles, pending);
+        final BoolQueryBuilder roleQuery = (BoolQueryBuilder) pending.filter().get(0);
+        assertEquals(1, roleQuery.should().size());
+        assertEquals(2, roleQuery.mustNot().size());
+        assertTermsQuery(roleField, Set.of(deniedPrefix + "2direct"), roleQuery.mustNot().get(0));
+        assertTrue(roleQuery.mustNot().get(1) instanceof org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder,
+                roleQuery.mustNot().get(1).toString());
+        final org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder prefix =
+                (org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder) roleQuery.mustNot().get(1);
+        assertEquals(roleField, prefix.fieldName());
+        assertEquals(deniedPrefix, prefix.value());
+    }
+
     private void assertTermsQuery(final String field, final Set<String> values, final QueryBuilder query) {
         assertTrue(query instanceof TermsQueryBuilder, query.toString());
         final TermsQueryBuilder terms = (TermsQueryBuilder) query;

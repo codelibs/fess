@@ -680,6 +680,96 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    private RoleQueryHelper roleQueryHelperOf(final org.codelibs.fess.entity.FessUser.PermissionState state) {
+        final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+                return false;
+            }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                return org.dbflute.optional.OptionalThing
+                        .of(new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.entity.FessUser() {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public String getName() {
+                                return "walking-user";
+                            }
+
+                            @Override
+                            public String[] getRoleNames() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public String[] getGroupNames() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public String[] getPermissions() {
+                                return new String[] { "2direct" };
+                            }
+
+                            @Override
+                            public boolean isEditable() {
+                                return false;
+                            }
+
+                            @Override
+                            public PermissionState getPermissionState() {
+                                return state;
+                            }
+                        }));
+            }
+        };
+        roleQueryHelper.init();
+        return roleQueryHelper;
+    }
+
+    /**
+     * The groups of a directory user can still be walked when the first search runs. The roles of that request
+     * lack the groups that are not resolved yet, and the role filter needs to know that.
+     */
+    @Test
+    public void test_isPermissionPending_whileTheUserIsPending() {
+        final RoleQueryHelper roleQueryHelper = roleQueryHelperOf(org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        getMockRequest();
+
+        assertFalse(roleQueryHelper.isPermissionPending(), "nothing is built yet");
+        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.JSON);
+
+        assertTrue(roleSet.contains("2direct"), String.valueOf(roleSet));
+        assertTrue(roleQueryHelper.isPermissionPending());
+        // the roles are cached in the request, and so is what they were built from
+        roleQueryHelper.build(SearchRequestType.JSON);
+        assertTrue(roleQueryHelper.isPermissionPending());
+    }
+
+    @Test
+    public void test_isPermissionPending_resolvedAndFailedAreNot() {
+        for (final org.codelibs.fess.entity.FessUser.PermissionState state : new org.codelibs.fess.entity.FessUser.PermissionState[] {
+                org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, org.codelibs.fess.entity.FessUser.PermissionState.FAILED }) {
+            final RoleQueryHelper roleQueryHelper = roleQueryHelperOf(state);
+            getMockRequest();
+            roleQueryHelper.build(SearchRequestType.JSON);
+            assertFalse(roleQueryHelper.isPermissionPending(), String.valueOf(state));
+        }
+    }
+
+    @Test
+    public void test_isPermissionPending_noRequest() {
+        assertFalse(new RoleQueryHelper().isPermissionPending());
+    }
+
     @Test
     public void test_build_withRequest() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {

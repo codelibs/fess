@@ -272,6 +272,13 @@ public class QueryHelper {
             final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
             roleQuery.should(QueryBuilders.termsQuery(roleField, roleSet));
             roleQuery.mustNot(QueryBuilders.termsQuery(roleField, roleSet.stream().map(name -> deniedPrefix + name).toList()));
+            if (ComponentUtil.getRoleQueryHelper().isPermissionPending()) {
+                // The roles are those of a user whose groups are still being resolved. A group that is not in the set
+                // yet cannot be matched against the deny entries above, so no document with a deny entry is returned
+                // until it is: an entry is the denied prefix followed by a permission, and an allow entry never begins
+                // with that prefix.
+                roleQuery.mustNot(QueryBuilders.prefixQuery(roleField, deniedPrefix));
+            }
         }
         boolQuery.filter(roleQuery);
     }
