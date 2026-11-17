@@ -89,6 +89,23 @@ public interface FessUser extends Serializable {
     }
 
     /**
+     * Tells whether the login of this user has ended where it was made, so that the session must end with it.
+     *
+     * <p>An identity provider can say when its own session ends (the SAML {@code SessionNotOnOrAfter}). The login
+     * session of Fess has no limit of its own, so without this a user stays logged in, with the roles of that login,
+     * after the identity provider has ended the session. It is asked every time the logged-in user is looked up, by
+     * the admin screens, the search and the {@code /api/v2} requests alike, and the session ends locally, without a
+     * logout at the identity provider, which has already ended it.</p>
+     *
+     * <p>Defaults to {@code false}: a login that has no end of its own is never ended here.</p>
+     *
+     * @return {@code true} if the login has ended.
+     */
+    default boolean isExpired() {
+        return false;
+    }
+
+    /**
      * Refreshes the user's information from the underlying data source.
      * @return True if refresh was successful, false otherwise.
      */

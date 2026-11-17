@@ -261,8 +261,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                  Password Change Check
     //                                  ---------------------
     /**
-     * Gets the user bean of the login session, ending the session first when the password of the
-     * user was changed after it was opened.
+     * Gets the user bean of the login session, ending the session first when the login ended where it
+     * was made ({@link FessUser#isExpired()}) or the password of the user was changed after it was opened.
      *
      * <p>Every way to ask who is logged in ends here, the admin screens as well as the search
      * and the {@code /api/v2} requests, so a session cannot outlive a password change by taking a
@@ -281,6 +281,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     @Override
     public OptionalThing<FessUserBean> getSavedUserBean() {
         final OptionalThing<FessUserBean> saved = getSessionUserBeanUnchecked();
+        if (saved.isPresent() && saved.get().getFessUser() != null && saved.get().getFessUser().isExpired()) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Ended a login session that ended where it was made. username={}", saved.get().getUserId());
+            }
+            logout();
+            return getSessionUserBeanUnchecked();
+        }
         if (saved.isPresent() && isPasswordChangedAfterLogin(saved.get())) {
             if (logger.isInfoEnabled()) {
                 logger.info("Ended a login session opened before the password was changed. username={}", saved.get().getUserId());
