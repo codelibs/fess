@@ -95,6 +95,16 @@ public class SsoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_metadata_settingsFailureIsAlsoReportedWithAStatus() throws Exception {
+        // a server whose SAML settings are not valid fails every request to this anonymous endpoint
+        final TestableSsoAction action = createAction(messageException("invalid settings", new SsoStateException("invalid settings")));
+
+        final ActionResponse response = action.metadata();
+
+        assertEquals(Integer.valueOf(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), response.getHttpStatus().get());
+    }
+
+    @Test
     public void test_metadata_informationalMessageStillRedirects() throws Exception {
         // an SsoMessageException without a cause carries information for a human, not a failure
         final TestableSsoAction action = createAction(messageException("info", null));
