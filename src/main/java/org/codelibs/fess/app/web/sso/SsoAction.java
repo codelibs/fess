@@ -201,7 +201,13 @@ public class SsoAction extends FessLoginAction {
                 saveInfo(e.getMessageCode());
                 return redirect(LoginAction.class);
             }
-            logger.warn("Failed to process metadata.", e);
+            if (e.getCause() instanceof SsoStateException) {
+                // the endpoint is anonymous, so a server whose settings are not valid is reported once per request
+                // and not with a stack trace per request
+                logger.warn("Failed to process metadata: {}", e.getCause().getMessage());
+            } else {
+                logger.warn("Failed to process metadata.", e);
+            }
             // this endpoint is fetched by the IdP or by automation, not by a browser. Redirecting
             // to the login page would report a misconfigured SP as 200 text/html, so the failure
             // is signalled with a status instead.

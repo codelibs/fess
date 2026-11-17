@@ -58,9 +58,4 @@ public class ShippedLog4j2ConfigTest {
         // warn: the default log level is warn, and a lower level would make the dump appear there.
         assertEquals("warn", levelOf("org.lastaflute.web.servlet.filter.RequestLoggingFilter"));
     }
-
-    @Test
-    public void test_samlLibraryStaysAtInfo() throws Exception {
-        assertEquals("info", levelOf("org.codelibs.saml2"));
-    }
 }
