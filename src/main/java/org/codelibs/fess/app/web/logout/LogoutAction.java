@@ -23,6 +23,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * The logout action.
@@ -58,6 +59,11 @@ public class LogoutAction extends FessSearchAction {
      */
     @Execute
     public HtmlResponse index() {
+        if (isCrossSiteRequest(getSecFetchSite())) {
+            // A GET with no token: a page of another site could end the session of whoever visits it, and for a
+            // user of an identity provider send them on to its logout. The browser says where the request came from.
+            return redirect(LoginAction.class);
+        }
         final OptionalThing<FessUserBean> userBean = getUserBean();
         // Only a logout that ended a session is an event. This endpoint is anonymous, so writing
         // the record unconditionally let any client append "action:LOGOUT user:-" to audit.log
@@ -73,4 +79,28 @@ public class LogoutAction extends FessSearchAction {
         return redirect(LoginAction.class);
     }
 
+    /**
+     * Gets the {@code Sec-Fetch-Site} header of the request, which a browser sends to a secure origin (HTTPS or
+     * localhost) and a page cannot change.
+     *
+     * @return the header value, or {@code null} when the request has none (a browser that does not send it, a plain
+     *         HTTP origin or a client that is not a browser)
+     */
+    protected String getSecFetchSite() {
+        return LaRequestUtil.getOptionalRequest().map(request -> request.getHeader("Sec-Fetch-Site")).orElse(null);
+    }
+
+    /**
+     * Tells whether the browser says that the request was started by another site. {@code same-origin} (a link of
+     * Fess itself), {@code none} (an address typed in, a bookmark) and an absent header are let through; so is any
+     * value this version does not know, since only the two named here are known to come from another site.
+     *
+     * <p>{@code same-site} counts as another site: a page on a sibling host name is not Fess.</p>
+     *
+     * @param secFetchSite the value of {@code Sec-Fetch-Site}, or {@code null}
+     * @return {@code true} if the request came from another site
+     */
+    protected static boolean isCrossSiteRequest(final String secFetchSite) {
+        return "cross-site".equalsIgnoreCase(secFetchSite) || "same-site".equalsIgnoreCase(secFetchSite);
+    }
 }

@@ -88,6 +88,32 @@ public class LogoutActionTest extends UnitFessTestCase {
         assertEquals(1, anonymous.logoutCount);
     }
 
+    @Test
+    public void test_index_ignoresARequestStartedByAnotherSite() {
+        final List<String> audit = new ArrayList<>();
+        for (final String site : new String[] { "cross-site", "same-site", "Cross-Site" }) {
+            final TestableLogoutAction action = new TestableLogoutAction("carol", recordingActivityHelper(audit));
+            action.secFetchSite = site;
+            assertSame(REDIRECT_TO_LOGIN, action.index());
+            assertEquals(site, 0, action.logoutCount);
+        }
+        assertEquals(List.of(), audit);
+    }
+
+    @Test
+    public void test_index_endsTheSessionOfARequestOfFessItselfOrOfNoKnownOrigin() {
+        // control: the same call ends the session when the browser says it came from Fess, from the address bar or
+        // does not say
+        for (final String site : new String[] { "same-origin", "none", null, "", "unknown-value" }) {
+            final List<String> audit = new ArrayList<>();
+            final TestableLogoutAction action = new TestableLogoutAction("carol", recordingActivityHelper(audit));
+            action.secFetchSite = site;
+            action.index();
+            assertEquals(String.valueOf(site), 1, action.logoutCount);
+            assertEquals(String.valueOf(site), List.of("action:LOGOUT\tuser:carol"), audit);
+        }
+    }
+
     /**
      * LogoutAction with the seams a plain unit test cannot provide: the user bean, the login
      * assist, the user-code cookie and the action path resolver.
@@ -96,6 +122,8 @@ public class LogoutActionTest extends UnitFessTestCase {
         private final OptionalThing<FessUserBean> userBean;
 
         int logoutCount;
+
+        String secFetchSite;
 
         TestableLogoutAction(final String userId, final ActivityHelper helper) {
             userBean = userId == null ? OptionalThing.empty() : OptionalThing.of(new FessUserBean(new StubFessUser(userId)));
@@ -112,6 +140,11 @@ public class LogoutActionTest extends UnitFessTestCase {
                     // no cookie store in a unit test
                 }
             };
+        }
+
+        @Override
+        protected String getSecFetchSite() {
+            return secFetchSite;
         }
 
         @Override
