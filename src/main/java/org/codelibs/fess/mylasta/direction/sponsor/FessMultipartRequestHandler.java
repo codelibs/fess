@@ -35,6 +35,7 @@ import org.codelibs.fess.exception.MultipartRequestException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.helper.message.ExceptionMessageBuilder;
 import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.web.exception.Forced400BadRequestException;
 import org.lastaflute.web.exception.Forced404NotFoundException;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.ruts.multipart.MultipartRequestHandler;
@@ -329,7 +330,8 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     protected void handleFileUploadException(final FileUploadException e) throws ServletException {
         // suppress logging because it can be caught by logging filter
         //log.error("Failed to parse multipart request", e);
-        throw new ServletException("Failed to upload the file.", e);
+        // A body that is cut off or malformed is the client's mistake: answer 400, not a 500 that the error handling reports as a server error.
+        throw new Forced400BadRequestException("Failed to upload the file.", UserMessages.empty(), e);
     }
 
     // ===================================================================================

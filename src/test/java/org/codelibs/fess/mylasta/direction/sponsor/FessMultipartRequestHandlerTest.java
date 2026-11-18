@@ -66,6 +66,22 @@ public class FessMultipartRequestHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_handleFileUploadException_answers400() {
+        // A body that is cut off or malformed is the client's mistake: it must not surface as a 500.
+        final FessMultipartRequestHandler handler = new FessMultipartRequestHandler();
+        final org.apache.commons.fileupload2.core.FileUploadException cause =
+                new org.apache.commons.fileupload2.core.FileUploadException("Stream ended unexpectedly");
+        try {
+            handler.handleFileUploadException(cause);
+            fail();
+        } catch (final org.lastaflute.web.exception.Forced400BadRequestException e) {
+            assertSame(cause, e.getCause());
+        } catch (final Exception e) {
+            fail("unexpected: " + e);
+        }
+    }
+
+    @Test
     public void test_instantiation() {
         final FessMultipartRequestHandler handler = new FessMultipartRequestHandler();
         assertNotNull(handler);
