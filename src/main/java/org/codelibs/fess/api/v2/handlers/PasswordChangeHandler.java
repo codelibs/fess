@@ -27,6 +27,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.exception.UserConflictException;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -307,6 +308,11 @@ public class PasswordChangeHandler {
         }
         try {
             ComponentUtil.getComponent(UserService.class).changePassword(userId, newPw);
+        } catch (final UserConflictException e) {
+            // the user was changed by someone else on each of the attempts of changePassword: nothing was written, so the client can simply retry
+            logger.warn("[v2/password] the user was changed concurrently: userId={}", userId);
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.CONFLICT, "the user was changed concurrently; retry");
+            return;
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password changePassword");
             return;
