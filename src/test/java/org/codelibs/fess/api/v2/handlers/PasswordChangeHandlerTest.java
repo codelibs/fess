@@ -867,6 +867,41 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_concurrentUserChange_returns409() throws Exception {
+        // changePassword gives up with UserConflictException when the user was changed by someone else on every
+        // attempt. Nothing was written, so the client is told to retry (409), not that the server failed (500).
+        registerStubLoginAssist("alice", "secret-current");
+        final org.codelibs.fess.app.service.UserService conflicting = new org.codelibs.fess.app.service.UserService() {
+            @Override
+            public void changePassword(final String username, final String password) {
+                throw new org.codelibs.fess.exception.UserConflictException("changed concurrently");
+            }
+        };
+        ComponentUtil.register(conflicting, "userService");
+        ComponentUtil.register(conflicting, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            assertEquals(409, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"conflict\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void passwordChange_nonStringCurrentPassword_returns400() throws Exception {
         // M-10: a numeric JSON value for current_password used to be silently stringified
         // by v.toString(). With the instanceof guard the value is treated as null, the
