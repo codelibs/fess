@@ -95,7 +95,7 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="boost" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.boost"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="boost"/>
                                         <la:text styleId="boost" property="boost" styleClass="form-control"/>
                                     </div>

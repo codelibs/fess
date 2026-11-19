@@ -53,40 +53,32 @@ ${fe:html(true)}
                             </div>
                             <%-- Default theme selector --%>
                             <c:if test="${editable}">
-                                <div class="row mb-3">
-                                    <div class="col-md-8">
-                                        <la:form action="/admin/theme/setdefault" styleId="setDefaultForm">
-                                            <div class="form-group row">
-                                                <label for="defaultTheme" class="col-md-3 text-sm-right col-form-label">
-                                                    <la:message key="labels.theme_default"/>
-                                                </label>
-                                                <div class="col-md-6">
-                                                    <la:select property="defaultTheme" styleId="defaultTheme" styleClass="form-control">
-                                                        <la:option value=""><la:message key="labels.theme_default_none"/></la:option>
-                                                        <c:forEach var="t" items="${themeItems}">
-                                                            <la:option value="${f:h(t.name)}">${f:h(t.displayName)} (${f:h(t.name)})</la:option>
-                                                        </c:forEach>
-                                                    </la:select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <button type="submit" class="btn btn-primary" name="setdefault"
-                                                            value="<la:message key="labels.theme_set_default"/>">
-                                                        <i class="fa fa-check" aria-hidden="true"></i>
-                                                        <la:message key="labels.theme_set_default"/>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </la:form>
-                                    </div>
-                                    <div class="col-md-4 text-right">
-                                        <la:form action="/admin/theme/reload">
-                                            <button type="submit" class="btn btn-default" name="reload"
-                                                    value="<la:message key="labels.theme_reload"/>">
-                                                <i class="fa fa-sync-alt" aria-hidden="true"></i>
-                                                <la:message key="labels.theme_reload"/>
+                                <div class="toolbar-row mb-3">
+                                    <la:form action="/admin/theme/setdefault" styleId="setDefaultForm">
+                                        <div class="field-row">
+                                            <label for="defaultTheme" class="col-form-label">
+                                                <la:message key="labels.theme_default"/>
+                                            </label>
+                                            <la:select property="defaultTheme" styleId="defaultTheme" styleClass="form-control field-select">
+                                                <la:option value=""><la:message key="labels.theme_default_none"/></la:option>
+                                                <c:forEach var="t" items="${themeItems}">
+                                                    <la:option value="${f:h(t.name)}">${f:h(t.displayName)} (${f:h(t.name)})</la:option>
+                                                </c:forEach>
+                                            </la:select>
+                                            <button type="submit" class="btn btn-primary" name="setdefault"
+                                                    value="<la:message key="labels.theme_set_default"/>">
+                                                <i class="fa fa-check" aria-hidden="true"></i>
+                                                <la:message key="labels.theme_set_default"/>
                                             </button>
-                                        </la:form>
-                                    </div>
+                                        </div>
+                                    </la:form>
+                                    <la:form action="/admin/theme/reload">
+                                        <button type="submit" class="btn btn-default" name="reload"
+                                                value="<la:message key="labels.theme_reload"/>">
+                                            <i class="fa fa-sync-alt" aria-hidden="true"></i>
+                                            <la:message key="labels.theme_reload"/>
+                                        </button>
+                                    </la:form>
                                 </div>
                             </c:if>
                             <%-- List --%>
@@ -208,11 +200,11 @@ ${fe:html(true)}
                                      step 2 for that theme. A plain form rather than la:form,
                                      which would put its double-submit token in the query string. --%>
                                 <form method="get" action="${fe:url('/admin/theme/')}">
-                                    <div class="form-group row">
-                                        <label for="installName" class="col-sm-3 col-form-label">
+                                    <div class="form-group field-row">
+                                        <label for="installName" class="col-form-label">
                                             <la:message key="labels.theme_name"/>
                                         </label>
-                                        <div class="col-sm-6">
+                                        <div class="field-select">
                                             <select id="installName" name="installName" class="form-control">
                                                 <option value=""><la:message key="labels.theme_install_select_name"/></option>
                                                 <c:forEach var="n" items="${availableThemeNames}">
@@ -220,7 +212,7 @@ ${fe:html(true)}
                                                 </c:forEach>
                                             </select>
                                         </div>
-                                        <div class="col-sm-3">
+                                        <div>
                                             <button type="submit" class="btn btn-default">
                                                 <la:message key="labels.theme_install_select"/>
                                             </button>
@@ -247,18 +239,18 @@ ${fe:html(true)}
                                                 <div class="form-control-plaintext">${f:h(pickedThemeName)}</div>
                                             </div>
                                         </div>
-                                        <div class="form-group row">
-                                            <label for="installVersion" class="col-sm-3 col-form-label">
+                                        <div class="form-group field-row">
+                                            <label for="installVersion" class="col-form-label">
                                                 <la:message key="labels.theme_version"/>
                                             </label>
-                                            <div class="col-sm-6">
+                                            <div class="field-select">
                                                 <select id="installVersion" name="version" class="form-control">
                                                     <c:forEach var="v" items="${availableVersions}">
                                                         <option value="${f:h(v)}" ${v == defaultVersion ? 'selected' : ''}>${f:h(v)}</option>
                                                     </c:forEach>
                                                 </select>
                                             </div>
-                                            <div class="col-sm-3">
+                                            <div>
                                                 <button type="submit" class="btn btn-primary ${f:h(editableClass)}">
                                                     <i class="fa fa-download" aria-hidden="true"></i>
                                                     <la:message key="labels.theme_install"/>

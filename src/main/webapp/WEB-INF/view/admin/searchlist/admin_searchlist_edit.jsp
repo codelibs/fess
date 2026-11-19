@@ -107,7 +107,7 @@ ${fe:html(true)}
                                         <la:errors property="doc.url"/>
                                         <la:text styleId="doc.url"
                                                  property="doc.url" styleClass="form-control"
-                                                 required="required" data-validation="required"/>
+                                                 required="required"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -116,7 +116,7 @@ ${fe:html(true)}
                                         <la:errors property="doc.title"/>
                                         <la:text styleId="doc.title"
                                                  property="doc.title" styleClass="form-control"
-                                                 required="required" data-validation="required"/>
+                                                 required="required"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -125,7 +125,7 @@ ${fe:html(true)}
                                         <la:errors property="doc.role"/>
                                         <la:textarea styleId="doc.role"
                                                      property="doc.role" styleClass="form-control"
-                                                     data-validation-help="1(username) | 2(groupname) | R(rolename)  e.g. Rguest"/>
+                                                     title="1(username) | 2(groupname) | R(rolename)  e.g. Rguest"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -135,9 +135,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.boost"
                                                  property="doc.boost" styleClass="form-control"
                                                  title="Floating point number" required="required"
-                                                 data-validation="custom"
-                                                 data-validation-regexp="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
-                                                 data-validation-help="number (Float)"/>
+                                                 pattern="[+\-]?\d+(\.\d+)?([eE][+\-]?\d+)?"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -284,8 +282,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.content_length"
                                                  property="doc.content_length"
                                                  styleClass="form-control" title="Integer"
-                                                 data-validation="custom" data-validation-regexp="^(\d+)?$"
-                                                 data-validation-help="number (Integer)"/>
+                                                 pattern="\d*"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -295,8 +292,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.favorite_count"
                                                  property="doc.favorite_count"
                                                  styleClass="form-control" title="Integer"
-                                                 data-validation="custom" data-validation-regexp="^(\d+)?$"
-                                                 data-validation-help="number (Integer)"/>
+                                                 pattern="\d*"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -305,9 +301,7 @@ ${fe:html(true)}
                                         <la:errors property="doc.click_count"/>
                                         <la:text styleId="doc.click_count"
                                                  property="doc.click_count" styleClass="form-control"
-                                                 title="Integer" data-validation="custom"
-                                                 data-validation-regexp="^(\d+)?$"
-                                                 data-validation-help="number (Integer)"/>
+                                                 title="Integer" pattern="\d*"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -317,9 +311,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.created"
                                                  property="doc.created" styleClass="form-control"
                                                  title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                 data-validation="custom"
-                                                 data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
-                                                 data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+                                                 pattern="[1-9]\d{3}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -329,9 +321,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.timestamp"
                                                  property="doc.timestamp" styleClass="form-control"
                                                  title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                 data-validation="custom"
-                                                 data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
-                                                 data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+                                                 pattern="[1-9]\d{3}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -341,9 +331,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.last_modified"
                                                  property="doc.last_modified" styleClass="form-control"
                                                  title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                 data-validation="custom"
-                                                 data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
-                                                 data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+                                                 pattern="[1-9]\d{3}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -353,9 +341,7 @@ ${fe:html(true)}
                                         <la:text styleId="doc.expires"
                                                  property="doc.expires" styleClass="form-control"
                                                  title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                 data-validation="custom"
-                                                 data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
-                                                 data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+                                                 pattern="[1-9]\d{3}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -382,17 +368,13 @@ ${fe:html(true)}
                                                              property="doc.${f:h(fieldName)}"
                                                              styleClass="form-control"
                                                              title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                             data-validation="custom"
-                                                             data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
-                                                             data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+                                                             pattern="[1-9]\d{3}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z"/>
                                                 </c:when>
                                                 <c:when test="${extraFieldTypes[fieldName] == 'number'}">
                                                     <la:text styleId="doc.${f:h(fieldName)}"
                                                              property="doc.${f:h(fieldName)}"
                                                              styleClass="form-control"
-                                                             data-validation="custom"
-                                                             data-validation-regexp="^[\d\.\-\+eE]*$"
-                                                             data-validation-help="number"/>
+                                                             pattern="[\d.\-+eE]*" title="number"/>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <la:text styleId="doc.${f:h(fieldName)}"
@@ -437,8 +419,5 @@ ${fe:html(true)}
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-<script src="${fe:url('/js/admin/plugins/form-validator/jquery.form-validator.min.js')}"
-        type="text/javascript"></script>
-<script src="${fe:url('/js/admin/searchlist.js')}" type="text/javascript"></script>
 </body>
 ${fe:html(false)}

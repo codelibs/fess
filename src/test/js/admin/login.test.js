@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
-import jquerySource from "../../../main/webapp/js/admin/jquery-3.7.1.min.js?raw";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import loginSource from "../../../main/webapp/js/login.js?raw";
 import { jsonResponse } from "../helpers/net.js";
 
@@ -18,11 +17,10 @@ function page({ redirect = "", contextPath = "/fess" } = {}) {
 <input type="hidden" id="contextPath" value="${contextPath}" />`;
 }
 
-// login.js binds the button when the document is ready, to the elements that exist then.
+// login.js binds the button when it runs, to the elements that exist then.
 async function mount(html) {
   document.body.innerHTML = html;
   run(loginSource);
-  await new Promise((resolve) => window.jQuery(resolve));
   const navigate = vi.fn();
   window.FessPasskeyLogin.navigate = navigate;
   return navigate;
@@ -56,10 +54,6 @@ const click = async () => {
   // let the promise chain of the click run to its end
   await vi.waitFor(() => expect(document.getElementById("passkey-login-btn").disabled).toBe(false));
 };
-
-beforeAll(() => {
-  run(jquerySource);
-});
 
 afterEach(() => {
   vi.unstubAllGlobals();

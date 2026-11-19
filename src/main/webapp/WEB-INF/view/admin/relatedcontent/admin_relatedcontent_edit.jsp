@@ -71,9 +71,9 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="sortOrder" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.sortOrder"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="sortOrder"/>
-                                        <la:text styleId="sortOrder" property="sortOrder" styleClass="form-control"/>
+                                        <la:text styleId="sortOrder" property="sortOrder" styleClass="form-control" size="8"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">

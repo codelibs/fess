@@ -1,49 +1,28 @@
-$(function() {
-  var $firstInput = $('input[type="text"],select,textarea', ".login-box,section.content").first();
-  var $errorInput = $(".form-group .has-error").first().next("input,select,textarea");
+// Admin login and new-password pages: focus the first field (or the one that failed), then the passkey button.
+(function() {
+  "use strict";
 
-  if ($errorInput.length) {
-    $errorInput.focus();
-  } else {
-    $firstInput.focus();
+  function focusFirstField() {
+    var error = document.querySelector(".form-group .has-error");
+    var errorField = error && error.nextElementSibling;
+    var first = document.querySelector(':is(.login-box, section.content) :is(input[type="text"], select, textarea)');
+    if (errorField && errorField.matches("input, select, textarea")) {
+      errorField.focus();
+    } else if (first) {
+      first.focus();
+    }
   }
 
-  $("section.content input").on("keypress", function(e) {
-    if (e.which === 13) {
-      var $submitButton = $("input#submit, button#submit");
-      if ($submitButton.length > 0) {
-        $submitButton.closest("form").trigger("submit");
-      }
-      return false;
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
     }
-  });
+  }
 
-  $(".table tr[data-href]").each(function() {
-    var $row = $(this);
-    $row.css("cursor", "pointer")
-      .on("mouseenter", function() {
-        $(this).addClass("active");
-      })
-      .on("mouseleave", function() {
-        $(this).removeClass("active");
-      })
-      .on("click", function() {
-        window.location.href = $(this).attr("data-href");
-      });
-  });
-
-  $("#confirmToDelete").on("show.bs.modal", function(event) {
-    var button = $(event.relatedTarget);
-    var docId = button.data("docid");
-    var title = button.data("title");
-    var url = button.data("url");
-
-    var $modal = $(this);
-    $modal.find(".modal-body #delete-doc-title").text(title);
-    $modal.find(".modal-body #delete-doc-url").text(url);
-    $modal.find(".modal-footer input#docId").val(docId);
-  });
-});
+  ready(focusFirstField);
+})();
 
 // Passkey (WebAuthn) login of the admin login page: POST options, navigator.credentials.get, POST verify,
 // then on to where the password login would go. The page does not load the theme bundle, so this mirrors its
@@ -121,7 +100,7 @@ window.FessPasskeyLogin = (function() {
   }
 
   function post(path, body) {
-    return fetch($("#contextPath").val() + "/api/v2" + path, {
+    return fetch(document.getElementById("contextPath").value + "/api/v2" + path, {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -137,10 +116,12 @@ window.FessPasskeyLogin = (function() {
     });
   }
 
-  function signIn($button) {
-    var $error = $("#passkey-error");
-    $error.addClass("d-none");
-    $button.prop("disabled", true);
+  function signIn(button) {
+    var error = document.getElementById("passkey-error");
+    if (error) {
+      error.classList.add("d-none");
+    }
+    button.disabled = true;
     return post("/auth/passkey/login/options", {})
       .then(function(options) {
         return navigator.credentials.get({ publicKey: toRequestOptions(options) });
@@ -149,17 +130,17 @@ window.FessPasskeyLogin = (function() {
         return post("/auth/passkey/login/verify", { credential: credentialToJson(credential) });
       })
       .then(function() {
-        var saved = $button.attr("data-redirect");
-        api.navigate($("#contextPath").val() + (isSafePath(saved) ? saved : DEFAULT_PATH));
+        var saved = button.getAttribute("data-redirect");
+        api.navigate(document.getElementById("contextPath").value + (isSafePath(saved) ? saved : DEFAULT_PATH));
       })
       .catch(function(e) {
         // The user dismissed the browser's passkey prompt: nothing to report.
-        if (!isCancel(e)) {
-          $error.removeClass("d-none");
+        if (!isCancel(e) && error) {
+          error.classList.remove("d-none");
         }
       })
       .then(function() {
-        $button.prop("disabled", false);
+        button.disabled = false;
       });
   }
 
@@ -174,14 +155,21 @@ window.FessPasskeyLogin = (function() {
     }
   };
 
-  $(function() {
-    var $button = $("#passkey-login-btn");
-    if ($button.length && isSupported()) {
-      $button.removeClass("d-none").on("click", function() {
-        signIn($button);
+  function bindButton() {
+    var button = document.getElementById("passkey-login-btn");
+    if (button && isSupported()) {
+      button.classList.remove("d-none");
+      button.addEventListener("click", function() {
+        signIn(button);
       });
     }
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindButton);
+  } else {
+    bindButton();
+  }
 
   return api;
 })();
