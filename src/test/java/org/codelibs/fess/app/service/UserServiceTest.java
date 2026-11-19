@@ -999,7 +999,7 @@ public class UserServiceTest extends UnitFessTestCase {
         final List<String> calls = new ArrayList<>();
         installStoreStubs(calls, "alice", false);
 
-        userService.store(storedUser("id-alice", "alicia"));
+        userService.store(readUser("id-alice", "alicia"));
 
         assertEquals(List.of("passkeys:alice", "passkeys:alicia", "auth:alicia", "user:alicia"), calls);
     }
@@ -1009,7 +1009,7 @@ public class UserServiceTest extends UnitFessTestCase {
         final List<String> calls = new ArrayList<>();
         installStoreStubs(calls, "alice", false);
 
-        userService.store(storedUser("id-alice", "alice"));
+        userService.store(readUser("id-alice", "alice"));
 
         assertEquals(List.of("auth:alice", "user:alice"), calls);
     }
@@ -1020,7 +1020,7 @@ public class UserServiceTest extends UnitFessTestCase {
         installStoreStubs(calls, "alice", false, storedUser("id-bob", "bob"));
 
         final UserConflictException e = org.junit.jupiter.api.Assertions.assertThrows(UserConflictException.class,
-                () -> userService.store(storedUser("id-alice", "bob")));
+                () -> userService.store(readUser("id-alice", "bob")));
 
         assertEquals("A user named bob already exists", e.getMessage());
         assertEquals("neither the passkeys of either name nor the user document may be touched", List.of(), calls);
@@ -1031,9 +1031,38 @@ public class UserServiceTest extends UnitFessTestCase {
         final List<String> calls = new ArrayList<>();
         installStoreStubs(calls, "alice", false, storedUser("id-alice", "alicia"));
 
-        userService.store(storedUser("id-alice", "alicia"));
+        userService.store(readUser("id-alice", "alicia"));
 
         assertEquals(List.of("passkeys:alice", "passkeys:alicia", "auth:alicia", "user:alicia"), calls);
+    }
+
+    @Test
+    public void test_store_create_onAnExistingName_isRefusedAndTheStoredUserIsKept() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+
+        final UserConflictException e = org.junit.jupiter.api.Assertions.assertThrows(UserConflictException.class,
+                () -> userService.store(storedUser("id-alice", "alice")));
+
+        assertEquals("A user named alice already exists", e.getMessage());
+        assertEquals("neither the passkeys nor the user document may be touched", List.of(), calls);
+    }
+
+    @Test
+    public void test_store_read_userWithItsOwnName_isStillUpdated() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+
+        userService.store(readUser("id-alice", "alice"));
+
+        assertEquals(List.of("auth:alice", "user:alice"), calls);
+    }
+
+    /** A user as it is read from the index: it carries the sequence number and primary term. */
+    private static User readUser(final String id, final String name) {
+        final User user = storedUser(id, name);
+        user.asDocMeta().seqNo(5L).primaryTerm(1L);
+        return user;
     }
 
     private static User storedUser(final String id, final String name) {
@@ -1081,6 +1110,12 @@ public class UserServiceTest extends UnitFessTestCase {
 
             @Override
             public void insertOrUpdate(final User entity,
+                    final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
+                calls.add("user:" + entity.getName());
+            }
+
+            @Override
+            public void update(final User entity,
                     final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
                 calls.add("user:" + entity.getName());
             }
