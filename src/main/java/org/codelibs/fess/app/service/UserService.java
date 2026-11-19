@@ -125,7 +125,9 @@ public class UserService {
      * credentials do not follow a rename. A failure to remove them fails the store before the user is
      * written.</p>
      *
-     * <p>A rename onto a name another user already holds is refused before anything is removed.</p>
+     * <p>A rename onto a name another user already holds is refused before anything is removed. So is a new user
+     * (one that was not read, so it carries no sequence number) whose ID is already stored: it would replace that
+     * user, with its password and roles.</p>
      *
      * <p>A user that was read (it carries the sequence number and primary term it was read with) is written
      * on the condition that it has not been changed since. The passkeys that a rename removes and the
@@ -134,6 +136,7 @@ public class UserService {
      *
      * @param user the user entity to store
      * @throws UserConflictException if the user is renamed to the name of another user
+     * @throws UserConflictException if a new user has the ID of a stored one
      * @throws UserConflictException if the user was read and has been changed by someone else since
      */
     public void store(final User user) {
@@ -201,6 +204,10 @@ public class UserService {
                 StringUtil.isBlank(user.getId()) ? null : userBhv.selectByPK(user.getId()).map(User::getName).orElse(null);
         if (previousName == null) {
             passkeyService.deleteByUserName(username);
+        } else if (!hasVersion(user)) {
+            // A user that was not read is a new one, and its ID is made from its name, so the stored row is
+            // that name's current holder: writing it would replace its password and roles.
+            throw new UserConflictException("A user named " + username + " already exists");
         } else if (!previousName.equals(username)) {
             if (getUserByName(username).filter(other -> !user.getId().equals(other.getId())).isPresent()) {
                 throw new UserConflictException("A user named " + username + " already exists");
