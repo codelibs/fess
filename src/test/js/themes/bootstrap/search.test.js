@@ -1179,6 +1179,20 @@ describe("runSearch — error handling", () => {
     expect(errBox().classList.contains("d-none")).toBe(false);
   });
 
+  it.each([400, 413, 414, 431])("shows error.invalid_request when an error page that is not JSON answers %i", async (status) => {
+    // api.js gives such a response an empty message: the text must come from the bundle, never "Invalid JSON".
+    api.get.mockRejectedValueOnce(Object.assign(new Error(""), { code: "HTTP_ERROR", httpStatus: status }));
+    await runSearch();
+    expect(errBox().textContent).toBe("error.invalid_request");
+    expect(errBox().classList.contains("d-none")).toBe(false);
+  });
+
+  it("shows error.server when a 5xx page that is not JSON answers", async () => {
+    api.get.mockRejectedValueOnce(Object.assign(new Error(""), { code: "HTTP_ERROR", httpStatus: 502 }));
+    await runSearch();
+    expect(errBox().textContent).toBe("error.server");
+  });
+
   it("shows error.network for a NetworkError", async () => {
     api.get.mockRejectedValueOnce(Object.assign(new Error("net"), { name: "NetworkError" }));
     await runSearch();
