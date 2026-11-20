@@ -1061,6 +1061,14 @@ describe("runSearch — zero results", () => {
     expect(document.getElementById("results-status").textContent).toBe("");
   });
 
+  it("lists the popular words in the empty state with a single request", async () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="popular-words" class="d-none"></div>');
+    await runSearch();
+    await settle();
+    expect(document.getElementById("popular-words").querySelectorAll("a[data-spa]").length).toBe(4);
+    expect(api.get.mock.calls.filter((c) => c[0] === "/popular-words").length).toBe(1);
+  });
+
   it("hides the facet sidebar, mobile toggle and pagination", async () => {
     await runSearch();
     await settle();
@@ -1946,16 +1954,16 @@ describe("attach — wiring", () => {
     vi.useFakeTimers();
     api.getConfig.mockReturnValue(FULL_CFG);
     installApiDispatch();
-    setLocation("/"); // no q → attach() loads popular words and populates the input from nothing
+    setLocation("/"); // no q → attach() populates the input from nothing
     mountBody(ATTACH_FIXTURE);
 
     attach();
-    await vi.advanceTimersByTimeAsync(0); // flush loadPopularWords / renderSearchOptions
+    await vi.advanceTimersByTimeAsync(0); // flush renderSearchOptions
 
     // attach() populated the option selects from config.
     expect(document.getElementById("numSearchOption").options.length).toBe(3);
-    // and rendered popular words.
-    expect(document.getElementById("popular-words").querySelectorAll("a[data-spa]").length).toBe(4);
+    // The home view fetches the popular words itself; attach() asks for none.
+    expect(api.get.mock.calls.filter((c) => c[0] === "/popular-words").length).toBe(0);
 
     // 1. Header form submit → navigate to search?q=..., syncs inputs.
     // The drawer's labels ride along; a legacy URL's sdh and as.* conditions do not.
