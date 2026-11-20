@@ -1193,12 +1193,14 @@ public class BundledBootstrapThemeTest {
                         "\"errors.user_permissions_unavailable\"")) {
                     assertTrue(s.contains(key), p.getFileName() + " must contain " + key);
                 }
-                assertTrue(Pattern.compile("\"result\\.click_count\": \"[^\"]*\\{n\\}").matcher(s).find(),
+                // {n}, or {n, plural, ...} where the language has plural forms
+                assertTrue(Pattern.compile("\"result\\.click_count\": \"[^\"]*\\{n[,}]").matcher(s).find(),
                         p.getFileName() + " must keep the {n} placeholder in result.click_count");
             }
         }
         final String en = Files.readString(THEME_DIR.resolve("i18n/messages.en.json"), StandardCharsets.UTF_8);
-        assertTrue(en.contains("\"result.click_count\": \"{n} views\""), "result.click_count must follow labels.search_click_views");
+        assertTrue(en.contains("\"result.click_count\": \"{n, plural, one {# view} other {# views}}\""),
+                "result.click_count must follow labels.search_click_views");
         assertTrue(en.contains("\"auth.password_change_required\": \"You need to update your password\""),
                 "auth.password_change_required must follow labels.login.newpassword");
     }
