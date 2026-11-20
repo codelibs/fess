@@ -16,8 +16,7 @@
 				</la:link></li>
 			</c:if>
 			<c:if test="${!pager.existPrePage}">
-				<li class="page-item disabled"><a
-						class="page-link" href="#"><la:message
+				<li class="page-item disabled"><a class="page-link" aria-disabled="true"><la:message
 						key="labels.prev_page" /></a></li>
 			</c:if>
 			<c:forEach var="p" varStatus="s"
@@ -35,8 +34,7 @@
 					</la:link></li>
 			</c:if>
 			<c:if test="${!pager.existNextPage}">
-				<li class="page-item disabled"><a
-						class="page-link" href="#"><la:message
+				<li class="page-item disabled"><a class="page-link" aria-disabled="true"><la:message
 							key="labels.next_page" /></a></li>
 			</c:if>
 		</ul>
