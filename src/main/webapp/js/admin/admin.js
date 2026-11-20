@@ -497,11 +497,18 @@
   }
 
   // A link to a tab (#section-1-3) opens it; the tabs are built by initFormLayout, so this runs after it.
-  function openTabOfAddress() {
-    var id = decodeURIComponent((location.hash || "").slice(1));
+  // A tab that holds an error stays the one that is shown when the page loads: the reader has to see the error.
+  function openTabOfAddress(keepErrorTab) {
+    var id;
+    try {
+      id = decodeURIComponent((location.hash || "").slice(1));
+    } catch (e) {
+      return; // a malformed address (#%) names nothing
+    }
     var pane = id ? document.getElementById(id) : null;
     var link = pane && pane.classList.contains("tab-pane") ? document.getElementById(id + "-tab") : null;
-    if (link) {
+    var nav = link && link.closest(".nav");
+    if (link && !(keepErrorTab === true && nav && nav.querySelector(".has-error"))) {
       activateTab(link);
     }
   }
@@ -522,11 +529,14 @@
     initFormLayout(document);
     initRangePickers(document);
     initMenuState();
-    openTabOfAddress();
+    openTabOfAddress(true);
     focusFirstField();
   }
 
   document.addEventListener("invalid", revealInvalidField, true);
+  window.addEventListener("hashchange", function() {
+    openTabOfAddress(false);
+  });
 
   window.FessAdmin = { init: init };
 

@@ -501,6 +501,24 @@ describe("form layout", () => {
     expect(links[0].hasAttribute("title")).toBe(false);
   });
 
+  it("does not stop at an address that cannot be decoded", () => {
+    window.location.hash = "#%";
+    expect(() => mount(sections)).not.toThrow();
+    expect(document.querySelectorAll("#b .nav-link")[0].classList.contains("active")).toBe(true);
+    window.location.hash = "";
+  });
+
+  it("keeps the tab that holds an error open over a tab that the address names, and follows a later change of the address", () => {
+    mount(sections.replace(text("urls"), `<ul class="has-error"><li>bad url</li></ul>${text("urls")}`));
+    const links = document.querySelectorAll("#b .nav-link");
+    window.location.hash = "#" + links[2].getAttribute("aria-controls");
+    window.FessAdmin.init();
+    expect(links[1].classList.contains("active")).toBe(true);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(links[2].classList.contains("active")).toBe(true);
+    window.location.hash = "";
+  });
+
   it("opens the tab that the address names", () => {
     mount(sections);
     const links = document.querySelectorAll("#b .nav-link");
