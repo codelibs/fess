@@ -121,7 +121,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
             }
         }).orElse(() -> {
             throwValidationErrorApi(messages -> {
-                messages.addErrorsFailedToStartJob(GLOBAL, id);
+                messages.addErrorsFailedToStopJob(GLOBAL, id);
             });
         });
         return asJson(new ApiResponse().status(Status.OK).result());
