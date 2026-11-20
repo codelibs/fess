@@ -3,7 +3,7 @@
 <c:set var="trendNoData" value="${empty trend.x or trend['empty']}"/>
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title"><la:message key="labels.searchlog_chart_trend"/></h3>
+        <h2 class="card-title"><la:message key="labels.searchlog_chart_trend"/></h2>
         <div class="card-tools">
             <c:if test="${not trendNoData}">
                 <div class="btn-group btn-group-sm" role="group">
@@ -30,7 +30,7 @@
 </div>
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title"><la:message key="labels.searchlog_table_chatUsers"/></h3>
+        <h2 class="card-title"><la:message key="labels.searchlog_table_chatUsers"/></h2>
         <div class="card-tools">
             <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="chatUsers"/></jsp:include>
         </div>
@@ -81,7 +81,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><la:message key="labels.searchlog_table_${tableName}"/></h3>
+                    <h2 class="card-title"><la:message key="labels.searchlog_table_${tableName}"/></h2>
                     <div class="card-tools">
                         <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="${tableName}"/></jsp:include>
                     </div>

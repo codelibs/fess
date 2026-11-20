@@ -39,7 +39,7 @@ ${fe:html(true)}
                         <div
                                 class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <c:if test="${crudMode == 1}">
                                         <la:message key="labels.failure_url_link_create"/>
                                     </c:if>
@@ -52,7 +52,7 @@ ${fe:html(true)}
                                     <c:if test="${crudMode == 4}">
                                         <la:message key="labels.failure_url_link_details"/>
                                     </c:if>
-                                </h3>
+                                </h2>
                                 <div class="card-tools">
                                     <div class="btn-group">
                                         <la:link href="/admin/failureurl"
@@ -146,9 +146,9 @@ ${fe:html(true)}
                                             <div class="modal-dialog">
                                                 <div class="modal-content bg-danger">
                                                     <div class="modal-header">
-                                                        <h4 class="modal-title">
+                                                        <h2 class="modal-title">
                                                             <la:message key="labels.crud_title_delete"/>
-                                                        </h4>
+                                                        </h2>
                                                         <button type="button" class="close" data-dismiss="modal"
                                                                 aria-label="<la:message key="labels.crud_button_close"/>">
                                                             <span aria-hidden="true">×</span>

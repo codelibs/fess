@@ -54,7 +54,7 @@ ${fe:html(true)}
                         <div
                                 class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <c:if test="${crudMode == 1}">
                                         <la:message
                                                 key="labels.bad_word_link_create"/>
@@ -62,7 +62,7 @@ ${fe:html(true)}
                                     <c:if test="${crudMode == 2}">
                                         <la:message key="labels.bad_word_link_edit"/>
                                     </c:if>
-                                </h3>
+                                </h2>
                                 <div class="card-tools">
                                     <div class="btn-group">
                                         <la:link href="/admin/badword"

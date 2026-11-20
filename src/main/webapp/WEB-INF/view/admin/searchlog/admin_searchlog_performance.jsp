@@ -4,7 +4,7 @@
         <div class="${chartName == 'responseTime' ? 'col-12' : 'col-lg-6'}">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><la:message key="labels.searchlog_chart_${chartName}"/></h3>
+                    <h2 class="card-title"><la:message key="labels.searchlog_chart_${chartName}"/></h2>
                     <div class="card-tools">
                         <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="${chartName}"/></jsp:include>
                     </div>
@@ -25,7 +25,7 @@
 </div>
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title"><la:message key="labels.searchlog_table_slowQueries"/></h3>
+        <h2 class="card-title"><la:message key="labels.searchlog_table_slowQueries"/></h2>
         <div class="card-tools">
             <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="slowQueries"/></jsp:include>
         </div>

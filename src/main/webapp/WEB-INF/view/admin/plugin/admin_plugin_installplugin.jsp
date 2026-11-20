@@ -35,9 +35,9 @@ ${fe:html(true)}
                 <div class="col-md-12">
                     <div class="card card-outline card-success">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.plugin_install"/>
-                            </h3>
+                            </h2>
                         </div>
                         <la:form action="/admin/plugin/install" enctype="multipart/form-data">
                         <div class="card-body">

@@ -49,7 +49,7 @@ ${fe:html(true)}
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <c:if test="${ldapAdminEnabled}"><h4><la:message key="labels.section_basic"/></h4></c:if>
+                                <c:if test="${ldapAdminEnabled}"><h3><la:message key="labels.section_basic"/></h3></c:if>
                                 <div class="form-group row">
                                     <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.user_name"/></label>
@@ -106,7 +106,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <c:if test="${ldapAdminEnabled}">
-                                    <h4><la:message key="labels.section_attributes"/></h4>
+                                    <h3><la:message key="labels.section_attributes"/></h3>
                                     <div class="form-group row">
                                         <label for="attributes.employeeNumber" class="col-sm-3 text-sm-right col-form-label"><la:message
                                                 key="labels.user_employeeNumber"/></label>
@@ -380,7 +380,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </c:if>
-                                <c:if test="${ldapAdminEnabled}"><h4><la:message key="labels.section_roles_groups"/></h4></c:if>
+                                <c:if test="${ldapAdminEnabled}"><h3><la:message key="labels.section_roles_groups"/></h3></c:if>
                                 <div class="form-group row">
                                     <label for="roles" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.roles"/></label>

@@ -41,9 +41,9 @@ ${fe:html(true)}
                         <div class="card card-outline card-primary">
                                 <%-- Card Header --%>
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <la:message key="labels.elevate_word_link_download"/>
-                                </h3>
+                                </h2>
                                 <div class="card-tools">
                                     <div class="btn-group">
                                         <la:link href="/admin/elevateword"

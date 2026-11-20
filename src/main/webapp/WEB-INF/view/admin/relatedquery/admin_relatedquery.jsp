@@ -129,9 +129,9 @@ ${fe:html(true)}
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h4 class="modal-title">
+                                                        <h2 class="modal-title">
                                                             <la:message key="labels.related_query_generate"/>
-                                                        </h4>
+                                                        </h2>
                                                         <button type="button" class="close" data-dismiss="modal"
                                                                 aria-label="<la:message key="labels.crud_button_close"/>">
                                                             <span aria-hidden="true">×</span>

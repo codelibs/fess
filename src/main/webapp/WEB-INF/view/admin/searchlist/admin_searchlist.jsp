@@ -38,9 +38,9 @@ ${fe:html(true)}
                     <div class="card card-outline card-primary">
                         <%-- Card Header --%>
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.search_list_configuration"/>
-                            </h3>
+                            </h2>
                             <div class="card-tools">
                                 <div class="btn-group">
                                     <la:link href="/admin/searchlist/createnew?q=${f:u(q)}"
@@ -194,9 +194,9 @@ ${fe:html(true)}
                                     <div class="modal-dialog">
                                         <div class="modal-content bg-danger">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="confirmToDeleteTitle">
+                                                <h2 class="modal-title" id="confirmToDeleteTitle">
                                                     <la:message key="labels.search_list_button_delete"/>
-                                                </h4>
+                                                </h2>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                         aria-label="<la:message key="labels.crud_button_close"/>">
                                                     <span aria-hidden="true">×</span>
@@ -247,9 +247,9 @@ ${fe:html(true)}
                                             <div class="modal-dialog">
                                                 <div class="modal-content bg-danger">
                                                     <div class="modal-header">
-                                                        <h4 class="modal-title">
+                                                        <h2 class="modal-title">
                                                             <la:message key="labels.search_list_button_delete_all"/>
-                                                        </h4>
+                                                        </h2>
                                                         <button type="button" class="close" data-dismiss="modal"
                                                                 aria-label="<la:message key="labels.crud_button_close"/>">
                                                             <span aria-hidden="true">×</span>

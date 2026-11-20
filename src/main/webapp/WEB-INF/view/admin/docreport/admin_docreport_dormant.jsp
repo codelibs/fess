@@ -31,10 +31,10 @@
         </c:if>
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><fmt:formatNumber value="${report.total}" var="totalText"/><fmt:formatNumber
+                <h2 class="card-title"><fmt:formatNumber value="${report.total}" var="totalText"/><fmt:formatNumber
                         value="${report.totalSize}" var="totalSizeText"/><la:message key="labels.docreport_dormant_summary"
                                                                                      arg0="${totalText}"
-                                                                                     arg1="${totalSizeText}"/></h3>
+                                                                                     arg1="${totalSizeText}"/></h2>
             </div>
             <div class="card-body p-0 table-responsive">
                 <table class="table table-sm table-hover mb-0">

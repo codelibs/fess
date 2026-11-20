@@ -268,7 +268,7 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
-                                <h3 class="card-title"><la:message key="labels.passkey_title"/></h3>
+                                <h2 class="card-title"><la:message key="labels.passkey_title"/></h2>
                             </div>
                             <div class="card-body">
                                 <table class="table table-bordered" aria-label="<la:message key="labels.passkey_title" />">

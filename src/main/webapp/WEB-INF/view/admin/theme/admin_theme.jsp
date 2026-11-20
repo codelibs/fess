@@ -30,9 +30,9 @@ ${fe:html(true)}
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.crud_title_list"/>
-                            </h3>
+                            </h2>
                             <div class="card-tools">
                                 <div class="btn-group">
                                     <la:link href="uploadpage"
@@ -132,9 +132,9 @@ ${fe:html(true)}
                                                                 <div class="modal-dialog">
                                                                     <div class="modal-content bg-danger">
                                                                         <div class="modal-header">
-                                                                            <h4 class="modal-title">
+                                                                            <h2 class="modal-title">
                                                                                 <la:message key="labels.crud_title_delete"/>
-                                                                            </h4>
+                                                                            </h2>
                                                                             <button type="button" class="close"
                                                                                     data-dismiss="modal"
                                                                                     aria-label="<la:message key="labels.crud_button_close"/>">
@@ -181,9 +181,9 @@ ${fe:html(true)}
 
                     <div class="card card-outline card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.theme_install_title"/>
-                            </h3>
+                            </h2>
                         </div>
                         <div class="card-body">
                             <c:if test="${empty availableThemeNames}">
