@@ -501,6 +501,21 @@ describe("form layout", () => {
     expect(links[0].hasAttribute("title")).toBe(false);
   });
 
+  it("writes every message of an error tab into its title, one per message, and no empty title", () => {
+    mount(
+      sections.replace(
+        text("urls"),
+        `<ul class="has-error"><li><i></i> bad url</li><li><i></i> too long</li></ul><ul class="has-error"><li>  </li></ul>${text("urls")}`
+      )
+    );
+    const links = document.querySelectorAll("#b .nav-link");
+    expect(links[1].getAttribute("title")).toBe("bad url; too long");
+    mount(sections.replace(text("perm"), `<ul class="has-error"><li><i></i> </li></ul>${text("perm")}`));
+    const marked = document.querySelectorAll("#b .nav-link")[2];
+    expect(marked.classList.contains("has-error")).toBe(true);
+    expect(marked.hasAttribute("title")).toBe(false);
+  });
+
   it("does not stop at an address that cannot be decoded", () => {
     window.location.hash = "#%";
     expect(() => mount(sections)).not.toThrow();

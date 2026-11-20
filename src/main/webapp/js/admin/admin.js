@@ -405,6 +405,21 @@
 
   var sectionCount = 0;
 
+  // The texts of the messages in a pane: one entry per message (a field's error list holds one <li> each), blanks left out.
+  function errorMessages(pane) {
+    var texts = [];
+    Array.prototype.forEach.call(pane.querySelectorAll(".has-error, .alert-danger"), function(box) {
+      var items = box.querySelectorAll("li");
+      Array.prototype.forEach.call(items.length ? items : [box], function(item) {
+        var text = (item.textContent || "").replace(/\s+/g, " ").trim();
+        if (text && texts.indexOf(text) < 0) {
+          texts.push(text);
+        }
+      });
+    });
+    return texts.join("; ");
+  }
+
   // A card body whose h4 headings split it into sections becomes tabs; the headings are the tab
   // titles. Anything before the first heading (messages) stays above the tabs.
   function buildSectionTabs(root) {
@@ -457,11 +472,13 @@
         item.appendChild(link);
         nav.appendChild(item);
 
-        var problem = pane.querySelector(".has-error, .alert-danger");
-        if (problem) {
+        if (pane.querySelector(".has-error, .alert-danger")) {
           link.classList.add("has-error");
-          // the red dot after the title is not enough for a screen reader or a colour-blind reader: the first message is the tab's description
-          link.setAttribute("title", (problem.textContent || "").replace(/\s+/g, " ").trim());
+          // the red dot after the title is not enough for a screen reader or a colour-blind reader: the messages are the tab's description
+          var messages = errorMessages(pane);
+          if (messages) {
+            link.setAttribute("title", messages);
+          }
           firstWithError = firstWithError || link;
         }
       });
