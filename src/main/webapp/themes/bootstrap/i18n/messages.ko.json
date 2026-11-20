@@ -2,6 +2,7 @@
   "search.placeholder": "검색...",
   "search.button": "검색",
   "search.no_results": "결과 없음.",
+  "search.results_heading": "검색 결과",
   "search.popular_searches": "인기 검색어",
   "search_history.title": "최근 검색",
   "search.did_not_match": "검색어 — {0} — 와(과) 일치하는 문서가 없습니다.",

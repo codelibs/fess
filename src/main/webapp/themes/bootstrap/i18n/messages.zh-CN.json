@@ -2,6 +2,7 @@
   "search.placeholder": "搜索...",
   "search.button": "搜索",
   "search.no_results": "无结果。",
+  "search.results_heading": "搜索结果",
   "search.popular_searches": "热门搜索",
   "search_history.title": "最近搜索",
   "search.did_not_match": "您的搜索 — {0} — 未匹配到任何文档。",

@@ -2,6 +2,7 @@
   "search.placeholder": "Cari...",
   "search.button": "Cari",
   "search.no_results": "Tidak ada hasil.",
+  "search.results_heading": "Hasil pencarian",
   "search.popular_searches": "Pencarian populer",
   "search_history.title": "Pencarian terbaru",
   "search.did_not_match": "Pencarian Anda — {0} — tidak cocok dengan dokumen apa pun.",

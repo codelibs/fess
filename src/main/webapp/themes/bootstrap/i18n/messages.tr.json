@@ -2,6 +2,7 @@
   "search.placeholder": "Ara...",
   "search.button": "Ara",
   "search.no_results": "Sonuç yok.",
+  "search.results_heading": "Arama sonuçları",
   "search.popular_searches": "Popüler aramalar",
   "search_history.title": "Son aramalar",
   "search.did_not_match": "Aramanız — {0} — herhangi bir belgeyle eşleşmedi.",

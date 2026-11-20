@@ -2,6 +2,7 @@
   "search.placeholder": "Szukaj...",
   "search.button": "Szukaj",
   "search.no_results": "Brak wyników.",
+  "search.results_heading": "Wyniki wyszukiwania",
   "search.popular_searches": "Popularne wyszukiwania",
   "search_history.title": "Ostatnie wyszukiwania",
   "search.did_not_match": "Nie znaleziono dokumentów pasujących do {0}.",

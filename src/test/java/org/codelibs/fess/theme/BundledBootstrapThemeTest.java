@@ -414,6 +414,15 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_indexHtml_headingsDoNotSkipALevel() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // search.js renders each result title as an h3, so the results view needs an h2 above them.
+        assertTrue(html.contains("<h2 class=\"visually-hidden\" id=\"results-heading\""));
+        // The headings of the page itself (and of its dialogs and drawers) are h1 and h2.
+        assertFalse(html.matches("(?s).*<h[3-6][\\s>].*"), "index.html has a heading below h2");
+    }
+
+    @Test
     public void test_searchJs_emitsAndHydratesGeoParams() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("\"geo.location.point\""));
