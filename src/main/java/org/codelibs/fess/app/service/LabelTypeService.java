@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.core.beans.util.BeanUtil;
@@ -115,14 +116,20 @@ public class LabelTypeService extends FessAppService {
     /**
      * Get a list of all label types.
      *
+     * <p>Every label type is returned. A cut at the size of a page would silently drop the label types past
+     * it from the label menu, from the admin forms and from the matching of crawled documents against the
+     * label type patterns.</p>
+     *
      * @return A list of all label types.
      */
     public List<LabelType> getLabelTypeList() {
-        return labelTypeBhv.selectList(cb -> {
+        final List<LabelType> list = new ArrayList<>();
+        labelTypeBhv.selectCursor(cb -> {
+            cb.query().matchAll();
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger(), 1);
-        });
+        }, list::add);
+        return list;
     }
 
     /**

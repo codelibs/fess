@@ -33,6 +33,7 @@ import org.codelibs.fess.exception.TagTypeConflictException;
 import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.core.message.UserMessages;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -87,7 +88,7 @@ public class TagsHandler extends AbstractTagHandler {
             };
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final TagRequestException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, e.code, e.getMessage());
+            writeFailure(req, res, e);
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/tags " + method);
         }
@@ -115,7 +116,9 @@ public class TagsHandler extends AbstractTagHandler {
         try {
             insertTagType(tagType);
         } catch (final TagTypeConflictException e) {
-            throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
+            throw new TagRequestException(V2ErrorCode.CONFLICT,
+                    messages -> messages.addErrorsTagtypeAlreadyExists(UserMessages.GLOBAL_PROPERTY_KEY),
+                    "a tag with the name already exists");
         }
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("tag", toTag(tagType, 0L));
@@ -184,12 +187,16 @@ public class TagsHandler extends AbstractTagHandler {
             try {
                 replaced = getTagTypeService().replace(current, renamed);
             } catch (final TagTypeConflictException e) {
-                throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
+                throw new TagRequestException(V2ErrorCode.CONFLICT,
+                        messages -> messages.addErrorsTagtypeAlreadyExists(UserMessages.GLOBAL_PROPERTY_KEY),
+                        "a tag with the name already exists");
             }
             if (!replaced) {
                 if (attempt >= MAX_UPDATE_ATTEMPTS) {
                     logger.warn("Failed to rename the tag after {} attempts: id={}", attempt, read.getId());
-                    throw new TagRequestException(V2ErrorCode.CONFLICT, "the tag was changed concurrently; try again");
+                    throw new TagRequestException(V2ErrorCode.CONFLICT,
+                            messages -> messages.addErrorsTagtypeChangedConcurrently(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "the tag was changed concurrently; try again");
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("The tag was changed concurrently; retrying the rename: id={}, attempt={}", read.getId(), attempt);
@@ -242,7 +249,9 @@ public class TagsHandler extends AbstractTagHandler {
             } catch (final TagTypeConflictException e) {
                 if (attempt >= MAX_UPDATE_ATTEMPTS) {
                     logger.warn("Failed to delete the tag after {} attempts: id={}", attempt, tagId, e);
-                    throw new TagRequestException(V2ErrorCode.CONFLICT, "the tag was changed concurrently; try again");
+                    throw new TagRequestException(V2ErrorCode.CONFLICT,
+                            messages -> messages.addErrorsTagtypeChangedConcurrently(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "the tag was changed concurrently; try again");
                 }
                 continue;
             }

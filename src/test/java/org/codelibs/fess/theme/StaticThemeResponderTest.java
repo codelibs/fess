@@ -536,7 +536,7 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
 
             assertEquals(200, res.status);
             assertEquals(expectedType, res.contentType);
-            assertEquals("public, max-age=86400", res.headers.get("Cache-Control"));
+            assertEquals("no-cache", res.headers.get("Cache-Control"));
             assertEquals("Accept-Encoding", res.headers.get("Vary"));
             assertEquals("same-origin", res.headers.get("Referrer-Policy"));
             assertNotNull(res.headers.get("ETag"));
@@ -589,6 +589,10 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
 
             assertEquals(304, res.status);
             assertEquals(0, res.body().length, "304 must have no body");
+            // The 304 repeats the validators and Cache-Control so a stored max-age from an earlier release is replaced.
+            assertEquals("no-cache", res.headers.get("Cache-Control"));
+            assertEquals(etag, res.headers.get("ETag"));
+            assertNotNull(res.headers.get("Last-Modified"));
         } finally {
             deleteTree(tmp);
         }
@@ -615,6 +619,68 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
 
             assertEquals(304, res.status);
             assertEquals(0, res.body().length, "304 must have no body");
+            assertEquals("no-cache", res.headers.get("Cache-Control"));
+            assertNotNull(res.headers.get("ETag"));
+            assertNotNull(res.headers.get("Last-Modified"));
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveAsset_ifNoneMatchThatDoesNotMatch_ignoresIfModifiedSince() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-asset-inm-ims-");
+        try {
+            final Path file = tmp.resolve("app.js");
+            Files.writeString(file, "console.log(1);");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final long mtime = Files.readAttributes(file, BasicFileAttributes.class).lastModifiedTime().toMillis();
+            final String ifModSince = DateTimeFormatter.RFC_1123_DATE_TIME
+                    .format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(mtime + 60_000), ZoneOffset.UTC));
+
+            final StubRequest req = new StubRequest();
+            req.headers.put("If-None-Match", "W/\"1-1\"");
+            req.headers.put("If-Modified-Since", ifModSince);
+            final CapturingResponse res = new CapturingResponse();
+
+            new StaticThemeResponder().serveAsset(req, res, theme, "app.js");
+
+            assertEquals(200, res.status);
+            assertEquals("console.log(1);", new String(res.body(), StandardCharsets.UTF_8));
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_matchesEtag_weakComparisonListAndWildcard() {
+        final String etag = "W/\"10-20\"";
+        assertTrue(StaticThemeResponder.matchesEtag("W/\"10-20\"", etag));
+        // a proxy may send the tag in another strength
+        assertTrue(StaticThemeResponder.matchesEtag("\"10-20\"", etag));
+        assertTrue(StaticThemeResponder.matchesEtag("\"1-1\", W/\"10-20\" , \"3-3\"", etag));
+        assertTrue(StaticThemeResponder.matchesEtag("*", etag));
+        assertFalse(StaticThemeResponder.matchesEtag("W/\"10-21\"", etag));
+        assertFalse(StaticThemeResponder.matchesEtag("\"1-1\", \"3-3\"", etag));
+        assertFalse(StaticThemeResponder.matchesEtag("", etag));
+        assertFalse(StaticThemeResponder.matchesEtag(null, etag));
+    }
+
+    @Test
+    public void test_serveAsset_ifNoneMatchAsStrongTagInAList_returns304() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-asset-inm-list-");
+        try {
+            final Path file = tmp.resolve("app.js");
+            Files.writeString(file, "console.log(1);");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final BasicFileAttributes attrs = Files.readAttributes(file, BasicFileAttributes.class);
+            final StubRequest req = new StubRequest();
+            req.headers.put("If-None-Match", "\"0-0\", \"" + attrs.size() + "-" + attrs.lastModifiedTime().toMillis() + "\"");
+            final CapturingResponse res = new CapturingResponse();
+
+            new StaticThemeResponder().serveAsset(req, res, theme, "app.js");
+
+            assertEquals(304, res.status);
         } finally {
             deleteTree(tmp);
         }

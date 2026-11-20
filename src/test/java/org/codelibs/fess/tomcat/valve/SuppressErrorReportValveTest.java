@@ -146,4 +146,25 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
         assertFalse(valve.isShowReport());
         assertFalse(valve.isShowServerInfo());
     }
+
+    @Test
+    public void test_page_isShortAndNamesTheContainerRefusal() {
+        final String page = SuppressErrorReportValve.page(400);
+        assertTrue(page, page.contains("<title>400 Bad Request."));
+        assertTrue(page, page.contains("too long"));
+        // nothing of the container's own page, and nothing a browser could load
+        assertFalse(page, page.contains("HTTP Status"));
+        assertFalse(page, page.contains("Tomcat"));
+        assertFalse(page, page.contains("<script"));
+        assertFalse(page, page.contains("<link"));
+    }
+
+    @Test
+    public void test_page_otherStatuses() {
+        assertTrue(SuppressErrorReportValve.page(404).contains("<h1>404 Not Found.</h1>"));
+        assertTrue(SuppressErrorReportValve.page(431).contains("Request Header Fields Too Large."));
+        assertTrue(SuppressErrorReportValve.page(500).contains("<h1>500 System Error.</h1>"));
+        assertTrue(SuppressErrorReportValve.page(418).contains("<h1>418 Bad Request.</h1>"));
+        assertFalse(SuppressErrorReportValve.page(404).contains("too long"));
+    }
 }

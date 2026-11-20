@@ -908,6 +908,16 @@ describe("runSearch — successful render", () => {
     expect(items[4].className).toContain("d-none");
   });
 
+  it("marks only the current page of the pagination with aria-current=page", async () => {
+    await runSearch();
+    await settle();
+    const current = document.querySelectorAll("#pagination [aria-current]");
+    expect(current.length).toBe(1);
+    expect(current[0].getAttribute("aria-current")).toBe("page");
+    expect(current[0].textContent).toBe("1");
+    expect(current[0].closest("li").classList.contains("active")).toBe(true);
+  });
+
   it("renders related queries and sanitized related content", async () => {
     await runSearch();
     await settle();
@@ -1026,11 +1036,68 @@ describe("runSearch — successful render", () => {
     expect(warn.classList.contains("d-none")).toBe(true);
   });
 
+  it("uses the wording without the query when the search has no keyword", async () => {
+    _state.q = "";
+    await runSearch();
+    await settle();
+    const text = document.getElementById("results-status").textContent;
+    expect(text).toContain("labels.search_result_status_no_query");
+  });
+
+  it("uses the _over wording without the query for an estimated count and no keyword", async () => {
+    _state.q = "";
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { record_count_relation: "GREATER_THAN_OR_EQUAL_TO" }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-status").textContent).toContain("labels.search_result_status_over_no_query");
+  });
+
   it("uses the _over status key when record_count_relation is not EQUAL_TO", async () => {
     installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { record_count_relation: "GREATER_THAN_OR_EQUAL_TO" }) });
     await runSearch();
     await settle();
     expect(document.getElementById("results-status").textContent).toContain("labels.search_result_status_over");
+  });
+
+  it("puts the focus on the count line when the render has dropped it to <body>", async () => {
+    // Enter on a pager link or a facet entry: the render removes the element that held the focus.
+    const pager = document.createElement("a");
+    pager.href = "#";
+    document.getElementById("pagination").appendChild(pager);
+    pager.focus();
+    expect(document.activeElement).toBe(pager);
+    await runSearch();
+    await settle();
+    expect(pager.isConnected).toBe(false);
+    expect(document.activeElement).toBe(document.getElementById("results-status"));
+  });
+
+  it("puts the focus on the view when there is no count line", async () => {
+    document.body.insertAdjacentHTML("beforeend", '<section id="results-view"></section>');
+    const pager = document.createElement("a");
+    pager.href = "#";
+    document.getElementById("pagination").appendChild(pager);
+    pager.focus();
+    installApiDispatch({ search: makeSearchEnv([]) });
+    await runSearch();
+    await settle();
+    expect(document.activeElement).toBe(document.getElementById("results-view"));
+  });
+
+  it("leaves the focus on <body> when the page was opened by its address", async () => {
+    // The first Tab must reach the skip link, not the count line the search just rendered.
+    expect(document.activeElement).toBe(document.body);
+    await runSearch();
+    await settle();
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("leaves the focus alone when it is on another element", async () => {
+    const box = document.getElementById("query");
+    box.focus();
+    await runSearch();
+    await settle();
+    expect(document.activeElement).toBe(box);
   });
 
   it("dispatches fess:search:after with the envelope", async () => {
@@ -1132,6 +1199,20 @@ describe("runSearch — error handling", () => {
     await runSearch();
     expect(errBox().textContent).toBe("http 400");
     expect(errBox().classList.contains("d-none")).toBe(false);
+  });
+
+  it.each([400, 413, 414, 431])("shows error.invalid_request when an error page that is not JSON answers %i", async (status) => {
+    // api.js gives such a response an empty message: the text must come from the bundle, never "Invalid JSON".
+    api.get.mockRejectedValueOnce(Object.assign(new Error(""), { code: "HTTP_ERROR", httpStatus: status }));
+    await runSearch();
+    expect(errBox().textContent).toBe("error.invalid_request");
+    expect(errBox().classList.contains("d-none")).toBe(false);
+  });
+
+  it("shows error.server when a 5xx page that is not JSON answers", async () => {
+    api.get.mockRejectedValueOnce(Object.assign(new Error(""), { code: "HTTP_ERROR", httpStatus: 502 }));
+    await runSearch();
+    expect(errBox().textContent).toBe("error.server");
   });
 
   it("shows error.network for a NetworkError", async () => {

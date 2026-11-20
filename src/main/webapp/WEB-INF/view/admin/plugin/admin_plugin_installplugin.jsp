@@ -56,7 +56,9 @@ ${fe:html(true)}
                                     <div class="card-body">
                                         <div class="form-group row">
                                             <la:errors property="selectedArtifact"/>
-                                            <la:select styleId="artifacts" property="id" styleClass="form-control">
+                                            <c:set var="aria_artifacts"><la:message key="labels.plugin_title"/></c:set>
+                                            <la:select styleId="artifacts" property="id" styleClass="form-control"
+                                                       aria-label="${f:h(aria_artifacts)}">
                                                 <c:forEach var="item" varStatus="s"
                                                            items="${availableArtifactItems}">
                                                     <la:option

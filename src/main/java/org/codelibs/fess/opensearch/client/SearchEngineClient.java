@@ -41,6 +41,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -195,6 +196,9 @@ import jakarta.annotation.PreDestroy;
  * Provides document indexing, searching, and administrative operations.
  */
 public class SearchEngineClient implements Client {
+
+    /** The limit the search engine names when it refuses a page beyond the result window. */
+    private static final Pattern RESULT_WINDOW_LIMIT = Pattern.compile("less than or equal to: \\[(\\d+)\\]");
 
     /**
      * Default constructor.
@@ -2348,6 +2352,19 @@ public class SearchEngineClient implements Client {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Cannot process {}", LogUtil.escapeJsonLineSeparators(searchRequestBuilder), e);
                 }
+                if (isResultWindowExceeded(e)) {
+                    // The page asked for lies beyond what the index can page through: say where the limit is
+                    // instead of "could not process", which leaves the user nothing to change. The limit is the
+                    // one the engine reports: index.max_result_window is a setting of the index, which
+                    // indexer.max.result.window.size does not have to match.
+                    final String window = getResultWindowLimit(e);
+                    throw new InvalidQueryException(
+                            window != null
+                                    ? messages -> messages.addErrorsInvalidQueryResultWindowExceeded(UserMessages.GLOBAL_PROPERTY_KEY,
+                                            window)
+                                    : messages -> messages.addErrorsInvalidQueryResultWindowUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "The result window is exceeded.", e);
+                }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Failed to process the query.", e);
             }
@@ -2368,6 +2385,47 @@ public class SearchEngineClient implements Client {
     public static boolean isCapacityRejection(final OpenSearchException cause) {
         final RestStatus status = cause.status();
         return status == RestStatus.TOO_MANY_REQUESTS || status == RestStatus.SERVICE_UNAVAILABLE;
+    }
+
+    /**
+     * Checks whether the search engine refused a search because it asks for a page beyond the result
+     * window of the index ({@code index.max_result_window}: {@code from + size} is above it).
+     *
+     * <p>The engine answers HTTP 400 {@code all shards failed} and names the cause only in a nested
+     * exception, so the causes are searched for its reason.</p>
+     *
+     * @param cause the failure of a search request to the search engine
+     * @return {@code true} when the reason is the result window; {@code false} for anything else
+     */
+    public static boolean isResultWindowExceeded(final OpenSearchException cause) {
+        return findResultWindowMessage(cause) != null;
+    }
+
+    /**
+     * Reads the limit of the result window from the refusal of the search engine
+     * ({@code from + size must be less than or equal to: [10000] but was [10010]}).
+     *
+     * @param cause the failure of a search request to the search engine
+     * @return the limit as digits, or {@code null} when the refusal is not about the result window or does not name it
+     */
+    public static String getResultWindowLimit(final OpenSearchException cause) {
+        final String message = findResultWindowMessage(cause);
+        if (message == null) {
+            return null;
+        }
+        final Matcher matcher = RESULT_WINDOW_LIMIT.matcher(message);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private static String findResultWindowMessage(final Throwable cause) {
+        Throwable t = cause;
+        for (int depth = 0; t != null && depth < 10; depth++, t = t.getCause()) {
+            final String message = t.getMessage();
+            if (message != null && message.contains("Result window is too large")) {
+                return message;
+            }
+        }
+        return null;
     }
 
     /**

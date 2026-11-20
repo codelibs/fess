@@ -414,6 +414,15 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_indexHtml_headingsDoNotSkipALevel() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // search.js renders each result title as an h3, so the results view needs an h2 above them.
+        assertTrue(html.contains("<h2 class=\"visually-hidden\" id=\"results-heading\""));
+        // The headings of the page itself (and of its dialogs and drawers) are h1 and h2.
+        assertFalse(html.matches("(?s).*<h[3-6][\\s>].*"), "index.html has a heading below h2");
+    }
+
+    @Test
     public void test_searchJs_emitsAndHydratesGeoParams() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("\"geo.location.point\""));
@@ -1193,12 +1202,14 @@ public class BundledBootstrapThemeTest {
                         "\"errors.user_permissions_unavailable\"")) {
                     assertTrue(s.contains(key), p.getFileName() + " must contain " + key);
                 }
-                assertTrue(Pattern.compile("\"result\\.click_count\": \"[^\"]*\\{n\\}").matcher(s).find(),
+                // {n}, or {n, plural, ...} where the language has plural forms
+                assertTrue(Pattern.compile("\"result\\.click_count\": \"[^\"]*\\{n[,}]").matcher(s).find(),
                         p.getFileName() + " must keep the {n} placeholder in result.click_count");
             }
         }
         final String en = Files.readString(THEME_DIR.resolve("i18n/messages.en.json"), StandardCharsets.UTF_8);
-        assertTrue(en.contains("\"result.click_count\": \"{n} views\""), "result.click_count must follow labels.search_click_views");
+        assertTrue(en.contains("\"result.click_count\": \"{n, plural, one {# view} other {# views}}\""),
+                "result.click_count must follow labels.search_click_views");
         assertTrue(en.contains("\"auth.password_change_required\": \"You need to update your password\""),
                 "auth.password_change_required must follow labels.login.newpassword");
     }

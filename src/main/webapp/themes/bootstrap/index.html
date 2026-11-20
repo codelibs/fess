@@ -84,7 +84,7 @@
        =================================================================== -->
   <div id="searchOptions" class="collapse">
     <div class="container">
-      <h3 id="searchOptionsLabel" data-i18n="search.options_title">Search Options</h3>
+      <h2 class="h3" id="searchOptionsLabel" data-i18n="search.options_title">Search Options</h2>
       <div>
         <fieldset class="mb-3">
           <legend data-i18n="search.num">Display Count</legend>
@@ -202,6 +202,9 @@
           <span data-i18n="labels.search_loading">Searching…</span>
         </div>
 
+        <!-- The heading the result titles (h3) sit under: h1 > h2 > h3, with no skipped level. -->
+        <h2 class="visually-hidden" id="results-heading" data-i18n="search.results_heading">Search results</h2>
+
         <!-- Options bar (parity searchResults.jsp ul.list-inline). -->
         <ul class="list-inline" id="options-bar"></ul>
 
@@ -235,7 +238,7 @@
              facet-body-mobile is a mirror of the desktop facet body. -->
         <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="facetOffcanvas" aria-labelledby="facetOffcanvasLabel">
           <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="facetOffcanvasLabel" data-i18n="facet.title">Filter</h5>
+            <h2 class="offcanvas-title h5" id="facetOffcanvasLabel" data-i18n="facet.title">Filter</h2>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" data-i18n-aria-label="aria.close"></button>
           </div>
           <div class="offcanvas-body" id="facet-body-mobile"></div>
@@ -322,7 +325,7 @@
       <form class="modal-content" id="login-form">
         <div id="login-step">
           <div class="modal-header">
-            <h5 class="modal-title" id="login-modal-title" data-i18n="auth.login">Login</h5>
+            <h2 class="modal-title h5" id="login-modal-title" data-i18n="auth.login">Login</h2>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria-label="aria.close"></button>
           </div>
           <div class="modal-body">
@@ -353,7 +356,7 @@
              must be changed (parity login/newpassword.jsp). auth.js switches between them. -->
         <div class="d-none" id="password-change-step">
           <div class="modal-header">
-            <h5 class="modal-title" data-i18n="profile.title">Change Password</h5>
+            <h2 class="modal-title h5" data-i18n="profile.title">Change Password</h2>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria-label="aria.close"></button>
           </div>
           <div class="modal-body">

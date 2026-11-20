@@ -546,6 +546,26 @@ export function isSessionGone(err) {
   return err.code === "auth_required" || err.code === "AUTH_REQUIRED" || err.httpStatus === 401;
 }
 
+/**
+ * isSessionGone(), and also: the server refused the request with 403 (the session-bound CSRF token
+ * of a session that has ended is checked before the login, so that is how a session that ended
+ * under an open page answers) and /auth/me then says that nobody is signed in. A 403 with a
+ * reason, or for a user who is still signed in, is some other refusal.
+ *
+ * @param {object} err - ApiError (code/httpStatus/details) or NetworkError
+ * @returns {Promise<boolean>}
+ */
+export async function isSessionEnded(err) {
+  if (isSessionGone(err)) return true;
+  if (!err || err.httpStatus !== 403 || (err.details && err.details.reason)) return false;
+  try {
+    const env = await api.get("/auth/me");
+    return !(env && env.authenticated);
+  } catch {
+    return false;
+  }
+}
+
 export function attach() {
   // D.3: If login_link feature is disabled, immediately hide the login button
   // so it never flashes visible before probeMe() settles.

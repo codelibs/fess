@@ -360,7 +360,7 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         final Response res = call(request("POST").json("{\"id\":\"" + tag.getId() + "\"}"), null);
         Assertions.assertEquals(409, res.status, res.body());
         Assertions.assertEquals("conflict", res.errorCode());
-        Assertions.assertEquals("the tag was changed concurrently; try again", res.errorMessage());
+        Assertions.assertEquals("The tag was changed by someone else. Reload it and try again.", res.errorMessage());
         // every attempt wrote once, and a wait that doubles up to a cap separates the attempts
         Assertions.assertEquals(AbstractTagHandler.MAX_UPDATE_ATTEMPTS,
                 env.service.calls.stream().filter(c -> c.startsWith("update")).count());

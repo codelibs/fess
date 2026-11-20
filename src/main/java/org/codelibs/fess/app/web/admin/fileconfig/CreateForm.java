@@ -20,6 +20,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
+import org.codelibs.fess.validation.RegexPattern;
 import org.codelibs.fess.validation.UriType;
 import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 import org.lastaflute.web.validation.Required;
@@ -65,18 +66,22 @@ public class CreateForm {
 
     /** The paths to include during crawling (pattern-based). */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.CRAWL_FILTER)
     public String includedPaths;
 
     /** The paths to exclude during crawling (pattern-based). */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.CRAWL_FILTER)
     public String excludedPaths;
 
     /** The document paths to include in search results (pattern-based). */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.FILE_DOC_PATH)
     public String includedDocPaths;
 
     /** The document paths to exclude from search results (pattern-based). */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.FILE_DOC_PATH)
     public String excludedDocPaths;
 
     /** Additional configuration parameters for the file crawler. */
