@@ -1417,7 +1417,9 @@ async function runSearch() {
   } catch (e) {
     if (e && e.name === "AbortError") return; // request superseded — newer request owns the UI
     const errBox = document.getElementById("search-error");
-    if (e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || e.httpStatus === 400)) {
+    // 400, and the refusals of an oversize request (413, 414, 431) that the server or a proxy answers
+    // with a page of its own: the request is not one that can be processed.
+    if (e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || [400, 413, 414, 431].includes(e.httpStatus))) {
       if (errBox) { errBox.textContent = e.message || t("error.invalid_request"); errBox.classList.remove("d-none"); }
       else { document.getElementById("results-meta").textContent = e.message || t("error.invalid_request"); }
       return;
