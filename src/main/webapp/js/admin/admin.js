@@ -238,7 +238,8 @@
       return;
     }
 
-    var tab = target.closest('[data-toggle="tab"]');
+    // A key with a modifier belongs to the browser (Alt+Left is Back, Cmd+Left is Back on a Mac, Ctrl+Home scrolls).
+    var tab = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ? null : target.closest('[data-toggle="tab"]');
     if (tab && (event.key === " " || /^(ArrowLeft|ArrowRight|Home|End)$/.test(event.key))) {
       if (event.key === " ") {
         activateTab(tab);

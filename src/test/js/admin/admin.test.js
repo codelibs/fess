@@ -305,6 +305,21 @@ describe("collapse, tabs and the side menu", () => {
     expect(other.defaultPrevented).toBe(false);
   });
 
+  it("leaves the arrow keys, Home and End with a modifier to the browser (Alt+Left is Back)", () => {
+    mount(tabList);
+    const a = document.getElementById("a");
+    a.focus();
+    ["altKey", "ctrlKey", "metaKey", "shiftKey"].forEach((modifier) => {
+      ["ArrowLeft", "ArrowRight", "Home", "End"].forEach((key) => {
+        const event = press(a, { key, [modifier]: true });
+        expect(event.defaultPrevented).toBe(false);
+      });
+    });
+    expect(document.activeElement.id).toBe("a");
+    expect(press(a, { key: " ", ctrlKey: true }).defaultPrevented).toBe(false);
+    expect(document.getElementById("a").classList.contains("active")).toBe(true);
+  });
+
   it("tells the state of the menu groups and of the menu button from the start", () => {
     window.matchMedia = (query) => ({ matches: false, media: query });
     mount(`<a id="p" data-widget="pushmenu" href="#">m</a>
