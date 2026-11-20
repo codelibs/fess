@@ -2877,6 +2877,7 @@ function renderPagination(env) {
     const li = makeLi("page-item" + (pageNum === env.page_number ? " active" : "") + (isFar ? " d-none d-sm-inline-block" : ""));
     const a = makeLink();
     a.textContent = String(pageNum);
+    if (pageNum === env.page_number) a.setAttribute("aria-current", "page");
     a.addEventListener("click", ev => { ev.preventDefault(); goToPage((pageNum - 1) * state.num); });
     li.appendChild(a);
     ul.appendChild(li);
