@@ -216,7 +216,9 @@
   });
 
   document.addEventListener("keydown", function(event) {
-    if (event.key === "Escape" && !openModal && document.body.classList.contains("sidebar-open")) {
+    // The side menu is a drawer only on a narrow screen; on a wide one Escape belongs to the field that has the focus.
+    if (event.key === "Escape" && !event.isComposing && !openModal && document.body.classList.contains("sidebar-open")
+        && window.matchMedia && window.matchMedia(NARROW).matches) {
       document.body.classList.remove("sidebar-open");
       var opener = document.querySelector('[data-widget="pushmenu"]');
       if (opener) {

@@ -345,6 +345,25 @@ describe("collapse, tabs and the side menu", () => {
     expect(document.activeElement.id).toBe("p");
   });
 
+  it("leaves Escape to the page when the menu is not a drawer (a wide screen) or an IME composition is open", () => {
+    window.matchMedia = (query) => ({ matches: true, media: query });
+    mount(`<a id="p" data-widget="pushmenu" href="#">m</a><section class="content"><input type="text" id="q"></section>`);
+    document.getElementById("p").click();
+    expect(document.body.classList.contains("sidebar-open")).toBe(true);
+    const q = document.getElementById("q");
+    q.focus();
+    press(q, { key: "Escape", isComposing: true });
+    expect(document.body.classList.contains("sidebar-open")).toBe(true);
+    // the window is widened: the class is still there, but Escape in a field must not move the focus to the menu button
+    window.matchMedia = (query) => ({ matches: false, media: query });
+    press(q, { key: "Escape" });
+    expect(document.body.classList.contains("sidebar-open")).toBe(true);
+    expect(document.activeElement.id).toBe("q");
+    window.matchMedia = (query) => ({ matches: true, media: query });
+    press(q, { key: "Escape" });
+    expect(document.body.classList.contains("sidebar-open")).toBe(false);
+  });
+
   it("opens and closes a menu group of the sidebar", () => {
     mount(`<ul data-widget="treeview"><li class="nav-item has-treeview" id="g"><a href="#" class="nav-link" id="l">g</a><ul class="nav-treeview"></ul></li></ul>`);
     const click = document.getElementById("l");
