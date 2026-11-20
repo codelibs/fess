@@ -566,9 +566,55 @@
     });
   }
 
+  // The message the server writes beside a refused field belongs to that field: the field names it as
+  // its description and says it is invalid, so a screen reader reads the refusal when the cursor is in
+  // the field (the message itself is announced only when it appears, not when the page is opened).
+  var errorCount = 0;
+
+  function freeId(base) {
+    var id = base;
+    for (var n = 2; document.getElementById(id); n += 1) {
+      id = base + "-" + n;
+    }
+    return id;
+  }
+
+  // The fields a refusal belongs to: the field after the list, or the two inputs that stand in for a
+  // date range (the field the server wrote is hidden by then).
+  function fieldsOfError(list) {
+    var next = list.nextElementSibling;
+    if (next && next.matches(".range-picker")) {
+      return Array.prototype.slice.call(next.querySelectorAll("input"));
+    }
+    return next && next.matches("input:not([type=hidden]), select, textarea") ? [next] : [];
+  }
+
+  function linkErrorsToFields(root) {
+    Array.prototype.forEach.call(root.querySelectorAll(".form-group ul.has-error"), function(list) {
+      var fields = fieldsOfError(list);
+      if (!fields.length) {
+        return;
+      }
+      if (!list.id) {
+        errorCount += 1;
+        var owner = list.nextElementSibling.matches(".range-picker") ? list.nextElementSibling.nextElementSibling : fields[0];
+        list.id = freeId("error-" + (owner && owner.id ? owner.id : "field-" + errorCount));
+      }
+      fields.forEach(function(field) {
+        var ids = (field.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+        if (ids.indexOf(list.id) < 0) {
+          ids.push(list.id);
+          field.setAttribute("aria-describedby", ids.join(" "));
+        }
+        field.setAttribute("aria-invalid", "true");
+      });
+    });
+  }
+
   function init() {
     initFormLayout(document);
     initRangePickers(document);
+    linkErrorsToFields(document);
     initMenuState();
     openTabOfAddress(true);
     initTabStops();
