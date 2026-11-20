@@ -36,6 +36,7 @@ import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.core.message.UserMessages;
 import org.codelibs.fess.util.DocumentUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -106,7 +107,7 @@ public class DocumentTagsHandler extends AbstractTagHandler {
             putTags(payload, userId, url);
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final TagRequestException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, e.code, e.getMessage());
+            writeFailure(req, res, e);
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/tags " + method);
         }
@@ -127,7 +128,9 @@ public class DocumentTagsHandler extends AbstractTagHandler {
             final TagType existing = getTagTypeService().getTagType(id).orElse(null);
             if (existing != null && !isInRequestVirtualHost(existing)) {
                 // the name is taken by a tag of another virtual host: one owner has one tag of a name
-                throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
+                throw new TagRequestException(V2ErrorCode.CONFLICT,
+                        messages -> messages.addErrorsTagtypeAlreadyExists(UserMessages.GLOBAL_PROPERTY_KEY),
+                        "a tag with the name already exists");
             }
             if (existing == null) {
                 final TagType created = createTag(name, userId, url);

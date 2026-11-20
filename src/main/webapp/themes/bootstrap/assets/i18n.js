@@ -80,6 +80,9 @@ export function setPageTitle(name) {
   document.title = name ? t("page.search_title", [name]) : t("page.title");
 }
 
+/** A "{name, plural, one {...} other {...}}" choice of a message (see t()). */
+const PLURAL = /\{(\w+),\s*plural,\s*((?:\w+\s*\{[^{}]*\}\s*)+)\}/g;
+
 /**
  * Translate a message key with optional parameter substitution.
  *
@@ -94,6 +97,13 @@ export function setPageTitle(name) {
  * positional indices). Numeric string keys in an Object are also treated as
  * positional by the pattern, so { "0": "foo" } replaces {0}.
  *
+ * A message can choose its wording by a number, as ICU MessageFormat does:
+ *   "{n, plural, one {# view} other {# views}}"  with { n: 1 } → "1 view"
+ * The categories (zero, one, two, few, many, other) are those of Intl.PluralRules for the UI
+ * locale, so each language lists the forms it has; "other" is the fallback and "#" stands for
+ * the number (a value that is not a number takes "other" and is shown as it is). A form cannot contain braces. A language without plural forms (Japanese) keeps
+ * a plain "{n}" message.
+ *
  * WARNING: substituted values are treated as plain text and must not contain
  * curly-brace placeholder patterns themselves (e.g. "{n}"). If a value might
  * contain braces, escape it before passing: val.replace(/\{/g, "&#123;").
@@ -105,6 +115,15 @@ export function setPageTitle(name) {
 export function t(key, params) {
   let s = messages[key] || key;
   if (params != null) {
+    s = s.replace(PLURAL, (_, name, forms) => {
+      const v = Array.isArray(params) ? params[Number(name)] : params[name];
+      // A value that is not a number (an already formatted "1,234") takes the "other" form and is shown as it is.
+      const n = v == null || v === "" ? NaN : Number(v);
+      const byCategory = {};
+      for (const m of forms.matchAll(/(\w+)\s*\{([^{}]*)\}/g)) byCategory[m[1]] = m[2];
+      const text = byCategory[Number.isNaN(n) ? "other" : new Intl.PluralRules(locale).select(n)] ?? byCategory.other ?? "";
+      return text.replace(/#/g, v == null ? "" : String(v));
+    });
     s = s.replace(/\{([^{}]+)\}/g, (_, k) => {
       const v = Array.isArray(params) ? params[Number(k)] : params[k];
       return v == null ? "" : String(v);

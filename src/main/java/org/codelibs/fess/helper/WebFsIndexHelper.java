@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +65,8 @@ public class WebFsIndexHelper {
 
     private static final Logger logger = LogManager.getLogger(WebFsIndexHelper.class);
 
-    private static final String DISABLE_URL_ENCODE = "#DISABLE_URL_ENCODE";
+    /** The comment line that leaves the line after it without URL encoding. */
+    public static final String DISABLE_URL_ENCODE = "#DISABLE_URL_ENCODE";
 
     /**
      * Pattern of a URL scheme of two or more characters, such as {@code s3:} or {@code gcs:}.
@@ -232,44 +232,20 @@ public class WebFsIndexHelper {
             }));
 
             // set included urls
-            final AtomicBoolean urlEncodeDisabled = new AtomicBoolean(false);
-            split(includedUrlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addIncludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Included URL: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
+            for (final String urlValue : toFilterPatterns(includedUrlsStr, systemHelper)) {
+                crawler.addIncludeFilter(urlValue);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Included URL: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                 }
-            }));
+            }
 
             // set excluded urls
-            urlEncodeDisabled.set(false);
-            split(excludedUrlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
+            for (final String urlValue : toFilterPatterns(excludedUrlsStr, systemHelper)) {
+                crawler.addExcludeFilter(urlValue);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Excluded URL: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                 }
-            }));
+            }
 
             // failure url
             final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(webConfig.getConfigId());
@@ -380,44 +356,20 @@ public class WebFsIndexHelper {
             }));
 
             // set included paths
-            final AtomicBoolean urlEncodeDisabled = new AtomicBoolean(false);
-            split(includedPathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addIncludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Included Path: {}", urlValue);
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
+            for (final String urlValue : toFilterPatterns(includedPathsStr, systemHelper)) {
+                crawler.addIncludeFilter(urlValue);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Included Path: {}", urlValue);
                 }
-            }));
+            }
 
             // set excluded paths
-            urlEncodeDisabled.set(false);
-            split(excludedPathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded Path: {}", urlValue);
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
+            for (final String urlValue : toFilterPatterns(excludedPathsStr, systemHelper)) {
+                crawler.addExcludeFilter(urlValue);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Excluded Path: {}", urlValue);
                 }
-            }));
+            }
 
             // failure url
             final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(fileConfig.getConfigId());
@@ -778,5 +730,38 @@ public class WebFsIndexHelper {
                     "The crawling URL {} has a user name and password. They are not supported in a crawling URL and the crawl of this URL fails. Register them in Web Authentication of the crawl configuration instead.",
                     CredentialUrlUtil.removeUserInfo(url));
         }
+    }
+
+    /**
+     * Reads the included or excluded patterns of a crawl configuration: one pattern per line, blank lines
+     * skipped, a line that starts with {@code #} a comment, and every other line URL-encoded unless the
+     * comment {@code #DISABLE_URL_ENCODE} comes before it, in which case that one line is used as it is.
+     * The configuration form validates its patterns with the same reading.
+     *
+     * @param text the lines of the configuration (may be null)
+     * @param systemHelper the helper that encodes a pattern
+     * @return the patterns to hand to the crawler
+     */
+    public static List<String> toFilterPatterns(final String text, final SystemHelper systemHelper) {
+        final List<String> patterns = new ArrayList<>();
+        if (StringUtil.isBlank(text)) {
+            return patterns;
+        }
+        boolean encodeDisabled = false;
+        for (final String raw : text.split("[\r\n]")) {
+            if (StringUtil.isBlank(raw)) {
+                continue;
+            }
+            final String line = raw.trim();
+            if (line.startsWith("#")) {
+                if (line.startsWith(DISABLE_URL_ENCODE)) {
+                    encodeDisabled = true;
+                }
+                continue;
+            }
+            patterns.add(encodeDisabled ? line : systemHelper.encodeUrlFilter(line));
+            encodeDisabled = false;
+        }
+        return patterns;
     }
 }

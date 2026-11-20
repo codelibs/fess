@@ -380,6 +380,24 @@ describe("registerRoutes", () => {
     expect(fallback("")).toBe(true);
   });
 
+  it("focuses the results view itself, not a result title the search is about to replace", async () => {
+    mountFullDom();
+    const view = document.getElementById("results-view");
+    view.insertAdjacentHTML("beforeend", '<ol><li><h3 class="title">old result</h3></li></ol>');
+    registered()[2][1]();
+    await flush();
+    expect(document.activeElement).toBe(view);
+  });
+
+  it("focuses the first heading of the other views", async () => {
+    mountFullDom();
+    const view = document.getElementById("help-view");
+    view.insertAdjacentHTML("beforeend", "<h2>Help heading</h2>");
+    registered()[5][1]();
+    await flush();
+    expect(document.activeElement).toBe(view.querySelector("h2"));
+  });
+
   it("route handlers reveal the matching view and hide the rest (no throw)", async () => {
     mountFullDom();
     const calls = registered();

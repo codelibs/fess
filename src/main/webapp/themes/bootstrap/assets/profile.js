@@ -4,7 +4,7 @@
 
 import * as api from "./api.js";
 import {
-  endSession, getCurrentUser, isPasskeyCancel, isPasskeyEnabled, isSessionGone, localizePasswordError,
+  endSession, getCurrentUser, isPasskeyCancel, isPasskeyEnabled, isSessionEnded, localizePasswordError,
   passkeyCredentialToJson, promptLogin, toPasskeyCreationOptions
 } from "./auth.js";
 import { formatDate } from "./format.js";
@@ -142,9 +142,10 @@ function buildPasskeySection() {
     successDiv.textContent = message;
     successDiv.classList.remove("d-none");
   };
-  // The session ended (the server answers 401 with no reason): same as the password form.
+  // The session ended (the server answers 401 with no reason, or 403 for the CSRF token of the
+  // ended session): same as the password form.
   const handleSessionGone = async (err) => {
-    if (!isSessionGone(err)) return false;
+    if (!(await isSessionEnded(err))) return false;
     await endSession();
     promptLogin();
     return true;
@@ -410,9 +411,10 @@ export function attach() {
         promptLogin();
       }
     } catch (err) {
-      errorDiv.textContent = localizePasswordError(err);
+      const ended = await isSessionEnded(err);
+      errorDiv.textContent = ended ? t("flash.login_required") : localizePasswordError(err);
       errorDiv.classList.remove("d-none");
-      if (isSessionGone(err)) {
+      if (ended) {
         await endSession();
         promptLogin();
       }

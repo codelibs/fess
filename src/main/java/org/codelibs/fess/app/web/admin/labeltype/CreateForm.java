@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.labeltype;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
+import org.codelibs.fess.validation.RegexPattern;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -62,12 +63,14 @@ public class CreateForm {
      * The paths to include for this label type.
      */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.LABEL_PATH)
     public String includedPaths;
 
     /**
      * The paths to exclude for this label type.
      */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.LABEL_PATH)
     public String excludedPaths;
 
     /**

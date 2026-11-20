@@ -25,10 +25,13 @@ import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserPrincipal;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,7 +160,68 @@ public class PermissionHelper {
         if (hasSpacedEntry(typedPermissions(permissionsText))) {
             messages.addErrorsInvalidPermissionSpacing(Constants.PERMISSIONS, denyPrefix + userPrefix + "name",
                     allowPrefix + userPrefix + "name");
+        } else if (hasFullWidthSyntaxEntry(typedPermissions(permissionsText))) {
+            messages.addErrorsInvalidPermissionFullwidth(Constants.PERMISSIONS, denyPrefix + userPrefix + "name",
+                    allowPrefix + userPrefix + "name");
         }
+    }
+
+    /**
+     * Returns whether any line of the permission entries writes the {@code (allow)} / {@code (deny)} prefix or
+     * the {@code {user}} / {@code {group}} / {@code {role}} marker with full-width characters (see
+     * {@link #isFullWidthSyntaxEntry(String)}).
+     *
+     * @param permissionsText the permission entries, separated by line breaks (may be null)
+     * @return true if a line is such an entry
+     */
+    public boolean hasFullWidthSyntaxEntry(final String permissionsText) {
+        return StringUtil.isNotBlank(permissionsText)
+                && split(permissionsText, "\n").get(stream -> stream.anyMatch(this::isFullWidthSyntaxEntry));
+    }
+
+    /**
+     * Returns whether a permission entry spells its {@code (allow)} / {@code (deny)} prefix or its
+     * {@code {user}} / {@code {group}} / {@code {role}} marker with full-width characters, as a Japanese
+     * keyboard produces them ({@code （deny）｛user｝bob}). {@link #encode(String)} does not know such a
+     * spelling: it would store the entry as a plain value, or drop a deny, so the document would stay
+     * visible to the person it was meant to be hidden from.
+     * <p>
+     * Only the leading syntax is judged. The name that follows it is taken as typed, so a role named with
+     * full-width or other non-ASCII letters stays valid.
+     * </p>
+     *
+     * @param entry a single permission entry (may be null)
+     * @return true if the syntax of the entry is not the half-width one that {@link #encode(String)} reads
+     */
+    public boolean isFullWidthSyntaxEntry(final String entry) {
+        if (StringUtil.isBlank(entry)) {
+            return false;
+        }
+        final String stripped = entry.strip();
+        final String normalized = Normalizer.normalize(stripped, Normalizer.Form.NFKC);
+        if (normalized.equals(stripped)) {
+            return false;
+        }
+        final Pattern syntax = entrySyntax();
+        final Matcher typed = syntax.matcher(stripped);
+        final Matcher intended = syntax.matcher(normalized);
+        typed.find();
+        intended.find();
+        return !sameSyntax(typed.group(1), intended.group(1)) || !sameSyntax(typed.group(2), intended.group(2));
+    }
+
+    /**
+     * The pattern of what {@link #encode(String)} reads at the start of an entry: the allow / deny prefix
+     * and the user / group / role marker, as configured in this helper.
+     */
+    private Pattern entrySyntax() {
+        return Pattern.compile("^(?:(" + Pattern.quote(allowPrefix) + "|" + Pattern.quote(denyPrefix) + ")\\s*)?("
+                + Pattern.quote(userPrefix) + "|" + Pattern.quote(groupPrefix) + "|" + Pattern.quote(rolePrefix) + ")?",
+                Pattern.CASE_INSENSITIVE);
+    }
+
+    private static boolean sameSyntax(final String a, final String b) {
+        return a == null ? b == null : a.equalsIgnoreCase(b);
     }
 
     /**

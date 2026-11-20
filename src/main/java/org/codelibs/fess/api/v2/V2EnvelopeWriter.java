@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.curl.CurlException;
 import org.codelibs.fesen.client.node.NodeUnavailableException;
 import org.codelibs.fesen.opensearch.OpenSearchException;
+import org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.exception.EnvelopeException;
@@ -192,6 +193,26 @@ public class V2EnvelopeWriter {
     }
 
     /**
+     * Writes the {@code invalid_request} envelope for a request parameter that was refused.
+     *
+     * <p>A refusal that carries a message code is written in the caller's language; the English
+     * message of the exception is for the log and is what a refusal without a code is written with.</p>
+     *
+     * @param res the HTTP response to write to
+     * @param cause the refused parameter
+     * @param locale the caller's locale; {@code null} falls back to English
+     * @throws IOException if writing the envelope fails
+     */
+    public void writeInvalidRequest(final HttpServletResponse res, final InvalidRequestParameterException cause, final Locale locale)
+            throws IOException {
+        if (cause.getMessageCode() != null) {
+            writeUserMessageError(res, V2ErrorCode.INVALID_REQUEST, locale, cause.getMessageCode());
+        } else {
+            writeError(res, V2ErrorCode.INVALID_REQUEST, cause.getMessage());
+        }
+    }
+
+    /**
      * Writes an error v2 envelope with optional structured details.
      *
      * <p>Behaves exactly like {@link #writeError(HttpServletResponse, V2ErrorCode, String)}
@@ -333,8 +354,11 @@ public class V2EnvelopeWriter {
      * <p>A refused connection counts only below a {@link CurlException}, the failure of a request
      * through the engine client; the same {@link ConnectException} from another client, such as the
      * one of an LLM provider, says nothing about the search engine.</p>
+     *
+     * @param cause the failure to classify, or {@code null}
+     * @return {@code true} when the failure is the search engine being out of reach or out of capacity
      */
-    private static boolean isSearchEngineUnavailable(final Throwable cause) {
+    public static boolean isSearchEngineUnavailable(final Throwable cause) {
         boolean inEngineRequest = false;
         Throwable t = cause;
         for (int depth = 0; t != null && depth < MAX_CAUSE_DEPTH; depth++, t = t.getCause()) {

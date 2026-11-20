@@ -15,6 +15,7 @@ ${fe:html(true)}
     </jsp:include>
 
     <main id="mainContent" class="content-wrapper position-relative">
+        <h1 class="sr-only"><la:message key="labels.dashboard_title_configuration"/></h1>
         <iframe class="w-100 h-100 position-absolute" style="border: 0;"
                 src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>?lang=${f:u(kopfLang)}"
                 title="<la:message key="labels.dashboard_plugin" />"></iframe>
