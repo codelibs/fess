@@ -578,3 +578,53 @@ describe("form layout", () => {
     expect([hidden("a"), hidden("b"), hidden("c"), hidden("d"), hidden("e")]).toEqual([true, true, false, false, true]);
   });
 });
+
+describe("the message of a refused field", () => {
+  const refused = (field = '<input type="password" id="password" name="password">') =>
+    `<section class="content"><form><div class="form-group"><label for="password">Password</label>
+      <ul class="has-error" role="alert"><li>too long</li></ul>${field}</div></form></section>`;
+
+  it("is the description of the field, which is marked invalid", () => {
+    mount(refused());
+    const list = document.querySelector("ul.has-error");
+    const field = document.getElementById("password");
+    expect(list.id).toBe("error-password");
+    expect(field.getAttribute("aria-describedby")).toBe("error-password");
+    expect(field.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("is added to the description that the field already has, once however often the page is prepared", () => {
+    mount(refused('<input type="password" id="password" name="password" aria-describedby="hint">'));
+    window.FessAdmin.init();
+    expect(document.getElementById("password").getAttribute("aria-describedby")).toBe("hint error-password");
+  });
+
+  it("is the description of both inputs that stand in for a date range, not of the hidden field", () => {
+    mount(refused('<input type="text" id="range" class="form-control datetimerange" value="">'));
+    const list = document.querySelector("ul.has-error");
+    const inputs = [...document.querySelectorAll(".range-picker input")];
+    expect(inputs.length).toBe(2);
+    inputs.forEach((input) => {
+      expect(input.getAttribute("aria-describedby")).toBe(list.id);
+      expect(input.getAttribute("aria-invalid")).toBe("true");
+    });
+    expect(list.id).toBe("error-range");
+    expect(document.getElementById("range").hasAttribute("aria-invalid")).toBe(false);
+  });
+
+  it("does not take an id that the page already uses", () => {
+    mount(`<section class="content"><form><div class="form-group"><ul class="has-error"><li>too long</li></ul>
+      <input type="text" id="name" name="name"></div><p id="error-name">other</p></form></section>`);
+    const list = document.querySelector("ul.has-error");
+    expect(list.id).toBe("error-name-2");
+    expect(document.getElementById("name").getAttribute("aria-describedby")).toBe("error-name-2");
+    expect(document.getElementById("error-name").textContent).toBe("other");
+  });
+
+  it("leaves a list that is not beside a field alone, and fields without an error", () => {
+    mount(`<section class="content"><form><div class="form-group"><ul class="has-error"><li>global</li></ul><p>text</p>
+      <input type="text" id="ok"></div></form></section>`);
+    expect(document.querySelector("ul.has-error").id).toBe("");
+    expect(document.getElementById("ok").hasAttribute("aria-invalid")).toBe(false);
+  });
+});
