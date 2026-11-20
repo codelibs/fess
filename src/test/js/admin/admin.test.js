@@ -417,6 +417,11 @@ describe("the date range of the search log", () => {
     ]);
   });
 
+  it("names the two inputs apart when the screen names the two ends", () => {
+    mount(page("2026-11-01 09:30 - 2026-11-19 18:05").replace('class="form-control datetimerange"', 'class="form-control datetimerange" data-label-from="From" data-label-to="To"'));
+    expect([...pickers()].map((i) => i.getAttribute("aria-label"))).toEqual(["Requested From", "Requested To"]);
+  });
+
   it("writes the text the server reads: start, a separator, end", () => {
     mount(page(""));
     const [from, to] = pickers();

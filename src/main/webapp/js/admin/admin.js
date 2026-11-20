@@ -317,14 +317,18 @@
 
       var box = document.createElement("div");
       box.className = "range-picker";
-      var inputs = [parts[0], parts[1]].map(function(value) {
+      // The screen names the two ends (data-label-from, data-label-to); the label of the field alone
+      // would give both inputs the same name.
+      var ends = [field.getAttribute("data-label-from"), field.getAttribute("data-label-to")];
+      var inputs = [parts[0], parts[1]].map(function(value, index) {
         var input = document.createElement("input");
         input.type = "datetime-local";
         input.step = 60;
         input.className = "form-control";
         input.value = toLocalValue(value);
-        if (name) {
-          input.setAttribute("aria-label", name);
+        var inputName = [name, ends[index]].filter(Boolean).join(" ");
+        if (inputName) {
+          input.setAttribute("aria-label", inputName);
         }
         return input;
       });
