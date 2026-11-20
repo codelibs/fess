@@ -32,14 +32,18 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.entity.TagChange;
 import org.codelibs.fess.exception.TagTypeConflictException;
 import org.codelibs.fess.helper.TagTypeHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.web.validation.VaMessenger;
 
 import com.google.common.util.concurrent.Striped;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Shared parts of the user tag endpoints ({@link TagsHandler} and {@link DocumentTagsHandler}).
@@ -94,6 +98,9 @@ public abstract class AbstractTagHandler {
         /** The error code of the envelope. */
         protected final transient V2ErrorCode code;
 
+        /** The message code of the localized error message, or {@code null} when the envelope carries {@link #getMessage()}. */
+        protected final transient VaMessenger<FessMessages> messageCode;
+
         /**
          * Creates the failure.
          *
@@ -101,8 +108,37 @@ public abstract class AbstractTagHandler {
          * @param message the error message of the envelope
          */
         protected TagRequestException(final V2ErrorCode code, final String message) {
+            this(code, null, message);
+        }
+
+        /**
+         * Creates the failure with a message in the language of the caller.
+         *
+         * @param code the error code of the envelope
+         * @param messageCode the message code of the error message of the envelope, which is resolved for the locale of the request
+         * @param message the English message, which is what a log or a test reads
+         */
+        protected TagRequestException(final V2ErrorCode code, final VaMessenger<FessMessages> messageCode, final String message) {
             super(message, null, false, false);
             this.code = code;
+            this.messageCode = messageCode;
+        }
+    }
+
+    /**
+     * Writes a refused request as an error envelope, with the message in the language of the request when the failure has one.
+     *
+     * @param req the request
+     * @param res the response
+     * @param e the failure
+     * @throws IOException if writing the envelope fails
+     */
+    protected void writeFailure(final HttpServletRequest req, final HttpServletResponse res, final TagRequestException e)
+            throws IOException {
+        if (e.messageCode != null) {
+            ComponentUtil.getV2EnvelopeWriter().writeUserMessageError(res, e.code, req.getLocale(), e.messageCode);
+        } else {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, e.code, e.getMessage());
         }
     }
 
@@ -166,8 +202,10 @@ public abstract class AbstractTagHandler {
     protected String toTagName(final Object name) throws TagRequestException {
         final String normalized = name instanceof final String value ? getTagTypeHelper().normalizeName(value).orElse(null) : null;
         if (normalized == null) {
+            final String maxLength = String.valueOf(ComponentUtil.getFessConfig().getUserTagNameMaxLengthAsInteger());
             throw new TagRequestException(V2ErrorCode.INVALID_REQUEST,
-                    "invalid tag name: enter 1 to " + ComponentUtil.getFessConfig().getUserTagNameMaxLengthAsInteger() + " characters");
+                    messages -> messages.addErrorsTagtypeInvalidName(UserMessages.GLOBAL_PROPERTY_KEY, maxLength),
+                    "invalid tag name: enter 1 to " + maxLength + " characters");
         }
         return normalized;
     }
@@ -231,7 +269,9 @@ public abstract class AbstractTagHandler {
         lock.lock();
         try {
             if (getTagTypeService().countByOwner(tagType.getOwner()) >= maxTags) {
-                throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "too many tags: a user can have up to " + maxTags + " tags");
+                throw new TagRequestException(V2ErrorCode.INVALID_REQUEST,
+                        messages -> messages.addErrorsTagtypeTooManyTags(UserMessages.GLOBAL_PROPERTY_KEY, String.valueOf(maxTags)),
+                        "too many tags: a user can have up to " + maxTags + " tags");
             }
             getTagTypeService().insert(tagType);
         } finally {
@@ -305,7 +345,9 @@ public abstract class AbstractTagHandler {
             } catch (final TagTypeConflictException e) {
                 if (attempt >= MAX_UPDATE_ATTEMPTS) {
                     logger.warn("Failed to update the tag after {} attempts: id={}", attempt, id, e);
-                    throw new TagRequestException(V2ErrorCode.CONFLICT, "the tag was changed concurrently; try again");
+                    throw new TagRequestException(V2ErrorCode.CONFLICT,
+                            messages -> messages.addErrorsTagtypeChangedConcurrently(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "the tag was changed concurrently; try again");
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("The tag was changed concurrently; retrying: id={}, attempt={}", id, attempt);
