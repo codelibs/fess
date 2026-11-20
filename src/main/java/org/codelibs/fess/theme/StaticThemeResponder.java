@@ -101,6 +101,13 @@ public class StaticThemeResponder {
     static final String SVG_CSP = "default-src 'none'; style-src 'unsafe-inline'";
 
     /**
+     * Cache-Control for theme assets. The asset URLs carry no version, so a browser must revalidate
+     * (ETag / Last-Modified, answered with 304) before reusing a stored copy; otherwise it keeps serving
+     * the files of the release that stored them after the server was upgraded.
+     */
+    static final String ASSET_CACHE_CONTROL = "no-cache";
+
+    /**
      * Allowlist backing {@link #isSafeMessageKey}: letters, digits, dots, underscores and
      * hyphens only. Applies both to the {@code message_key} request parameter read by
      * {@link #resolveMessageKey} and to a {@code detailKey} passed directly to
@@ -610,6 +617,47 @@ public class StaticThemeResponder {
     }
 
     /**
+     * Tells whether an {@code If-None-Match} header names the entity tag, with the weak comparison RFC 9110
+     * prescribes for it: the {@code W/} marker is ignored, the header may be a comma separated list, and
+     * {@code *} matches anything. A proxy that compresses the body may send the tag back in another strength.
+     *
+     * @param ifNoneMatch the value of the request header (may be null)
+     * @param etag the entity tag of the file
+     * @return true if the header names the tag
+     */
+    static boolean matchesEtag(final String ifNoneMatch, final String etag) {
+        if (ifNoneMatch == null) {
+            return false;
+        }
+        final String opaque = stripWeakMarker(etag);
+        for (final String candidate : ifNoneMatch.split(",")) {
+            final String c = candidate.trim();
+            if ("*".equals(c) || opaque.equals(stripWeakMarker(c))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String stripWeakMarker(final String tag) {
+        return tag.startsWith("W/") ? tag.substring(2) : tag;
+    }
+
+    /**
+     * Answers a conditional GET with 304. The validators and {@code Cache-Control} are repeated because
+     * a browser merges the headers of a 304 into the stored response: leaving {@code Cache-Control} out
+     * would keep the {@code max-age} an earlier release stored, and the asset would stay fresh without
+     * revalidation.
+     */
+    private void sendNotModified(final HttpServletResponse res, final String contentType, final String etag, final String lastModified) {
+        res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+        res.setContentType(contentType);
+        res.setHeader("Cache-Control", ASSET_CACHE_CONTROL);
+        res.setHeader("ETag", etag);
+        res.setHeader("Last-Modified", lastModified);
+    }
+
+    /**
      * Streams a validated asset file with caching, conditional-GET (304) and content-type headers.
      *
      * @param req the current request (for {@code If-None-Match}/{@code If-Modified-Since})
@@ -637,22 +685,22 @@ public class StaticThemeResponder {
 
         // Honor If-None-Match
         final String ifNoneMatch = req == null ? null : req.getHeader("If-None-Match");
-        if (etag.equals(ifNoneMatch)) {
-            res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-            res.setContentType(contentType);
+        if (matchesEtag(ifNoneMatch, etag)) {
+            sendNotModified(res, contentType, etag, lastModified);
             return;
         }
 
-        // Honor If-Modified-Since (basic: compare epoch millis rounded to seconds)
-        final String ifModifiedSince = req == null ? null : req.getHeader("If-Modified-Since");
+        // Honor If-Modified-Since (basic: compare epoch millis rounded to seconds). It is ignored when the
+        // request carries If-None-Match, as a validator that does not match settles the question: a file whose
+        // content changed but whose time is not newer (a theme put back to an older one) must be sent again.
+        final String ifModifiedSince = req == null || ifNoneMatch != null ? null : req.getHeader("If-Modified-Since");
         if (ifModifiedSince != null) {
             try {
                 final long clientMtime =
                         DateTimeFormatter.RFC_1123_DATE_TIME.parse(ifModifiedSince, ZonedDateTime::from).toInstant().toEpochMilli();
                 // truncate to seconds for comparison
                 if ((mtime / 1000) <= (clientMtime / 1000)) {
-                    res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    res.setContentType(contentType);
+                    sendNotModified(res, contentType, etag, lastModified);
                     return;
                 }
             } catch (final Exception ignore) {
@@ -669,7 +717,7 @@ public class StaticThemeResponder {
         final boolean isHtml = "text/html; charset=UTF-8".equals(contentType);
         res.setStatus(HttpServletResponse.SC_OK);
         res.setContentType(contentType);
-        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.setHeader("Cache-Control", ASSET_CACHE_CONTROL);
         res.setHeader("Vary", "Accept-Encoding");
         res.setHeader("Referrer-Policy", "same-origin");
         res.setHeader("ETag", etag);
