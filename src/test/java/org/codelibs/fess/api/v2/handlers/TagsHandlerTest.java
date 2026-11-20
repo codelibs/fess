@@ -294,8 +294,12 @@ public class TagsHandlerTest extends UnitFessTestCase {
         for (final String body : new String[] { "{}", "{\"name\":\"   \"}", "{\"name\":1}", "{\"name\":\"" + "a".repeat(51) + "\"}" }) {
             final Response res = call(request("POST").json(body), null);
             Assertions.assertEquals(400, res.status, body);
-            Assertions.assertEquals("invalid tag name: enter 1 to 50 characters", res.errorMessage(), body);
+            Assertions.assertEquals("Enter a tag name of 1 to 50 characters without control characters.", res.errorMessage(), body);
         }
+        // The refusal is written in the language of the request.
+        final Response ja = call(request("POST").json("{}").locale(java.util.Locale.JAPANESE), null);
+        Assertions.assertEquals(400, ja.status);
+        Assertions.assertEquals("タグ名は制御文字を含めずに1～50文字で入力してください。", ja.errorMessage());
         final Response res = call(request("POST").json("{\"name\":\"foo\",\"shared\":\"yes\"}"), null);
         Assertions.assertEquals(400, res.status);
         Assertions.assertEquals("shared must be a boolean", res.errorMessage());
@@ -309,7 +313,10 @@ public class TagsHandlerTest extends UnitFessTestCase {
         final Response res = call(request("POST").json("{\"name\":\"foo\"}"), null);
         Assertions.assertEquals(409, res.status, res.body());
         Assertions.assertEquals("conflict", res.errorCode());
-        Assertions.assertEquals("a tag with the name already exists", res.errorMessage());
+        Assertions.assertEquals("A tag with the same name and owner already exists.", res.errorMessage());
+        // the refusal is written in the language of the request
+        final Response ja = call(request("POST").json("{\"name\":\"foo\"}").locale(java.util.Locale.JAPANESE), null);
+        Assertions.assertEquals("同じ名前と所有者のタグがすでに存在します。", ja.errorMessage());
         // the existing tag is untouched
         Assertions.assertEquals(list("http://a/"), list(env.stored("foo", "alice").getPaths()));
     }
@@ -380,7 +387,7 @@ public class TagsHandlerTest extends UnitFessTestCase {
         env.service.deleteConflictOn = t -> "foo".equals(t.getName());
         final Response res = call(request("PUT").json("{\"name\":\"bar\"}"), old.getId());
         Assertions.assertEquals(409, res.status, res.body());
-        Assertions.assertEquals("the tag was changed concurrently; try again", res.errorMessage());
+        Assertions.assertEquals("The tag was changed by someone else. Reload it and try again.", res.errorMessage());
         Assertions.assertNull(env.stored("bar", "alice"), "the new tag is rolled back");
         Assertions.assertNotNull(env.service.store.get(old.getId()));
         Assertions.assertEquals(List.of(), env.helper.changes);
@@ -428,7 +435,7 @@ public class TagsHandlerTest extends UnitFessTestCase {
         env.put("bar", "alice", false);
         final Response res = call(request("PUT").json("{\"name\":\"bar\"}"), old.getId());
         Assertions.assertEquals(409, res.status, res.body());
-        Assertions.assertEquals("a tag with the name already exists", res.errorMessage());
+        Assertions.assertEquals("A tag with the same name and owner already exists.", res.errorMessage());
         Assertions.assertNotNull(env.service.store.get(old.getId()));
         Assertions.assertEquals(List.of(), env.helper.changes);
     }
