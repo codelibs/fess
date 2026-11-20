@@ -6,8 +6,6 @@
 			arg1="${f:h(pager.allPageCount)}"
 			arg2="${f:h(pager.allRecordCount)}" />
 	</div>
-	<nav aria-label="...">
-	</nav>
 	<div class="col-sm-10">
 		<ul class="pagination pagination-sm m-0 float-right">
 			<c:if test="${pager.existPrePage}">
