@@ -29,7 +29,9 @@ bootstrap/
 │   ├── markdown.js       # minimal Markdown renderer for chat answers
 │   ├── logo.png          # home page logo
 │   ├── logo-head.png     # header logo
-│   └── styles.css        # overrides on top of css/bootstrap.min.css
+│   ├── styles.css        # overrides on top of vendor/bootstrap/bootstrap.min.css
+│   └── vendor/           # the theme's own copies of Bootstrap 5.3.9, Popper 2.11.8 and
+│                         # Font Awesome Free 7.3.1 (solid + regular + v4 shims)
 ├── i18n/
 │   └── messages.<locale>.json   # UI messages, one file per locale
 ├── help/
@@ -104,7 +106,7 @@ document answers HTTP 404 before the stream starts and is reported as "not avail
 ## Context path
 
 Fess 15.9 and later insert `<base href="{context path}/">` right after `<head>` when they
-serve `index.html`. Every URL in this theme is relative to that base (`css/bootstrap.min.css`,
+serve `index.html`. Every URL in this theme is relative to that base (`{{themePath}}/assets/…`,
 `api/v2`, `search?q=…`, `./`), so the theme works when Fess runs under a context path such as
 `/fess`. `router.js` matches routes against the path below the base, and `i18n.js` and `help.js`
 load their JSON relative to the module URL. Keep new URLs relative: a root-absolute URL
