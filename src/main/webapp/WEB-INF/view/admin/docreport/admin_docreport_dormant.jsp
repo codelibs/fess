@@ -73,13 +73,23 @@
             <c:if test="${lastPage > 1}">
                 <div class="card-footer">
                     <ul class="pagination pagination-sm justify-content-center mb-0">
-                        <li class="page-item ${currentPage > 1 ? '' : 'disabled'}"><a class="page-link"
-                                                                                      href="${currentPage > 1 ? fe:url('/admin/docreport/dormant') += '?' += f:h(reportQuery) += '&amp;pn=' += (currentPage - 1) : '#'}"><la:message
-                                key="labels.prev_page"/></a></li>
+                        <c:if test="${currentPage > 1}">
+                            <li class="page-item"><a class="page-link" href="${fe:url('/admin/docreport/dormant') += '?' += f:h(reportQuery) += '&amp;pn=' += (currentPage - 1)}"><la:message
+                                    key="labels.prev_page"/></a></li>
+                        </c:if>
+                        <c:if test="${!(currentPage > 1)}">
+                            <li class="page-item disabled"><a class="page-link" aria-disabled="true"><la:message
+                                    key="labels.prev_page"/></a></li>
+                        </c:if>
                         <li class="page-item active"><span class="page-link">${currentPage} / ${lastPage}</span></li>
-                        <li class="page-item ${currentPage < lastPage ? '' : 'disabled'}"><a class="page-link"
-                                                                                             href="${currentPage < lastPage ? fe:url('/admin/docreport/dormant') += '?' += f:h(reportQuery) += '&amp;pn=' += (currentPage + 1) : '#'}"><la:message
-                                key="labels.next_page"/></a></li>
+                        <c:if test="${currentPage < lastPage}">
+                            <li class="page-item"><a class="page-link" href="${fe:url('/admin/docreport/dormant') += '?' += f:h(reportQuery) += '&amp;pn=' += (currentPage + 1)}"><la:message
+                                    key="labels.next_page"/></a></li>
+                        </c:if>
+                        <c:if test="${!(currentPage < lastPage)}">
+                            <li class="page-item disabled"><a class="page-link" aria-disabled="true"><la:message
+                                    key="labels.next_page"/></a></li>
+                        </c:if>
                     </ul>
                 </div>
             </c:if>

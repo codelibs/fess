@@ -26,7 +26,7 @@
   --line-strong: #cfd4dc;
   --ink: #101828;
   --ink-2: #475467;
-  --ink-3: #8a94a6;
+  --ink-3: #5f6b7d;
 
   --accent: #1d4ed8;
   --accent-ink: #ffffff;
@@ -61,7 +61,7 @@
     --line-strong: #364457;
     --ink: #e8edf4;
     --ink-2: #aab5c5;
-    --ink-3: #7b879a;
+    --ink-3: #8b97aa;
     --accent: #6c9bff;
     --accent-ink: #0b1220;
     --accent-soft: #1a2a4a;
@@ -88,7 +88,7 @@
   --line-strong: #364457;
   --ink: #e8edf4;
   --ink-2: #aab5c5;
-  --ink-3: #7b879a;
+  --ink-3: #8b97aa;
   --accent: #6c9bff;
   --accent-ink: #0b1220;
   --accent-soft: #1a2a4a;
@@ -197,6 +197,7 @@ body.sidebar-collapse .main-sidebar { visibility: hidden; border-right-width: 0;
   color: var(--ink-3);
   font-size: 0.86rem;
 }
+.main-footer a { display: inline-flex; align-items: center; min-height: 24px; }
 
 @media (max-width: 991.98px) {
   .wrapper { grid-template-columns: minmax(0, 1fr); }
@@ -344,7 +345,7 @@ body.sidebar-collapse .main-sidebar { visibility: hidden; border-right-width: 0;
 
 /* a label/field pair is one column: the label sits above its field */
 .form-group.row { display: block; margin: 0 0 1.1rem; }
-.form-group.row > [class*="col-"] { display: block; width: 100%; max-width: var(--field-max); flex: none; padding: 0; }
+.form-group.row > [class*="col-"] { display: block; width: 100%; max-width: var(--field-max); flex: none; padding: 0; overflow-wrap: anywhere; }
 .form-group.row > .col-form-label { max-width: none; padding: 0 0 0.3rem; }
 .form-group.row > .alert { max-width: none; }
 .form-group.row > .form-inline[class*="col-"] { display: flex; }
@@ -368,7 +369,7 @@ label { display: inline-block; margin-bottom: 0.3rem; font-weight: 550; }
 }
 .form-control::placeholder { color: var(--ink-3); }
 .form-control:hover:not(:disabled):not([readonly]) { border-color: var(--ink-3); }
-.form-control:focus { outline: none; border-color: var(--accent); box-shadow: var(--ring); }
+.form-control:focus { outline: 2px solid transparent; border-color: var(--accent); box-shadow: var(--ring); }
 .form-control:disabled, .form-control[readonly] { background: var(--sunken); color: var(--ink-3); }
 textarea.form-control { height: auto; min-height: 2.25rem; padding-top: 0.5rem; padding-bottom: 0.5rem; line-height: 1.5; resize: vertical; }
 select.form-control {
@@ -405,7 +406,8 @@ input[type="file"]::file-selector-button:hover { background: var(--sunken); }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 
 .form-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.form-inline .form-control { width: auto; }
+.form-inline .form-control { width: auto; max-width: 100%; }
+.form-inline > .form-group { min-width: 0; max-width: 100%; }
 .form-inline input[type="number"].form-control { width: 7.5rem; }
 .form-inline label { margin: 0; }
 .form-inline .form-check { margin: 0; }
@@ -459,7 +461,7 @@ ul.has-error li { display: flex; gap: 0.4rem; align-items: baseline; }
   transition: background-color 0.12s, border-color 0.12s, box-shadow 0.12s, filter 0.12s;
 }
 .btn:hover { text-decoration: none; background: var(--sunken); }
-.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn:focus-visible { outline: 2px solid transparent; box-shadow: var(--ring); }
 .btn:disabled, .btn.disabled { opacity: 0.55; pointer-events: none; }
 
 .btn-default, .btn-outline-light, .btn-outline-secondary, .btn-secondary, .btn-outline-dark { color: var(--ink); }
@@ -644,6 +646,7 @@ ul.has-error li { display: flex; gap: 0.4rem; align-items: baseline; }
 .breadcrumb { display: flex; flex-wrap: wrap; list-style: none; margin: 0; padding: 0.25rem 0; font-size: 0.9rem; color: var(--ink-3); }
 .breadcrumb-item + .breadcrumb-item::before { content: "/"; padding: 0 0.5rem; color: var(--line-strong); }
 .breadcrumb-item.active { color: var(--ink); }
+.breadcrumb-item > a { display: inline-flex; align-items: center; min-width: 24px; min-height: 24px; }
 
 .nav { display: flex; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
 .nav-tabs { gap: 0.25rem; border-bottom: 1px solid var(--line); margin-bottom: 1rem; }

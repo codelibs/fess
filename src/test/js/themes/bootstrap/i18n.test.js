@@ -12,6 +12,9 @@
 // keeps that document mutation from leaking.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { installFetch, jsonResponse } from "../../helpers/net.js";
 import { resetDom } from "../../helpers/dom.js";
 import {
@@ -95,6 +98,104 @@ describe("t", () => {
 
   it("leaves placeholders untouched when params is omitted", () => {
     expect(t("a {x} b")).toBe("a {x} b");
+  });
+});
+
+describe("t — plural choice", () => {
+  const MSG = "{n, plural, one {# view} other {# views}}";
+
+  it("picks the form of the number (English)", () => {
+    expect(t(MSG, { n: 1 })).toBe("1 view");
+    expect(t(MSG, { n: 0 })).toBe("0 views");
+    expect(t(MSG, { n: 2 })).toBe("2 views");
+  });
+
+  it("takes the number from a positional param as well", () => {
+    expect(t("{0, plural, one {# row} other {# rows}}", [1])).toBe("1 row");
+    expect(t("{0, plural, one {# row} other {# rows}}", [3])).toBe("3 rows");
+  });
+
+  it("keeps the other placeholders of the message", () => {
+    expect(t("{n, plural, one {# view} other {# views}} of {name}", { n: 1, name: "x" })).toBe("1 view of x");
+  });
+
+  it("falls back to the other form when the locale's category is not listed", () => {
+    expect(t("{n, plural, other {# views}}", { n: 1 })).toBe("1 views");
+  });
+
+  it("keeps a form without # and the other placeholders apart", () => {
+    expect(t("{n, plural, one {Dokument} other {Dokumente}}: {name}", { n: 1, name: "a" })).toBe("Dokument: a");
+    expect(t("{n, plural, one {Dokument} other {Dokumente}}: {name}", { n: 3, name: "a" })).toBe("Dokumente: a");
+  });
+
+  it("does not print NaN for a value that is not a plain number", () => {
+    expect(t(MSG, { n: "1,234" })).toBe("1,234 views");
+    expect(t(MSG, { n: null })).toBe(" views");
+    expect(t(MSG, {})).toBe(" views");
+  });
+
+  async function inLocale(locale, messages) {
+    vi.resetModules();
+    installFetch(async () => jsonResponse(messages));
+    setLanguage(locale);
+    const m = await import(I18N);
+    await m.init();
+    return m;
+  }
+
+  it("uses the plural categories of the UI locale (Russian: one, few, many)", async () => {
+    const m = await inLocale("ru", { k: "{n, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}" });
+    expect(m.t("k", { n: 1 })).toBe("1 просмотр");
+    expect(m.t("k", { n: 2 })).toBe("2 просмотра");
+    expect(m.t("k", { n: 5 })).toBe("5 просмотров");
+    expect(m.t("k", { n: 21 })).toBe("21 просмотр");
+    expect(m.t("k", { n: 11 })).toBe("11 просмотров");
+  });
+
+  it("uses the French rule that 0 is singular", async () => {
+    const m = await inLocale("fr", { k: "{n, plural, one {# vue} other {# vues}}" });
+    expect(m.t("k", { n: 0 })).toBe("0 vue");
+    expect(m.t("k", { n: 1 })).toBe("1 vue");
+    expect(m.t("k", { n: 2 })).toBe("2 vues");
+  });
+});
+
+describe("bundled count messages", () => {
+  // fileURLToPath gets the URL as a string: under jsdom the global URL is a foreign class.
+  const bundleOf = (loc) => JSON.parse(readFileSync(resolve(dirname(fileURLToPath(import.meta.url)),
+    `../../../../main/webapp/themes/bootstrap/i18n/messages.${loc}.json`), "utf-8"));
+  const KEYS = ["result.click_count", "tag.path_count", "labels.chat_hit_count"];
+
+  it.each(["de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW"])(
+    "%s: every count message renders for 0, 1, 2, 5, 21 and 1000 without a brace, hash or NaN", async (loc) => {
+      const bundle = bundleOf(loc);
+      vi.resetModules();
+      installFetch(async () => jsonResponse(bundle));
+      setLanguage(loc);
+      const m = await import(I18N);
+      await m.init();
+      for (const key of KEYS) {
+        for (const n of [0, 1, 2, 5, 21, 1000]) {
+          const text = m.t(key, { n, count: n });
+          expect(text, `${loc} ${key} ${n}`).not.toMatch(/[{}#]|NaN|undefined/);
+          expect(text.trim(), `${loc} ${key} ${n}`).not.toBe("");
+          expect(text, `${loc} ${key} ${n}`).toContain(String(n));
+        }
+      }
+    });
+
+  it("English says 1 view and 1 document, not 1 views or 1 documents", async () => {
+    const bundle = bundleOf("en");
+    vi.resetModules();
+    installFetch(async () => jsonResponse(bundle));
+    setLanguage("en");
+    const m = await import(I18N);
+    await m.init();
+    expect(m.t("result.click_count", { n: 1 })).toBe("1 view");
+    expect(m.t("result.click_count", { n: 2 })).toBe("2 views");
+    expect(m.t("tag.path_count", { n: 1 })).toBe("1 document");
+    expect(m.t("tag.path_count", { n: 0 })).toBe("0 documents");
+    expect(m.t("labels.chat_hit_count", { count: 1 })).toBe("1 document found");
   });
 });
 

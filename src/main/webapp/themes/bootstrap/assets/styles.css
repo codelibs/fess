@@ -286,6 +286,9 @@ footer[role="contentinfo"] {
 #result .site cite { color: #00852c; font-style: normal; }
 /* "More" link is desktop-hidden (shown only on phones, see media query below). */
 #result .more { display: none; }
+/* Each value of the options bar (sort, count, language, label) is a link that opens the options
+   drawer. Bootstrap's badge is about 20px high; keep the link at least 24 x 24 CSS px (WCAG 2.5.8). */
+#options-bar .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; }
 /* Info line (date / size / cache / similar / favorite) is small. */
 #result .info { font-size: 80%; }
 /* The copy control is a <button> so it is focusable and keyboard-operable;

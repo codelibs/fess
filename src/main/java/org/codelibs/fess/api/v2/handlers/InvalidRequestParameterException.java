@@ -15,12 +15,22 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.lastaflute.web.validation.VaMessenger;
+
 /**
  * Thrown when a v2 API request parameter violates a length, item-count, or
  * format constraint. Handlers map this to {@code V2ErrorCode.INVALID_REQUEST}.
+ *
+ * <p>{@link #getMessage()} is the English text meant for logs. A violation a visitor can cause
+ * through the search page also carries a message code, which the handlers resolve in the
+ * caller's language.</p>
  */
 public class InvalidRequestParameterException extends RuntimeException {
     private static final long serialVersionUID = 1L;
+
+    /** The message code of the localized message, or {@code null} when the violation has none. */
+    private final transient VaMessenger<FessMessages> messageCode;
 
     /**
      * Constructs the exception with a message describing the violated constraint.
@@ -28,6 +38,26 @@ public class InvalidRequestParameterException extends RuntimeException {
      * @param message the detail message describing the invalid request parameter
      */
     public InvalidRequestParameterException(final String message) {
+        this(null, message);
+    }
+
+    /**
+     * Constructs the exception with a message code for the caller's language besides the English message.
+     *
+     * @param messageCode the message code of the localized message, or {@code null}
+     * @param message the detail message describing the invalid request parameter
+     */
+    public InvalidRequestParameterException(final VaMessenger<FessMessages> messageCode, final String message) {
         super(message);
+        this.messageCode = messageCode;
+    }
+
+    /**
+     * Returns the message code of the localized message.
+     *
+     * @return the message code, or {@code null} when the violation has none
+     */
+    public VaMessenger<FessMessages> getMessageCode() {
+        return messageCode;
     }
 }

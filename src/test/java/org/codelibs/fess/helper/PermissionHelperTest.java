@@ -27,6 +27,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.EnumSet;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -494,6 +495,77 @@ public class PermissionHelperTest extends UnitFessTestCase {
         final FessMessages ok = new FessMessages();
         permissionHelper.validateEntries("{user}bob\nDevelopers", ok);
         assertTrue(ok.isEmpty());
+    }
+
+    @Test
+    public void test_isFullWidthSyntaxEntry_fullWidthPrefixOrMarker() {
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("\uFF08deny\uFF09{user}dave"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("\uFF08allow\uFF09{role}admin"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("(deny)\uFF5Buser\uFF5Ddave"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("\uFF5Brole\uFF5Dguest"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("{\uFF55\uFF53\uFF45\uFF52}bob"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("\uFF08\uFF44\uFF45\uFF4E\uFF59\uFF09{group}staff"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("  \uFF08deny\uFF09{user}dave  "));
+    }
+
+    @Test
+    public void test_isFullWidthSyntaxEntry_acceptedEntries() {
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry(null));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry(""));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("{user}bob"));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("(deny){user}bob"));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("(DENY){GROUP}staff"));
+        // the name after the syntax is taken as typed: non-ASCII names stay valid
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("{role}\uFF47uest"));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("(deny){user}\u7530\u4E2D"));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("{role}\u958B\u767A\u8005"));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("\u958B\u767A\u8005"));
+        // a value that merely starts with a full-width parenthesis is not a permission syntax
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("\uFF08\u682A\uFF09\u55B6\u696D"));
+        // whitespace is the business of isSpacedEntry
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("(deny) {user}bob"));
+    }
+
+    @Test
+    public void test_isFullWidthSyntaxEntry_followsTheConfiguredPrefixes() {
+        permissionHelper.setUserPrefix("{usr}");
+        permissionHelper.setRolePrefix("{rl}");
+        permissionHelper.allowPrefix = "(ok)";
+        permissionHelper.denyPrefix = "(ng)";
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("\uFF08ng\uFF09{usr}dave"));
+        assertTrue(permissionHelper.isFullWidthSyntaxEntry("(ng)\uFF5Brl\uFF5Ddave"));
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("(ng){usr}dave"));
+        // the default spelling is not the configured one: it is a plain value
+        assertFalse(permissionHelper.isFullWidthSyntaxEntry("\uFF08deny\uFF09{user}dave"));
+    }
+
+    @Test
+    public void test_validateEntries_fullWidthSyntax() {
+        final FessMessages ng = new FessMessages();
+        permissionHelper.validateEntries("{user}alice\n\uFF08deny\uFF09{user}dave\n(deny){user}\u3000erin", ng);
+        assertTrue(ng.hasMessageOf("permissions"));
+
+        final FessMessages ok = new FessMessages();
+        permissionHelper.validateEntries("{user}alice\n(deny){user}dave\n{role}\uFF47uest\n\u958B\u767A\u8005", ok);
+        assertTrue(ok.isEmpty());
+    }
+
+    @Test
+    public void test_fullWidthMessage_usesOnlyItsTwoArguments() throws Exception {
+        // a literal {user} in a message is read as an argument placeholder, so only the examples {0} and {1} are given
+        final java.io.File dir = new java.io.File("src/main/resources");
+        final java.io.File[] files = dir.listFiles((d, name) -> name.startsWith("fess_message") && name.endsWith(".properties"));
+        assertTrue(files.length >= 17);
+        for (final java.io.File file : files) {
+            final java.util.Properties props = new java.util.Properties();
+            try (java.io.Reader reader = new java.io.InputStreamReader(new java.io.FileInputStream(file), StandardCharsets.UTF_8)) {
+                props.load(reader);
+            }
+            final String message = props.getProperty("errors.invalid_permission_fullwidth");
+            assertNotNull(message, file.getName());
+            assertTrue(message.contains("{0}") && message.contains("{1}"), file.getName());
+            assertTrue(message.replaceAll("\\{[01]\\}", "").replaceAll("[^{}]", "").isEmpty(), file.getName());
+        }
     }
 
     private static UserPrincipal user(final String name) {

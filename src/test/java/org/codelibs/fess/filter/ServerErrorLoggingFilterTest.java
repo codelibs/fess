@@ -89,6 +89,18 @@ public class ServerErrorLoggingFilterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_serverError_keepsTheCauseInTheRequestForTheErrorPage() throws Exception {
+        final HttpServletRequest request = getMockRequest();
+        final HttpServletResponse response = getMockResponse();
+        final ExposedLoggingFilter loggingFilter = new ExposedLoggingFilter();
+        final IllegalStateException cause = new IllegalStateException("kept");
+
+        new ServerErrorLoggingFilter().doFilter(request, response, (req, res) -> loggingFilter.fireServerError(request, response, cause));
+
+        assertSame(cause, request.getAttribute(org.codelibs.fess.Constants.SERVER_ERROR_CAUSE));
+    }
+
+    @Test
     public void test_noServerError_logsNothing() throws Exception {
         final LogCapturingAppender appender = LogCapturingAppender.attach(ServerErrorLoggingFilter.class);
         try {

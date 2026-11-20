@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { describe, it, expect, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterEach } from "vitest";
 import adminSource from "../../../main/webapp/js/admin/admin.js?raw";
 
 // The shipped file is a plain script that uses the globals of the page; run it as the page does.
@@ -417,6 +417,11 @@ describe("the date range of the search log", () => {
     ]);
   });
 
+  it("names the two inputs apart when the screen names the two ends", () => {
+    mount(page("2026-11-01 09:30 - 2026-11-19 18:05").replace('class="form-control datetimerange"', 'class="form-control datetimerange" data-label-from="From" data-label-to="To"'));
+    expect([...pickers()].map((i) => i.getAttribute("aria-label"))).toEqual(["Requested From", "Requested To"]);
+  });
+
   it("writes the text the server reads: start, a separator, end", () => {
     mount(page(""));
     const [from, to] = pickers();
@@ -439,6 +444,50 @@ describe("the date range of the search log", () => {
   it("leaves a value it cannot read empty", () => {
     mount(page("not a date"));
     expect([...pickers()].map((i) => i.value)).toEqual(["", ""]);
+  });
+});
+
+describe("where the cursor starts", () => {
+  const page = (extra = "", before = "") =>
+    `${before}<section class="content"><form>${extra}<div class="form-group"><input type="text" id="name"><input type="text" id="other"></div></form></section>`;
+
+  // earlier groups leave their own matchMedia behind: start from a mouse pointer
+  beforeEach(() => {
+    window.matchMedia = (query) => ({ matches: false, media: query });
+  });
+  afterEach(() => {
+    document.activeElement?.blur();
+  });
+
+  it("is the first field of the form", () => {
+    mount(page());
+    expect(document.activeElement.id).toBe("name");
+  });
+
+  it("is not a field under a finger, where it would open the on-screen keyboard", () => {
+    window.matchMedia = (query) => ({ matches: /pointer:\s*coarse/.test(query), media: query });
+    mount(page());
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("is the message that says a form was saved, so the page that follows the redirect does not leave it on the document", () => {
+    mount(page('<div class="alert alert-success" role="status" id="msg">Saved</div>'));
+    expect(document.activeElement.id).toBe("msg");
+    expect(document.activeElement.getAttribute("tabindex")).toBe("-1");
+  });
+
+  it("is the message under a finger too (it opens no keyboard)", () => {
+    window.matchMedia = (query) => ({ matches: /pointer:\s*coarse/.test(query), media: query });
+    mount(page('<div class="alert alert-success" role="status" id="msg">Saved</div>'));
+    expect(document.activeElement.id).toBe("msg");
+  });
+
+  it("is the field the server refused, whatever else the page holds", () => {
+    mount(
+      `<section class="content"><form><div class="alert alert-success" id="msg">Saved</div>
+        <div class="form-group"><input type="text" id="name"><ul class="has-error"><li>bad</li></ul><input type="text" id="bad"></div></form></section>`
+    );
+    expect(document.activeElement.id).toBe("bad");
   });
 });
 

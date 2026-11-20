@@ -95,7 +95,8 @@ ${fe:html(true)}
                                                 <la:message key="labels.crawling_info_session_id_search"/>
                                             </c:set>
                                             <la:text styleId="sessionIdSearchBtn" property="sessionId"
-                                                     styleClass="form-control" placeholder="${ph_session_id}"></la:text>
+                                                     styleClass="form-control" placeholder="${ph_session_id}"
+                                                     aria-label="${f:h(ph_session_id)}"></la:text>
                                         </div>
                                         <div class="form-group ml-sm-2">
                                             <button type="submit" class="btn btn-primary" id="submit"

@@ -72,6 +72,48 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_writeInvalidRequest_usesTheCallersLanguage_whenTheRefusalHasAMessageCode() throws Exception {
+        final org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException cause =
+                new org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException(
+                        messages -> messages.addErrorsInvalidStartPosition(org.lastaflute.core.message.UserMessages.GLOBAL_PROPERTY_KEY),
+                        "start must be non-negative, got: -1");
+        final CapturingResponse ja = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(ja, cause, java.util.Locale.JAPANESE);
+        assertEquals(400, ja.status);
+        assertTrue(ja.body(), ja.body().contains("開始位置は 0 以上で指定してください。"));
+        assertFalse(ja.body(), ja.body().contains("got:"));
+
+        final CapturingResponse en = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(en, cause, java.util.Locale.ENGLISH);
+        assertTrue(en.body(), en.body().contains("The start position must be 0 or greater."));
+    }
+
+    @Test
+    public void test_writeInvalidRequest_namesTheParameterAndTheLimit_inTheCallersLanguage() throws Exception {
+        final org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException cause =
+                org.junit.jupiter.api.Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException.class,
+                        () -> org.codelibs.fess.api.v2.handlers.V2ParamValidator.checkMaxLength("abcdef", 3, "q"));
+        // the English text of the exception, and of the default bundle, is what API clients have always read
+        assertEquals("q exceeds the maximum length of 3", cause.getMessage());
+        final CapturingResponse en = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(en, cause, java.util.Locale.ENGLISH);
+        assertTrue(en.body(), en.body().contains("q exceeds the maximum length of 3"));
+        final CapturingResponse ja = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(ja, cause, java.util.Locale.JAPANESE);
+        assertTrue(ja.body(), ja.body().contains("q は最大長 3 を超えています。"));
+    }
+
+    @Test
+    public void test_writeInvalidRequest_writesTheMessage_whenTheRefusalHasNoMessageCode() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(res,
+                new org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException("q exceeds the maximum length of 1000"),
+                java.util.Locale.JAPANESE);
+        assertEquals(400, res.status);
+        assertTrue(res.body(), res.body().contains("q exceeds the maximum length of 1000"));
+    }
+
+    @Test
     public void test_writeError_sets_characterEncoding_to_UTF_8() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new V2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "bad");

@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 
 import jakarta.servlet.Filter;
@@ -87,11 +88,15 @@ public class ServerErrorLoggingFilter implements Filter {
      * gets the method, the path, the exception class and its message, and nothing else. The
      * query string is left out because it carries caller-supplied values.</p>
      *
+     * <p>The exception is also stored in the request for {@link org.codelibs.fess.servlet.ErrorPageServlet}.</p>
+     *
      * @param request the request that failed
      * @param response the response, possibly already committed
      * @param cause the exception that became the 500
      */
     protected void logServerError(final HttpServletRequest request, final HttpServletResponse response, final Throwable cause) {
+        // The error page that answers the 500 reads it: a failure of the search engine is a 503 there.
+        request.setAttribute(Constants.SERVER_ERROR_CAUSE, cause);
         // The throwable is passed as its class name and message, never as the trailing argument,
         // so that log4j2 does not append a stack trace to this WARN line.
         logger.warn("Server error: {} {} [{}: {}]", request.getMethod(), request.getRequestURI(), cause.getClass().getName(),

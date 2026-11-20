@@ -68,9 +68,14 @@ describe("get", () => {
     await expect(api.get("/x")).rejects.toMatchObject({ code: "PROTOCOL" });
   });
 
-  it("throws ApiError(NETWORK) on invalid JSON", async () => {
+  it("throws ApiError(PROTOCOL) with no technical message on a 200 that is not JSON", async () => {
     installFetch(async () => badJsonResponse());
-    await expect(api.get("/x")).rejects.toMatchObject({ code: "NETWORK", message: "Invalid JSON" });
+    await expect(api.get("/x")).rejects.toMatchObject({ code: "PROTOCOL", message: "", httpStatus: 200 });
+  });
+
+  it("throws ApiError(HTTP_ERROR) with the status when an error page is not JSON", async () => {
+    installFetch(async () => badJsonResponse({ status: 400 }));
+    await expect(api.get("/x")).rejects.toMatchObject({ code: "HTTP_ERROR", message: "", httpStatus: 400 });
   });
 
   it("wraps a fetch rejection in NetworkError", async () => {
