@@ -517,7 +517,8 @@ public class SearchHandlerTest extends UnitFessTestCase {
             }
         }, "searchHelper");
 
-        for (final String[] pagingParam : new String[][] { { "num", "0" }, { "num", "-1" }, { "start", "-1" } }) {
+        for (final String[] pagingParam : new String[][] { { "num", "0", "errors.invalid_page_size" },
+                { "num", "-1", "errors.invalid_page_size" }, { "start", "-1", "errors.invalid_start_position" } }) {
             final CapturingResponse res = new CapturingResponse();
             final Map<String, String[]> params = new HashMap<>();
             params.put("q", new String[] { "*" });
@@ -527,7 +528,8 @@ public class SearchHandlerTest extends UnitFessTestCase {
             final String body = res.body();
             assertEquals(pagingParam[0] + "=" + pagingParam[1] + " " + body, 400, res.status);
             assertTrue(body.contains("\"code\":\"invalid_request\""), body);
-            assertTrue(body.contains(pagingParam[0] + " must be"), body);
+            // The reason is the message of the caller's language, not the developer text of the exception.
+            assertTrue(body.contains(ComponentUtil.getMessageManager().getMessage(Locale.ROOT, pagingParam[2], pagingParam[1])), body);
         }
         assertFalse(searched.get(), "the search must not start");
     }

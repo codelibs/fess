@@ -25,8 +25,11 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.web.validation.VaMessenger;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -106,7 +109,9 @@ public class V2JsonRequestParams extends SearchRequestParams {
             }
         }
         if (fields.size() > maxItems) {
-            throw new InvalidRequestParameterException("fields exceeds the maximum number of distinct names: " + maxItems);
+            throw new InvalidRequestParameterException(
+                    messages -> messages.addErrorsParamTooManyNames(UserMessages.GLOBAL_PROPERTY_KEY, "fields", String.valueOf(maxItems)),
+                    "fields exceeds the maximum number of distinct names: " + maxItems);
         }
         return fields;
     }
@@ -126,7 +131,8 @@ public class V2JsonRequestParams extends SearchRequestParams {
             }
         }
         if (conditions.size() > maxItems) {
-            throw new InvalidRequestParameterException("conditions exceeds the maximum number of distinct names: " + maxItems);
+            throw new InvalidRequestParameterException(messages -> messages.addErrorsParamTooManyNames(UserMessages.GLOBAL_PROPERTY_KEY,
+                    "conditions", String.valueOf(maxItems)), "conditions exceeds the maximum number of distinct names: " + maxItems);
         }
         return conditions;
     }
@@ -164,10 +170,14 @@ public class V2JsonRequestParams extends SearchRequestParams {
         try {
             facetInfo = createFacetInfo(request);
         } catch (final NumberFormatException e) {
-            throw new InvalidRequestParameterException("facet.size and facet.minDocCount must be integers");
+            throw new InvalidRequestParameterException(messages -> messages.addErrorsInvalidFacetNumber(UserMessages.GLOBAL_PROPERTY_KEY),
+                    "facet.size and facet.minDocCount must be integers");
         }
         if (facetInfo != null && facetInfo.size != null && facetInfo.size < 1) {
-            throw new InvalidRequestParameterException("facet.size must be positive, got: " + facetInfo.size);
+            final int size = facetInfo.size;
+            throw new InvalidRequestParameterException(
+                    messages -> messages.addErrorsInvalidFacetSize(UserMessages.GLOBAL_PROPERTY_KEY, String.valueOf(size)),
+                    "facet.size must be positive, got: " + size);
         }
         return facetInfo;
     }
@@ -205,7 +215,8 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 if (parsed < 0) {
                     // Reject negative start rather than passing -1 to the search backend.
                     // The handler should map InvalidOffsetException to INVALID_REQUEST.
-                    throw new InvalidOffsetException("start must be non-negative, got: " + parsed);
+                    throw new InvalidOffsetException(messages -> messages.addErrorsInvalidStartPosition(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "start must be non-negative, got: " + parsed);
                 }
                 startPosition = parsed;
             } catch (final NumberFormatException e) {
@@ -243,7 +254,8 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 final int parsed = Integer.parseInt(value);
                 if (parsed < 0) {
                     // Reject negative offset rather than passing -1 to the search backend.
-                    throw new InvalidOffsetException("offset must be non-negative, got: " + parsed);
+                    throw new InvalidOffsetException(messages -> messages.addErrorsInvalidOffset(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "offset must be non-negative, got: " + parsed);
                 }
                 offset = parsed;
             } catch (final NumberFormatException e) {
@@ -288,7 +300,9 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 if (requested <= 0) {
                     // Zero and negative values are invalid — reject so the caller can return
                     // INVALID_REQUEST rather than silently serving the maximum page.
-                    throw new InvalidPageSizeException("num must be positive, got: " + requested);
+                    throw new InvalidPageSizeException(
+                            messages -> messages.addErrorsInvalidPageSize(UserMessages.GLOBAL_PROPERTY_KEY, String.valueOf(requested)),
+                            "num must be positive, got: " + requested);
                 }
                 final int max = fessConfig.getPagingSearchPageMaxSizeAsInteger();
                 if (requested > max) {
@@ -334,6 +348,16 @@ public class V2JsonRequestParams extends SearchRequestParams {
         public InvalidPageSizeException(final String message) {
             super(message);
         }
+
+        /**
+         * Creates the exception with a message code for the caller's language besides the diagnostic message.
+         *
+         * @param messageCode the message code of the localized message
+         * @param message human-readable description of the invalid page size
+         */
+        public InvalidPageSizeException(final VaMessenger<FessMessages> messageCode, final String message) {
+            super(messageCode, message);
+        }
     }
 
     /**
@@ -359,6 +383,16 @@ public class V2JsonRequestParams extends SearchRequestParams {
          */
         public InvalidOffsetException(final String message) {
             super(message);
+        }
+
+        /**
+         * Creates the exception with a message code for the caller's language besides the diagnostic message.
+         *
+         * @param messageCode the message code of the localized message
+         * @param message human-readable description of the invalid offset
+         */
+        public InvalidOffsetException(final VaMessenger<FessMessages> messageCode, final String message) {
+            super(messageCode, message);
         }
     }
 

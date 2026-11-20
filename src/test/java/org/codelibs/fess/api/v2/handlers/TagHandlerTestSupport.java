@@ -490,6 +490,7 @@ final class TagHandlerTestSupport {
         private final Map<String, String> headers = new HashMap<>();
         private byte[] body = new byte[0];
         private String contentType;
+        private java.util.Locale locale = java.util.Locale.ENGLISH;
 
         StubRequest(final String method) {
             this.method = method;
@@ -497,6 +498,11 @@ final class TagHandlerTestSupport {
 
         StubRequest header(final String name, final String value) {
             headers.put(name, value);
+            return this;
+        }
+
+        StubRequest locale(final java.util.Locale locale) {
+            this.locale = locale;
             return this;
         }
 
@@ -542,7 +548,7 @@ final class TagHandlerTestSupport {
             case "getContentLength" -> body.length;
             case "getContentLengthLong" -> (long) body.length;
             case "getInputStream" -> stream;
-            case "getLocale" -> java.util.Locale.ENGLISH;
+            case "getLocale" -> locale;
             case "hashCode" -> System.identityHashCode(proxy);
             case "equals" -> proxy == args[0];
             case "toString" -> "StubRequest[" + method + "]";

@@ -191,6 +191,63 @@ public class LoginActionTest extends UnitFessTestCase {
         });
     }
 
+    /**
+     * A user who is already signed in is not asked to sign in again: /login/ sends them where a login sends
+     * them, a page their roles can open, and does not show the form.
+     */
+    @Test
+    public void test_index_aSignedInUserIsSentWhereALoginSendsThem() {
+        suppressBindingOf(FessLoginAssist.class);
+        suppressBindingOf(UserService.class);
+        suppressBindingOf(PasskeyService.class);
+        final FessUserBean signedIn = new FessUserBean(new FessUser() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "taro";
+            }
+
+            @Override
+            public String[] getRoleNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getGroupNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getPermissions() {
+                return new String[0];
+            }
+        });
+        final java.util.List<FessUserBean> redirected = new java.util.ArrayList<>();
+        final LoginAction signedInAction = new LoginAction() {
+            {
+                fessConfig = ComponentUtil.getFessConfig();
+            }
+
+            @Override
+            protected OptionalThing<FessUserBean> getUserBean() {
+                return OptionalThing.of(signedIn);
+            }
+
+            @Override
+            protected org.lastaflute.web.response.HtmlResponse redirectByUser(final FessUserBean user) {
+                redirected.add(user);
+                return org.lastaflute.web.response.HtmlResponse.undefined();
+            }
+        };
+        inject(signedInAction);
+
+        signedInAction.index();
+
+        assertEquals(1, redirected.size());
+        assertSame(signedIn, redirected.get(0));
+    }
+
     /** Registers a config with the given directory, the given name limit and the reserved name admin. */
     @SuppressWarnings("serial")
     private LoginAction actionWithDirectory(final String providerUrl, final int maxUsernameLength) {

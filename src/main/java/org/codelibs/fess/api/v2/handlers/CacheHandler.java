@@ -100,7 +100,7 @@ public class CacheHandler {
             V2ParamValidator.checkArray(req.getParameterValues("hq"), cfg.getApiParamMaxArraySizeOrDefault(),
                     cfg.getApiParamMaxLengthOrDefault(), "hq");
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(res, e, req.getLocale());
             return;
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/cache: FessConfig lookup failed; skipping hq bounds check", e);

@@ -22,7 +22,10 @@ function showView(id) {
       el.removeAttribute("hidden");
       // H.2: move keyboard focus to the first heading or the section root so
       // screen readers announce the new view after a client-side navigation.
-      const heading = el.querySelector("h1, h2, h3");
+      // The headings of the results view are the result titles, which the search about
+      // to run replaces; a focus on one of them would fall back to <body>. The view is
+      // the target there.
+      const heading = vid === "results-view" ? null : el.querySelector("h1, h2, h3");
       const target = heading || el;
       if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
       // Defer focus so the element is visible before receiving focus.

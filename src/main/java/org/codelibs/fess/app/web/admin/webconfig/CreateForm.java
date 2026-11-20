@@ -21,6 +21,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
+import org.codelibs.fess.validation.RegexPattern;
 import org.codelibs.fess.validation.UriType;
 import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 import org.lastaflute.web.validation.Required;
@@ -79,24 +80,28 @@ public class CreateForm {
      * URL patterns to include during crawling.
      */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.CRAWL_FILTER)
     public String includedUrls;
 
     /**
      * URL patterns to exclude during crawling.
      */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern(RegexPattern.Syntax.CRAWL_FILTER)
     public String excludedUrls;
 
     /**
      * Document URL patterns to include in search index.
      */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern
     public String includedDocUrls;
 
     /**
      * Document URL patterns to exclude from search index.
      */
     @CustomSize(maxKey = "form.admin.max.input.size")
+    @RegexPattern
     public String excludedDocUrls;
 
     /**

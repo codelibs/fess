@@ -338,6 +338,9 @@ public class Constants extends CoreLibConstants {
     /** Request attribute key for storing the error detail message key shown by the error page. */
     public static final String ERROR_DETAIL_KEY = "fess.ErrorDetailKey";
 
+    /** Request attribute key for the exception that made a request end as a server error, read by the error page. */
+    public static final String SERVER_ERROR_CAUSE = "fess.ServerErrorCause";
+
     // ============================================================
     // Date/Time Format Constants
     // ============================================================
