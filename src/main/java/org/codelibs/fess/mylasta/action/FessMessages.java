@@ -146,6 +146,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {item} is not a valid CRON expression. */
     public static final String CONSTRAINTS_CronExpression_MESSAGE = "{constraints.CronExpression.message}";
 
+    /** The key of the message: {item} has an invalid regular expression. */
+    public static final String CONSTRAINTS_RegexPattern_MESSAGE = "{constraints.RegexPattern.message}";
+
     /** The key of the message: Login failed. */
     public static final String ERRORS_LOGIN_FAILURE = "{errors.login.failure}";
 
@@ -1251,6 +1254,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addConstraintsCronExpressionMessage(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(CONSTRAINTS_CronExpression_MESSAGE));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.RegexPattern.message' with parameters.
+     * <pre>
+     * message: {item} has an invalid regular expression.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsRegexPatternMessage(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(CONSTRAINTS_RegexPattern_MESSAGE));
         return this;
     }
 
