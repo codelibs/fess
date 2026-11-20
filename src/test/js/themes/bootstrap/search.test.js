@@ -1049,6 +1049,47 @@ describe("runSearch — successful render", () => {
     expect(document.getElementById("results-status").textContent).toContain("labels.search_result_status_over");
   });
 
+  it("puts the focus on the count line when the render has dropped it to <body>", async () => {
+    // Enter on a pager link or a facet entry: the render removes the element that held the focus.
+    const pager = document.createElement("a");
+    pager.href = "#";
+    document.getElementById("pagination").appendChild(pager);
+    pager.focus();
+    expect(document.activeElement).toBe(pager);
+    await runSearch();
+    await settle();
+    expect(pager.isConnected).toBe(false);
+    expect(document.activeElement).toBe(document.getElementById("results-status"));
+  });
+
+  it("puts the focus on the view when there is no count line", async () => {
+    document.body.insertAdjacentHTML("beforeend", '<section id="results-view"></section>');
+    const pager = document.createElement("a");
+    pager.href = "#";
+    document.getElementById("pagination").appendChild(pager);
+    pager.focus();
+    installApiDispatch({ search: makeSearchEnv([]) });
+    await runSearch();
+    await settle();
+    expect(document.activeElement).toBe(document.getElementById("results-view"));
+  });
+
+  it("leaves the focus on <body> when the page was opened by its address", async () => {
+    // The first Tab must reach the skip link, not the count line the search just rendered.
+    expect(document.activeElement).toBe(document.body);
+    await runSearch();
+    await settle();
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("leaves the focus alone when it is on another element", async () => {
+    const box = document.getElementById("query");
+    box.focus();
+    await runSearch();
+    await settle();
+    expect(document.activeElement).toBe(box);
+  });
+
   it("dispatches fess:search:after with the envelope", async () => {
     const spy = vi.fn();
     document.addEventListener("fess:search:after", spy);
