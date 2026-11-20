@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.pathmap;
 
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.validation.RegexPattern;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -46,6 +47,7 @@ public class CreateForm {
      */
     @Required
     @Size(max = 1000)
+    @RegexPattern(RegexPattern.Syntax.PLAIN)
     public String regex;
 
     /**
@@ -85,6 +87,7 @@ public class CreateForm {
      * The user agent string for this path mapping.
      */
     @Size(max = 1000)
+    @RegexPattern(RegexPattern.Syntax.PLAIN)
     public String userAgent;
 
     /**
