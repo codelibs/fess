@@ -2,6 +2,7 @@
   "search.placeholder": "Zoeken...",
   "search.button": "Zoeken",
   "search.no_results": "Geen resultaten.",
+  "search.results_heading": "Zoekresultaten",
   "search.popular_searches": "Populaire zoekopdrachten",
   "search_history.title": "Recente zoekopdrachten",
   "search.did_not_match": "Geen documenten gevonden die overeenkomen met {0}.",

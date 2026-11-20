@@ -2,6 +2,7 @@
   "search.placeholder": "Поиск...",
   "search.button": "Поиск",
   "search.no_results": "Нет результатов.",
+  "search.results_heading": "Результаты поиска",
   "search.popular_searches": "Популярные запросы",
   "search_history.title": "Недавние запросы",
   "search.did_not_match": "По вашему запросу — {0} — ничего не найдено.",

@@ -2,6 +2,7 @@
   "search.placeholder": "खोजें...",
   "search.button": "खोजें",
   "search.no_results": "कोई परिणाम नहीं।",
+  "search.results_heading": "खोज परिणाम",
   "search.popular_searches": "लोकप्रिय खोजें",
   "search_history.title": "हाल की खोजें",
   "search.did_not_match": "आपकी खोज — {0} — किसी भी दस्तावेज़ से मेल नहीं खाती।",
