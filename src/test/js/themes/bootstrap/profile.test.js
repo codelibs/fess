@@ -158,6 +158,35 @@ describe("attach (submit)", () => {
     expect(document.getElementById("profile-error").textContent).toBe("flash.login_required");
   });
 
+  it("treats the 403 of the CSRF token of an ended session as an ended session", async () => {
+    api.post.mockRejectedValue({ code: "forbidden", httpStatus: 403 });
+    api.get.mockResolvedValue({ authenticated: false });
+    mountProfile();
+    setPasswords("current", "newpass1", "newpass1");
+
+    submitForm();
+
+    await vi.waitFor(() => expect(auth.promptLogin).toHaveBeenCalledTimes(1));
+    expect(api.get).toHaveBeenCalledWith("/auth/me");
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("profile-error").textContent).toBe("flash.login_required");
+  });
+
+  it("keeps the session when a 403 comes while the user is still signed in", async () => {
+    api.post.mockRejectedValue({ code: "forbidden", httpStatus: 403 });
+    api.get.mockResolvedValue({ authenticated: true, user: { name: "Al" } });
+    mountProfile();
+    setPasswords("current", "newpass1", "newpass1");
+
+    submitForm();
+
+    const err = document.getElementById("profile-error");
+    await vi.waitFor(() => expect(err.classList.contains("d-none")).toBe(false));
+    expect(err.textContent).toBe("error.server");
+    expect(auth.endSession).not.toHaveBeenCalled();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
+  });
+
   it("keeps the session when only the current password is wrong", async () => {
     api.post.mockRejectedValue({ code: "auth_required", details: { reason: "invalid_current_password" } });
     mountProfile();
@@ -305,6 +334,33 @@ describe("passkey section", () => {
 
     expect(auth.endSession).toHaveBeenCalledTimes(1);
     expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+  });
+
+  it("treats the 403 of the CSRF token of an ended session as an ended session", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "forbidden", httpStatus: 403 });
+    await mountAndLoad();
+    api.get.mockReset().mockResolvedValue({ authenticated: false });
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(api.get).toHaveBeenCalledWith("/auth/me");
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(true);
+  });
+
+  it("shows the error of a 403 while the user is still signed in", async () => {
+    api.post.mockRejectedValue({ name: "ApiError", code: "forbidden", httpStatus: 403 });
+    await mountAndLoad();
+    api.get.mockReset().mockResolvedValue({ authenticated: true, user: { name: "Al" } });
+
+    submitPasskeyForm("My phone", "secret");
+    await flush();
+
+    expect(auth.endSession).not.toHaveBeenCalled();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
+    expect(document.getElementById("passkey-error").textContent).toBe("error.server");
   });
 
   it("is silent when the user dismisses the browser prompt", async () => {
