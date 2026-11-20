@@ -22,31 +22,8 @@
 	margin-top: 3.0em;
 }
 
-.container .text-muted {
-	margin: 20px 0;
-}
-
 .notification {
 	text-align: center;
-}
-
-ul.has-error {
-	color: #dd4b39 !important;
-	list-style-type: none;
-	padding: 0;
-}
-
-.form-group .has-error + .form-control {
-	border-color: #dd4b39 !important;
-	box-shadow: none;
-}
-
-.sidebar-mini.sidebar-collapse .sidebar-search {
-	display: none !important;
-}
-
-input[type="file"].form-control:not([type="file"]) {
-	height: 0% !important;
 }
 
 #result ol {
@@ -85,24 +62,29 @@ textarea.systemInfoData {
 	line-height: 1.5em;
 }
 
-.login-box {
-	height: 500px;
+.empty-list-placeholder {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.85rem 1rem;
+	color: var(--ink-2);
+	background: var(--sunken);
+	border: 1px solid var(--line);
+	border-radius: 10px;
 }
 
-.empty-list-placeholder {
-	text-align: center;
-	padding: 2em 1em;
+.row > .empty-list-placeholder {
+	width: calc(100% - 1rem);
+	margin: 0 0.5rem;
 }
 
 .empty-list-placeholder .fa {
-	font-size: 2.5em;
-	margin-bottom: 0.5em;
-	display: block;
+	flex: none;
+	font-size: 1.1rem;
 }
 
 .empty-list-placeholder p {
-	color: #6c757d;
-	margin-top: 0.5em;
+	margin: 0;
 }
 
 .searchlog-filter > * {
@@ -130,7 +112,7 @@ textarea.systemInfoData {
 
 .searchlog-rank {
 	width: 2.5rem;
-	color: #6c757d;
+	color: var(--ink-3);
 	text-align: right;
 	white-space: nowrap;
 }
@@ -146,7 +128,7 @@ textarea.systemInfoData {
 	left: 0;
 	top: 15%;
 	height: 70%;
-	background: rgba(0, 123, 255, 0.15);
+	background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .searchlog-bar-cell span {
@@ -161,21 +143,21 @@ textarea.systemInfoData {
 }
 
 .searchlog-heat-0 {
-	background: #f4f6f9;
+	background: var(--sunken);
 }
 
 .searchlog-heat-1 {
-	background: rgba(0, 123, 255, 0.2);
+	background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .searchlog-heat-2 {
-	background: rgba(0, 123, 255, 0.4);
+	background: color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .searchlog-heat-3 {
-	background: rgba(0, 123, 255, 0.65);
+	background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
 .searchlog-heat-4 {
-	background: rgba(0, 123, 255, 0.9);
+	background: color-mix(in srgb, var(--accent) 90%, transparent);
 }

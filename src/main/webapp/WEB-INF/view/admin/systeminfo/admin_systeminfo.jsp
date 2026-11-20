@@ -26,50 +26,53 @@ ${fe:html(true)}
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+            <div class="card card-outline card-primary">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="systeminfo-env-tab" href="#systeminfo-env"
+                               data-toggle="tab" role="tab" aria-controls="systeminfo-env" aria-selected="true">
                                 <la:message key="labels.system_info_env_title"/>
-                            </h3>
-                        </div>
-                        <%-- Card Body --%>
-                        <div class="card-body">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="systeminfo-prop-tab" href="#systeminfo-prop"
+                               data-toggle="tab" role="tab" aria-controls="systeminfo-prop" aria-selected="false">
+                                <la:message key="labels.system_info_prop_title"/>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="systeminfo-fessprop-tab" href="#systeminfo-fessprop"
+                               data-toggle="tab" role="tab" aria-controls="systeminfo-fessprop" aria-selected="false">
+                                <la:message key="labels.system_info_fess_prop_title"/>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="systeminfo-bug-tab" href="#systeminfo-bug"
+                               data-toggle="tab" role="tab" aria-controls="systeminfo-bug" aria-selected="false">
+                                <la:message key="labels.system_info_bug_report_title"/>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="systeminfo-env" role="tabpanel"
+                             aria-labelledby="systeminfo-env-tab">
 								<textarea id="envData" class="systemInfoData form-control"
                                           readonly>
 <c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
 								</textarea>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <la:message key="labels.system_info_prop_title"/>
-                            </h3>
-                        </div>
-                        <div class="card-body">
+                        <div class="tab-pane" id="systeminfo-prop" role="tabpanel"
+                             aria-labelledby="systeminfo-prop-tab">
 								<textarea id="propData" class="systemInfoData form-control"
                                           readonly>
 <c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
 								</textarea>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card card-outline card-warning">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <la:message key="labels.system_info_fess_prop_title"/>
-                            </h3>
-                        </div>
-                        <div class="card-body">
+                        <div class="tab-pane" id="systeminfo-fessprop" role="tabpanel"
+                             aria-labelledby="systeminfo-fessprop-tab">
                             <c:if test="${empty fessPropItems}">
 									<textarea id="fessPropData" class="systemInfoData form-control"
                                               readonly><la:message
@@ -83,16 +86,8 @@ ${fe:html(true)}
 									</textarea>
                             </c:if>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card card-outline card-danger">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <la:message key="labels.system_info_bug_report_title"/>
-                            </h3>
-                        </div>
-                        <div class="card-body">
+                        <div class="tab-pane" id="systeminfo-bug" role="tabpanel"
+                             aria-labelledby="systeminfo-bug-tab">
 								<textarea id="bugReportData" class="systemInfoData form-control"
                                           readonly>
 <c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterEach } from "vitest";
 
 let A;
 beforeAll(async () => {
@@ -81,6 +81,47 @@ describe("init", () => {
     A.init();
     expect(calls.map((c) => c[0])).toEqual(["trend", "trend"]);
     delete window.echarts;
+  });
+});
+
+describe("chart theme", () => {
+  const themes = [];
+  const mountCharts = () => {
+    themes.length = 0;
+    window.echarts = { init: (el, theme) => (themes.push(theme), { setOption: (o) => themes.push(o.backgroundColor), resize() {} }) };
+    document.body.innerHTML =
+      '<script type="application/json" id="searchlog-analytics-data">' +
+      JSON.stringify({ charts: { trend } }) +
+      '</script><div class="searchlog-chart" data-chart="trend"></div>';
+    A.init();
+  };
+
+  afterEach(() => {
+    delete window.echarts;
+    delete window.matchMedia;
+    document.documentElement.removeAttribute("data-theme");
+  });
+
+  it("uses the light theme by default and a transparent background", () => {
+    mountCharts();
+    expect(themes).toEqual([null, "transparent"]);
+  });
+
+  it("uses the dark theme when the operating system asks for it", () => {
+    window.matchMedia = (q) => ({ matches: q === "(prefers-color-scheme: dark)" });
+    mountCharts();
+    expect(themes[0]).toBe("dark");
+  });
+
+  it("lets data-theme on the page win over the operating system", () => {
+    window.matchMedia = () => ({ matches: true });
+    document.documentElement.setAttribute("data-theme", "light");
+    mountCharts();
+    expect(themes[0]).toBeNull();
+    document.documentElement.setAttribute("data-theme", "dark");
+    window.matchMedia = () => ({ matches: false });
+    mountCharts();
+    expect(themes[0]).toBe("dark");
   });
 });
 

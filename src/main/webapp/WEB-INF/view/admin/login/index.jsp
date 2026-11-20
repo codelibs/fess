@@ -3,16 +3,13 @@ ${fe:html(true)}
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="light dark">
 <title><la:message key="labels.login.title" /></title>
-<link href="${fe:url('/css/admin/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/admin/adminlte.min.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/fontawesome/css/fontawesome.min.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/fontawesome/css/solid.min.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/fontawesome/css/regular.min.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/admin/admin.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/admin/style.css')}" rel="stylesheet" type="text/css" />
-<!--[if lt IE 9]>
-<script src="${fe:url('/css/admin/html5shiv.min.js')}"></script>
-<script src="${fe:url('/css/admin/respond.min.js')}"></script>
-<![endif]-->
 </head>
 <body class="hold-transition login-page">
 	<div class="login-box">
@@ -95,9 +92,6 @@ ${fe:html(true)}
 		</div>
 	</div>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script type="text/javascript" src="${fe:url('/js/admin/jquery-3.7.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/admin/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/admin/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/login.js')}"></script>
 </body>
 ${fe:html(false)}

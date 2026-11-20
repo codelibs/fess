@@ -52,6 +52,7 @@ ${fe:html(true)}
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
+                                <h4><la:message key="labels.section_basic"/></h4>
                                 <div class="form-group row">
                                     <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.name"/></label>
@@ -69,6 +70,7 @@ ${fe:html(true)}
                                                      rows="5"/>
                                     </div>
                                 </div>
+                                <h4><la:message key="labels.section_filters"/></h4>
                                 <div class="form-group row">
                                     <label for="includedPaths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.included_paths"/></label>
@@ -105,6 +107,7 @@ ${fe:html(true)}
                                                      styleClass="form-control" rows="5"/>
                                     </div>
                                 </div>
+                                <h4><la:message key="labels.section_crawl"/></h4>
                                 <div class="form-group row">
                                     <label for="configParameter" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.config_parameter"/></label>
@@ -158,11 +161,12 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="boost" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.boost"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="boost"/>
                                         <la:text styleId="boost" property="boost" styleClass="form-control"/>
                                     </div>
                                 </div>
+                                <h4><la:message key="labels.section_access"/></h4>
                                 <div class="form-group row">
                                     <label for="permissions" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.permissions"/></label>

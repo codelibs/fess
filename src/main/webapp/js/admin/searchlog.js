@@ -188,6 +188,21 @@
     });
   }
 
+  // The console follows the operating system's light or dark setting (or data-theme on the root element);
+  // ECharts has a dark theme of its own for the text and the axes.
+  function chartTheme() {
+    var forced = document.documentElement.getAttribute("data-theme");
+    if (forced) {
+      return forced === "dark" ? "dark" : null;
+    }
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : null;
+  }
+
+  function withTransparentBackground(option) {
+    option.backgroundColor = "transparent";
+    return option;
+  }
+
   function init() {
     var dataEl = document.getElementById("searchlog-analytics-data");
     var data, instances, selected, charts, previousLabel, observer;
@@ -213,10 +228,10 @@
       if (!chart) {
         return;
       }
-      instance = window.echarts.init(el);
-      instance.setOption(buildOption(chart, {
+      instance = window.echarts.init(el, chartTheme());
+      instance.setOption(withTransparentBackground(buildOption(chart, {
         previousLabel : previousLabel
-      }));
+      })));
       charts[name] = instance;
       instances.push(instance);
     });
@@ -227,8 +242,8 @@
       if (!chart) {
         return;
       }
-      instance = window.echarts.init(el);
-      instance.setOption(buildSparklineOption(chart, el.getAttribute("data-series")));
+      instance = window.echarts.init(el, chartTheme());
+      instance.setOption(withTransparentBackground(buildSparklineOption(chart, el.getAttribute("data-series"))));
       instances.push(instance);
     });
 

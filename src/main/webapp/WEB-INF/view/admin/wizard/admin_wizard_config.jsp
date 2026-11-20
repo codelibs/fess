@@ -72,18 +72,18 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="maxAccessCount" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.maxAccessCount"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="maxAccessCount"/>
                                         <la:text styleId="maxAccessCount" property="maxAccessCount"
-                                                 styleClass="form-control"/>
+                                                 styleClass="form-control" size="8"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="depth" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.depth"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="depth"/>
-                                        <la:text styleId="depth" property="depth" styleClass="form-control"/>
+                                        <la:text styleId="depth" property="depth" styleClass="form-control" size="8"/>
                                     </div>
                                 </div>
                             </div>

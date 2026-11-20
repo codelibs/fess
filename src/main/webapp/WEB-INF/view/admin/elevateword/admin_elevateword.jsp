@@ -75,7 +75,7 @@ ${fe:html(true)}
                             <%-- List --%>
                             <c:if test="${elevateWordPager.allRecordCount == 0}">
                                 <div class="row">
-                                    <div class="col-sm-12">
+                                    <div class="col-sm-12 empty-list-placeholder">
                                         <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>

@@ -75,20 +75,20 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="numberOfShardsForDoc" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.number_of_shards_for_doc"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="numberOfShardsForDoc"/>
                                         <la:text styleId="numberOfShardsForDoc" property="numberOfShardsForDoc"
-                                                 styleClass="form-control"/>
+                                                 styleClass="form-control" size="8"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="autoExpandReplicasForDoc"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.auto_expand_replicas_for_doc"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="form-inline col-sm-9">
                                         <la:errors property="autoExpandReplicasForDoc"/>
                                         <la:text styleId="autoExpandReplicasForDoc"
-                                                 property="autoExpandReplicasForDoc" styleClass="form-control"/>
+                                                 property="autoExpandReplicasForDoc" styleClass="form-control" size="8"/>
                                     </div>
                                 </div>
                             </div>

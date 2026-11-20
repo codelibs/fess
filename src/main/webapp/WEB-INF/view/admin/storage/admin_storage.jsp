@@ -96,7 +96,7 @@ ${fe:html(true)}
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
                                                     <button type="submit" class="btn btn-success" name="createDir">
-                                                        <i class="fa fa-make" aria-hidden="true"></i>
+                                                        <i class="fa fa-folder-plus" aria-hidden="true"></i>
                                                         <la:message key="labels.crud_button_create"/>
                                                     </button>
                                                 </div>

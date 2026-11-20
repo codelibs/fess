@@ -5,6 +5,23 @@ search system, see [MIGRATION.md](MIGRATION.md).
 
 ## Upgrading to 15.10
 
+**The admin console no longer ships Bootstrap, AdminLTE, jQuery, Popper, moment.js, the date/time pickers or
+the form validator.** Fess 15.9.0 loaded them from `css/admin/` and `js/admin/`. The console now uses its own
+`css/admin/admin.css` and `js/admin/admin.js` (plain JavaScript), Font Awesome 7 Free under
+`css/admin/fontawesome/`, and follows the operating system's light or dark setting. Nothing changes in the
+data or the settings. If you added your own admin page, theme tweak or script that relies on the removed
+libraries, change it:
+
+* `$`, `jQuery`, `moment`, `$.fn.modal`, `.tooltip()`, `.daterangepicker()` and `.timepicker()` are not defined
+  on admin pages. The `data-toggle="modal|collapse|tab"`, `data-target` and `data-dismiss="modal"` attributes
+  of Bootstrap keep working; tooltips are the browser's own `title` text.
+* The class names the admin JSPs use (`card`, `btn`, `form-group`, `row`, `col-sm-*`, `modal`, `table`, ...) are
+  kept, but only the ones `admin.css` defines. A Bootstrap class it does not define has no effect.
+* The search log screen takes its time range from two native date-time inputs; the value sent to the
+  server (`yyyy-MM-dd HH:mm - yyyy-MM-dd HH:mm`) is unchanged.
+* The bundled `bootstrap` search theme is not affected: it still loads its own Bootstrap 5 files from the
+  web application root (`css/bootstrap.min.css`, `js/bootstrap.min.js`).
+
 **A search result whose URL has a scheme outside `search.result.link.schemes` is no longer linked or
 redirected.** The setting is new in 15.10 (fess#3777). Its default is the list the bootstrap theme
 accepted until now:
