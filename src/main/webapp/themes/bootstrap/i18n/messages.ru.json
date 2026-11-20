@@ -294,6 +294,7 @@
   "error.detail_not_found_on_file_system": "Файл не найден в файловой системе.",
   "error.detail_unauthorized_request": "У вас нет доступа к этому ресурсу.",
   "error.detail_bad_authentication": "Ошибка аутентификации. Войдите и повторите попытку.",
+  "error.detail_search_engine_unavailable": "Поисковая система недоступна. Повторите попытку позже.",
   "error.detail_not_load_from_server": "Не удалось загрузить содержимое с сервера.",
   "labels.cache_title": "Кэшированная страница",
   "labels.cache_url": "URL",

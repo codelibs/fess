@@ -294,6 +294,7 @@
   "error.detail_not_found_on_file_system": "Il file non è stato trovato nel file system.",
   "error.detail_unauthorized_request": "Non sei autorizzato ad accedere a questa risorsa.",
   "error.detail_bad_authentication": "Autenticazione fallita. Accedere e riprovare.",
+  "error.detail_search_engine_unavailable": "Il motore di ricerca non è disponibile. Riprova più tardi.",
   "error.detail_not_load_from_server": "Impossibile caricare il contenuto dal server.",
   "labels.cache_title": "Pagina in cache",
   "labels.cache_url": "URL",

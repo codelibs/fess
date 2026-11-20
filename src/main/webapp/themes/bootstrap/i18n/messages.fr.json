@@ -294,6 +294,7 @@
   "error.detail_not_found_on_file_system": "Le fichier est introuvable sur le système de fichiers.",
   "error.detail_unauthorized_request": "Vous n'êtes pas autorisé à accéder à cette ressource.",
   "error.detail_bad_authentication": "Échec de l'authentification. Veuillez vous connecter et réessayer.",
+  "error.detail_search_engine_unavailable": "Le moteur de recherche est indisponible. Veuillez réessayer plus tard.",
   "error.detail_not_load_from_server": "Le contenu n'a pas pu être chargé depuis le serveur.",
   "labels.cache_title": "Page en cache",
   "labels.cache_url": "URL",

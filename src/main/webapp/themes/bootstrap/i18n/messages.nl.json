@@ -294,6 +294,7 @@
   "error.detail_not_found_on_file_system": "Het bestand is niet gevonden op het bestandssysteem.",
   "error.detail_unauthorized_request": "U heeft geen toegang tot deze bron.",
   "error.detail_bad_authentication": "Authenticatie mislukt. Log in en probeer het opnieuw.",
+  "error.detail_search_engine_unavailable": "De zoekmachine is niet beschikbaar. Probeer het later opnieuw.",
   "error.detail_not_load_from_server": "De inhoud kon niet van de server worden geladen.",
   "labels.cache_title": "Gecachete pagina",
   "labels.cache_url": "URL",

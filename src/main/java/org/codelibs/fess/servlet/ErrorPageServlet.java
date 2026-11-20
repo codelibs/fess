@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
@@ -85,7 +86,12 @@ public class ErrorPageServlet extends HttpServlet {
             writeText(response, HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        final int status = resolveStatus(request, response, dispatcherType);
+        int status = resolveStatus(request, response, dispatcherType);
+        if (status == HttpServletResponse.SC_INTERNAL_SERVER_ERROR && isSearchEngineUnavailable(request)) {
+            // The failure is that the search engine cannot be reached or is out of capacity, which is neither
+            // the visitor's doing nor a defect of this request: it can succeed shortly, so it is a 503.
+            status = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+        }
         // A FORWARD dispatch (and some containers, even an ERROR one) may carry no
         // jakarta.servlet.error.request_uri attribute; fall back to the request's own URI. On a
         // FORWARD/ERROR dispatch that fallback URI is the dispatch target (this servlet's own
@@ -211,13 +217,28 @@ public class ErrorPageServlet extends HttpServlet {
      *
      * @param request the request being answered
      * @param status the HTTP status being reported
-     * @return the key, or null when absent, not in the allowed shape, and not a 401
+     * @return the key, or null when absent, not in the allowed shape, and neither a 401 nor a failure of the search engine
      */
     static String resolveDetailKey(final HttpServletRequest request, final int status) {
         if (request.getAttribute(Constants.ERROR_DETAIL_KEY) instanceof final String key && StaticThemeResponder.isSafeMessageKey(key)) {
             return key;
         }
+        if (isSearchEngineUnavailable(request)) {
+            return "errors.search_engine_unavailable";
+        }
         return status == HttpServletResponse.SC_UNAUTHORIZED ? "errors.bad_authentication" : null;
+    }
+
+    /**
+     * Tells whether the request failed because the search engine is out of reach or out of capacity, from the
+     * exception {@code ServerErrorLoggingFilter} stored when the request ended as a server error.
+     *
+     * @param request the request being answered
+     * @return true when the recorded failure is the search engine being unavailable
+     */
+    static boolean isSearchEngineUnavailable(final HttpServletRequest request) {
+        return request.getAttribute(Constants.SERVER_ERROR_CAUSE) instanceof final Throwable cause
+                && V2EnvelopeWriter.isSearchEngineUnavailable(cause);
     }
 
     /**

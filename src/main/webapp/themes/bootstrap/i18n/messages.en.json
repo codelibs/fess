@@ -294,6 +294,7 @@
   "error.detail_not_found_on_file_system": "The file was not found on the file system.",
   "error.detail_unauthorized_request": "You are not authorised to access this resource.",
   "error.detail_bad_authentication": "Authentication failed. Please log in and try again.",
+  "error.detail_search_engine_unavailable": "The search engine is not available. Please try again later.",
   "error.detail_not_load_from_server": "The content could not be loaded from the server.",
   "labels.cache_title": "Cached page",
   "labels.cache_url": "URL",

@@ -215,6 +215,60 @@ public class ErrorPageServletTest extends UnitFessTestCase {
         assertEquals("errors.bad_authentication", responder.lastDetailKey);
     }
 
+    /**
+     * A request that failed because the search engine is out of reach is not a defect of the request: the
+     * visitor is answered 503 with the line that names the cause, where any other failure stays a 500.
+     */
+    @Test
+    public void test_service_searchEngineUnavailableIsAnsweredAs503() throws Exception {
+        final Throwable unreachable = new org.codelibs.curl.CurlException(
+                "Failed to access to http://localhost:9200/fess_user.user/_search", new java.net.ConnectException("Connection refused"));
+
+        final ErrorPageServlet servlet = new ErrorPageServlet();
+        servlet.setThemeRegistry(new StubRegistry(THEME));
+        final StubResponder responder = new StubResponder(true);
+        servlet.setStaticThemeResponder(responder);
+        final StubRequest req = new StubRequest(DispatcherType.ERROR);
+        req.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        req.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/admin/webconfig/");
+        req.setAttribute(Constants.SERVER_ERROR_CAUSE, unreachable);
+        req.header = "text/html";
+        servlet.service(req, new StubResponse());
+        assertTrue(responder.called);
+        assertEquals(503, responder.lastHttpStatus);
+        assertEquals(503, responder.lastDisplayCode);
+        assertEquals("errors.search_engine_unavailable", responder.lastDetailKey);
+
+        // a client that does not take HTML gets the status and the one line
+        final StubRequest plain = new StubRequest(DispatcherType.ERROR);
+        plain.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        plain.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/admin/webconfig/");
+        plain.setAttribute(Constants.SERVER_ERROR_CAUSE, unreachable);
+        final StubResponse res = new StubResponse();
+        servlet.service(plain, res);
+        assertEquals(503, res.status);
+        assertEquals("Service Unavailable.", res.bodyAsString());
+
+        // any other failure stays a 500
+        final StubRequest other = new StubRequest(DispatcherType.ERROR);
+        other.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        other.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/admin/webconfig/");
+        other.setAttribute(Constants.SERVER_ERROR_CAUSE, new IllegalStateException("boom"));
+        final StubResponse otherRes = new StubResponse();
+        servlet.service(other, otherRes);
+        assertEquals(500, otherRes.status);
+        assertEquals("System Error.", otherRes.bodyAsString());
+
+        // a connection refused by something other than the engine client says nothing about the engine
+        final StubRequest llm = new StubRequest(DispatcherType.ERROR);
+        llm.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        llm.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/admin/webconfig/");
+        llm.setAttribute(Constants.SERVER_ERROR_CAUSE, new java.net.ConnectException("Connection refused"));
+        final StubResponse llmRes = new StubResponse();
+        servlet.service(llm, llmRes);
+        assertEquals(500, llmRes.status);
+    }
+
     @Test
     public void test_service_forwardDispatchIsFiveHundred() throws Exception {
         final ErrorPageServlet servlet = new ErrorPageServlet();
@@ -408,6 +462,12 @@ public class ErrorPageServletTest extends UnitFessTestCase {
         req.setAttribute(Constants.ERROR_DETAIL_KEY, "not safe; <script>");
         assertEquals("errors.bad_authentication", ErrorPageServlet.resolveDetailKey(req, 401));
         assertNull(ErrorPageServlet.resolveDetailKey(req, 404));
+        // A failure of the search engine names it, unless an action said something more specific.
+        final StubRequest down = new StubRequest(DispatcherType.ERROR);
+        down.setAttribute(Constants.SERVER_ERROR_CAUSE, new org.codelibs.fesen.client.node.NodeUnavailableException("all nodes are down"));
+        assertEquals("errors.search_engine_unavailable", ErrorPageServlet.resolveDetailKey(down, 503));
+        down.setAttribute(Constants.ERROR_DETAIL_KEY, "errors.docid_not_found");
+        assertEquals("errors.docid_not_found", ErrorPageServlet.resolveDetailKey(down, 503));
     }
 
     // ===== resolveVirtualHostKey =====

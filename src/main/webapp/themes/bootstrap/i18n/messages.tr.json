@@ -294,6 +294,7 @@
   "error.detail_not_found_on_file_system": "Dosya sisteminde dosya bulunamadı.",
   "error.detail_unauthorized_request": "Bu kaynağa erişim yetkiniz yok.",
   "error.detail_bad_authentication": "Kimlik doğrulama başarısız. Giriş yapın ve tekrar deneyin.",
+  "error.detail_search_engine_unavailable": "Arama motoru kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
   "error.detail_not_load_from_server": "İçerik sunucudan yüklenemedi.",
   "labels.cache_title": "Önbelleğe alınmış sayfa",
   "labels.cache_url": "URL",

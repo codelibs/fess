@@ -170,6 +170,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: SSO login process failed. */
     public static final String ERRORS_sso_login_error = "{errors.sso_login_error}";
 
+    /** The key of the message: The search engine is not available. Please try again later. */
+    public static final String ERRORS_search_engine_unavailable = "{errors.search_engine_unavailable}";
+
     /** The key of the message: Could not find {0}. */
     public static final String ERRORS_could_not_find_log_file = "{errors.could_not_find_log_file}";
 
@@ -1367,6 +1370,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsSsoLoginError(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_sso_login_error));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.search_engine_unavailable' with parameters.
+     * <pre>
+     * message: The search engine is not available. Please try again later.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsSearchEngineUnavailable(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_search_engine_unavailable));
         return this;
     }
 
