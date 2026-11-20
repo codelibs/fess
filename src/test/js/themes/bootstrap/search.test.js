@@ -908,6 +908,16 @@ describe("runSearch — successful render", () => {
     expect(items[4].className).toContain("d-none");
   });
 
+  it("marks only the current page of the pagination with aria-current=page", async () => {
+    await runSearch();
+    await settle();
+    const current = document.querySelectorAll("#pagination [aria-current]");
+    expect(current.length).toBe(1);
+    expect(current[0].getAttribute("aria-current")).toBe("page");
+    expect(current[0].textContent).toBe("1");
+    expect(current[0].closest("li").classList.contains("active")).toBe(true);
+  });
+
   it("renders related queries and sanitized related content", async () => {
     await runSearch();
     await settle();
