@@ -1078,6 +1078,28 @@ describe("runSearch — zero results", () => {
     expect(document.getElementById("results-popular-words").classList.contains("d-none")).toBe(true);
   });
 
+  it("does not say 'did not match' for a partial result with no hit; the warning stays", async () => {
+    installApiDispatch({ search: makeSearchEnv([], { partial: true, shard_failed: true, prev_page: false, next_page: false, page_numbers: [] }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("empty-state").classList.contains("d-none")).toBe(true);
+    const warn = document.getElementById("results-warning");
+    expect(warn.classList.contains("d-none")).toBe(false);
+    expect(warn.textContent).toContain("labels.search_partially_failed");
+  });
+
+  it("asks for the popular words only when the empty state is shown", async () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="popular-words" class="d-none"></div>');
+    installApiDispatch({ search: makeSearchEnv([], { partial: true, shard_failed: true, prev_page: false, next_page: false, page_numbers: [] }) });
+    await runSearch();
+    await settle();
+    expect(api.get.mock.calls.filter((c) => c[0] === "/popular-words").length).toBe(0);
+    installApiDispatch({ search: makeSearchEnv([]) });
+    await runSearch();
+    await settle();
+    expect(api.get.mock.calls.filter((c) => c[0] === "/popular-words").length).toBe(1);
+  });
+
   it("does NOT clear related queries — loadRelated still populates them", async () => {
     await runSearch();
     await settle();

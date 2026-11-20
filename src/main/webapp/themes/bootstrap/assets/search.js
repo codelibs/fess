@@ -1172,7 +1172,9 @@ function renderResults(env) {
     if (dnm) {
       dnm.textContent = t("search.did_not_match", [state.q || ""]);
     }
-    empty.classList.remove("d-none");
+    // A partial result with no hit (e.g. the search engine could not be reached) says nothing about
+    // whether a document matches: the warning above the results is shown alone, not "did not match".
+    empty.classList.toggle("d-none", !!env.partial);
     meta.textContent = "";
     const statusEl = document.getElementById("results-status");
     if (statusEl) statusEl.textContent = "";
@@ -1184,7 +1186,7 @@ function renderResults(env) {
     renderExportMenu(false);
     // The popular words of the empty state are fetched here, when it is shown: the home view has
     // its own request, and the pages that never show this state need none.
-    loadPopularWords();
+    if (!env.partial) loadPopularWords();
     return;
   }
   empty.classList.add("d-none");
