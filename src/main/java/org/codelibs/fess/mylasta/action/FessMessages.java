@@ -332,6 +332,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Could not process the specified query. */
     public static final String ERRORS_invalid_query_cannot_process = "{errors.invalid_query_cannot_process}";
 
+    /** The key of the message: Only the first {0} results can be retrieved (start position + page size). Go to an earlier page or narrow down the search. */
+    public static final String ERRORS_invalid_query_result_window_exceeded = "{errors.invalid_query_result_window_exceeded}";
+
+    /** The key of the message: The page is beyond the results that can be retrieved. Go to an earlier page or narrow down the search. */
+    public static final String ERRORS_invalid_query_result_window_unknown = "{errors.invalid_query_result_window_unknown}";
+
     /** The key of the message: The mode is incorrect. (not {0}, but {1}) */
     public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
 
@@ -2147,6 +2153,35 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidQueryCannotProcess(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_query_cannot_process));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_result_window_exceeded' with parameters.
+     * <pre>
+     * message: Only the first {0} results can be retrieved (start position + page size). Go to an earlier page or narrow down the search.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryResultWindowExceeded(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_query_result_window_exceeded, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_result_window_unknown' with parameters.
+     * <pre>
+     * message: The page is beyond the results that can be retrieved. Go to an earlier page or narrow down the search.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryResultWindowUnknown(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_query_result_window_unknown));
         return this;
     }
 
