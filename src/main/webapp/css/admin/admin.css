@@ -197,6 +197,7 @@ body.sidebar-collapse .main-sidebar { visibility: hidden; border-right-width: 0;
   color: var(--ink-3);
   font-size: 0.86rem;
 }
+.main-footer a { display: inline-flex; align-items: center; min-height: 24px; }
 
 @media (max-width: 991.98px) {
   .wrapper { grid-template-columns: minmax(0, 1fr); }
@@ -645,6 +646,7 @@ ul.has-error li { display: flex; gap: 0.4rem; align-items: baseline; }
 .breadcrumb { display: flex; flex-wrap: wrap; list-style: none; margin: 0; padding: 0.25rem 0; font-size: 0.9rem; color: var(--ink-3); }
 .breadcrumb-item + .breadcrumb-item::before { content: "/"; padding: 0 0.5rem; color: var(--line-strong); }
 .breadcrumb-item.active { color: var(--ink); }
+.breadcrumb-item > a { display: inline-flex; align-items: center; min-width: 24px; min-height: 24px; }
 
 .nav { display: flex; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
 .nav-tabs { gap: 0.25rem; border-bottom: 1px solid var(--line); margin-bottom: 1rem; }
