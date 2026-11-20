@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Se está ejecutando en modo de desarrollo. Instale OpenSearch por separado en un entorno de producción.",
   "labels.search_result_status": "Resultados de búsqueda para {bq} {b1} - {b2} de {b0}",
   "labels.search_result_status_over": "Resultados de búsqueda para {bq} {b1} - {b2} de más de {b0}",
+  "labels.search_result_status_no_query": "Resultados {b1} - {b2} de {b0}",
+  "labels.search_result_status_over_no_query": "Resultados {b1} - {b2} de más de {b0}",
   "labels.search_result_time": "({0} segundos)",
   "labels.similar_doc_result_status": "Mostrando resultados similares.",
   "labels.search_result_more": "Más detalles..",

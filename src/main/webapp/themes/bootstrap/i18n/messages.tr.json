@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess geliştirici modunda çalışıyor. Üretim ortamında OpenSearch'ü ayrıca yükleyin.",
   "labels.search_result_status": "{bq} için {b1} - {b2} arası sonuçlar (toplam {b0})",
   "labels.search_result_status_over": "{bq} için {b1} - {b2} arası sonuçlar ({b0} üzerinde)",
+  "labels.search_result_status_no_query": "{b1} - {b2} arası sonuçlar (toplam {b0})",
+  "labels.search_result_status_over_no_query": "{b1} - {b2} arası sonuçlar ({b0} üzerinde)",
   "labels.search_result_time": "({0} saniye)",
   "labels.similar_doc_result_status": "Benzer sonuçlar gösteriliyor.",
   "labels.search_result_more": "Daha fazla..",

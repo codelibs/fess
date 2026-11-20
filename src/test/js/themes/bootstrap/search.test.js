@@ -1026,6 +1026,22 @@ describe("runSearch — successful render", () => {
     expect(warn.classList.contains("d-none")).toBe(true);
   });
 
+  it("uses the wording without the query when the search has no keyword", async () => {
+    _state.q = "";
+    await runSearch();
+    await settle();
+    const text = document.getElementById("results-status").textContent;
+    expect(text).toContain("labels.search_result_status_no_query");
+  });
+
+  it("uses the _over wording without the query for an estimated count and no keyword", async () => {
+    _state.q = "";
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { record_count_relation: "GREATER_THAN_OR_EQUAL_TO" }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-status").textContent).toContain("labels.search_result_status_over_no_query");
+  });
+
   it("uses the _over status key when record_count_relation is not EQUAL_TO", async () => {
     installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { record_count_relation: "GREATER_THAN_OR_EQUAL_TO" }) });
     await runSearch();

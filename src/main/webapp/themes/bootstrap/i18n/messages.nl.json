@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess wordt uitgevoerd in ontwikkelingsmodus. Installeer OpenSearch afzonderlijk in een productieomgeving.",
   "labels.search_result_status": "Zoekresultaten voor {bq} {b1} - {b2} van {b0}",
   "labels.search_result_status_over": "Zoekresultaten voor {bq} ongeveer {b0} of meer {b1} - {b2}",
+  "labels.search_result_status_no_query": "Zoekresultaten {b1} - {b2} van {b0}",
+  "labels.search_result_status_over_no_query": "Zoekresultaten {b1} - {b2} van ongeveer {b0} of meer",
   "labels.search_result_time": "({0} seconden)",
   "labels.similar_doc_result_status": "Vergelijkbare resultaten worden weergegeven.",
   "labels.search_result_more": "Meer..",

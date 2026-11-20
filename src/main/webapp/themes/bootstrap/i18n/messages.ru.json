@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess работает в режиме разработчика. Установите OpenSearch отдельно в производственной среде.",
   "labels.search_result_status": "Результаты {b1} - {b2} из {b0} для {bq}",
   "labels.search_result_status_over": "Результаты {b1} - {b2} из более чем {b0} для {bq}",
+  "labels.search_result_status_no_query": "Результаты {b1} - {b2} из {b0}",
+  "labels.search_result_status_over_no_query": "Результаты {b1} - {b2} из более чем {b0}",
   "labels.search_result_time": "({0} секунд)",
   "labels.similar_doc_result_status": "Отображение похожих результатов.",
   "labels.search_result_more": "Ещё..",

@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess wird im Entwicklungsmodus ausgeführt. Bitte installieren Sie OpenSearch in einer Produktionsumgebung separat.",
   "labels.search_result_status": "Ergebnisse {b1} - {b2} von {b0} für {bq}",
   "labels.search_result_status_over": "Ergebnisse {b1} - {b2} von über {b0} für {bq}",
+  "labels.search_result_status_no_query": "Ergebnisse {b1} - {b2} von {b0}",
+  "labels.search_result_status_over_no_query": "Ergebnisse {b1} - {b2} von über {b0}",
   "labels.search_result_time": "({0} Sekunden)",
   "labels.similar_doc_result_status": "Ähnliche Ergebnisse werden angezeigt.",
   "labels.search_result_more": "Mehr..",

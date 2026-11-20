@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess berjalan dalam mode pengembangan. Instal OpenSearch secara terpisah di lingkungan produksi.",
   "labels.search_result_status": "Hasil {b1} - {b2} dari {b0} untuk {bq}",
   "labels.search_result_status_over": "Hasil {b1} - {b2} dari lebih dari {b0} untuk {bq}",
+  "labels.search_result_status_no_query": "Hasil {b1} - {b2} dari {b0}",
+  "labels.search_result_status_over_no_query": "Hasil {b1} - {b2} dari lebih dari {b0}",
   "labels.search_result_time": "({0} detik)",
   "labels.similar_doc_result_status": "Menampilkan hasil serupa.",
   "labels.search_result_more": "Lebih..",
