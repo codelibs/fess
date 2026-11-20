@@ -120,16 +120,33 @@
       Array.prototype.forEach.call(nav.querySelectorAll('[data-toggle="tab"]'), function(link) {
         link.classList.remove("active");
         link.setAttribute("aria-selected", "false");
+        link.setAttribute("tabindex", "-1");
       });
     }
     trigger.classList.add("active");
     trigger.setAttribute("aria-selected", "true");
+    trigger.setAttribute("tabindex", "0");
     if (pane.parentNode) {
       Array.prototype.forEach.call(pane.parentNode.children, function(sibling) {
         sibling.classList.remove("active");
       });
     }
     pane.classList.add("active");
+  }
+
+  // Arrow keys, Home and End move between the tabs of one tab list (WAI-ARIA tabs pattern); Space opens the focused tab.
+  function moveTab(link, key) {
+    var nav = link.closest(".nav");
+    var tabs = nav ? Array.prototype.slice.call(nav.querySelectorAll('[data-toggle="tab"]')) : [];
+    var at = tabs.indexOf(link);
+    if (at < 0) {
+      return false;
+    }
+    var next = key === "Home" ? 0 : key === "End" ? tabs.length - 1
+      : key === "ArrowRight" ? (at + 1) % tabs.length : (at - 1 + tabs.length) % tabs.length;
+    tabs[next].focus();
+    activateTab(tabs[next]);
+    return true;
   }
 
   function togglePushMenu(trigger) {
@@ -201,6 +218,17 @@
   });
 
   document.addEventListener("keydown", function(event) {
+    // The side menu is a drawer only on a narrow screen; on a wide one Escape belongs to the field that has the focus.
+    if (event.key === "Escape" && !event.isComposing && !openModal && document.body.classList.contains("sidebar-open")
+        && window.matchMedia && window.matchMedia(NARROW).matches) {
+      document.body.classList.remove("sidebar-open");
+      var opener = document.querySelector('[data-widget="pushmenu"]');
+      if (opener) {
+        opener.setAttribute("aria-expanded", "false");
+        opener.focus();
+      }
+      return;
+    }
     if (openModal) {
       if (event.key === "Escape") {
         hideModal();
@@ -211,6 +239,18 @@
     }
     var target = event.target;
     if (!(target instanceof Element)) {
+      return;
+    }
+
+    // A key with a modifier belongs to the browser (Alt+Left is Back, Cmd+Left is Back on a Mac, Ctrl+Home scrolls).
+    var tab = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ? null : target.closest('[data-toggle="tab"]');
+    if (tab && (event.key === " " || /^(ArrowLeft|ArrowRight|Home|End)$/.test(event.key))) {
+      if (event.key === " ") {
+        activateTab(tab);
+        event.preventDefault();
+      } else if (moveTab(tab, event.key)) {
+        event.preventDefault();
+      }
       return;
     }
 
@@ -367,6 +407,21 @@
 
   var sectionCount = 0;
 
+  // The texts of the messages in a pane: one entry per message (a field's error list holds one <li> each), blanks left out.
+  function errorMessages(pane) {
+    var texts = [];
+    Array.prototype.forEach.call(pane.querySelectorAll(".has-error, .alert-danger"), function(box) {
+      var items = box.querySelectorAll("li");
+      Array.prototype.forEach.call(items.length ? items : [box], function(item) {
+        var text = (item.textContent || "").replace(/\s+/g, " ").trim();
+        if (text && texts.indexOf(text) < 0) {
+          texts.push(text);
+        }
+      });
+    });
+    return texts.join("; ");
+  }
+
   // A card body whose h4 headings split it into sections becomes tabs; the headings are the tab
   // titles. Anything before the first heading (messages) stays above the tabs.
   function buildSectionTabs(root) {
@@ -407,6 +462,7 @@
 
         var item = document.createElement("li");
         item.className = "nav-item";
+        item.setAttribute("role", "presentation");
         var link = document.createElement("a");
         link.className = "nav-link";
         link.id = id + "-tab";
@@ -420,6 +476,11 @@
 
         if (pane.querySelector(".has-error, .alert-danger")) {
           link.classList.add("has-error");
+          // the red dot after the title is not enough for a screen reader or a colour-blind reader: the messages are the tab's description
+          var messages = errorMessages(pane);
+          if (messages) {
+            link.setAttribute("title", messages);
+          }
           firstWithError = firstWithError || link;
         }
       });
@@ -454,13 +515,57 @@
     buildSectionTabs(root);
   }
 
+  // A link to a tab (#section-1-3) opens it; the tabs are built by initFormLayout, so this runs after it.
+  // A tab that holds an error stays the one that is shown when the page loads: the reader has to see the error.
+  function openTabOfAddress(keepErrorTab) {
+    var id;
+    try {
+      id = decodeURIComponent((location.hash || "").slice(1));
+    } catch (e) {
+      return; // a malformed address (#%) names nothing
+    }
+    var pane = id ? document.getElementById(id) : null;
+    var link = pane && pane.classList.contains("tab-pane") ? document.getElementById(id + "-tab") : null;
+    var nav = link && link.closest(".nav");
+    if (link && !(keepErrorTab === true && nav && nav.querySelector(".has-error"))) {
+      activateTab(link);
+    }
+  }
+
+  // The state of the side menu is told from the start, not only after the first click.
+  function initMenuState() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-widget="treeview"] .has-treeview > .nav-link'), function(link) {
+      link.setAttribute("aria-expanded", link.parentElement.classList.contains("menu-open") ? "true" : "false");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-widget="pushmenu"]'), function(button) {
+      var narrow = window.matchMedia && window.matchMedia(NARROW).matches;
+      var open = narrow ? document.body.classList.contains("sidebar-open") : !document.body.classList.contains("sidebar-collapse");
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  // Only the selected tab of a tab list is in the tab order; the arrow keys move between the others.
+  function initTabStops() {
+    Array.prototype.forEach.call(document.querySelectorAll('.nav [data-toggle="tab"].active'), function(selected) {
+      Array.prototype.forEach.call(selected.closest(".nav").querySelectorAll('[data-toggle="tab"]'), function(link) {
+        link.setAttribute("tabindex", link === selected ? "0" : "-1");
+      });
+    });
+  }
+
   function init() {
     initFormLayout(document);
     initRangePickers(document);
+    initMenuState();
+    openTabOfAddress(true);
+    initTabStops();
     focusFirstField();
   }
 
   document.addEventListener("invalid", revealInvalidField, true);
+  window.addEventListener("hashchange", function() {
+    openTabOfAddress(false);
+  });
 
   window.FessAdmin = { init: init };
 
