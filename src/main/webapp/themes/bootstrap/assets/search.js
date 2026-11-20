@@ -949,7 +949,9 @@ function renderResultsStatus(env) {
   const end   = env.end_record_number   || 0;
   const q     = state.q || "";
   const isOver = env.record_count_relation && env.record_count_relation !== "EQUAL_TO";
-  const statusKey = isOver ? "labels.search_result_status_over" : "labels.search_result_status";
+  // A search without a keyword (a filter-only search) has nothing to put after "for": the
+  // count line then uses the wording without the query.
+  const statusKey = "labels.search_result_status" + (isOver ? "_over" : "") + (q ? "" : "_no_query");
   const values = { b0: count.toLocaleString(), b1: String(start), b2: String(end), bq: q };
   t(statusKey).split(/(\{b[012q]\})/).forEach(part => {
     const m = part.match(/^\{(b[012q])\}$/);

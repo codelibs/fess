@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "正在开发模式下运行。请在生产环境中单独安装OpenSearch。",
   "labels.search_result_status": "{bq} 的搜索结果 {b0} 条中的 {b1} - {b2} 条",
   "labels.search_result_status_over": "{bq} 的搜索结果 大约 {b0} 条以上 {b1} - {b2} 条",
+  "labels.search_result_status_no_query": "搜索结果 {b0} 条中的 {b1} - {b2} 条",
+  "labels.search_result_status_over_no_query": "搜索结果 大约 {b0} 条以上 {b1} - {b2} 条",
   "labels.search_result_time": "({0} 秒)",
   "labels.similar_doc_result_status": "显示相似结果。",
   "labels.search_result_more": "更多..",

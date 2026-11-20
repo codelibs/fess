@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess działa w trybie programisty. Zainstaluj OpenSearch osobno w środowisku produkcyjnym.",
   "labels.search_result_status": "Wyniki wyszukiwania dla {bq} {b1} - {b2} z {b0}",
   "labels.search_result_status_over": "Wyniki wyszukiwania dla {bq} około {b0} lub więcej {b1} - {b2}",
+  "labels.search_result_status_no_query": "Wyniki wyszukiwania {b1} - {b2} z {b0}",
+  "labels.search_result_status_over_no_query": "Wyniki wyszukiwania {b1} - {b2} z około {b0} lub więcej",
   "labels.search_result_time": "({0} sekund)",
   "labels.similar_doc_result_status": "Wyświetlanie podobnych wyników.",
   "labels.search_result_more": "Więcej..",

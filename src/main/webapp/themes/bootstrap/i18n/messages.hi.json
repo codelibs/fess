@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess विकास मोड में चल रहा है। उत्पादन वातावरण के लिए इंस्टॉलेशन गाइड देखें।",
   "labels.search_result_status": "{bq} के लिए परिणाम {b1} - {b2} में से {b0}",
   "labels.search_result_status_over": "{bq} के लिए परिणाम {b1} - {b2} में से {b0} से अधिक",
+  "labels.search_result_status_no_query": "परिणाम {b1} - {b2} में से {b0}",
+  "labels.search_result_status_over_no_query": "परिणाम {b1} - {b2} में से {b0} से अधिक",
   "labels.search_result_time": "({0} सेकंड)",
   "labels.similar_doc_result_status": "समान परिणाम दिखाए जा रहे हैं।",
   "labels.search_result_more": "और...",

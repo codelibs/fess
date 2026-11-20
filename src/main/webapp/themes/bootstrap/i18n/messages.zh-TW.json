@@ -252,6 +252,8 @@
   "labels.development_mode_warning": "Fess 正在開發模式下執行。請在生產環境中單獨安裝 OpenSearch。",
   "labels.search_result_status": "{bq} 的搜尋結果 {b0} 條中的 {b1} - {b2} 條",
   "labels.search_result_status_over": "{bq} 的搜尋結果 大約 {b0} 條以上 {b1} - {b2} 條",
+  "labels.search_result_status_no_query": "搜尋結果 {b0} 條中的 {b1} - {b2} 條",
+  "labels.search_result_status_over_no_query": "搜尋結果 大約 {b0} 條以上 {b1} - {b2} 條",
   "labels.search_result_time": "({0} 秒)",
   "labels.similar_doc_result_status": "顯示相似結果。",
   "labels.search_result_more": "更多..",
