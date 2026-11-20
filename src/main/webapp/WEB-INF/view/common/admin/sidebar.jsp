@@ -22,7 +22,7 @@
 				</div>
 			</form>
 		</c:if>
-		<nav class="mt-2">
+		<nav class="mt-2" aria-label="<la:message key="labels.sidebar.menu" />">
 
 		<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
 			<li class="nav-header"><la:message key="labels.sidebar.menu" /></li>

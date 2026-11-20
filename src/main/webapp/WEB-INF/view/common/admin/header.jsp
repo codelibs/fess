@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <a href="#mainContent" class="sr-only sr-only-focusable"><la:message
 		key="labels.skip_to_main_content" /></a>
-<nav class="main-header navbar navbar-expand navbar-dark navbar-secondary">
+<header class="main-header navbar navbar-expand navbar-dark navbar-secondary">
 	<ul class="navbar-nav">
 		<li class="nav-item">
 			<a class="nav-link" data-widget="pushmenu" href="#">
@@ -29,4 +29,4 @@
 		</c:if>
 		<li class="nav-item" title="<la:message key="labels.tooltip_logout" />"><a class="nav-link" href="${contextPath}/logout" aria-label="<la:message key="labels.tooltip_logout" />"><i class="fa fa-sign-out-alt" aria-hidden="true"></i></a></li>
 	</ul>
-</nav>
+</header>
