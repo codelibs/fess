@@ -19,8 +19,18 @@ libraries, change it:
   kept, but only the ones `admin.css` defines. A Bootstrap class it does not define has no effect.
 * The search log screen takes its time range from two native date-time inputs; the value sent to the
   server (`yyyy-MM-dd HH:mm - yyyy-MM-dd HH:mm`) is unchanged.
-* The bundled `bootstrap` search theme is not affected: it still loads its own Bootstrap 5 files from the
-  web application root (`css/bootstrap.min.css`, `js/bootstrap.min.js`).
+
+**A search theme no longer gets Bootstrap, Popper or Font Awesome from the web application root.**
+`css/bootstrap.min.css`, `css/font-awesome.min.css`, `css/fonts/`, `js/bootstrap.min.js` and `js/popper.min.js`
+are removed, so a change to one of them can no longer change every theme. The bundled `bootstrap` theme
+carries its own copies under `themes/bootstrap/assets/vendor/` (Bootstrap 5.3.9, was 5.3.0; Popper 2.11.8;
+Font Awesome Free 7.3.1, was 5.12.0), and the themes of the `fess-themes` repository that show icons carry
+Font Awesome the same way. **A theme that still links a removed file loses its styles, scripts or icons
+(`css/font-awesome.min.css` is the common one): update the `fess-themes` themes to the versions released
+for 15.10, and for a theme of your own copy the library into the theme and link it as
+`{{themePath}}/assets/vendor/...`.** Font Awesome 7 keeps the version 5 and 6 icon names (`fa-search`,
+`fa-pencil-alt`, ...) and, with `v4-shims.min.css`, the old `-o` names (`fa fa-star-o`, ...) that Font
+Awesome 5.12 did not show. Only `woff2` fonts are shipped.
 
 **A search result whose URL has a scheme outside `search.result.link.schemes` is no longer linked or
 redirected.** The setting is new in 15.10 (fess#3777). Its default is the list the bootstrap theme

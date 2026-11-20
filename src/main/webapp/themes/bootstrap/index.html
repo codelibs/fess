@@ -10,8 +10,11 @@
        theme is relative to it, so the theme works under any context path. Fess also replaces
        the double-braced themePath placeholder with themes/<this theme's name>, so a renamed
        copy of this theme loads its own assets. -->
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{themePath}}/assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="{{themePath}}/assets/vendor/fontawesome/css/fontawesome.min.css">
+  <link rel="stylesheet" href="{{themePath}}/assets/vendor/fontawesome/css/solid.min.css">
+  <link rel="stylesheet" href="{{themePath}}/assets/vendor/fontawesome/css/regular.min.css">
+  <link rel="stylesheet" href="{{themePath}}/assets/vendor/fontawesome/css/v4-shims.min.css">
   <link rel="stylesheet" href="{{themePath}}/assets/styles.css">
   <link rel="icon" href="favicon.ico">
 
@@ -379,8 +382,8 @@
     non-bundle build needs Popper's createPopper for dropdowns/tooltips), and both
     classic defer scripts MUST appear before app.js (type="module") in document order.
   -->
-  <script src="js/popper.min.js" defer></script>
-  <script src="js/bootstrap.min.js" defer></script>
+  <script src="{{themePath}}/assets/vendor/popper/popper.min.js" defer></script>
+  <script src="{{themePath}}/assets/vendor/bootstrap/bootstrap.min.js" defer></script>
   <script type="module" src="{{themePath}}/assets/app.js"></script>
 </body>
 </html>
