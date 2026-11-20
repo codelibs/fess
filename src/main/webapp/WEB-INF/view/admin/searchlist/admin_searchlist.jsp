@@ -145,8 +145,7 @@ ${fe:html(true)}
                                                     </la:link></li>
                                                 </c:if>
                                                 <c:if test="${!existPrevPage}">
-                                                    <li class="page-item disabled"><a class="page-link"
-                                                                                      href="#"><la:message
+                                                    <li class="page-item disabled"><a class="page-link" aria-disabled="true"><la:message
                                                             key="labels.prev_page"/></a></li>
                                                 </c:if>
                                                 <c:forEach var="pageNumber" varStatus="s"
@@ -169,9 +168,7 @@ ${fe:html(true)}
                                                     </li>
                                                 </c:if>
                                                 <c:if test="${!existNextPage}">
-                                                    <li class="next disabled"><a
-                                                            class="page-link"
-                                                            href="#"><la:message
+                                                    <li class="page-item disabled"><a class="page-link" aria-disabled="true"><la:message
                                                             key="labels.next_page"/></a></li>
                                                 </c:if>
                                             </ul>
