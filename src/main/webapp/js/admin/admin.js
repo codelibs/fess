@@ -254,6 +254,16 @@
       return;
     }
 
+    // A link that is announced as a button (the groups of the side menu) opens with Space too. A held key
+    // opens it once, and a combination with a modifier is left to the browser.
+    if (event.key === " " && target.matches('a[role="button"]') && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+      event.preventDefault();
+      if (!event.repeat) {
+        target.click();
+      }
+      return;
+    }
+
     // A row that is announced as a button opens with Enter or Space, like a button.
     if (target.matches(".table tr[data-href]")) {
       if (event.key === "Enter" || event.key === " ") {

@@ -330,6 +330,28 @@ describe("collapse, tabs and the side menu", () => {
     expect(stops()).toEqual(["-1", "0", "-1"]);
   });
 
+  it("opens a menu group with Space as well as Enter: it is announced as a button", () => {
+    mount(`<ul data-widget="treeview"><li class="nav-item has-treeview"><a href="#" role="button" class="nav-link" id="g">g</a></li></ul>`);
+    const space = press(document.getElementById("g"), { key: " " });
+    expect(space.defaultPrevented).toBe(true);
+    expect(document.getElementById("g").parentElement.classList.contains("menu-open")).toBe(true);
+  });
+
+  it("opens a menu group once when Space is held, and leaves Space with a modifier to the browser", () => {
+    mount(`<ul data-widget="treeview"><li class="nav-item has-treeview"><a href="#" role="button" class="nav-link" id="g">g</a></li></ul>`);
+    const group = document.getElementById("g").parentElement;
+    press(document.getElementById("g"), { key: " " });
+    expect(group.classList.contains("menu-open")).toBe(true);
+    const held = press(document.getElementById("g"), { key: " ", repeat: true });
+    expect(held.defaultPrevented).toBe(true);
+    expect(group.classList.contains("menu-open")).toBe(true);
+    ["altKey", "ctrlKey", "metaKey", "shiftKey"].forEach((modifier) => {
+      const event = press(document.getElementById("g"), { key: " ", [modifier]: true });
+      expect(event.defaultPrevented).toBe(false);
+    });
+    expect(group.classList.contains("menu-open")).toBe(true);
+  });
+
   it("tells the state of the menu groups and of the menu button from the start", () => {
     window.matchMedia = (query) => ({ matches: false, media: query });
     mount(`<a id="p" data-widget="pushmenu" href="#">m</a>

@@ -39,7 +39,7 @@
 				
             <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or (fe:permission('admin-dict-view') and not fesenPluginless) or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view') or fe:permission('admin-theme-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='system'}">menu-open</c:if>">
-				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='system'}">active</c:if>">
+				<a href="#" role="button" class="nav-link <c:if test="${param.menuCategoryType=='system'}">active</c:if>">
 					<i class='nav-icon fa fa-laptop' aria-hidden="true"></i>
 					<p>
 						<la:message key="labels.menu_system" />
@@ -116,7 +116,7 @@
 			</c:if>
 			<c:if test="${fe:permission('admin-webconfig-view') or fe:permission('admin-fileconfig-view') or fe:permission('admin-dataconfig-view') or fe:permission('admin-labeltype-view') or fe:permission('admin-tagtype-view') or fe:permission('admin-keymatch-view') or fe:permission('admin-boostdoc-view') or fe:permission('admin-relatedcontent-view') or fe:permission('admin-relatedquery-view') or fe:permission('admin-pathmap-view') or fe:permission('admin-webauth-view') or fe:permission('admin-fileauth-view') or fe:permission('admin-reqheader-view') or fe:permission('admin-duplicatehost-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='crawl'}">menu-open</c:if>">
-				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>">
+				<a href="#" role="button" class="nav-link <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>">
 					<i class='nav-icon fa fa-cogs' aria-hidden="true"></i>
 					<p>
 						<la:message key="labels.menu_crawl" />
@@ -235,7 +235,7 @@
 						
 			<c:if test="${fe:permission('admin-user-view') or fe:permission('admin-role-view') or fe:permission('admin-group-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='user'}">menu-open</c:if>">
-				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='user'}">active</c:if>">
+				<a href="#" role="button" class="nav-link <c:if test="${param.menuCategoryType=='user'}">active</c:if>">
 					<i class='nav-icon fa fa-user' aria-hidden="true"></i>
 					<p>
 						<la:message key="labels.menu_user" />
@@ -269,7 +269,7 @@
 			<c:if test="${fe:permission('admin-suggest-view') or fe:permission('admin-elevateword-view') or fe:permission('admin-badword-view')}">
 
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='suggest'}">menu-open</c:if>">
-				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='suggest'}">active</c:if>">
+				<a href="#" role="button" class="nav-link <c:if test="${param.menuCategoryType=='suggest'}">active</c:if>">
 					<i class='nav-icon fa fa-list' aria-hidden="true"></i>
 					<p>
 						<la:message key="labels.menu_suggest" />
@@ -303,7 +303,7 @@
 
 			<c:if test="${fe:permission('admin-systeminfo-view') or fe:permission('admin-searchlog-view') or fe:permission('admin-joblog-view') or fe:permission('admin-crawlinginfo-view') or fe:permission('admin-log-view') or fe:permission('admin-failureurl-view') or fe:permission('admin-searchlist-view') or fe:permission('admin-docreport-view') or fe:permission('admin-backup-view') or fe:permission('admin-maintenance-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='log'}">menu-open</c:if>">
-				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='log'}">active</c:if>">
+				<a href="#" role="button" class="nav-link <c:if test="${param.menuCategoryType=='log'}">active</c:if>">
 					<i class='nav-icon fa fa-rss' aria-hidden="true"></i>
 					<p>
 						<la:message key="labels.menu_system_log" />

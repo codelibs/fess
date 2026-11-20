@@ -27,8 +27,7 @@ ${fe:html(true)}
                             <li class="breadcrumb-item active"><la:link href="/admin/elevateword">
                                 <la:message key="labels.elevate_word_link_list"/>
                             </la:link></li>
-                            <li class="breadcrumb-item active"><a href="#"><la:message
-                                    key="labels.elevate_word_link_upload"/></a></li>
+                            <li class="breadcrumb-item active" aria-current="page"><la:message key="labels.elevate_word_link_upload"/></li>
                         </ol>
                     </div>
                 </div>
