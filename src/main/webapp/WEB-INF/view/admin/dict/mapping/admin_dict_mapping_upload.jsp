@@ -44,9 +44,9 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline card-success">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <la:message key="labels.dict_mapping_link_upload"/>
-                                </h3>
+                                </h2>
                                 <div class="card-tools">
                                     <div class="btn-group">
                                         <la:link href="/admin/dict"

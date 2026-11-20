@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title"><la:message key="labels.searchlog_table_queries"/></h3>
+        <h2 class="card-title"><la:message key="labels.searchlog_table_queries"/></h2>
         <div class="card-tools">
             <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="queries"/></jsp:include>
         </div>
@@ -51,7 +51,7 @@
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><la:message key="labels.searchlog_table_zeroHitQueries"/></h3>
+                <h2 class="card-title"><la:message key="labels.searchlog_table_zeroHitQueries"/></h2>
                 <div class="card-tools">
                     <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="zeroHitQueries"/></jsp:include>
                 </div>
@@ -91,7 +91,7 @@
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><la:message key="labels.searchlog_table_zeroClickQueries"/></h3>
+                <h2 class="card-title"><la:message key="labels.searchlog_table_zeroClickQueries"/></h2>
                 <div class="card-tools">
                     <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="zeroClickQueries"/></jsp:include>
                 </div>

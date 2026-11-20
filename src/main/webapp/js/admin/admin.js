@@ -445,12 +445,16 @@
     return texts.join("; ");
   }
 
-  // A card body whose h4 headings split it into sections becomes tabs; the headings are the tab
+  // The heading of a section: h2 on a screen whose sections sit right under the page title, h3 on one
+  // whose card has its own h2 title. The page decides the level, so any of them splits a card body.
+  var SECTION_HEAD = /^H[2-4]$/;
+
+  // A card body whose headings split it into sections becomes tabs; the headings are the tab
   // titles. Anything before the first heading (messages) stays above the tabs.
   function buildSectionTabs(root) {
     Array.prototype.forEach.call(root.querySelectorAll(".card-body"), function(body) {
       var heads = Array.prototype.filter.call(body.children, function(child) {
-        return child.tagName === "H4";
+        return SECTION_HEAD.test(child.tagName);
       });
       if (heads.length < 2 || body.getAttribute("data-sections-ready")) {
         return;
@@ -474,7 +478,7 @@
         pane.setAttribute("role", "tabpanel");
         pane.setAttribute("aria-labelledby", id + "-tab");
         var nodes = [head];
-        for (var node = head.nextElementSibling; node && node.tagName !== "H4"; node = node.nextElementSibling) {
+        for (var node = head.nextElementSibling; node && !SECTION_HEAD.test(node.tagName); node = node.nextElementSibling) {
           nodes.push(node);
         }
         nodes.forEach(function(node) {

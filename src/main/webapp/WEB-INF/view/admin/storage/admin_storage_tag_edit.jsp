@@ -40,10 +40,10 @@ ${fe:html(true)}
 						<div class="col-md-12">
 							<div class="card card-outline card-success">
 								<div class="card-header">
-									<h3 class="card-title">
+									<h2 class="card-title">
 										<la:message key="labels.storage_title_tag" />
 										<c:if test="${path!=null}">${f:h(path)}/</c:if>${f:h(name)}
-									</h3>
+									</h2>
 								</div>
 								<div class="card-body">
 									<div>

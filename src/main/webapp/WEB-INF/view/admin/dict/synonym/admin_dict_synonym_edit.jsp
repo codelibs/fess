@@ -55,14 +55,14 @@ ${fe:html(true)}
                         <div
                                 class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <c:if test="${crudMode == 1}">
                                         <la:message key="labels.dict_synonym_link_create"/>
                                     </c:if>
                                     <c:if test="${crudMode == 2}">
                                         <la:message key="labels.dict_synonym_link_edit"/>
                                     </c:if>
-                                </h3>
+                                </h2>
                                 <div class="card-tools">
                                     <div class="btn-group">
                                         <la:link href="/admin/dict"

@@ -44,7 +44,7 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <c:if test="${crudMode == null}">
                                         <la:message key="labels.crud_title_list"/>
                                     </c:if>
@@ -60,7 +60,7 @@ ${fe:html(true)}
                                     <c:if test="${crudMode == 4}">
                                         <la:message key="labels.crud_title_details"/>
                                     </c:if>
-                                </h3>
+                                </h2>
                                 <div class="card-tools">
                                     <div class="btn-group">
                                         <c:choose>

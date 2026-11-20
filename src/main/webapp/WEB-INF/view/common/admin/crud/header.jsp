@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<h3 class="card-title">
+<h2 class="card-title">
 	<c:if test="${crudMode == null}">
 		<la:message key="labels.crud_title_list" />
 	</c:if>
@@ -15,7 +15,7 @@
 	<c:if test="${crudMode == 4}">
 		<la:message key="labels.crud_title_details" />
 	</c:if>
-</h3>
+</h2>
 <div class="card-tools">
 	<c:choose>
 		<c:when test="${crudMode == null}">

@@ -38,7 +38,7 @@ ${fe:html(true)}
                                     <la:errors property="_global"/>
                                 </div>
                                     <%-- System --%>
-                                <h4><la:message key="labels.general_menu_system"/></h4>
+                                <h2><la:message key="labels.general_menu_system"/></h2>
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.web_api_json_enabled"/></span>
@@ -235,7 +235,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Crawler --%>
-                                <h4><la:message key="labels.general_menu_crawler"/></h4>
+                                <h2><la:message key="labels.general_menu_crawler"/></h2>
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.incremental_crawling"/></span>
@@ -302,7 +302,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Logging --%>
-                                <h4><la:message key="labels.general_menu_logging"/></h4>
+                                <h2><la:message key="labels.general_menu_logging"/></h2>
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.search_log_enabled"/></span>
@@ -402,7 +402,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Suggest --%>
-                                <h4><la:message key="labels.general_menu_suggest"/></h4>
+                                <h2><la:message key="labels.general_menu_suggest"/></h2>
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.suggest_search_log_enabled"/></span>
@@ -443,7 +443,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- LDAP --%>
-                                <h4><la:message key="labels.general_menu_ldap"/></h4>
+                                <h2><la:message key="labels.general_menu_ldap"/></h2>
                                 <div class="form-group row">
                                     <label for="ldapProviderUrl"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -547,7 +547,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- OpenID Connect --%>
-                                <h4><la:message key="labels.general_menu_oic"/></h4>
+                                <h2><la:message key="labels.general_menu_oic"/></h2>
                                 <div class="form-group row">
                                     <label for="oicClientId"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -639,7 +639,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- SAML --%>
-                                <h4><la:message key="labels.general_menu_saml"/></h4>
+                                <h2><la:message key="labels.general_menu_saml"/></h2>
                                 <div class="form-group row">
                                     <label for="samlIdpEntityid"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -771,7 +771,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- SPNEGO --%>
-                                <h4><la:message key="labels.general_menu_spnego"/></h4>
+                                <h2><la:message key="labels.general_menu_spnego"/></h2>
                                 <div class="form-group row">
                                     <label for="spnegoKrb5Conf"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -918,7 +918,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Entra ID --%>
-                                <h4><la:message key="labels.general_menu_entraid"/></h4>
+                                <h2><la:message key="labels.general_menu_entraid"/></h2>
                                 <div class="form-group row">
                                     <label for="entraidTenant"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -1036,7 +1036,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Notice --%>
-                                <h4><la:message key="labels.general_menu_notice"/></h4>
+                                <h2><la:message key="labels.general_menu_notice"/></h2>
                                 <div class="form-group row">
                                     <label for="notificationLogin"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -1068,7 +1068,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Notify --%>
-                                <h4><la:message key="labels.general_menu_notify"/></h4>
+                                <h2><la:message key="labels.general_menu_notify"/></h2>
                                 <div class="form-group row">
                                     <label for="notificationTo" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.notification_to"/></label>
@@ -1140,7 +1140,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                     <%-- Storage --%>
-                                <h4><la:message key="labels.general_storage"/></h4>
+                                <h2><la:message key="labels.general_storage"/></h2>
                                 <div class="form-group row">
                                     <label for="storageType"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -1227,7 +1227,7 @@ ${fe:html(true)}
                                 </div>
                                     <%-- RAG --%>
                                 <c:if test="${ragEnabled}">
-                                <h4><la:message key="labels.general_rag"/></h4>
+                                <h2><la:message key="labels.general_rag"/></h2>
                                 <div class="form-group row">
                                     <label for="ragLlmName"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message

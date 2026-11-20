@@ -33,9 +33,9 @@ ${fe:html(true)}
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.log_configuration"/>
-                            </h3>
+                            </h2>
                         </div>
                         <div class="card-body">
                             <%-- Message --%>

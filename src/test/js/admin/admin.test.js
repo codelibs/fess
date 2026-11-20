@@ -557,6 +557,12 @@ describe("form layout", () => {
     expect(document.querySelector("#b > #msg")).not.toBeNull();
   });
 
+  it.each(["h2", "h3"])("also splits a card body at %s headings, the level the page gives its sections", (tag) => {
+    mount(sections.replace(/<(\/?)h4>/g, `<$1${tag}>`));
+    expect(Array.from(document.querySelectorAll("#b > .form-tabs .nav-link")).map((l) => l.textContent)).toEqual(["Basic", "Crawl", "Access"]);
+    expect(document.querySelectorAll(`#b .tab-pane > ${tag}.section-title`).length).toBe(3);
+  });
+
   it("switches the section with the tab", () => {
     mount(sections);
     document.querySelectorAll("#b .nav-link")[2].click();

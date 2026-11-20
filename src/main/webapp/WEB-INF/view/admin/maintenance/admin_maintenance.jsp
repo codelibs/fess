@@ -39,9 +39,9 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <la:message key="labels.upgrade_reindex"/>
-                                </h3>
+                                </h2>
                             </div>
                             <div class="card-body">
                                 <div class="form-group row">
@@ -106,9 +106,9 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <la:message key="labels.reload_doc_index"/>
-                                </h3>
+                                </h2>
                             </div>
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary"
@@ -124,9 +124,9 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <la:message key="labels.rebuild_config_index"/>
-                                </h3>
+                                </h2>
                             </div>
                             <div class="card-body">
                                 <div class="form-group row">
@@ -172,9 +172,9 @@ ${fe:html(true)}
                                     <div class="modal-dialog">
                                         <div class="modal-content bg-warning">
                                             <div class="modal-header">
-                                                <h4 class="modal-title">
+                                                <h2 class="modal-title">
                                                     <la:message key="labels.rebuild_config_index"/>
-                                                </h4>
+                                                </h2>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                         aria-label="<la:message key="labels.crud_button_close"/>">
                                                     <span aria-hidden="true">&times;</span>
@@ -206,9 +206,9 @@ ${fe:html(true)}
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
-                                <h3 class="card-title">
+                                <h2 class="card-title">
                                     <la:message key="labels.clear_crawler_index"/>
-                                </h3>
+                                </h2>
                             </div>
                             <div class="card-footer">
                                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmToClearCrawlerIndex">
@@ -220,9 +220,9 @@ ${fe:html(true)}
                                     <div class="modal-dialog">
                                         <div class="modal-content bg-danger">
                                             <div class="modal-header">
-                                                <h4 class="modal-title">
+                                                <h2 class="modal-title">
                                                     <la:message key="labels.clear_crawler_index_button"/>
-                                                </h4>
+                                                </h2>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                         aria-label="<la:message key="labels.crud_button_close"/>">
                                                     <span aria-hidden="true">×</span>
@@ -255,9 +255,9 @@ ${fe:html(true)}
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.diagnostic_logs"/>
-                            </h3>
+                            </h2>
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary"

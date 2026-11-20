@@ -33,9 +33,9 @@ ${fe:html(true)}
                 <div class="col-md-12">
                     <div class="card card-outline card-success">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <la:message key="labels.theme_upload"/>
-                            </h3>
+                            </h2>
                         </div>
                         <la:form action="/admin/theme/upload" enctype="multipart/form-data">
                             <div class="card-body">

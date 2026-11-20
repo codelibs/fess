@@ -28,8 +28,8 @@
         <c:forEach var="group" items="${report.groups}" varStatus="st">
             <div class="card docreport-group">
                 <div class="card-header">
-                    <h3 class="card-title"><fmt:formatNumber value="${group.count}" var="groupCount"/><la:message
-                            key="labels.docreport_duplicate_group" arg0="${st.count}" arg1="${groupCount}"/></h3>
+                    <h2 class="card-title"><fmt:formatNumber value="${group.count}" var="groupCount"/><la:message
+                            key="labels.docreport_duplicate_group" arg0="${st.count}" arg1="${groupCount}"/></h2>
                 </div>
                 <div class="card-body p-0 table-responsive">
                     <table class="table table-sm table-hover mb-0">

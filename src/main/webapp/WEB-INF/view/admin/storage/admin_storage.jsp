@@ -33,7 +33,7 @@ ${fe:html(true)}
                 <div class="col-md-12">
                     <div class="card card-outline card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <a aria-hidden="true" href="${contextPath}/admin/storage/">
                                     <i class="fas fa-database fa-fw"
                                        aria-hidden="true"></i>${f:h(bucket)}
@@ -45,7 +45,7 @@ ${fe:html(true)}
                                 / <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir" href="#"
                                     aria-label="<la:message key="labels.crud_title_create"/>"><i
                                     class="fas fa-folder fa-fw" aria-hidden="true"></i></a></c:if>
-                            </h3>
+                            </h2>
                             <c:if test="${editable}">
 								<div class="card-tools">
                                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
@@ -73,9 +73,9 @@ ${fe:html(true)}
                                                      enctype="multipart/form-data" styleClass="modal-content">
                                                 <input type="hidden" name="path" value="${f:h(path)}"/>
                                                 <div class="modal-header">
-                                                    <h4 class="modal-title">
+                                                    <h2 class="modal-title">
                                                         <la:message key="labels.crud_title_create"/>
-                                                    </h4>
+                                                    </h2>
                                                     <button type="button" class="close" data-dismiss="modal"
                                                             aria-label="<la:message key="labels.crud_button_close"/>">
                                                         <span aria-hidden="true">&times;</span>
@@ -110,9 +110,9 @@ ${fe:html(true)}
                                                      styleClass="modal-content">
                                                 <input type="hidden" name="path" value="${f:h(path)}"/>
                                                 <div class="modal-header">
-                                                    <h4 class="modal-title">
+                                                    <h2 class="modal-title">
                                                         <la:message key="labels.storage_upload_file"/>
-                                                    </h4>
+                                                    </h2>
                                                     <button type="button" class="close" data-dismiss="modal"
                                                             aria-label="<la:message key="labels.crud_button_close"/>">
                                                         <span aria-hidden="true">&times;</span>
@@ -222,11 +222,11 @@ ${fe:html(true)}
                                                                 <div class="modal-dialog">
                                                                     <div class="modal-content bg-danger">
                                                                         <div class="modal-header">
-                                                                            <h4 class="modal-title">
+                                                                            <h2 class="modal-title">
                                                                                 <la:message
                                                                                         key="labels.crud_title_delete"/>
                                                                                 : ${f:h(data.name)}
-                                                                            </h4>
+                                                                            </h2>
                                                                             <button type="button" class="close"
                                                                                     data-dismiss="modal"
                                                                                     aria-label="<la:message key="labels.crud_button_close"/>">
