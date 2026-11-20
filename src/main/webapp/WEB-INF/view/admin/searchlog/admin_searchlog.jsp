@@ -119,8 +119,11 @@ ${fe:html(true)}
                                     <label for="requestedTimeRangeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_requestedtime"/></label>
                                     <div class="col-sm-4">
+                                        <c:set var="range_from"><la:message key="labels.searchlog_range_from"/></c:set>
+                                        <c:set var="range_to"><la:message key="labels.searchlog_range_to"/></c:set>
                                         <la:text styleId="requestedTimeRangeSearch" property="requestedTimeRange"
-                                                 styleClass="form-control datetimerange"/>
+                                                 styleClass="form-control datetimerange"
+                                                 data-label-from="${f:h(range_from)}" data-label-to="${f:h(range_to)}"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
