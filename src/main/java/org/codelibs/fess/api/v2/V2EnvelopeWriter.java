@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.curl.CurlException;
 import org.codelibs.fesen.client.node.NodeUnavailableException;
 import org.codelibs.fesen.opensearch.OpenSearchException;
+import org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.exception.EnvelopeException;
@@ -189,6 +190,26 @@ public class V2EnvelopeWriter {
                         .toMessageList(locale != null ? locale : Locale.ENGLISH, messages)
                         .stream()
                         .collect(Collectors.joining(" ")));
+    }
+
+    /**
+     * Writes the {@code invalid_request} envelope for a request parameter that was refused.
+     *
+     * <p>A refusal that carries a message code is written in the caller's language; the English
+     * message of the exception is for the log and is what a refusal without a code is written with.</p>
+     *
+     * @param res the HTTP response to write to
+     * @param cause the refused parameter
+     * @param locale the caller's locale; {@code null} falls back to English
+     * @throws IOException if writing the envelope fails
+     */
+    public void writeInvalidRequest(final HttpServletResponse res, final InvalidRequestParameterException cause, final Locale locale)
+            throws IOException {
+        if (cause.getMessageCode() != null) {
+            writeUserMessageError(res, V2ErrorCode.INVALID_REQUEST, locale, cause.getMessageCode());
+        } else {
+            writeError(res, V2ErrorCode.INVALID_REQUEST, cause.getMessage());
+        }
     }
 
     /**

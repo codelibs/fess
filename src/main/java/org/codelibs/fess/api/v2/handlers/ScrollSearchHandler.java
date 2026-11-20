@@ -162,7 +162,7 @@ public class ScrollSearchHandler {
                 logger.debug("Loaded {} documents", count);
             }
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/documents/all request", e);

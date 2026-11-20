@@ -143,7 +143,7 @@ public class SearchHandler {
                     ComponentUtil.getV2UserPayloads().permissionState(userBean.isPresent() ? userBean.get() : null));
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/search request", e);

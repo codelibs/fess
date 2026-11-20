@@ -31,4 +31,13 @@ public class InvalidRequestParameterExceptionTest extends UnitFessTestCase {
     public void test_pageSizeIsSubtype() {
         assertTrue(InvalidRequestParameterException.class.isAssignableFrom(V2JsonRequestParams.InvalidPageSizeException.class));
     }
+
+    @Test
+    public void test_messageCodeIsOptional() {
+        assertNull(new InvalidRequestParameterException("bad").getMessageCode());
+        final InvalidRequestParameterException e =
+                new InvalidRequestParameterException(messages -> messages.addErrorsInvalidStartPosition("_global"), "bad");
+        assertNotNull(e.getMessageCode());
+        assertEquals("bad", e.getMessage());
+    }
 }
