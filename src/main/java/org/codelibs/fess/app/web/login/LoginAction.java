@@ -27,6 +27,7 @@ import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -75,13 +76,22 @@ public class LoginAction extends FessLoginAction {
     //                                                                      ==============
 
     /**
-     * Displays the login page.
+     * Displays the login page, or sends a user who is already signed in where a login would have sent them.
      *
-     * @return the HTML response for the login page
+     * <p>Asking a signed-in user to sign in again leaves them with a form that cannot do anything for
+     * them, for example when a blocked cross-site logout or a bookmark leads here. The target is the
+     * one {@link #redirectByUser} gives a user who has just logged in: it is a page the user's roles
+     * can open, so it does not send the user back here.</p>
+     *
+     * @return the HTML response for the login page, or the redirect for a signed-in user
      */
     @Execute
     public HtmlResponse index() {
         getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
+        final OptionalThing<FessUserBean> user = getUserBean();
+        if (user.isPresent()) {
+            return redirectByUser(user.get());
+        }
         return asIndexPage(null).useForm(LoginForm.class);
     }
 
