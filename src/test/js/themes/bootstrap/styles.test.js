@@ -21,3 +21,12 @@ describe("styles.css under prefers-reduced-motion: reduce", () => {
     expect(reducedMotion).toMatch(/\.result-card \{ transition: none; \}/);
   });
 });
+
+describe("styles.css target size", () => {
+  it("keeps each link of the options bar at least 24 x 24 CSS px", () => {
+    const rule = css.match(/#options-bar \.badge \{([^}]*)\}/);
+    expect(rule).not.toBeNull();
+    expect(rule[1]).toMatch(/min-height: 24px/);
+    expect(rule[1]).toMatch(/min-width: 24px/);
+  });
+});
