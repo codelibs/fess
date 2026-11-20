@@ -281,13 +281,22 @@
   });
 
   // ---- page preparation ----------------------------------------------------------------------
+  // Where the screen puts the cursor when it opens: on the field that the server refused, else on the
+  // message that tells a form was saved (the page is a new one after the redirect, so the cursor would
+  // stay on the document), else on the first field - except under a finger, where a focused field
+  // opens the on-screen keyboard over the form before anybody asked for it.
   function focusFirstField() {
     var first = document.querySelector(':is(.login-box, section.content) :is(input[type="text"], select, textarea)');
     var error = document.querySelector(".form-group .has-error");
     var errorField = error && error.nextElementSibling;
+    var message = document.querySelector("section.content .alert-success");
+    var touch = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
     if (errorField && errorField.matches("input, select, textarea")) {
       errorField.focus();
-    } else if (first) {
+    } else if (message) {
+      message.setAttribute("tabindex", "-1");
+      message.focus();
+    } else if (first && !touch) {
       first.focus();
     }
   }
