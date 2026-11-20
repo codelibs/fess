@@ -297,6 +297,7 @@
   "error.detail_not_found_on_file_system": "Plik nie został znaleziony w systemie plików.",
   "error.detail_unauthorized_request": "Nie masz uprawnień dostępu do tego zasobu.",
   "error.detail_bad_authentication": "Uwierzytelnianie nie powiodło się. Zaloguj się i spróbuj ponownie.",
+  "error.detail_search_engine_unavailable": "Wyszukiwarka jest niedostępna. Spróbuj ponownie później.",
   "error.detail_not_load_from_server": "Nie udało się załadować treści z serwera.",
   "labels.cache_title": "Strona z pamięci podręcznej",
   "labels.cache_url": "URL",

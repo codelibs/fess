@@ -297,6 +297,7 @@
   "error.detail_not_found_on_file_system": "ファイルシステム上にファイルが見つかりませんでした。",
   "error.detail_unauthorized_request": "このリソースへのアクセス権限がありません。",
   "error.detail_bad_authentication": "認証に失敗しました。ログインして再度お試しください。",
+  "error.detail_search_engine_unavailable": "検索エンジンに接続できません。しばらくしてからもう一度お試しください。",
   "error.detail_not_load_from_server": "サーバーからコンテンツを読み込めませんでした。",
   "labels.cache_title": "キャッシュされたページ",
   "labels.cache_url": "URL",

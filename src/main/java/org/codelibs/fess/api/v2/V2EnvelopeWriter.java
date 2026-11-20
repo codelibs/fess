@@ -354,8 +354,11 @@ public class V2EnvelopeWriter {
      * <p>A refused connection counts only below a {@link CurlException}, the failure of a request
      * through the engine client; the same {@link ConnectException} from another client, such as the
      * one of an LLM provider, says nothing about the search engine.</p>
+     *
+     * @param cause the failure to classify, or {@code null}
+     * @return {@code true} when the failure is the search engine being out of reach or out of capacity
      */
-    private static boolean isSearchEngineUnavailable(final Throwable cause) {
+    public static boolean isSearchEngineUnavailable(final Throwable cause) {
         boolean inEngineRequest = false;
         Throwable t = cause;
         for (int depth = 0; t != null && depth < MAX_CAUSE_DEPTH; depth++, t = t.getCause()) {

@@ -20,6 +20,7 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.UserService;
@@ -174,6 +175,16 @@ public class LoginAction extends FessLoginAction {
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
             recordFailure(limiter, clientIp, username);
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
+        } catch (final RuntimeException e) {
+            if (!V2EnvelopeWriter.isSearchEngineUnavailable(e)) {
+                throw e;
+            }
+            // The credentials were not checked, because the users cannot be read: that is not a failed login, and
+            // not worth a stack trace either. Say so on the form and give back the address slot the attempt took.
+            logger.warn("[login] the search engine is unavailable: username={}, reason={}", LogUtil.sanitize(username),
+                    LogUtil.sanitize(e.getMessage()));
+            limiter.release(LoginRateLimiter.Scope.IP, clientIp);
+            throwValidationError(messages -> messages.addErrorsSearchEngineUnavailable(GLOBAL), () -> asIndexPage(form));
         }
         return redirect(getClass());
     }

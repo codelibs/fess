@@ -297,6 +297,7 @@
   "error.detail_not_found_on_file_system": "Die Datei wurde im Dateisystem nicht gefunden.",
   "error.detail_unauthorized_request": "Sie sind nicht berechtigt, auf diese Ressource zuzugreifen.",
   "error.detail_bad_authentication": "Authentifizierung fehlgeschlagen. Bitte melden Sie sich an und versuchen Sie es erneut.",
+  "error.detail_search_engine_unavailable": "Die Suchmaschine ist nicht verfügbar. Bitte versuchen Sie es später erneut.",
   "error.detail_not_load_from_server": "Der Inhalt konnte nicht vom Server geladen werden.",
   "labels.cache_title": "Zwischengespeicherte Seite",
   "labels.cache_url": "URL",

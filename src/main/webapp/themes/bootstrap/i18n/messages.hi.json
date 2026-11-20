@@ -297,6 +297,7 @@
   "error.detail_not_found_on_file_system": "फ़ाइल सिस्टम में फ़ाइल नहीं मिली।",
   "error.detail_unauthorized_request": "आपको इस संसाधन तक पहुंच की अनुमति नहीं है।",
   "error.detail_bad_authentication": "प्रमाणीकरण विफल। लॉग इन करें और पुनः प्रयास करें।",
+  "error.detail_search_engine_unavailable": "खोज इंजन उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
   "error.detail_not_load_from_server": "सर्वर से सामग्री लोड नहीं की जा सकी।",
   "labels.cache_title": "कैश्ड पृष्ठ",
   "labels.cache_url": "URL",

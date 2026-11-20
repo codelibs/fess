@@ -297,6 +297,7 @@
   "error.detail_not_found_on_file_system": "在檔案系統中找不到檔案。",
   "error.detail_unauthorized_request": "您無權存取此資源。",
   "error.detail_bad_authentication": "驗證失敗。請登入並重試。",
+  "error.detail_search_engine_unavailable": "搜尋引擎目前無法使用，請稍後再試。",
   "error.detail_not_load_from_server": "無法從伺服器載入內容。",
   "labels.cache_title": "快取頁面",
   "labels.cache_url": "URL",

@@ -297,6 +297,7 @@
   "error.detail_not_found_on_file_system": "File tidak ditemukan di sistem file.",
   "error.detail_unauthorized_request": "Anda tidak berwenang mengakses sumber daya ini.",
   "error.detail_bad_authentication": "Autentikasi gagal. Silakan masuk dan coba lagi.",
+  "error.detail_search_engine_unavailable": "Mesin pencari tidak tersedia. Silakan coba lagi nanti.",
   "error.detail_not_load_from_server": "Konten tidak dapat dimuat dari server.",
   "labels.cache_title": "Halaman tembolok",
   "labels.cache_url": "URL",
