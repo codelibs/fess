@@ -330,21 +330,56 @@ public class AdminUserActionTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getUser_apiBody_isNotJudgedByItsVersion() {
-        // the admin API keeps the check inside the request only: a body with an old version is still applied
+    public void test_getUser_doesNotJudgeTheVersion() {
+        // getUser also builds a new user; the version is judged only by getUserToUpdate
+        registerStoredUserOfVersion(9);
+
+        assertTrue(AdminUserAction.getUser(editFormToSave(1)).isPresent());
+    }
+
+    @Test
+    public void test_getUserToUpdate_staleFormIsReportedAndNotApplied() {
+        registerStoredUserOfVersion(9);
+        final EditForm form = editFormToSave(1);
+        final boolean[] reported = { false };
+
+        try {
+            AdminUserAction.getUserToUpdate(form, () -> {
+                reported[0] = true;
+                throw new IllegalStateException("refused");
+            });
+            fail();
+        } catch (final IllegalStateException e) {
+            assertEquals("refused", e.getMessage());
+        }
+        assertTrue(reported[0]);
+    }
+
+    @Test
+    public void test_getUserToUpdate_currentFormIsApplied() {
+        registerStoredUserOfVersion(9);
+
+        final OptionalEntity<User> entity = AdminUserAction.getUserToUpdate(editFormToSave(9), () -> fail());
+
+        assertTrue(entity.isPresent());
+        assertEquals("alice", entity.get().getName());
+    }
+
+    private static void registerStoredUserOfVersion(final long version) {
         ComponentUtil.register(new UserService() {
             @Override
             public OptionalEntity<User> getUser(final String id) {
-                return OptionalEntity.of(storedUserOfVersion(9));
+                return OptionalEntity.of(storedUserOfVersion(version));
             }
         }, UserService.class.getCanonicalName());
-        final EditForm form = new EditForm();
+    }
+
+    private static EditForm editFormToSave(final Integer version) {
+        final EditForm form = editFormOfVersion(version);
         form.crudMode = CrudMode.EDIT;
         form.id = "id-alice";
         form.name = "alice";
-        form.versionNo = 1;
-
-        assertTrue(AdminUserAction.getUser(form).isPresent());
+        return form;
     }
 
     /**

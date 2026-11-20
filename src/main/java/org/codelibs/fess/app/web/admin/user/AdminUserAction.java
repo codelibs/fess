@@ -453,11 +453,26 @@ public class AdminUserAction extends FessAdminAction {
      * @return optional user entity populated from the form
      */
     protected OptionalEntity<User> getUserToUpdate(final EditForm form) {
+        return getUserToUpdate(form,
+                () -> throwValidationError(messages -> messages.addErrorsUserChangedConcurrently(GLOBAL), this::asEditHtml));
+    }
+
+    /**
+     * Returns the stored user that the form is saved onto, after checking that the form is not out of date.
+     * Shared with the admin API, whose body carries the version of the user it was read from in the same way.
+     * The check runs before the form is applied to the user, so nothing is encoded or written for a refused form.
+     *
+     * @param form the edit form or API body
+     * @param onStale called when the stored user was changed since the form was read. It must throw the
+     *        refusal of the caller; if it returns, the form is applied anyway.
+     * @return optional user entity populated from the form
+     */
+    public static OptionalEntity<User> getUserToUpdate(final EditForm form, final Runnable onStale) {
         return getEntity(form).map(entity -> {
             if (isStaleForm(entity, form)) {
                 logger.info("The edit form of a user is stale: id={}, formVersion={}, storedVersion={}", form.id, form.versionNo,
                         entity.getVersionNo());
-                throwValidationError(messages -> messages.addErrorsUserChangedConcurrently(GLOBAL), this::asEditHtml);
+                onStale.run();
             }
             return populateUser(form, entity);
         });

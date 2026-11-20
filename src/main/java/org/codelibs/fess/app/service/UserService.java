@@ -79,6 +79,8 @@ public class UserService {
 
         final PagingResultBean<User> userList = userBhv.selectPage(cb -> {
             cb.paging(userPager.getPageSize(), userPager.getCurrentPageNumber());
+            // the version of each user is what an edit carries to tell that it is out of date
+            cb.request().setVersion(true);
             setupListCondition(cb, userPager);
         });
 
