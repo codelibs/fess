@@ -159,6 +159,10 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // #for_now jflute to suppress CVE-2014-0050 even if commons-fileupload is older than safety version (2024/09/08)
     // but if you use safety version, this extension is basically unneeded (or you can use it as double check)
     protected void checkBoundarySize(final String contentType, final byte[] boundary) {
+        if (boundary == null) {
+            // no boundary parameter: the file upload reports it as a FileUploadException, which is answered with 400
+            return;
+        }
         final int boundarySize = boundary.length;
         final int limitSize = getBoundaryLimitSize();
         if (boundarySize > getBoundaryLimitSize()) {

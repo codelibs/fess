@@ -82,6 +82,25 @@ public class FessMultipartRequestHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_checkBoundarySize_noBoundary() {
+        // A multipart content type without a boundary parameter is rejected later as a bad request, not by a NullPointerException.
+        final FessMultipartRequestHandler handler = new FessMultipartRequestHandler();
+        handler.checkBoundarySize("multipart/form-data", null);
+    }
+
+    @Test
+    public void test_checkBoundarySize_tooLong() {
+        final FessMultipartRequestHandler handler = new FessMultipartRequestHandler();
+        handler.checkBoundarySize("multipart/form-data", new byte[2000]);
+        try {
+            handler.checkBoundarySize("multipart/form-data", new byte[2001]);
+            fail();
+        } catch (final RuntimeException e) {
+            // too long boundary is refused
+        }
+    }
+
+    @Test
     public void test_instantiation() {
         final FessMultipartRequestHandler handler = new FessMultipartRequestHandler();
         assertNotNull(handler);
