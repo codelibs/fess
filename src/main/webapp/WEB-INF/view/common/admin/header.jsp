@@ -4,7 +4,7 @@
 <nav class="main-header navbar navbar-expand navbar-dark navbar-secondary">
 	<ul class="navbar-nav">
 		<li class="nav-item">
-			<a class="nav-link" data-widget="pushmenu" href="#">
+			<a class="nav-link" data-widget="pushmenu" href="#" role="button">
 				<i class="fas fa-bars" aria-hidden="true"></i>
 				<span class="sr-only"><la:message
 						key="labels.admin_toggle_navi" /></span>
