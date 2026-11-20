@@ -120,10 +120,12 @@
       Array.prototype.forEach.call(nav.querySelectorAll('[data-toggle="tab"]'), function(link) {
         link.classList.remove("active");
         link.setAttribute("aria-selected", "false");
+        link.setAttribute("tabindex", "-1");
       });
     }
     trigger.classList.add("active");
     trigger.setAttribute("aria-selected", "true");
+    trigger.setAttribute("tabindex", "0");
     if (pane.parentNode) {
       Array.prototype.forEach.call(pane.parentNode.children, function(sibling) {
         sibling.classList.remove("active");
@@ -542,11 +544,21 @@
     });
   }
 
+  // Only the selected tab of a tab list is in the tab order; the arrow keys move between the others.
+  function initTabStops() {
+    Array.prototype.forEach.call(document.querySelectorAll('.nav [data-toggle="tab"].active'), function(selected) {
+      Array.prototype.forEach.call(selected.closest(".nav").querySelectorAll('[data-toggle="tab"]'), function(link) {
+        link.setAttribute("tabindex", link === selected ? "0" : "-1");
+      });
+    });
+  }
+
   function init() {
     initFormLayout(document);
     initRangePickers(document);
     initMenuState();
     openTabOfAddress(true);
+    initTabStops();
     focusFirstField();
   }
 

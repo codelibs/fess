@@ -320,6 +320,16 @@ describe("collapse, tabs and the side menu", () => {
     expect(document.getElementById("a").classList.contains("active")).toBe(true);
   });
 
+  it("keeps only the selected tab in the tab order", () => {
+    mount(tabList);
+    const stops = () => ["a", "b", "c"].map((id) => document.getElementById(id).getAttribute("tabindex"));
+    expect(stops()).toEqual(["0", "-1", "-1"]);
+    press(document.getElementById("a"), { key: "End" });
+    expect(stops()).toEqual(["-1", "-1", "0"]);
+    document.getElementById("b").click();
+    expect(stops()).toEqual(["-1", "0", "-1"]);
+  });
+
   it("tells the state of the menu groups and of the menu button from the start", () => {
     window.matchMedia = (query) => ({ matches: false, media: query });
     mount(`<a id="p" data-widget="pushmenu" href="#">m</a>
