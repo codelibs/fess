@@ -73,6 +73,58 @@ document whose extracted text is longer than `maxUncompressionSize` of `crawler/
 well. Look under Admin > Failure URL for `Suspected zip bomb`. Raise `maxUncompressionSize` in that file if
 you have to index such documents.
 
+**The static files of a theme are revalidated instead of being cached for a day.** Until 15.9 the files under
+`/themes/<name>/` were sent with `Cache-Control: public, max-age=86400`, so a browser kept the scripts and
+stylesheets of the version it had loaded for up to 24 hours after an upgrade. They are now sent with
+`Cache-Control: no-cache` together with `ETag` and `Last-Modified`: the browser asks on every use and gets a
+`304 Not Modified` (no body) while the file is unchanged. **A browser that loaded the theme of 15.9.0 still
+holds those files under the old rule, so for up to 24 hours after the upgrade it can run the old scripts and
+stylesheets of the bundled theme next to the new `index.html`. Reload the page without the cache (Ctrl+F5 /
+Shift+reload) once, or wait for the day to pass.** A reverse proxy that caches `/themes/` by itself must
+honour `no-cache` for the change to reach its clients.
+
+**The label menu, the label choices of the admin forms and the matching of crawled documents now use every
+label type.** Until 15.9 only the first `page.labeltype.max.fetch.size` (1,000) label types were read, so a
+label type beyond them was missing from the menu and from the forms, and the documents it should label were
+not labelled. The setting now only sizes the pages of the label type list in the admin console. An
+installation with more than 1,000 label types sends a larger `/api/v2/ui/config` (about 45 bytes per label
+type) and loads all of them on every change of a label type.
+
+**An invalid regular expression is refused when a crawl configuration, a label type or a path mapping is
+saved.** The included and excluded URLs and paths of a web or file configuration, the document filters of
+both, the paths of a label type and the regular expression and user agent of a path mapping are compiled
+when the form is saved (the admin API answers with the same error). Until 15.9 they were stored as typed: the
+crawler skipped an invalid include or exclude pattern with a warning in the log, so it had no effect, and
+the other fields failed when they were used. A configuration that was saved with such a pattern is not
+changed, but cannot be saved again until the pattern is corrected.
+
+**A permission entry written with full-width characters is refused.** On the permission field of the admin
+screens and the admin API, `（deny）{user}name` or `(deny)｛user｝name` (full-width parentheses or braces, as a
+Japanese keyboard types them) is rejected with a message asking for the half-width spelling, such as
+`(deny){user}name`. Until 15.9 such an entry was stored as a plain value that matches nobody, or dropped, so a
+deny that was meant to hide a document had no effect. The name after the marker is not changed, so a role
+named in Japanese or with full-width letters is still accepted.
+
+**An admin user edit form that is out of date is refused.** The edit form of a user now carries the version of
+the stored user. If the user was changed after the form was shown (by another administrator, by the user, or
+by the deletion of a role or group the user had), saving the form shows "The user was changed by someone else.
+Reload it and try again." and writes nothing. Until 15.9 the form was saved over the change. A script that
+drives the admin screens with a saved form has to load the user again before it saves. The admin API
+(`PUT /api/admin/user/setting`) does not compare the version in its body; it only refuses a write that
+collides with another one at the same moment.
+
+**A user who is already signed in no longer gets the login form.** `GET /login/` now redirects the user to the
+page a login would lead to: the dashboard for an administrator, the first admin screen the roles allow for a user
+with some admin role, the search page for anyone else. An anonymous visitor still gets the form. To sign in as
+another account, sign out first. The same applies where `/login/` was the landing page of a blocked cross-site
+`/logout/` (fess#3815): the session still stays, and the browser now ends on the page above.
+
+**While the search engine cannot be reached, Fess answers `503 Service Unavailable` instead of `500`.** A console
+screen that reads the engine ends with the theme's 503 page (a client that does not take HTML gets
+`Service Unavailable.`), as the v2 API already did with `503 service_unavailable`. A login attempt shows the
+form again with a message instead of a system error, and it is not counted as a failed login or against the
+rate limit. A monitor that treated `500` from these pages as "engine down" has to accept `503`.
+
 **Fess creates a new index, `fess_user.passkey`, when it starts.** Passkey (WebAuthn) login for local
 users is new in 15.10 (fess#3795) and is off by default, but the index is created and used whether or not it is
 on: deleting a user, creating or renaming one, and opening a user's details on the admin screen all
