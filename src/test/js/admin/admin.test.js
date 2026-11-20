@@ -245,6 +245,9 @@ describe("modal", () => {
 });
 
 describe("collapse, tabs and the side menu", () => {
+  // the modal tests leave a dialog open in the script's own state; Escape closes it
+  beforeEach(() => document.dispatchEvent(keyEvent("keydown", { key: "Escape" })));
+
   it("collapses and expands the target and keeps aria-expanded in step", () => {
     mount(`<a id="t" role="button" data-toggle="collapse" href="#panel" aria-expanded="false">s</a><div class="collapse" id="panel"></div>`);
     document.getElementById("t").click();
@@ -265,6 +268,66 @@ describe("collapse, tabs and the side menu", () => {
     expect(document.getElementById("b").classList.contains("active")).toBe(true);
     expect(document.getElementById("one").classList.contains("active")).toBe(false);
     expect(document.getElementById("two").classList.contains("active")).toBe(true);
+  });
+
+  const tabList = `<ul class="nav nav-tabs" role="tablist">
+      <li role="presentation"><a id="a" class="nav-link active" data-toggle="tab" href="#one" role="tab" aria-selected="true">1</a></li>
+      <li role="presentation"><a id="b" class="nav-link" data-toggle="tab" href="#two" role="tab" aria-selected="false">2</a></li>
+      <li role="presentation"><a id="c" class="nav-link" data-toggle="tab" href="#three" role="tab" aria-selected="false">3</a></li></ul>
+    <div class="tab-content"><div class="tab-pane active" id="one"></div><div class="tab-pane" id="two"></div><div class="tab-pane" id="three"></div></div>`;
+
+  it("moves between the tabs with the arrow keys, Home and End, and the focus follows", () => {
+    mount(tabList);
+    const a = document.getElementById("a");
+    a.focus();
+    const right = press(a, { key: "ArrowRight" });
+    expect(right.defaultPrevented).toBe(true);
+    expect(document.activeElement.id).toBe("b");
+    expect(document.getElementById("b").getAttribute("aria-selected")).toBe("true");
+    expect(document.getElementById("two").classList.contains("active")).toBe(true);
+    press(document.getElementById("b"), { key: "End" });
+    expect(document.activeElement.id).toBe("c");
+    press(document.getElementById("c"), { key: "ArrowRight" });
+    expect(document.activeElement.id).toBe("a");
+    press(document.getElementById("a"), { key: "ArrowLeft" });
+    expect(document.activeElement.id).toBe("c");
+    press(document.getElementById("c"), { key: "Home" });
+    expect(document.activeElement.id).toBe("a");
+    expect(document.getElementById("one").classList.contains("active")).toBe(true);
+  });
+
+  it("opens the focused tab with Space and leaves other keys alone", () => {
+    mount(tabList);
+    const space = press(document.getElementById("b"), { key: " " });
+    expect(space.defaultPrevented).toBe(true);
+    expect(document.getElementById("two").classList.contains("active")).toBe(true);
+    const other = press(document.getElementById("b"), { key: "a" });
+    expect(other.defaultPrevented).toBe(false);
+  });
+
+  it("tells the state of the menu groups and of the menu button from the start", () => {
+    window.matchMedia = (query) => ({ matches: false, media: query });
+    mount(`<a id="p" data-widget="pushmenu" href="#">m</a>
+      <ul data-widget="treeview"><li class="nav-item has-treeview menu-open"><a href="#" class="nav-link" id="open">a</a></li>
+      <li class="nav-item has-treeview"><a href="#" class="nav-link" id="shut">b</a></li></ul>`);
+    expect(document.getElementById("open").getAttribute("aria-expanded")).toBe("true");
+    expect(document.getElementById("shut").getAttribute("aria-expanded")).toBe("false");
+    expect(document.getElementById("p").getAttribute("aria-expanded")).toBe("true");
+    window.matchMedia = (query) => ({ matches: true, media: query });
+    window.FessAdmin.init();
+    expect(document.getElementById("p").getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("closes the side menu that is open over a narrow page with Escape and puts the focus on the menu button", () => {
+    window.matchMedia = (query) => ({ matches: true, media: query });
+    mount(`<a id="p" data-widget="pushmenu" href="#">m</a>`);
+    document.getElementById("p").click();
+    expect(document.body.classList.contains("sidebar-open")).toBe(true);
+    const event = press(document.body, { key: "Escape" });
+    expect(event.defaultPrevented).toBe(false);
+    expect(document.body.classList.contains("sidebar-open")).toBe(false);
+    expect(document.getElementById("p").getAttribute("aria-expanded")).toBe("false");
+    expect(document.activeElement.id).toBe("p");
   });
 
   it("opens and closes a menu group of the sidebar", () => {
@@ -393,6 +456,27 @@ describe("form layout", () => {
     expect(links[1].classList.contains("active")).toBe(true);
     expect(links[1].classList.contains("has-error")).toBe(true);
     expect(links[0].classList.contains("has-error")).toBe(false);
+  });
+
+  it("keeps the tab list a tab list: the list items are presentation, an error tab carries the message as its title", () => {
+    mount(sections.replace(text("urls"), `<ul class="has-error"><li>bad url</li></ul>${text("urls")}`));
+    const items = Array.from(document.querySelectorAll("#b > .form-tabs > li"));
+    expect(items.map((li) => li.getAttribute("role"))).toEqual(["presentation", "presentation", "presentation"]);
+    const links = document.querySelectorAll("#b .nav-link");
+    expect(links[1].getAttribute("title")).toBe("bad url");
+    expect(links[0].hasAttribute("title")).toBe(false);
+  });
+
+  it("opens the tab that the address names", () => {
+    mount(sections);
+    const links = document.querySelectorAll("#b .nav-link");
+    expect(links[0].classList.contains("active")).toBe(true);
+    window.location.hash = "#" + links[2].getAttribute("aria-controls");
+    window.FessAdmin.init();
+    expect(links[0].classList.contains("active")).toBe(false);
+    expect(links[2].classList.contains("active")).toBe(true);
+    expect(document.getElementById(links[2].getAttribute("aria-controls")).classList.contains("active")).toBe(true);
+    window.location.hash = "";
   });
 
   it("shows the section of a field the browser refuses to submit", () => {

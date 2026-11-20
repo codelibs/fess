@@ -132,6 +132,21 @@
     pane.classList.add("active");
   }
 
+  // Arrow keys, Home and End move between the tabs of one tab list (WAI-ARIA tabs pattern); Space opens the focused tab.
+  function moveTab(link, key) {
+    var nav = link.closest(".nav");
+    var tabs = nav ? Array.prototype.slice.call(nav.querySelectorAll('[data-toggle="tab"]')) : [];
+    var at = tabs.indexOf(link);
+    if (at < 0) {
+      return false;
+    }
+    var next = key === "Home" ? 0 : key === "End" ? tabs.length - 1
+      : key === "ArrowRight" ? (at + 1) % tabs.length : (at - 1 + tabs.length) % tabs.length;
+    tabs[next].focus();
+    activateTab(tabs[next]);
+    return true;
+  }
+
   function togglePushMenu(trigger) {
     var body = document.body;
     var narrow = window.matchMedia(NARROW).matches;
@@ -201,6 +216,15 @@
   });
 
   document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" && !openModal && document.body.classList.contains("sidebar-open")) {
+      document.body.classList.remove("sidebar-open");
+      var opener = document.querySelector('[data-widget="pushmenu"]');
+      if (opener) {
+        opener.setAttribute("aria-expanded", "false");
+        opener.focus();
+      }
+      return;
+    }
     if (openModal) {
       if (event.key === "Escape") {
         hideModal();
@@ -211,6 +235,17 @@
     }
     var target = event.target;
     if (!(target instanceof Element)) {
+      return;
+    }
+
+    var tab = target.closest('[data-toggle="tab"]');
+    if (tab && (event.key === " " || /^(ArrowLeft|ArrowRight|Home|End)$/.test(event.key))) {
+      if (event.key === " ") {
+        activateTab(tab);
+        event.preventDefault();
+      } else if (moveTab(tab, event.key)) {
+        event.preventDefault();
+      }
       return;
     }
 
@@ -407,6 +442,7 @@
 
         var item = document.createElement("li");
         item.className = "nav-item";
+        item.setAttribute("role", "presentation");
         var link = document.createElement("a");
         link.className = "nav-link";
         link.id = id + "-tab";
@@ -418,8 +454,11 @@
         item.appendChild(link);
         nav.appendChild(item);
 
-        if (pane.querySelector(".has-error, .alert-danger")) {
+        var problem = pane.querySelector(".has-error, .alert-danger");
+        if (problem) {
           link.classList.add("has-error");
+          // the red dot after the title is not enough for a screen reader or a colour-blind reader: the first message is the tab's description
+          link.setAttribute("title", (problem.textContent || "").replace(/\s+/g, " ").trim());
           firstWithError = firstWithError || link;
         }
       });
@@ -454,9 +493,33 @@
     buildSectionTabs(root);
   }
 
+  // A link to a tab (#section-1-3) opens it; the tabs are built by initFormLayout, so this runs after it.
+  function openTabOfAddress() {
+    var id = decodeURIComponent((location.hash || "").slice(1));
+    var pane = id ? document.getElementById(id) : null;
+    var link = pane && pane.classList.contains("tab-pane") ? document.getElementById(id + "-tab") : null;
+    if (link) {
+      activateTab(link);
+    }
+  }
+
+  // The state of the side menu is told from the start, not only after the first click.
+  function initMenuState() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-widget="treeview"] .has-treeview > .nav-link'), function(link) {
+      link.setAttribute("aria-expanded", link.parentElement.classList.contains("menu-open") ? "true" : "false");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-widget="pushmenu"]'), function(button) {
+      var narrow = window.matchMedia && window.matchMedia(NARROW).matches;
+      var open = narrow ? document.body.classList.contains("sidebar-open") : !document.body.classList.contains("sidebar-collapse");
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
   function init() {
     initFormLayout(document);
     initRangePickers(document);
+    initMenuState();
+    openTabOfAddress();
     focusFirstField();
   }
 
