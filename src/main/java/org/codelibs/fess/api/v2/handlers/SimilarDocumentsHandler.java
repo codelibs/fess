@@ -137,7 +137,7 @@ public class SimilarDocumentsHandler {
             payload.put("data", searchHandler.filterDocuments(documents, searchHandler.getVisibleTagTypes(data, userId), userId));
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
         } catch (final SearchEngineUnavailableException e) {
             // Already logged where the search engine refused the search; the request may succeed shortly.
             ComponentUtil.getV2EnvelopeWriter().writeSearchEngineUnavailable(response);

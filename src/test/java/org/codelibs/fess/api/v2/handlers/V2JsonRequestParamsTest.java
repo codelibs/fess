@@ -181,8 +181,17 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
         // M-6 (start variant): negative start is equally invalid — reject so the
         // search backend never sees -1.
         final V2JsonRequestParams params = newParams(Map.of("start", new String[] { "-1" }));
-        assertThrows(V2JsonRequestParams.InvalidOffsetException.class, params::getStartPosition,
-                "start=-1 must throw InvalidOffsetException");
+        final V2JsonRequestParams.InvalidOffsetException e = assertThrows(V2JsonRequestParams.InvalidOffsetException.class,
+                params::getStartPosition, "start=-1 must throw InvalidOffsetException");
+        // The English text is for the log; the caller is answered with the message of the code.
+        assertEquals("start must be non-negative, got: -1", e.getMessage());
+        assertNotNull(e.getMessageCode());
+    }
+
+    @Test
+    public void test_getOffset_negative_carriesMessageCode() {
+        assertNotNull(assertThrows(V2JsonRequestParams.InvalidOffsetException.class,
+                newParams(Map.of("offset", new String[] { "-1" }))::getOffset).getMessageCode());
     }
 
     @Test
