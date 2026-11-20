@@ -84,6 +84,19 @@ public class FessBoot extends TomcatBoot {
     /** Environment variable that selects the HTTP session store ({@code opensearch}); unset keeps Tomcat's in-memory sessions */
     protected static final String FESS_SESSION_STORE = "FESS_SESSION_STORE";
 
+    /** Key of the tomcat configuration file that sets the compression of the responses ({@code on} or {@code off}) */
+    protected static final String COMPRESSION_KEY = "tomcat.compression";
+
+    /** Key of the tomcat configuration file that adds types to the compressed responses (comma-separated) */
+    protected static final String COMPRESSION_MIME_KEY = "tomcat.compression.mime";
+
+    /**
+     * The types of the responses that are compressed by default: the static files only. HTML and JSON are left out
+     * because the admin screens put a session token in the page and reflect the request, so the size of a compressed
+     * response can reveal the token; add them with {@code tomcat.compression.mime} when that does not matter.
+     */
+    protected static final String COMPRESSIBLE_MIME_TYPES = "text/css,text/javascript,application/javascript,image/svg+xml";
+
     /** The name of the filter that saves the sessions before a response is committed */
     protected static final String SESSION_FILTER_NAME = "fessSessionFilter";
 
@@ -318,6 +331,34 @@ public class FessBoot extends TomcatBoot {
             context.setCookieProcessor(new Rfc6265CookieProcessor());
             setupSessionStore(context, System.getenv(FESS_SESSION_STORE));
         }
+    }
+
+    /**
+     * Applies the connector settings Fess sets itself, after those of the tomcat configuration file.
+     */
+    @Override
+    protected void setupServerConfigIfNeeds() {
+        super.setupServerConfigIfNeeds();
+        setupCompression(server.getConnector(), configProps);
+    }
+
+    /**
+     * Turns on the compression of the static text responses (scripts, styles, SVG) of 1 KB or more.
+     * Pages and JSON carry the session token or reflect the request, so they stay as they are unless
+     * {@code tomcat.compression.mime} in the tomcat configuration file adds their types. Binary content
+     * (images, downloads) and event streams are not in the list either.
+     * {@code tomcat.compression=off} turns the compression off, for a deployment whose reverse proxy compresses already.
+     *
+     * @param connector the HTTP connector
+     * @param props the tomcat configuration, or {@code null} when there is none
+     */
+    protected static void setupCompression(final Connector connector, final Properties props) {
+        final String compression = props == null ? null : props.getProperty(COMPRESSION_KEY);
+        connector.setProperty("compression", compression == null || compression.isBlank() ? "on" : compression.trim());
+        connector.setProperty("compressionMinSize", "1024");
+        final String extra = props == null ? null : props.getProperty(COMPRESSION_MIME_KEY);
+        connector.setProperty("compressibleMimeType",
+                extra == null || extra.isBlank() ? COMPRESSIBLE_MIME_TYPES : COMPRESSIBLE_MIME_TYPES + "," + extra.trim());
     }
 
     /**

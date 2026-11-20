@@ -32,6 +32,13 @@ for 15.10, and for a theme of your own copy the library into the theme and link 
 `fa-pencil-alt`, ...) and, with `v4-shims.min.css`, the old `-o` names (`fa fa-star-o`, ...) that Font
 Awesome 5.12 did not show. Only `woff2` fonts are shipped.
 
+**Fess now compresses the scripts, styles and SVG files of 1 KB or more itself.** The HTTP connector sends them
+as gzip when the client accepts it (`bootstrap.min.css` goes from 232 KB to about 31 KB). Pages (HTML), JSON,
+images, downloads, event streams and the NDJSON and CSV exports are not compressed, because the size of a
+compressed page can reveal the session token it contains. If a reverse proxy in front of Fess already
+compresses, or you want the previous behavior, set `tomcat.compression=off` in `tomcat_config.properties`;
+`tomcat.compression.mime=text/html,application/json` there adds the types of pages and JSON.
+
 **A search result whose URL has a scheme outside `search.result.link.schemes` is no longer linked or
 redirected.** The setting is new in 15.10 (fess#3777). Its default is the list the bootstrap theme
 accepted until now:
