@@ -79,7 +79,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="parameterName" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.access_token_parameter_name"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="parameterName"/>
@@ -88,7 +88,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="expires" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.access_token_expires"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="expires"/>

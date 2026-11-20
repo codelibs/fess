@@ -124,7 +124,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="logTypeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
+                                    <label for="size" class="col-sm-2 text-sm-right col-form-label"><la:message
                                             key="labels.searchlog_size"/></label>
                                     <div class="col-sm-4">
                                         <la:select styleId="size" property="size"

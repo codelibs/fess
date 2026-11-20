@@ -10,9 +10,10 @@
 		<c:if test="${fe:permission('admin-searchlist-view')}">
 			<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="GET" class="form-inline mt-2 sidebar-search">
 				<div class="input-group">
-					<input class="form-control form-control-sidebar" name="q" id="query"
+					<input class="form-control form-control-sidebar" name="q" id="sidebarQuery"
 						   maxlength="1000"
-						   placeholder="<la:message key="labels.sidebar.placeholder_search" />">
+						   placeholder="<la:message key="labels.sidebar.placeholder_search" />"
+						   aria-label="<la:message key="labels.sidebar.placeholder_search" />">
 					<div class="input-group-append">
 						<button class="btn btn-sidebar" type="submit" name="search" id="search-btn"
 								aria-label="<la:message key="labels.crud_button_search" />">
