@@ -452,6 +452,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: A permission entry must not have a space after (allow) or (deny), or before the user, group or role name. Write it as {0} or {1}. If the entry was saved by an earlier version of Fess, enter it again. */
     public static final String ERRORS_invalid_permission_spacing = "{errors.invalid_permission_spacing}";
 
+    /** The key of the message: A permission entry must be written with half-width characters. Write it as {0} or {1}. */
+    public static final String ERRORS_invalid_permission_fullwidth = "{errors.invalid_permission_fullwidth}";
+
     /** The key of the message: Failed to upload theme: {0} */
     public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
 
@@ -2773,6 +2776,22 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidPermissionSpacing(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_permission_spacing, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_permission_fullwidth' with parameters.
+     * <pre>
+     * message: A permission entry must be written with half-width characters. Write it as {0} or {1}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidPermissionFullwidth(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_permission_fullwidth, arg0, arg1));
         return this;
     }
 
