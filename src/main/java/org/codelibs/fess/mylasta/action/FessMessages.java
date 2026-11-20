@@ -146,6 +146,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {item} is not a valid CRON expression. */
     public static final String CONSTRAINTS_CronExpression_MESSAGE = "{constraints.CronExpression.message}";
 
+    /** The key of the message: {item} has an invalid regular expression. */
+    public static final String CONSTRAINTS_RegexPattern_MESSAGE = "{constraints.RegexPattern.message}";
+
     /** The key of the message: Login failed. */
     public static final String ERRORS_LOGIN_FAILURE = "{errors.login.failure}";
 
@@ -170,6 +173,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: SSO login process failed. */
     public static final String ERRORS_sso_login_error = "{errors.sso_login_error}";
 
+    /** The key of the message: The search engine is not available. Please try again later. */
+    public static final String ERRORS_search_engine_unavailable = "{errors.search_engine_unavailable}";
+
     /** The key of the message: Could not find {0}. */
     public static final String ERRORS_could_not_find_log_file = "{errors.could_not_find_log_file}";
 
@@ -187,6 +193,30 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: No more results can be displayed. */
     public static final String ERRORS_result_size_exceeded = "{errors.result_size_exceeded}";
+
+    /** The key of the message: The start position must be 0 or greater. */
+    public static final String ERRORS_invalid_start_position = "{errors.invalid_start_position}";
+
+    /** The key of the message: The offset must be 0 or greater. */
+    public static final String ERRORS_invalid_offset = "{errors.invalid_offset}";
+
+    /** The key of the message: num must be positive, got: {0} */
+    public static final String ERRORS_invalid_page_size = "{errors.invalid_page_size}";
+
+    /** The key of the message: facet.size and facet.minDocCount must be integers */
+    public static final String ERRORS_invalid_facet_number = "{errors.invalid_facet_number}";
+
+    /** The key of the message: facet.size must be positive, got: {0} */
+    public static final String ERRORS_invalid_facet_size = "{errors.invalid_facet_size}";
+
+    /** The key of the message: {0} exceeds the maximum length of {1} */
+    public static final String ERRORS_param_too_long = "{errors.param_too_long}";
+
+    /** The key of the message: {0} exceeds the maximum number of values: {1} */
+    public static final String ERRORS_param_too_many_values = "{errors.param_too_many_values}";
+
+    /** The key of the message: {0} exceeds the maximum number of distinct names: {1} */
+    public static final String ERRORS_param_too_many_names = "{errors.param_too_many_names}";
 
     /** The key of the message: Failed to delete the file {0}. */
     public static final String ERRORS_failed_to_delete_file = "{errors.failed_to_delete_file}";
@@ -332,6 +362,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Could not process the specified query. */
     public static final String ERRORS_invalid_query_cannot_process = "{errors.invalid_query_cannot_process}";
 
+    /** The key of the message: Only the first {0} results can be retrieved (start position + page size). Go to an earlier page or narrow down the search. */
+    public static final String ERRORS_invalid_query_result_window_exceeded = "{errors.invalid_query_result_window_exceeded}";
+
+    /** The key of the message: The page is beyond the results that can be retrieved. Go to an earlier page or narrow down the search. */
+    public static final String ERRORS_invalid_query_result_window_unknown = "{errors.invalid_query_result_window_unknown}";
+
     /** The key of the message: The mode is incorrect. (not {0}, but {1}) */
     public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
 
@@ -415,6 +451,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: A permission entry must not have a space after (allow) or (deny), or before the user, group or role name. Write it as {0} or {1}. If the entry was saved by an earlier version of Fess, enter it again. */
     public static final String ERRORS_invalid_permission_spacing = "{errors.invalid_permission_spacing}";
+
+    /** The key of the message: A permission entry must be written with half-width characters. Write it as {0} or {1}. */
+    public static final String ERRORS_invalid_permission_fullwidth = "{errors.invalid_permission_fullwidth}";
 
     /** The key of the message: Failed to upload theme: {0} */
     public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
@@ -1261,6 +1300,20 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'constraints.RegexPattern.message' with parameters.
+     * <pre>
+     * message: {item} has an invalid regular expression.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsRegexPatternMessage(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(CONSTRAINTS_RegexPattern_MESSAGE));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.login.failure' with parameters.
      * <pre>
      * message: Login failed.
@@ -1377,6 +1430,20 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.search_engine_unavailable' with parameters.
+     * <pre>
+     * message: The search engine is not available. Please try again later.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsSearchEngineUnavailable(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_search_engine_unavailable));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.could_not_find_log_file' with parameters.
      * <pre>
      * message: Could not find {0}.
@@ -1460,6 +1527,126 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsResultSizeExceeded(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_result_size_exceeded));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_start_position' with parameters.
+     * <pre>
+     * message: The start position must be 0 or greater.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidStartPosition(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_start_position));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_offset' with parameters.
+     * <pre>
+     * message: The offset must be 0 or greater.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidOffset(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_offset));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_page_size' with parameters.
+     * <pre>
+     * message: num must be positive, got: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidPageSize(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_page_size, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_facet_number' with parameters.
+     * <pre>
+     * message: facet.size and facet.minDocCount must be integers
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidFacetNumber(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_facet_number));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_facet_size' with parameters.
+     * <pre>
+     * message: facet.size must be positive, got: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidFacetSize(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_facet_size, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.param_too_long' with parameters.
+     * <pre>
+     * message: {0} exceeds the maximum length of {1}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsParamTooLong(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_param_too_long, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.param_too_many_values' with parameters.
+     * <pre>
+     * message: {0} exceeds the maximum number of values: {1}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsParamTooManyValues(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_param_too_many_values, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.param_too_many_names' with parameters.
+     * <pre>
+     * message: {0} exceeds the maximum number of distinct names: {1}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsParamTooManyNames(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_param_too_many_names, arg0, arg1));
         return this;
     }
 
@@ -2157,6 +2344,35 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.invalid_query_result_window_exceeded' with parameters.
+     * <pre>
+     * message: Only the first {0} results can be retrieved (start position + page size). Go to an earlier page or narrow down the search.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryResultWindowExceeded(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_query_result_window_exceeded, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_result_window_unknown' with parameters.
+     * <pre>
+     * message: The page is beyond the results that can be retrieved. Go to an earlier page or narrow down the search.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryResultWindowUnknown(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_query_result_window_unknown));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.crud_invalid_mode' with parameters.
      * <pre>
      * message: The mode is incorrect. (not {0}, but {1})
@@ -2563,6 +2779,22 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidPermissionSpacing(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_permission_spacing, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_permission_fullwidth' with parameters.
+     * <pre>
+     * message: A permission entry must be written with half-width characters. Write it as {0} or {1}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidPermissionFullwidth(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_permission_fullwidth, arg0, arg1));
         return this;
     }
 

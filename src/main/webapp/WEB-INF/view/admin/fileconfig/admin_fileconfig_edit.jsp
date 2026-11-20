@@ -217,7 +217,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="permissions" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                    <label for="description" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.description"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="description"/>

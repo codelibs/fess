@@ -58,6 +58,7 @@ ${fe:html(true)}
                         <div class="tab-pane active" id="systeminfo-env" role="tabpanel"
                              aria-labelledby="systeminfo-env-tab">
 								<textarea id="envData" class="systemInfoData form-control"
+                                          aria-labelledby="systeminfo-env-tab"
                                           readonly>
 <c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
@@ -66,6 +67,7 @@ ${fe:html(true)}
                         <div class="tab-pane" id="systeminfo-prop" role="tabpanel"
                              aria-labelledby="systeminfo-prop-tab">
 								<textarea id="propData" class="systemInfoData form-control"
+                                          aria-labelledby="systeminfo-prop-tab"
                                           readonly>
 <c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
@@ -75,11 +77,13 @@ ${fe:html(true)}
                              aria-labelledby="systeminfo-fessprop-tab">
                             <c:if test="${empty fessPropItems}">
 									<textarea id="fessPropData" class="systemInfoData form-control"
+                                          aria-labelledby="systeminfo-fessprop-tab"
                                               readonly><la:message
                                             key="labels.system_info_system_properties_does_not_exist"/></textarea>
                             </c:if>
                             <c:if test="${!empty fessPropItems}">
 									<textarea id="fessPropData" class="systemInfoData form-control"
+                                          aria-labelledby="systeminfo-fessprop-tab"
                                               readonly>
 <c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
@@ -89,6 +93,7 @@ ${fe:html(true)}
                         <div class="tab-pane" id="systeminfo-bug" role="tabpanel"
                              aria-labelledby="systeminfo-bug-tab">
 								<textarea id="bugReportData" class="systemInfoData form-control"
+                                          aria-labelledby="systeminfo-bug-tab"
                                           readonly>
 <c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>

@@ -170,7 +170,7 @@ public class ExportSearchHandler {
                 logger.debug("Exported {} documents", count);
             }
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
         } catch (final InvalidQueryException e) {
             // The scroll reports a failure on a later page as an invalid query too.
             if (started[0] != null) {

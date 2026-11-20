@@ -33,6 +33,7 @@ import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.core.message.UserMessages;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -120,7 +121,7 @@ public class SuggestWordsHandler {
             payload.put("suggest_words", items);
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/suggest-words");
         }
@@ -146,7 +147,9 @@ public class SuggestWordsHandler {
         try {
             final int requested = Integer.parseInt(numParam);
             if (requested <= 0) {
-                throw new InvalidRequestParameterException("num must be positive, got: " + requested);
+                throw new InvalidRequestParameterException(
+                        messages -> messages.addErrorsInvalidPageSize(UserMessages.GLOBAL_PROPERTY_KEY, String.valueOf(requested)),
+                        "num must be positive, got: " + requested);
             }
             return Math.min(requested, maxSize);
         } catch (final NumberFormatException e) {

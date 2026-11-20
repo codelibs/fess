@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
+import org.lastaflute.core.message.UserMessages;
+
 /**
  * Stateless helpers that enforce length/item-count bounds on v2 request
  * parameters, throwing {@link InvalidRequestParameterException} on violation.
@@ -35,7 +37,9 @@ public final class V2ParamValidator {
      */
     public static String checkMaxLength(final String value, final int max, final String name) {
         if (value != null && value.length() > max) {
-            throw new InvalidRequestParameterException(name + " exceeds the maximum length of " + max);
+            throw new InvalidRequestParameterException(
+                    messages -> messages.addErrorsParamTooLong(UserMessages.GLOBAL_PROPERTY_KEY, name, String.valueOf(max)),
+                    name + " exceeds the maximum length of " + max);
         }
         return value;
     }
@@ -54,7 +58,9 @@ public final class V2ParamValidator {
     public static String[] checkArray(final String[] values, final int maxItems, final int maxLen, final String name) {
         if (values != null) {
             if (values.length > maxItems) {
-                throw new InvalidRequestParameterException(name + " exceeds the maximum number of values: " + maxItems);
+                throw new InvalidRequestParameterException(
+                        messages -> messages.addErrorsParamTooManyValues(UserMessages.GLOBAL_PROPERTY_KEY, name, String.valueOf(maxItems)),
+                        name + " exceeds the maximum number of values: " + maxItems);
             }
             for (final String v : values) {
                 checkMaxLength(v, maxLen, name);

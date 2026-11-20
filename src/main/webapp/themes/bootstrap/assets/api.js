@@ -32,7 +32,12 @@ export class NetworkError extends Error {
 
 async function unwrap(resp) {
   let body;
-  try { body = await resp.json(); } catch { throw new ApiError("NETWORK", "Invalid JSON", resp.status); }
+  try { body = await resp.json(); } catch {
+    // Not JSON: the server or a proxy in front of it answered with a page of its own (e.g. Tomcat's
+    // 400 for a request line over 8 KB). The message stays empty so each caller shows its own
+    // localized text for the status instead of a technical one.
+    throw new ApiError(resp.ok ? "PROTOCOL" : "HTTP_ERROR", "", resp.status);
+  }
   const env = body && body.response;
   if (!env) throw new ApiError("PROTOCOL", "Missing response envelope", resp.status);
   if (env.status !== 0) {

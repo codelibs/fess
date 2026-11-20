@@ -240,6 +240,82 @@ public class SearchEngineClientTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isResultWindowExceeded() {
+        // The engine names the reason only in a nested exception of the "all shards failed" answer.
+        final OpenSearchException nested = new OpenSearchException(
+                "OpenSearch exception [type=illegal_argument_exception, reason=Result window is too large, from + size must be less than or equal to: [10000] but was [10010].]");
+        assertTrue(SearchEngineClient.isResultWindowExceeded(new OpenSearchStatusException(
+                "OpenSearch exception [type=search_phase_execution_exception, reason=all shards failed]", RestStatus.BAD_REQUEST, nested)));
+        assertTrue(SearchEngineClient.isResultWindowExceeded(nested));
+        assertFalse(SearchEngineClient.isResultWindowExceeded(new OpenSearchStatusException(
+                "OpenSearch exception [type=search_phase_execution_exception, reason=all shards failed]", RestStatus.BAD_REQUEST, null)));
+        assertFalse(SearchEngineClient.isResultWindowExceeded(new OpenSearchException("x")));
+    }
+
+    @Test
+    public void test_getResultWindowLimit_isTheOneTheEngineNames() {
+        final OpenSearchException nested = new OpenSearchException(
+                "OpenSearch exception [type=illegal_argument_exception, reason=Result window is too large, from + size must be less than or equal to: [20000] but was [20010].]");
+        assertEquals("20000",
+                SearchEngineClient.getResultWindowLimit(new OpenSearchStatusException(
+                        "OpenSearch exception [type=search_phase_execution_exception, reason=all shards failed]", RestStatus.BAD_REQUEST,
+                        nested)));
+        // a refusal that names no limit, or is about something else, has none
+        assertNull(SearchEngineClient.getResultWindowLimit(new OpenSearchException("Result window is too large")));
+        assertNull(SearchEngineClient.getResultWindowLimit(new OpenSearchException("x")));
+    }
+
+    /** The limit is the engine's, which the setting of Fess does not have to match: without one the text names none. */
+    @Test
+    public void test_search_resultWindowExceeded_usesTheLimitOfTheEngineOrNamesNone() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final OpenSearchException named =
+                new OpenSearchException("Result window is too large, from + size must be less than or equal to: [20000] but was [20010].");
+        final OpenSearchException unnamed = new OpenSearchException("Result window is too large");
+        for (final OpenSearchException failure : new OpenSearchException[] { named, unnamed }) {
+            try {
+                clientSearchFailingWith(failure).search("fess.search", builder -> true, (builder, execTime, response) -> response);
+                fail("a page beyond the result window must not be answered as a result");
+            } catch (final InvalidQueryException e) {
+                final org.codelibs.fess.mylasta.action.FessMessages messages = new org.codelibs.fess.mylasta.action.FessMessages();
+                e.getMessageCode().message(messages);
+                final String text = String.join(" ", ComponentUtil.getMessageManager().toMessageList(java.util.Locale.ENGLISH, messages));
+                if (failure == named) {
+                    assertTrue(text, text.contains("first 20000 results"));
+                } else {
+                    assertFalse(text, text.matches(".*\\d.*"));
+                    assertTrue(text, text.contains("beyond the results that can be retrieved"));
+                }
+            }
+        }
+    }
+
+    /**
+     * A page beyond the result window of the index is not a query nobody can process: the user is told where the
+     * limit is, in the language of the request, with the configured size.
+     */
+    @Test
+    public void test_search_resultWindowExceeded_namesTheLimit() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final OpenSearchException nested = new OpenSearchException(
+                "OpenSearch exception [type=illegal_argument_exception, reason=Result window is too large, from + size must be less than or equal to: [10000] but was [10010].]");
+        final OpenSearchStatusException failure = new OpenSearchStatusException(
+                "OpenSearch exception [type=search_phase_execution_exception, reason=all shards failed]", RestStatus.BAD_REQUEST, nested);
+        try {
+            clientSearchFailingWith(failure).search("fess.search", builder -> true, (builder, execTime, response) -> response);
+            fail("a page beyond the result window must not be answered as a result");
+        } catch (final InvalidQueryException e) {
+            assertEquals(failure, e.getCause());
+            final org.codelibs.fess.mylasta.action.FessMessages messages = new org.codelibs.fess.mylasta.action.FessMessages();
+            e.getMessageCode().message(messages);
+            final String text = String.join(" ", ComponentUtil.getMessageManager().toMessageList(java.util.Locale.ENGLISH, messages));
+            assertTrue(text, text.contains("first 10000 results"));
+            final String ja = String.join(" ", ComponentUtil.getMessageManager().toMessageList(java.util.Locale.JAPANESE, messages));
+            assertTrue(ja, ja.contains("先頭から 10000 件"));
+        }
+    }
+
+    @Test
     public void test_search_otherEngineFailures_stayInvalidQueries() {
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         final OpenSearchException[] failures = { new OpenSearchStatusException("x", RestStatus.BAD_REQUEST, null),

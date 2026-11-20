@@ -41,6 +41,7 @@ import {
   promptLogin,
   endSession,
   isSessionGone,
+  isSessionEnded,
   localizePasswordError,
   isPasskeyEnabled,
   isPasskeyLoginAvailable,
@@ -802,6 +803,35 @@ describe("isSessionGone", () => {
     [null, false],
   ])("%o → %s", (err, expected) => {
     expect(isSessionGone(err)).toBe(expected);
+  });
+});
+
+describe("isSessionEnded", () => {
+  it("is true for what isSessionGone knows, without asking the server", async () => {
+    api.get.mockClear();
+    expect(await isSessionEnded({ httpStatus: 401 })).toBe(true);
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it("is true for a 403 when /auth/me says nobody is signed in", async () => {
+    api.get.mockResolvedValue({ authenticated: false });
+    expect(await isSessionEnded({ httpStatus: 403, code: "forbidden" })).toBe(true);
+    expect(api.get).toHaveBeenCalledWith("/auth/me");
+  });
+
+  it("is false for a 403 while the user is signed in, or when /auth/me fails", async () => {
+    api.get.mockResolvedValue({ authenticated: true });
+    expect(await isSessionEnded({ httpStatus: 403 })).toBe(false);
+    api.get.mockRejectedValue(new Error("offline"));
+    expect(await isSessionEnded({ httpStatus: 403 })).toBe(false);
+  });
+
+  it("is false for a 403 with a reason, and for other errors, without asking the server", async () => {
+    api.get.mockClear();
+    expect(await isSessionEnded({ httpStatus: 403, details: { reason: "chat_not_permitted" } })).toBe(false);
+    expect(await isSessionEnded({ httpStatus: 500 })).toBe(false);
+    expect(await isSessionEnded(null)).toBe(false);
+    expect(api.get).not.toHaveBeenCalled();
   });
 });
 
