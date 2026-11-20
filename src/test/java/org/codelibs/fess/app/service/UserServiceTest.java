@@ -1058,6 +1058,28 @@ public class UserServiceTest extends UnitFessTestCase {
         assertEquals(List.of("auth:alice", "user:alice"), calls);
     }
 
+    @Test
+    public void test_store_read_userChangedSinceItWasRead_isRefusedAsChangedConcurrently() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        final UserBhv bhv = userService.userBhv;
+        userService.userBhv = new UserBhv() {
+            @Override
+            public org.dbflute.optional.OptionalEntity<User> selectByPK(final String id) {
+                return bhv.selectByPK(id);
+            }
+
+            @Override
+            public void update(final User entity,
+                    final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("opensearch said: version_conflict_engine_exception [seqNo=7]");
+            }
+        };
+
+        org.junit.jupiter.api.Assertions.assertThrows(org.codelibs.fess.exception.UserChangedConcurrentlyException.class,
+                () -> userService.store(readUser("id-alice", "alice")));
+    }
+
     /** A user as it is read from the index: it carries the sequence number and primary term. */
     private static User readUser(final String id, final String name) {
         final User user = storedUser(id, name);

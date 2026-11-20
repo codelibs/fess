@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.opensearch.user.bsbhv.BsUserBhv;
+import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
@@ -66,6 +67,14 @@ public class UserBhv extends BsUserBhv {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    @Override
+    protected UserCB xprepareCBAsPK(final String id) {
+        final UserCB cb = super.xprepareCBAsPK(id);
+        // the version of the stored user is what an edit form carries to tell that it is out of date
+        cb.request().setVersion(true);
+        return cb;
     }
 
     private boolean isAttribute(final String key) {

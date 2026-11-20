@@ -24,6 +24,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserPager;
 import org.codelibs.fess.exception.FessUserNotFoundException;
+import org.codelibs.fess.exception.UserChangedConcurrentlyException;
 import org.codelibs.fess.exception.UserConflictException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
@@ -137,7 +138,7 @@ public class UserService {
      * @param user the user entity to store
      * @throws UserConflictException if the user is renamed to the name of another user
      * @throws UserConflictException if a new user has the ID of a stored one
-     * @throws UserConflictException if the user was read and has been changed by someone else since
+     * @throws UserChangedConcurrentlyException if the user was read and has been changed by someone else since
      */
     public void store(final User user) {
         final String username = user.getName();
@@ -167,7 +168,7 @@ public class UserService {
                 // The user was read, and the whole document is written back: a change made in between
                 // (a password change, for one) must not be put back to what was read.
                 if (!updateIfUnchanged(user)) {
-                    throw new UserConflictException(
+                    throw new UserChangedConcurrentlyException(
                             "The user was changed by someone else, so it was not saved. Load it again and retry: username=" + username);
                 }
             } else {

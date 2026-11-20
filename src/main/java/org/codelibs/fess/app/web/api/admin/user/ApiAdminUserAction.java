@@ -34,6 +34,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.admin.user.CreateForm;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.UserChangedConcurrentlyException;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
@@ -162,6 +163,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
             if (StringUtil.isNotBlank(body.password)) {
                 activityHelper.passwordChanged(getUserBean(), entity.getName());
             }
+        } catch (final UserChangedConcurrentlyException e) {
+            logger.info("The user was changed by someone else: id={}, username={}", body.id, body.name);
+            throwValidationErrorApi(messages -> messages.addErrorsUserChangedConcurrently(GLOBAL));
         } catch (final Exception e) {
             logger.warn("Failed to update user: id={}, username={}, error={}", body.id, body.name, e.getMessage(), e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

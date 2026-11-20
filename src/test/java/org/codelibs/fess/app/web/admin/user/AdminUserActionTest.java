@@ -21,11 +21,13 @@ import java.util.Map;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
+import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.user.exentity.Group;
 import org.codelibs.fess.opensearch.user.exentity.Role;
+import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -293,6 +295,56 @@ public class AdminUserActionTest extends UnitFessTestCase {
             reported.append(messages.toString());
         });
         return reported.toString();
+    }
+
+    private static User storedUserOfVersion(final long version) {
+        final User stored = new User();
+        stored.setId("id-alice");
+        stored.setName("alice");
+        stored.setVersionNo(version);
+        return stored;
+    }
+
+    private static EditForm editFormOfVersion(final Integer version) {
+        final EditForm form = new EditForm();
+        form.versionNo = version;
+        return form;
+    }
+
+    @Test
+    public void test_isStaleForm_userSavedSinceTheFormWasShown() {
+        assertTrue(AdminUserAction.isStaleForm(storedUserOfVersion(4), editFormOfVersion(3)));
+        assertTrue(AdminUserAction.isStaleForm(storedUserOfVersion(1), editFormOfVersion(-1)));
+    }
+
+    @Test
+    public void test_isStaleForm_userNotChangedSince() {
+        assertFalse(AdminUserAction.isStaleForm(storedUserOfVersion(3), editFormOfVersion(3)));
+    }
+
+    @Test
+    public void test_isStaleForm_versionThatWasNotReadCannotBeCompared() {
+        assertFalse(AdminUserAction.isStaleForm(storedUserOfVersion(-1), editFormOfVersion(3)));
+        assertFalse(AdminUserAction.isStaleForm(new User(), editFormOfVersion(3)));
+        assertFalse(AdminUserAction.isStaleForm(storedUserOfVersion(4), editFormOfVersion(null)));
+    }
+
+    @Test
+    public void test_getUser_apiBody_isNotJudgedByItsVersion() {
+        // the admin API keeps the check inside the request only: a body with an old version is still applied
+        ComponentUtil.register(new UserService() {
+            @Override
+            public OptionalEntity<User> getUser(final String id) {
+                return OptionalEntity.of(storedUserOfVersion(9));
+            }
+        }, UserService.class.getCanonicalName());
+        final EditForm form = new EditForm();
+        form.crudMode = CrudMode.EDIT;
+        form.id = "id-alice";
+        form.name = "alice";
+        form.versionNo = 1;
+
+        assertTrue(AdminUserAction.getUser(form).isPresent());
     }
 
     /**

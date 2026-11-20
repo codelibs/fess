@@ -554,6 +554,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: too many tags: a user can have up to {0} tags */
     public static final String ERRORS_tagtype_too_many_tags = "{errors.tagtype_too_many_tags}";
 
+    /** The key of the message: The user was changed by someone else. Reload it and try again. */
+    public static final String ERRORS_user_changed_concurrently = "{errors.user_changed_concurrently}";
+
     /** The key of the message: The regular expression after "regex:" is invalid: {0} */
     public static final String ERRORS_relatedcontent_invalid_regex = "{errors.relatedcontent_invalid_regex}";
 
@@ -3267,6 +3270,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsTagtypeTooManyTags(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_tagtype_too_many_tags, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.user_changed_concurrently' with parameters.
+     * <pre>
+     * message: The user was changed by someone else. Reload it and try again.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsUserChangedConcurrently(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_user_changed_concurrently));
         return this;
     }
 

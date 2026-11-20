@@ -35,6 +35,7 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.exception.UserChangedConcurrentlyException;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.user.exentity.Passkey;
@@ -326,7 +327,7 @@ public class AdminUserAction extends FessAdminAction {
         verifyRolesAndGroups(form, roleService, groupService, v -> throwValidationError(v, this::asEditHtml));
         verifyPassword(form, this::asEditHtml);
         verifyToken(this::asEditHtml);
-        getUser(form).ifPresent(entity -> {
+        getUserToUpdate(form).ifPresent(entity -> {
             try {
                 userService.store(entity);
                 if (StringUtil.isNotBlank(form.password)) {
@@ -334,6 +335,9 @@ public class AdminUserAction extends FessAdminAction {
                 }
                 logger.info("Updated user: {}", entity.getName());
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final UserChangedConcurrentlyException e) {
+                logger.info("The user was changed by someone else: {}", form.name);
+                throwValidationError(messages -> messages.addErrorsUserChangedConcurrently(GLOBAL), this::asEditHtml);
             } catch (final Exception e) {
                 logger.warn("Failed to update user: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -441,22 +445,56 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     /**
+     * Returns the stored user that the edit form is saved onto. The form is refused if the user was changed
+     * since the form was shown, before anything is written: its hidden version number is the version of the
+     * stored user at that time.
+     *
+     * @param form the edit form
+     * @return optional user entity populated from the form
+     */
+    protected OptionalEntity<User> getUserToUpdate(final EditForm form) {
+        return getEntity(form).map(entity -> {
+            if (isStaleForm(entity, form)) {
+                logger.info("The edit form of a user is stale: id={}, formVersion={}, storedVersion={}", form.id, form.versionNo,
+                        entity.getVersionNo());
+                throwValidationError(messages -> messages.addErrorsUserChangedConcurrently(GLOBAL), this::asEditHtml);
+            }
+            return populateUser(form, entity);
+        });
+    }
+
+    /**
+     * Tells whether the stored user was changed since the edit form was shown.
+     *
+     * @param stored the user as it is stored now
+     * @param form the edit form, carrying the version of the user at the time it was shown
+     * @return true if the versions differ. A version that was not read (negative or missing) cannot be compared,
+     *         and the form is not judged stale.
+     */
+    protected static boolean isStaleForm(final User stored, final EditForm form) {
+        final Long version = stored.getVersionNo();
+        return version != null && version.longValue() >= 0L && form.versionNo != null && version.longValue() != form.versionNo.longValue();
+    }
+
+    /**
      * Returns the user entity based on the provided form data, applying any necessary transformations.
      *
      * @param form the form containing user data for retrieval and update
      * @return optional user entity populated from the form
      */
     public static OptionalEntity<User> getUser(final CreateForm form) {
-        return getEntity(form).map(entity -> {
-            copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
-            if (form.crudMode.intValue() == CrudMode.CREATE || StringUtil.isNotBlank(form.password)) {
-                final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(form.password);
-                entity.setOriginalPassword(form.password);
-                entity.setPassword(encodedPassword);
-            }
-            return entity;
-        });
+        return getEntity(form).map(entity -> populateUser(form, entity));
+    }
+
+    private static User populateUser(final CreateForm form, final User entity) {
+        copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
+        if (form.crudMode.intValue() == CrudMode.CREATE || StringUtil.isNotBlank(form.password)) {
+            final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(form.password);
+            entity.setOriginalPassword(form.password);
+            entity.setPassword(encodedPassword);
+        }
+        return entity;
     }
 
     /**
