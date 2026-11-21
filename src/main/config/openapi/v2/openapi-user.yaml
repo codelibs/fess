@@ -891,6 +891,13 @@ paths:
         When another request has changed the password after `current_password`
         was verified (two requests with the same `current_password` sent at
         once), the later one answers `conflict` (409) and does not change it.
+
+        Only a local user's or a directory user's session may change a
+        password: the session of a user an identity provider authenticated
+        (SSO) answers `401` as no session does, whatever `current_password` is.
+        A directory user's session never changes the stored password of a
+        local user of the same name: a `current_password` that only that
+        password satisfies is answered as a wrong one.
       operationId: authPasswordV2
       security: [{ sessionCookie: [] }]
       parameters:

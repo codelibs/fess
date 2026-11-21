@@ -905,6 +905,100 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_ssoSessionOfALocalUsersName_isRefusedBeforeTheCurrentPasswordIsChecked() throws Exception {
+        // An SSO session carries only a name. The local fess_user of that name is another account: the SSO user must
+        // not be able to change its password by knowing it, so the session is answered as no session is, like the
+        // passkey endpoints do, and no password is looked at.
+        final StubFessLoginAssist stub = registerStubLoginAssist("alice", "secret-current").asLocalUser().asSsoSession();
+        final boolean[] changed = { false };
+        final org.codelibs.fess.app.service.UserService service = new org.codelibs.fess.app.service.UserService() {
+            @Override
+            public void changePassword(final String username, final String currentPassword, final String password) {
+                changed[0] = true;
+            }
+        };
+        ComponentUtil.register(service, "userService");
+        ComponentUtil.register(service, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        final int[] verifications = { 0 };
+        stub.withConcurrentRequestDuringVerification(() -> verifications[0]++);
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        try {
+            for (final String currentPassword : new String[] { "secret-current", "WRONG" }) {
+                final CapturingResponse res = new CapturingResponse();
+                final TrackingStubSession session = new TrackingStubSession();
+                new PasswordChangeHandler(
+                        rl).handle(
+                                new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                                        .withJsonBody("{\"current_password\":\"" + currentPassword
+                                                + "\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                                res);
+
+                assertEquals(401, res.status, res.body());
+                assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+                assertFalse(res.body().contains("invalid_current_password"), res.body());
+                assertFalse(changed[0], "the local password must not be changed");
+                assertFalse(session.invalidateCalled, "a refused request must leave the session alone");
+            }
+            assertEquals(0, verifications[0], "the current password must not even be checked");
+            for (int i = 0; i < 5; i++) {
+                assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "alice", 5, 60),
+                        "a refused request must not take a slot of the user bucket");
+            }
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
+    public void passwordChange_directorySessionVerifiedOnlyByTheLocalHash_isAWrongCurrentPassword() throws Exception {
+        // A directory login (LDAP, SPNEGO) whose bind fails falls back to the local user of the same name, whose hash
+        // then verifies. The directory session does not own that password: it is answered as a wrong current password.
+        registerStubLoginAssist("alice", "secret-current").asLocalUser().asDirectorySession();
+        final boolean[] changed = { false };
+        final org.codelibs.fess.app.service.UserService service = new org.codelibs.fess.app.service.UserService() {
+            @Override
+            public void changePassword(final String username, final String currentPassword, final String password) {
+                changed[0] = true;
+            }
+        };
+        ComponentUtil.register(service, "userService");
+        ComponentUtil.register(service, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final TrackingStubSession session = new TrackingStubSession();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                    .withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            assertEquals(401, res.status, res.body());
+            assertTrue(res.body().contains("\"reason\":\"invalid_current_password\""), res.body());
+            assertFalse(changed[0], "the local password must not be changed");
+            assertFalse(session.invalidateCalled, "a refused request must leave the session alone");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void passwordChange_concurrentUserChange_returns409() throws Exception {
         // changePassword gives up with UserConflictException when the user was changed by someone else on every
         // attempt. Nothing was written, so the client is told to retry (409), not that the server failed (500).
@@ -1243,6 +1337,8 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         private final String expectedPw;
         private transient Runnable concurrentRequest = () -> {};
         private boolean localUser = false;
+        private boolean localSession = false;
+        private boolean ssoSession = false;
 
         StubFessLoginAssist(final String userId, final String expectedPw) {
             this.userId = userId;
@@ -1267,6 +1363,30 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
          */
         StubFessLoginAssist asLocalUser() {
             this.localUser = true;
+            this.localSession = true;
+            return this;
+        }
+
+        /**
+         * Makes the session belong to a directory user while {@link #findLoginUser} still answers with a local user,
+         * as a directory login does when the password verifies only against the stored hash of the local user of
+         * that name.
+         *
+         * @return this stub (fluent)
+         */
+        StubFessLoginAssist asDirectorySession() {
+            this.localSession = false;
+            return this;
+        }
+
+        /**
+         * Makes the session belong to a user that SAML, OpenID Connect or Entra ID authenticated,
+         * which is neither a local user nor a directory user.
+         *
+         * @return this stub (fluent)
+         */
+        StubFessLoginAssist asSsoSession() {
+            this.ssoSession = true;
             return this;
         }
 
@@ -1277,8 +1397,18 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
         @Override
         public OptionalThing<FessUserBean> getSavedUserBean() {
-            // Pretend a user is logged in so the handler proceeds past the auth gate.
-            return OptionalThing.of(new FessUserBean(new StubFessUser(userId)));
+            // Pretend a user is logged in so the handler proceeds past the auth gate. The session is a
+            // directory user's unless the test says otherwise: only a local or a directory user may change a password.
+            if (ssoSession) {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(userId)));
+            }
+            if (localSession) {
+                final org.codelibs.fess.opensearch.user.exentity.User u = new org.codelibs.fess.opensearch.user.exentity.User();
+                u.setName(userId);
+                return OptionalThing.of(new FessUserBean(u));
+            }
+            return OptionalThing.of(
+                    new FessUserBean(new org.codelibs.fess.ldap.LdapUser(userId, false, new String[0], FessUser.PermissionState.RESOLVED)));
         }
 
         @Override
