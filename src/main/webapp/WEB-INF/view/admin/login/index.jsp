@@ -37,6 +37,10 @@ ${fe:html(true)}
 								<li><i class="fa fa-exclamation-circle"></i> <la:message key="errors.login_error" /></li>
 							</ul>
 						</div>
+						<%-- Shown by js/login.js when the passkey prompt was dismissed, timed out or the user verification was not satisfied. --%>
+						<div id="passkey-not-completed" class="alert alert-info d-none" role="alert">
+							<la:message key="labels.login_passkey_not_completed" />
+						</div>
 					</c:if>
 				</div>
 				<la:form action="/login/" styleId="login" method="post">

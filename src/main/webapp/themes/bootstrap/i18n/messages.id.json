@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Terlalu banyak percobaan masuk. Coba lagi nanti.",
   "auth.password_change_required": "Anda perlu memperbarui kata sandi Anda",
   "auth.passkey_login": "Masuk dengan passkey",
+  "auth.passkey_not_completed": "Operasi passkey tidak selesai. Coba lagi atau gunakan kata sandi Anda.",
   "chat.placeholder": "Ajukan pertanyaan...",
   "chat.send": "Kirim",
   "chat.disabled": "Obrolan dinonaktifkan di server ini.",
