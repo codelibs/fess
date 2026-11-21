@@ -556,9 +556,9 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
 
     @Test
     public void test_getPasswordChangedAt() {
-        assertEquals(0L, userService.getPasswordChangedAt("alice"));
+        assertEquals(0L, userService.getPasswordChangedAt("alice").getAsLong());
         stored.setPasswordChangedAt(123L);
-        assertEquals(123L, userService.getPasswordChangedAt("alice"));
+        assertEquals(123L, userService.getPasswordChangedAt("alice").getAsLong());
     }
 
     @Test
@@ -569,7 +569,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
                 return OptionalEntity.empty();
             }
         };
-        assertEquals(0L, userService.getPasswordChangedAt("ghost"));
+        assertTrue(userService.getPasswordChangedAt("ghost").isEmpty());
     }
 
     @Test
