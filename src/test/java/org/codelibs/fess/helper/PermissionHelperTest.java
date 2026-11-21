@@ -366,11 +366,56 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.encode("(deny)foo"));
         assertNull(permissionHelper.encode("(deny) foo"));
         assertNull(permissionHelper.encode("(DENY)foo"));
-        assertNull(permissionHelper.encode("(deny)(allow){user}bob"));
-        assertNull(permissionHelper.encode("(deny)(deny){user}bob"));
+        assertNull(permissionHelper.encode("(deny)(allow)foo"));
+        assertNull(permissionHelper.encode("(allow)(deny)foo"));
+        assertNull(permissionHelper.encode("(deny)(deny)"));
         // allow keeps its raw pass-through, now without the leading blank
         assertEquals("foo", permissionHelper.encode("(allow)foo"));
         assertEquals("foo", permissionHelper.encode("(allow) foo"));
+    }
+
+    @Test
+    public void test_encode_stackedPrefixesCollapse() {
+        // a single (deny) anywhere among the prefixes denies the entry, whatever the order
+        assertEquals("DRx", permissionHelper.encode("(allow)(deny){role}x"));
+        assertEquals("DRx", permissionHelper.encode("(deny)(allow){role}x"));
+        assertEquals("DRx", permissionHelper.encode("(deny)(deny){role}x"));
+        assertEquals("D1bob", permissionHelper.encode("(deny)(allow){user}bob"));
+        assertEquals("D2staff", permissionHelper.encode("(allow)(allow)(deny)(allow){group}staff"));
+        assertEquals("D1bob", permissionHelper.encode("(deny)(deny){user}bob"));
+        // allow only
+        assertEquals("Rx", permissionHelper.encode("(allow)(allow){role}x"));
+        assertEquals("1bob", permissionHelper.encode("(allow)(allow)(allow){user}bob"));
+        assertEquals("foo", permissionHelper.encode("(allow)(allow)foo"));
+        // mixed case and whitespace between the prefixes
+        assertEquals("DRx", permissionHelper.encode("(ALLOW)(Deny){ROLE}x"));
+        assertEquals("DRx", permissionHelper.encode("(Deny) (aLLow)\t{role}x"));
+        assertEquals("D2staff", permissionHelper.encode("  (allow) (deny) (allow) {Group}staff  "));
+    }
+
+    @Test
+    public void test_encode_stackedPrefixesAreFixedPoint() {
+        final String[] inputs = { "(allow)(deny){role}x", "(deny)(allow){role}x", "(deny)(deny){user}bob", "(allow)(allow){group}staff",
+                "(ALLOW)(Deny) {USER}bob", "(allow)(allow)foo", "(deny)(allow)(deny){role}Dev" };
+        for (final String input : inputs) {
+            final String encoded = permissionHelper.encode(input);
+            assertNotNull("encode should accept: " + input, encoded);
+            final String decoded = permissionHelper.decode(encoded);
+            assertEquals("displayed form of " + input, decoded, permissionHelper.decode(permissionHelper.encode(decoded)));
+            assertEquals("re-saving the displayed form of " + input, encoded, permissionHelper.encode(decoded));
+        }
+        assertEquals("(deny){role}x", permissionHelper.decode(permissionHelper.encode("(allow)(deny){role}x")));
+        assertEquals("(deny){role}x", permissionHelper.decode(permissionHelper.encode("(deny)(allow){role}x")));
+        assertEquals("{role}x", permissionHelper.decode(permissionHelper.encode("(allow)(allow){role}x")));
+    }
+
+    @Test
+    public void test_isSpacedEntry_stackedPrefixes() {
+        assertTrue(permissionHelper.isSpacedEntry("(allow)(deny) {user}bob"));
+        assertTrue(permissionHelper.isSpacedEntry("(allow) (deny){user}bob"));
+        assertFalse(permissionHelper.isSpacedEntry("(allow)(deny){user}bob"));
+        assertFalse(permissionHelper.isSpacedEntry("(allow)(allow)foo"));
+        assertFalse(permissionHelper.isSpacedEntry("(deny)(allow)"));
     }
 
     @Test
