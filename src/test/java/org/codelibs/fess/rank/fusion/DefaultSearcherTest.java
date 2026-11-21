@@ -177,8 +177,10 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         // what SearchEngineClient reports when the engine refuses a page past index.max_result_window
         final FessMessages messages = new FessMessages();
         e.getMessageCode().message(messages);
-        assertTrue(messages.hasMessageOf(UserMessages.GLOBAL_PROPERTY_KEY, FessMessages.ERRORS_invalid_query_cannot_process),
-                "the page past the depth must be reported as the query the engine cannot process");
+        assertTrue(messages.hasMessageOf(UserMessages.GLOBAL_PROPERTY_KEY, FessMessages.ERRORS_invalid_query_result_window_exceeded),
+                "the page past the depth must say where the results end, not that the query cannot be processed");
+        assertEquals("the limit named is the depth of the fused search", String.valueOf(DEFAULT_PAGINATION_DEPTH),
+                messages.accessByFlatIterator().next().getValues()[0]);
     }
 
     @Test

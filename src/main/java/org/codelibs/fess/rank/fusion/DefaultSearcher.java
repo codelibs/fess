@@ -171,8 +171,10 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             if (logger.isDebugEnabled()) {
                 logger.debug("A fused search reached past its last page: start={}, rank.fusion.pagination_depth={}", start, depth);
             }
-            // The engine's answer to a page past index.max_result_window, as SearchEngineClient reports it
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+            // The answer to a page past index.max_result_window, as SearchEngineClient reports it: the number is the
+            // limit of this search, which is the depth and not the window of the index
+            throw new InvalidQueryException(
+                    messages -> messages.addErrorsInvalidQueryResultWindowExceeded(UserMessages.GLOBAL_PROPERTY_KEY, String.valueOf(depth)),
                     "The page starts past the fused results.");
         }
         if (start + params.getPageSize() > depth) {
