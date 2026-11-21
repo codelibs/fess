@@ -74,11 +74,14 @@ the whole installation with `query.boost.fuzzy.min.length=-1` in `fess_config.pr
 value never adds it).
 
 **A document that the extractor takes for a zip bomb is now recorded as a failure URL.** Until 15.9 such a
-document was indexed without its content and nothing was recorded (fess#3757). The check rejects a
-document whose extracted text is longer than `maxUncompressionSize` of `crawler/extractor+tikaExtractor.xml`
-(10,000,000 characters), so a genuine text file, archive or office document of that size is rejected as
-well. Look under Admin > Failure URL for `Suspected zip bomb`. Raise `maxUncompressionSize` in that file if
-you have to index such documents.
+document was indexed without its content and nothing was recorded (fess#3757). The extractor takes a document
+for a zip bomb when its extracted text is longer than `maxUncompressionSize` (10,000,000 characters) and also
+more than `maxCompressionRatio` times longer than the bytes it was read from. Both are set in
+`crawler/extractor+tikaExtractor.xml`. The ratio is 100 (extracted characters per input byte, the default of
+Tika): an ordinary archive or office document of text, which expands by a factor of a few to a few tens, is
+indexed whatever its size, and only a document that expands by more than that is rejected. Look under Admin >
+Failure URL for `Suspected zip bomb`. Raise `maxCompressionRatio` in that file if you have to index a more
+compressible document, or lower it to be stricter.
 
 **The static files of a theme are revalidated instead of being cached for a day.** Until 15.9 the files under
 `/themes/<name>/` were sent with `Cache-Control: public, max-age=86400`, so a browser kept the scripts and
