@@ -45,6 +45,7 @@ import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.jcifs.smb.SID;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -387,7 +388,7 @@ public class PermissionHelper {
                     }
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smbUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
+                    logger.debug("smbUrl:{} roleType:{}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()), roleTypeList);
                 }
             } else if (responseData.getUrl().startsWith("smb1:")) {
                 final org.codelibs.jcifs.smb1.SID[] allowedSids = (org.codelibs.jcifs.smb1.SID[]) metaDataMap
@@ -411,7 +412,7 @@ public class PermissionHelper {
                     }
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("smb1Url:{} roleType:{}", responseData.getUrl(), roleTypeList);
+                    logger.debug("smb1Url:{} roleType:{}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()), roleTypeList);
                 }
             }
         }
@@ -473,7 +474,7 @@ public class PermissionHelper {
                 throw new CrawlingAccessException("Failed to access permission info", e);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("fileUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
+                logger.debug("fileUrl:{} roleType:{}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()), roleTypeList);
             }
         }
         return roleTypeList;
@@ -499,7 +500,7 @@ public class PermissionHelper {
                 roleTypeList.add(systemHelper.getSearchRoleByGroup(group));
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("ftpUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
+                logger.debug("ftpUrl:{} roleType:{}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()), roleTypeList);
             }
         }
         return roleTypeList;

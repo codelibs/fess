@@ -31,6 +31,7 @@ import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.extractor.impl.PdfExtractor;
 import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -83,7 +84,7 @@ public class FessPdfExtractor extends PdfExtractor {
         if (!isOcrRequested(params)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("OCR is not enabled for this crawl, so the PDF has no text: url={}",
-                        params != null ? params.get(ExtractData.URL) : null);
+                        params != null ? CredentialUrlUtil.removeUserInfo(params.get(ExtractData.URL)) : null);
             }
             return content;
         }

@@ -226,7 +226,8 @@ public class WebFsIndexHelper {
                         // unusable protocol is dropped, and used to be dropped without a trace: the
                         // job then succeeded having crawled nothing.
                         logger.warn("Unsupported protocol in a crawling URL: {}. It is skipped. Available web protocols are {} ({}).",
-                                urlValue, ComponentUtil.getFessConfig().getCrawlerWebProtocols(), FessConfig.CRAWLER_WEB_PROTOCOLS);
+                                CredentialUrlUtil.removeUserInfo(urlValue), ComponentUtil.getFessConfig().getCrawlerWebProtocols(),
+                                FessConfig.CRAWLER_WEB_PROTOCOLS);
                     }
                 }
             }));
@@ -260,7 +261,7 @@ public class WebFsIndexHelper {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Crawling {}", urlsStr);
+                logger.debug("Crawling {}", CredentialUrlUtil.removeUserInfoInText(urlsStr));
             }
 
             crawler.setBackground(true);
@@ -328,8 +329,8 @@ public class WebFsIndexHelper {
                         if (isUnsupportedProtocol(urlValue, protocolHelper.getFileProtocols())) {
                             logger.warn(
                                     "Unsupported protocol in a crawling path: {}. It is crawled as a local file path. Available file protocols are {} ({}). {}",
-                                    urlValue, ComponentUtil.getFessConfig().getCrawlerFileProtocols(), FessConfig.CRAWLER_FILE_PROTOCOLS,
-                                    protocolPluginHint(urlValue));
+                                    CredentialUrlUtil.removeUserInfo(urlValue), ComponentUtil.getFessConfig().getCrawlerFileProtocols(),
+                                    FessConfig.CRAWLER_FILE_PROTOCOLS, protocolPluginHint(urlValue));
                         }
                         if (urlValue.startsWith("/")) {
                             u = "file:" + urlValue;
@@ -345,8 +346,8 @@ public class WebFsIndexHelper {
                         // that upgrades keeps its own crawler.file.protocols, so this is the shape a
                         // missing protocol plugin takes for it. fess-crawler only logs the skip at
                         // info level, per URL, once the crawl is under way.
-                        logger.warn("No crawler client is registered for a crawling path: {}. It is not crawled. {}", u,
-                                protocolPluginHint(u));
+                        logger.warn("No crawler client is registered for a crawling path: {}. It is not crawled. {}",
+                                CredentialUrlUtil.removeUserInfo(u), protocolPluginHint(u));
                     }
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
@@ -359,7 +360,7 @@ public class WebFsIndexHelper {
             for (final String urlValue : toFilterPatterns(includedPathsStr, systemHelper)) {
                 crawler.addIncludeFilter(urlValue);
                 if (logger.isInfoEnabled()) {
-                    logger.info("Included Path: {}", urlValue);
+                    logger.info("Included Path: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                 }
             }
 
@@ -367,7 +368,7 @@ public class WebFsIndexHelper {
             for (final String urlValue : toFilterPatterns(excludedPathsStr, systemHelper)) {
                 crawler.addExcludeFilter(urlValue);
                 if (logger.isInfoEnabled()) {
-                    logger.info("Excluded Path: {}", urlValue);
+                    logger.info("Excluded Path: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                 }
             }
 
@@ -378,13 +379,13 @@ public class WebFsIndexHelper {
                     final String urlValue = Pattern.quote(u);
                     crawler.addExcludeFilter(urlValue);
                     if (logger.isInfoEnabled()) {
-                        logger.info("Excluded Path from failures: {}", urlValue);
+                        logger.info("Excluded Path from failures: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                     }
                 });
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Crawling {}", pathsStr);
+                logger.debug("Crawling {}", CredentialUrlUtil.removeUserInfoInText(pathsStr));
             }
 
             crawler.setBackground(true);

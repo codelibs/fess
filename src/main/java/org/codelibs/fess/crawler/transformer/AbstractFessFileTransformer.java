@@ -65,6 +65,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
 /**
@@ -588,7 +589,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             // is the only place the loss can be reported, so it is reported at a level an
             // operator watching the crawler log will see.
             logger.warn("Could not extract a text, indexing the document without content: url={}, extractor={}",
-                    params.get(ExtractData.URL), extractor.getClass().getSimpleName(), e);
+                    CredentialUrlUtil.removeUserInfo(params.get(ExtractData.URL)), extractor.getClass().getSimpleName(), e);
         }
         return new ExtractData();
     }

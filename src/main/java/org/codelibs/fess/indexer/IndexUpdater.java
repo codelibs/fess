@@ -49,6 +49,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.fess.util.ThreadDumpUtil;
@@ -411,7 +412,7 @@ public class IndexUpdater extends Thread {
         final long maxDocumentRequestSize = Long.parseLong(fessConfig.getIndexerWebfsMaxDocumentRequestSize());
         for (final OpenSearchAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Indexing: url={}", accessResult.getUrl());
+                logger.debug("Indexing: url={}", CredentialUrlUtil.removeUserInfo(accessResult.getUrl()));
             }
             accessResult.setStatus(Constants.DONE_STATUS);
             accessResultList.add(accessResult);
@@ -432,20 +433,22 @@ public class IndexUpdater extends Thread {
                     final Transformer transformer = ComponentUtil.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
-                        logger.warn("Transformer not found: name={}, url={}", accessResultData.getTransformerName(), accessResult.getUrl());
+                        logger.warn("Transformer not found: name={}, url={}", accessResultData.getTransformerName(),
+                                CredentialUrlUtil.removeUserInfo(accessResult.getUrl()));
                         continue;
                     }
                     @SuppressWarnings("unchecked")
                     final Map<String, Object> map = (Map<String, Object>) transformer.getData(accessResultData);
                     if (map.isEmpty()) {
                         // no transformer
-                        logger.warn("No data: url={}", accessResult.getUrl());
+                        logger.warn("No data: url={}", CredentialUrlUtil.removeUserInfo(accessResult.getUrl()));
                         continue;
                     }
 
                     if (Constants.FALSE.equals(map.get(Constants.INDEXING_TARGET))) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Skipped indexing (not a target): url={}", accessResult.getUrl());
+                            logger.debug("Skipped indexing (not a target): url={}",
+                                    CredentialUrlUtil.removeUserInfo(accessResult.getUrl()));
                         }
                         continue;
                     }
@@ -471,10 +474,10 @@ public class IndexUpdater extends Thread {
                         logger.debug("Added documents: count={}", documentSize);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to add document: url={}", accessResult.getUrl(), e);
+                    logger.warn("Failed to add document: url={}", CredentialUrlUtil.removeUserInfo(accessResult.getUrl()), e);
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Skipped indexing (no content): url={}", accessResult.getUrl());
+                logger.debug("Skipped indexing (no content): url={}", CredentialUrlUtil.removeUserInfo(accessResult.getUrl()));
             }
 
         }
@@ -491,7 +494,7 @@ public class IndexUpdater extends Thread {
         try {
             return accessResult.getAccessResultData();
         } catch (final Exception e) {
-            logger.warn("Failed to get data: url={}", accessResult.getUrl(), e);
+            logger.warn("Failed to get data: url={}", CredentialUrlUtil.removeUserInfo(accessResult.getUrl()), e);
         }
         return null;
     }
@@ -567,7 +570,8 @@ public class IndexUpdater extends Thread {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         map.put(fessConfig.getIndexFieldBoost(), documentBoost);
         if (logger.isDebugEnabled()) {
-            logger.debug("Document boost applied: boost={}, url={}", documentBoost, map.get(fessConfig.getIndexFieldUrl()));
+            logger.debug("Document boost applied: boost={}, url={}", documentBoost,
+                    CredentialUrlUtil.removeUserInfoInText(String.valueOf(map.get(fessConfig.getIndexFieldUrl()))));
         }
     }
 
@@ -585,7 +589,7 @@ public class IndexUpdater extends Thread {
             final int count = searchLogHelper.getClickCount(url);
             doc.put(fessConfig.getIndexFieldClickCount(), count);
             if (logger.isDebugEnabled()) {
-                logger.debug("Click count: count={}, url={}", count, url);
+                logger.debug("Click count: count={}, url={}", count, CredentialUrlUtil.removeUserInfo(url));
             }
         }
     }
@@ -604,7 +608,7 @@ public class IndexUpdater extends Thread {
             final long count = searchLogHelper.getFavoriteCount(url);
             map.put(fessConfig.getIndexFieldFavoriteCount(), count);
             if (logger.isDebugEnabled()) {
-                logger.debug("Favorite count: count={}, url={}", count, url);
+                logger.debug("Favorite count: count={}, url={}", count, CredentialUrlUtil.removeUserInfo(url));
             }
         }
     }

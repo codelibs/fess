@@ -36,6 +36,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.groovy.util.Maps;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ClassUtil;
@@ -62,6 +63,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.MemoryUtil;
@@ -1827,5 +1829,59 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String value = transformer.normalizeCanonicalUrl("http://example.com/", "javascript:void(0)");
         // normalizeCanonicalUrl catches MalformedURLException and returns null
         assertNull(value);
+    }
+
+    private void assertNoPasswordInLog(final LogCapturingAppender appender, final String expected) {
+        final List<String> messages = appender.events().stream().map(e -> e.getMessage().getFormattedMessage()).toList();
+        assertFalse(messages.isEmpty());
+        for (final String message : messages) {
+            assertFalse(message, message.contains("secret"));
+        }
+        assertTrue(messages.toString(), messages.stream().anyMatch(m -> m.contains(expected)));
+    }
+
+    @Test
+    public void test_addChildUrlFromTagAttribute_logWithoutUserInfo() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessXpathTransformer.class);
+        try {
+            final List<String> urlList = new ArrayList<>();
+            transformer.addChildUrlFromTagAttribute(urlList, new URL("http://user:secret@example.com/dir/"),
+                    " http://user:secret@example.com/a.html ", "UTF-8");
+            assertEquals(1, urlList.size());
+            // the crawl itself is not changed: the child URL keeps its user name and password
+            assertEquals("http://user:secret@example.com/a.html", urlList.get(0));
+            assertNoPasswordInLog(appender, "Adding child URL: url=http://example.com/a.html");
+            assertNoPasswordInLog(appender, "URL conversion: original= http://example.com/a.html , converted=http://example.com/a.html");
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_isValidCanonicalUrl_logWithoutUserInfo() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessXpathTransformer.class);
+        try {
+            assertFalse(transformer.isValidCanonicalUrl("https://user:secret@example.com/a", "http://user:secret@example.com/a"));
+            assertNoPasswordInLog(appender, "https://example.com/a -> http://example.com/a");
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_logWithoutUserInfo() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessXpathTransformer.class);
+        try {
+            assertNull(transformer.normalizeCanonicalUrl("http://user:secret@example.com/a", "javascript:void(0)"));
+            final List<String> warnings = appender.messagesAt(Level.WARN);
+            assertEquals(1, warnings.size());
+            assertFalse(warnings.get(0), warnings.get(0).contains("secret"));
+            assertTrue(warnings.get(0), warnings.get(0).contains("baseUrl=http://example.com/a"));
+        } finally {
+            appender.detach();
+        }
     }
 }

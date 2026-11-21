@@ -61,6 +61,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.LogUtil;
 
@@ -331,7 +332,7 @@ public class FessCrawlerThread extends CrawlerThread {
         final ConditionalHeaders headers = resolveConditionalHeaders(document, headResponse);
         if (headers != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Sending a conditional GET: url={}, headers={}", url, headers);
+                logger.debug("Sending a conditional GET: url={}, headers={}", CredentialUrlUtil.removeUserInfo(url), headers);
             }
             conditionalGetState = new ConditionalGetState(url, document, id, headers);
         }
@@ -469,7 +470,7 @@ public class FessCrawlerThread extends CrawlerThread {
             return null;
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Found documents: {}", docList);
+            logger.debug("Found documents: {}", CredentialUrlUtil.removeUserInfoInText(String.valueOf(docList)));
         }
         final Set<RequestData> urlSet = new HashSet<>(docList.size());
         for (final Map<String, Object> doc : docList) {

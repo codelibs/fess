@@ -77,6 +77,28 @@ public class PathMappingHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_replaceUrl_logWithoutUserInfo() {
+        final String sessionId = "test";
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("smb://");
+        pathMapping.setReplacement("file://");
+        final List<PathMapping> pathMappingList = new ArrayList<>();
+        pathMappingList.add(pathMapping);
+        pathMappingHelper.setPathMappingList(sessionId, pathMappingList);
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(PathMappingHelper.class);
+        try {
+            // the result of the mapping is not changed
+            assertEquals("file://user:secret@host/share/", pathMappingHelper.replaceUrl(sessionId, "smb://user:secret@host/share/"));
+            final List<String> messages = appender.messagesAt(Level.DEBUG);
+            assertTrue(messages.toString(), messages.contains("replace: smb://host/share/ -> file://host/share/"));
+            messages.forEach(m -> assertFalse(m, m.contains("secret")));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_replaceUrls() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();

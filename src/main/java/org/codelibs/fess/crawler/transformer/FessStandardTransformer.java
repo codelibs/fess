@@ -23,6 +23,7 @@ import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.exception.ExtractorNotFoundException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -100,7 +101,7 @@ public class FessStandardTransformer extends AbstractFessFileTransformer {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("url={}, extractor={}", responseData.getUrl(), extractor);
+            logger.debug("url={}, extractor={}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()), extractor);
         }
         return extractor;
     }

@@ -30,6 +30,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.fesen.opensearch.action.admin.indices.refresh.RefreshResponse;
@@ -116,7 +117,7 @@ public class IndexingHelper {
                     if (!thumbnailManager.offer(doc)) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Removing {}={} from doc[{}]", thumbnailField, doc.get(thumbnailField),
-                                    doc.get(fessConfig.getIndexFieldUrl()));
+                                    CredentialUrlUtil.removeUserInfoInText(String.valueOf(doc.get(fessConfig.getIndexFieldUrl()))));
                         }
                         doc.remove(thumbnailField);
                     }
@@ -187,8 +188,9 @@ public class IndexingHelper {
                 type = cause != null ? cause.getClass().getSimpleName() : "unknown";
                 reason = failure.getMessage();
             }
-            logger.warn("Failed to index a document: url={}, id={}, status={}, type={}, reason={}", url, failure.getId(),
-                    failure.getStatus(), type, abbreviateReason(reason, cause));
+            logger.warn("Failed to index a document: url={}, id={}, status={}, type={}, reason={}",
+                    CredentialUrlUtil.removeUserInfoInText(String.valueOf(url)), failure.getId(), failure.getStatus(), type,
+                    abbreviateReason(reason, cause));
         }
     }
 
