@@ -82,7 +82,7 @@ public class BcryptPasswordEncoder implements PasswordEncoder {
             return false;
         }
         try {
-            return BCrypt.checkpw(rawPassword, encodedPassword);
+            return BCrypt.checkpw(rawPassword, normalizeVersion(encodedPassword));
         } catch (final IllegalArgumentException e) {
             // Malformed stored hash.
             if (logger.isDebugEnabled()) {
@@ -90,6 +90,24 @@ public class BcryptPasswordEncoder implements PasswordEncoder {
             }
             return false;
         }
+    }
+
+    /**
+     * Rewrites the version of a hash written by another implementation to the one the vendored BCrypt parses.
+     * {@code $2b$} (Python bcrypt, OpenBSD, Spring Security) and {@code $2y$} (PHP, {@code htpasswd -B}) compute the
+     * same hash as {@code $2a$} for every password this encoder accepts, but the vendored class reads only
+     * {@code $2$} and {@code $2a$}. Recomputing under {@code $2a$} also makes the final comparison use the same version
+     * on both sides. {@code $2x$} is left as it is, so that it is refused: it marks a hash made with the
+     * sign-extension bug of crypt_blowfish, which {@code $2a$} does not reproduce.
+     *
+     * @param bcryptHash the stored hash (without any <code>{id}</code> prefix)
+     * @return the hash with a {@code $2b$} or {@code $2y$} prefix changed to {@code $2a$}, otherwise unchanged
+     */
+    protected String normalizeVersion(final String bcryptHash) {
+        if (bcryptHash.startsWith("$2b$") || bcryptHash.startsWith("$2y$")) {
+            return "$2a$" + bcryptHash.substring(4);
+        }
+        return bcryptHash;
     }
 
     @Override
@@ -153,7 +171,7 @@ public class BcryptPasswordEncoder implements PasswordEncoder {
     }
 
     /**
-     * Parses the cost (log rounds) component of a BCrypt hash (<code>$2a$NN$...</code>).
+     * Parses the cost (log rounds) component of a BCrypt hash (<code>$2a$NN$...</code>, or <code>$2b$</code> / <code>$2y$</code>).
      *
      * @param bcryptHash the BCrypt hash string (without any <code>{id}</code> prefix)
      * @return the cost value, or {@code -1} if parsing fails
