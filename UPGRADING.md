@@ -117,7 +117,12 @@ the stored user. If the user was changed after the form was shown (by another ad
 by the deletion of a role or group the user had), saving the form shows "The user was changed by someone else.
 Reload it and try again." and writes nothing. Until 15.9 the form was saved over the change. A script that
 drives the admin screens with a saved form has to load the user again before it saves. The admin API
-(`PUT /api/admin/user/setting`) does not compare the version in its body; it only refuses a write that
+(`PUT /api/admin/user/setting`) compares the `version_no` of its body in the same way and refuses a stale one
+with the same message (HTTP 400, `status` 1) before anything is written, so a client has to send the
+`version_no` it has just read from `GET /api/admin/user/setting/{id}` (or the list) and read the user again
+after a refusal. The version also changes when Fess itself writes the user (a login that upgrades the password
+hash, ending the other sessions of the user when a passkey is removed, a password change), so a client that
+reads a user and waits across such a write is refused as well. Until 15.9 the API applied a body with any `version_no`; it only refused a write that
 collides with another one at the same moment.
 
 **A user who is already signed in no longer gets the login form.** `GET /login/` now redirects the user to the

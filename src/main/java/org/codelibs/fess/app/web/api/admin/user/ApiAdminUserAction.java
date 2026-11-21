@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.user;
 
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.getUser;
+import static org.codelibs.fess.app.web.admin.user.AdminUserAction.getUserToUpdate;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.validateAttributes;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.verifyPasswordPolicy;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.verifyRolesAndGroups;
@@ -139,7 +140,8 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     }
 
     /**
-     * Updates an existing user setting.
+     * Updates an existing user setting. The body must carry the {@code version_no} of the user it was
+     * read from; if the user was changed since, the request is refused and nothing is written.
      *
      * @param body the user data to update
      * @return JSON response containing the updated user setting ID
@@ -152,7 +154,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         verifyRolesAndGroups(body, roleService, groupService, this::throwValidationErrorApi);
         verifyPassword(body, false);
         body.crudMode = CrudMode.EDIT;
-        final User entity = getUser(body).orElseGet(() -> {
+        final User entity = getUserToUpdate(body, () -> {
+            throwValidationErrorApi(messages -> messages.addErrorsUserChangedConcurrently(GLOBAL));
+        }).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
                 messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
             });
