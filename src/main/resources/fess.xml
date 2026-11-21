@@ -51,6 +51,10 @@
 	</component>
 	<component name="passwordHashHelper" class="org.codelibs.fess.helper.PasswordHashHelper">
 	</component>
+	<!-- Password algorithms are resolved as "<id>PasswordEncoder" (app.password.algorithm and the {id}
+	     prefix of a stored password). A plugin adds its own with a component of that name in fess++.xml. -->
+	<component name="bcryptPasswordEncoder" class="org.codelibs.fess.crypto.password.BcryptPasswordEncoder">
+	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
 	</component>
 	<component name="crawlingInfoHelper" class="org.codelibs.fess.helper.CrawlingInfoHelper">

@@ -169,3 +169,28 @@ local password again; a local user whose name and password are also accepted by 
 Removing a passkey, by the user or by an administrator, ends the other login sessions of that user
 the way a password change does: the sessions end when they next check the user index, within
 `password.changed.check.interval` seconds (default 60).
+
+**The password hash refuses a password longer than the algorithm reads.** BCrypt (`app.password.algorithm`,
+the only built-in algorithm) takes into account only the first 72 bytes of a password in UTF-8, so a longer one
+accepts any ending. The screens and the API already refuse to set such a password in 15.10; now hashing it refuses
+it too (`IllegalArgumentException`), so no other code path can store one. The limit belongs to the algorithm,
+while `password.max.length` (default 100 characters) is unchanged. The algorithm is now a component: the id in
+`{id}` and in `app.password.algorithm` is resolved as the DI component `<id>PasswordEncoder`
+(`bcryptPasswordEncoder` is registered by Fess), so a plugin can supply another one, with its own limit if it has
+one. If `app.password.algorithm` names an id with no such component (for example the plugin jar was
+removed), Fess still starts and users with a stored hash of another id still log in, but setting any password
+fails at the first password hash with a message naming `app.password.algorithm`. Code outside this repository
+that extended `PasswordHashHelper` must adapt: the public constants `BCRYPT_PREFIX` and `BCRYPT_MAX_PASSWORD_BYTES`
+and the protected members `getEncoders`, `ID_BCRYPT`, `parseBcryptCost`, `resolveBcryptCost` and
+`getDummyBcryptHash` are removed (BCrypt specifics moved to `BcryptPasswordEncoder`, which has
+`MAX_PASSWORD_BYTES`, and to the `PasswordEncoder` interface), and the inner `PasswordEncoder` interface is now
+the public `org.codelibs.fess.crypto.password.PasswordEncoder`. **An account whose password was set longer than 72 bytes keeps logging in:** BCrypt has been the hash since
+15.6.0 and the password field accepted up to 100 characters with no byte rule until 15.10, so passwords longer
+than 72 bytes exist. Verifying a password never applies the limit, only the first 72 bytes are compared, and the
+stored hash is not upgraded to a newer cost while the password stays that long.
+A password that long whose stored hash is a legacy one (the unsalted SHA-256, SHA-512 or MD5 hex digest of
+`app.digest.algorithm`) also keeps that hash instead of moving to BCrypt at login, since BCrypt would refuse it;
+the warning about an insecure legacy MD5 hash is still written at each login until the user sets a new password.
+Set a new password (at most 72 bytes) to get the full protection. A fresh installation whose
+`index.user.initial_password` is longer than 72 bytes fails to start before it creates the user index, with a
+message naming the property; an installation whose `admin` user already exists only logs a warning.

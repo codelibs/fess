@@ -20,6 +20,7 @@ import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -182,6 +183,7 @@ public class LoginActionTest extends UnitFessTestCase {
         final SystemHelper systemHelper = new SystemHelper();
         sysField.set(changeAction, systemHelper);
         ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(new PasswordHashHelper(), "passwordHashHelper");
         final PasswordForm form = new PasswordForm();
         form.password = "Abcdefg1234";
         form.confirmPassword = "Abcdefg1234";

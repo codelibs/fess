@@ -28,6 +28,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -642,6 +643,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * currently configured algorithm/parameters. A failure here never fails
      * the login and never propagates an exception to the caller.
      *
+     * <p>A password longer than the algorithm accepts (see {@link PasswordHashHelper#getMaxPasswordBytes()})
+     * is not re-hashed, so that it keeps logging in with its stored hash.</p>
+     *
      * <p>Logs only the username (never the plaintext or hash values).</p>
      *
      * @param username the user whose stored hash is being upgraded
@@ -651,10 +655,21 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      */
     protected void lazyUpgradePassword(final String username, final String plainPassword, final String currentStored,
             final PasswordHashHelper passwordHashHelper) {
-        if (!passwordHashHelper.upgradeEncoding(currentStored)) {
-            return;
-        }
         try {
+            // Both calls resolve the encoder of app.password.algorithm, which throws when no component of that
+            // name is registered. The password has been verified already, so that must not fail the login.
+            if (!passwordHashHelper.upgradeEncoding(currentStored)) {
+                return;
+            }
+            if (passwordHashHelper.exceedsMaxPasswordBytes(plainPassword)) {
+                // The password was set over the limit of the algorithm (releases before 15.10 allowed it), so it cannot be
+                // hashed again. The stored hash stays as it is and the login goes on; a new password removes the case.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Skipped the upgrade of a password hash, the password is longer than the algorithm accepts. username={}",
+                            username);
+                }
+                return;
+            }
             final String newEncoded = passwordHashHelper.encode(plainPassword);
             final boolean updated =
                     ComponentUtil.getComponent(UserService.class).updateStoredPasswordHash(username, currentStored, newEncoded);
@@ -664,6 +679,11 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
                 }
             } else if (logger.isWarnEnabled()) {
                 logger.warn("Failed to upgrade password hash (update returned false). username={}", username);
+            }
+        } catch (final FessConfigurationException e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Skipped the upgrade of a password hash, the algorithm of app.password.algorithm cannot be resolved."
+                        + " The stored hash is kept. username={}, reason={}", username, e.getMessage());
             }
         } catch (final Exception e) {
             if (logger.isWarnEnabled()) {

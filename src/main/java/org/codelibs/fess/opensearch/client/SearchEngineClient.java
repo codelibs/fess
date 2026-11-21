@@ -72,6 +72,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.helper.DocumentHelper;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -423,6 +424,10 @@ public class SearchEngineClient implements Client {
                     }
                     final boolean exists = existsIndex(indexName);
                     if (!exists) {
+                        if ((fessConfig.getIndexUserIndex() + ".user").equals(indexName)) {
+                            // before the index exists: a later start would not load the admin user again
+                            verifyInitialUserPassword(fessConfig);
+                        }
                         createIndex(configIndex, indexName);
                         createAlias(configIndex, indexName);
                     }
@@ -433,6 +438,25 @@ public class SearchEngineClient implements Client {
                 logger.warn("Invalid index config name: configName={}", configName);
             }
         });
+    }
+
+    /**
+     * Refuses to create the user index with an {@code index.user.initial_password} that the password
+     * hash does not accept, instead of failing later while the admin user is hashed and leaving the
+     * index without it. Only a start that creates the user index fails: an installation whose admin
+     * user exists keeps starting, see {@code SystemHelper#reportOverlongInitialPassword}.
+     *
+     * @param fessConfig the Fess configuration
+     * @throws FessConfigurationException if the password is longer than the hash algorithm accepts
+     */
+    protected void verifyInitialUserPassword(final FessConfig fessConfig) {
+        final PasswordHashHelper passwordHashHelper = ComponentUtil.getPasswordHashHelper();
+        final String password = fessConfig.getIndexUserInitialPassword();
+        if (passwordHashHelper.exceedsMaxPasswordBytes(password)) {
+            throw new FessConfigurationException("index.user.initial_password is " + password.getBytes(StandardCharsets.UTF_8).length
+                    + " bytes long, but the password hash accepts at most " + passwordHashHelper.getMaxPasswordBytes()
+                    + " bytes. Set a shorter password in fess_config.properties before the user index is created.");
+        }
     }
 
     /**

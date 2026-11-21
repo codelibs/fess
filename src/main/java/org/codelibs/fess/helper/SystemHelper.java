@@ -786,12 +786,14 @@ public class SystemHelper {
     }
 
     /**
-     * Warns when {@code index.user.initial_password} is longer than BCrypt reads. Only the webapp process warns.
+     * Warns when {@code index.user.initial_password} is longer than the password hash accepts (BCrypt
+     * reads only the first 72 bytes). Only the webapp process warns.
      *
      * <p>Only warns: an installation that has run on such a value since its first start has an
      * {@code admin} user whose hash covers the first 72 bytes only, and that is the password its
-     * operator uses. Refusing to start would lock that installation out on upgrade. The password
-     * itself is not logged.
+     * operator uses. Refusing to start would lock that installation out on upgrade. A start that would
+     * have to create the admin user with such a value fails instead, see {@code SearchEngineClient}.
+     * The password itself is not logged.
      *
      * @param fessConfig The configuration to check.
      * @return true if the warning was written.
@@ -802,15 +804,16 @@ public class SystemHelper {
             return false;
         }
         final String password = fessConfig.getIndexUserInitialPassword();
-        if (!exceedsBcryptLimit(password)) {
+        final PasswordHashHelper passwordHashHelper = ComponentUtil.getPasswordHashHelper();
+        if (!passwordHashHelper.exceedsMaxPasswordBytes(password)) {
             return false;
         }
+        final int max = passwordHashHelper.getMaxPasswordBytes();
         logger.warn(
-                "index.user.initial_password is {} bytes long, but BCrypt reads only the first {} bytes. The admin user is created with"
-                        + " a password that accepts any ending after them. Set a password of at most {} bytes in fess_config.properties,"
-                        + " or change the admin password on the Users page after the first start, which refuses a longer one.",
-                password.getBytes(StandardCharsets.UTF_8).length, PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES,
-                PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES);
+                "index.user.initial_password is {} bytes long, but the password hash reads only the first {} bytes. An admin user created"
+                        + " earlier with it accepts any ending after them. Set a password of at most {} bytes in fess_config.properties,"
+                        + " or change the admin password on the Users page, which refuses a longer one.",
+                password.getBytes(StandardCharsets.UTF_8).length, max, max);
         return true;
     }
 
@@ -1386,17 +1389,6 @@ public class SystemHelper {
     }
 
     /**
-     * Checks whether BCrypt would ignore the end of a password, which it does after the first
-     * {@link PasswordHashHelper#BCRYPT_MAX_PASSWORD_BYTES} bytes of its UTF-8 form.
-     *
-     * @param password The password to check.
-     * @return true if the password is longer than BCrypt takes into account.
-     */
-    protected boolean exceedsBcryptLimit(final String password) {
-        return password != null && password.getBytes(StandardCharsets.UTF_8).length > PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES;
-    }
-
-    /**
      * Validates a password against configured password policy requirements.
      *
      * @param password The password to validate.
@@ -1414,10 +1406,10 @@ public class SystemHelper {
             return "errors.password_length";
         }
 
-        // BCrypt ignores everything after the first 72 bytes, so a longer password would be
-        // accepted with any ending. Refuse it when a password is set instead. This comes before the
+        // The hash algorithm may ignore everything after the first bytes (BCrypt: 72), so a longer password
+        // would be accepted with any ending. Refuse it when a password is set instead. This comes before the
         // configured maximum so that a password over both limits is told the limit it cannot get past.
-        if (exceedsBcryptLimit(password)) {
+        if (ComponentUtil.getPasswordHashHelper().exceedsMaxPasswordBytes(password)) {
             return "errors.password_too_long";
         }
 

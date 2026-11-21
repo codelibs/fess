@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.service.UserService;
+import org.codelibs.fess.crypto.bcrypt.BCrypt;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.ldap.LdapUser;
@@ -423,6 +424,62 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertNull(rec.lastHash.get());
     }
 
+    @Test
+    public void test_lazyUpgrade_passwordOverTheAlgorithmLimit_isNotRehashedAndLoginStillWorks() throws Exception {
+        // A password set over 72 bytes before 15.10, hashed with a cost below the target one.
+        final String overlong = "a".repeat(80);
+        final String oldCostHash = "{bcrypt}" + BCrypt.hashpw(overlong, BCrypt.gensalt(4));
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword(oldCostHash);
+        installUserBhv(stored);
+        final RecordingUserService rec = installUserService();
+        assertTrue(passwordHashHelper.upgradeEncoding(oldCostHash));
+
+        final OptionalEntity<FessUser> result = loginAssist.doAuthenticateLocal("alice", overlong);
+
+        assertTrue(result.isPresent());
+        // no attempt to hash the password again, so nothing is written and nothing is logged as a failure
+        assertEquals(0, countingPm.encodeCalls.get());
+        assertEquals(0, rec.updateCalls.get());
+    }
+
+    @Test
+    public void test_lazyUpgrade_passwordWithinTheLimit_stillUpgradesAnOldCostHash() throws Exception {
+        final String password = "a".repeat(72);
+        final String oldCostHash = "{bcrypt}" + BCrypt.hashpw(password, BCrypt.gensalt(4));
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword(oldCostHash);
+        installUserBhv(stored);
+        final RecordingUserService rec = installUserService();
+
+        assertTrue(loginAssist.doAuthenticateLocal("alice", password).isPresent());
+
+        assertEquals(1, rec.updateCalls.get());
+        assertTrue(rec.lastHash.get().startsWith("{bcrypt}$2a$10$"));
+    }
+
+    @Test
+    public void test_lazyUpgrade_unresolvableConfiguredAlgorithm_loginStillWorksAndNothingIsWritten() throws Exception {
+        final String oldCostHash = "{bcrypt}" + BCrypt.hashpw("secret", BCrypt.gensalt(4));
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword(oldCostHash);
+        installUserBhv(stored);
+        final RecordingUserService rec = installUserService();
+        // e.g. the plugin that supplied the algorithm was removed but app.password.algorithm still names it
+        testConfig.passwordAlgorithm = "gone";
+
+        final OptionalEntity<FessUser> ok = loginAssist.doAuthenticateLocal("alice", "secret");
+        assertTrue(ok.isPresent());
+        assertEquals(0, rec.updateCalls.get());
+        assertEquals(0, countingPm.encodeCalls.get());
+
+        // a wrong password is refused the same way as always, without an exception
+        assertFalse(loginAssist.doAuthenticateLocal("alice", "wrong").isPresent());
+    }
+
     // ---------------------------------------------------------------------
     // needsLoginSessionSyncCheck
     // ---------------------------------------------------------------------
@@ -761,6 +818,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         private final PasswordHashHelper delegate;
         final AtomicInteger matchesCalls = new AtomicInteger(0);
         final AtomicInteger paddingCalls = new AtomicInteger(0);
+        final AtomicInteger encodeCalls = new AtomicInteger(0);
         final AtomicReference<String> lastStored = new AtomicReference<>();
 
         CountingPasswordHashHelper(final PasswordHashHelper delegate) {
@@ -769,7 +827,18 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
         @Override
         public String encode(final String rawPassword) {
+            encodeCalls.incrementAndGet();
             return delegate.encode(rawPassword);
+        }
+
+        @Override
+        public int getMaxPasswordBytes() {
+            return delegate.getMaxPasswordBytes();
+        }
+
+        @Override
+        public boolean exceedsMaxPasswordBytes(final String password) {
+            return delegate.exceedsMaxPasswordBytes(password);
         }
 
         @Override

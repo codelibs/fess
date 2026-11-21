@@ -28,6 +28,8 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.exception.FessConfigurationException;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -923,6 +925,69 @@ public class SearchEngineClientTest extends UnitFessTestCase {
         } finally {
             System.clearProperty("fess.thumbnail.process");
         }
+    }
+
+    @Test
+    public void test_verifyInitialUserPassword_refusesAPasswordTheHashDoesNotAccept() {
+        final String password = "x".repeat(40) + "SECRET" + "y".repeat(40);
+        ComponentUtil.register(new PasswordHashHelper() {
+            @Override
+            public int getMaxPasswordBytes() {
+                return 72;
+            }
+        }, "passwordHashHelper");
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexUserInitialPassword() {
+                return password;
+            }
+        };
+
+        try {
+            new SearchEngineClient().verifyInitialUserPassword(config);
+            fail("a password of 86 bytes must be refused");
+        } catch (final FessConfigurationException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("index.user.initial_password"));
+            assertTrue(e.getMessage(), e.getMessage().contains("86"));
+            assertFalse("the password must not be quoted: " + e.getMessage(), e.getMessage().contains("SECRET"));
+        }
+    }
+
+    @Test
+    public void test_verifyInitialUserPassword_acceptsAPasswordWithinTheLimitOrWithoutALimit() {
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexUserInitialPassword() {
+                return "a".repeat(72);
+            }
+        };
+        ComponentUtil.register(new PasswordHashHelper() {
+            @Override
+            public int getMaxPasswordBytes() {
+                return 72;
+            }
+        }, "passwordHashHelper");
+        new SearchEngineClient().verifyInitialUserPassword(config);
+
+        final FessConfig longPassword = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexUserInitialPassword() {
+                return "a".repeat(200);
+            }
+        };
+        ComponentUtil.register(new PasswordHashHelper() {
+            @Override
+            public int getMaxPasswordBytes() {
+                return 0;
+            }
+        }, "passwordHashHelper");
+        new SearchEngineClient().verifyInitialUserPassword(longPassword);
     }
 
     @Test
