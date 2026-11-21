@@ -891,6 +891,9 @@ paths:
         When another request has changed the password after `current_password`
         was verified (two requests with the same `current_password` sent at
         once), the later one answers `conflict` (409) and does not change it.
+        This applies to a local user, whose stored password `current_password`
+        is compared with. For a directory (LDAP) login nothing is compared, so
+        two simultaneous changes may both succeed.
       operationId: authPasswordV2
       security: [{ sessionCookie: [] }]
       parameters:
