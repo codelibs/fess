@@ -120,7 +120,8 @@ ${fe:html(true)}
                                         <tr>
                                             <th><la:message
                                                     key="labels.failure_url_last_access_time"/></th>
-                                            <td>${f:h(lastAccessTime)}<la:hidden
+                                            <td><c:if test="${not empty lastAccessTime}"><fmt:formatDate value="${fe:date(lastAccessTime)}"
+                                                            pattern="yyyy-MM-dd'T'HH:mm:ss"/></c:if><la:hidden
                                                     property="lastAccessTime"/></td>
                                         </tr>
                                         </tbody>

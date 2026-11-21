@@ -84,11 +84,13 @@ ${fe:html(true)}
                                     </tr>
                                     <tr>
                                         <th><la:message key="labels.joblog_startTime"/></th>
-                                        <td>${f:h(startTime)}<la:hidden property="startTime"/></td>
+                                        <td><c:if test="${not empty startTime}"><fmt:formatDate value="${fe:date(startTime)}"
+                                                            pattern="yyyy-MM-dd'T'HH:mm:ss"/></c:if><la:hidden property="startTime"/></td>
                                     </tr>
                                     <tr>
                                         <th><la:message key="labels.joblog_endTime"/></th>
-                                        <td>${f:h(endTime)}<la:hidden property="endTime"/></td>
+                                        <td><c:if test="${not empty endTime}"><fmt:formatDate value="${fe:date(endTime)}"
+                                                            pattern="yyyy-MM-dd'T'HH:mm:ss"/></c:if><la:hidden property="endTime"/></td>
                                     </tr>
                                     <tr>
                                         <th><la:message key="labels.joblog_scriptType"/></th>
