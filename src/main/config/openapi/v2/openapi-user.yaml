@@ -18,6 +18,21 @@ info:
     → 413, `unsupported_media_type` → 415, `rate_limited` → 429,
     `internal_error` → 500, `service_unavailable` → 503).
 
+    **Authentication.** A client signs in with `POST /auth/login` (or the
+    passkey flow) and then sends the session cookie that the response sets
+    (`sessionCookie`) on every request. Most read endpoints are served
+    anonymously; the endpoints that act for a user (password change,
+    passkeys, tags, search history, favorites writes) answer `401
+    auth_required` without a signed-in session. The search endpoints
+    (`/search`, `/documents/all`, `/documents/export`,
+    `/documents/{docId}/similar`, `/suggest-words`, `/labels`,
+    `/popular-words`) also accept an administrator-issued access token
+    (`accessToken`) in place of a login. Each operation's `security` lists the
+    credentials it accepts; an empty `{}` entry means the operation also works
+    without one, which holds only while `login.required` is disabled (see
+    below). The CSRF header described next is a separate requirement and is
+    modelled as a parameter, not as a security scheme.
+
     State-changing endpoints (`POST` / `PUT` / `DELETE`) require the
     `X-Fess-CSRF-Token` header. Acquire the token from
     `POST /auth/login` (in the `csrf_token` field) or from
@@ -65,6 +80,11 @@ externalDocs:
   url: https://fess.codelibs.org/15.9/api/
 servers:
   - url: http://localhost:8080/api/v2
+# Anonymous or signed in. An operation overrides this with its own `security`:
+# a signed-in session only, no credential at all (`[]`), or a session or access token.
+security:
+  - {}
+  - sessionCookie: []
 tags:
   - name: search
     description: Search operations
@@ -111,6 +131,7 @@ paths:
         the engine snapshot embedded under `error.details.engine` so
         monitoring tools can still parse cluster metadata.
       operationId: healthV2
+      security: []
       responses:
         '200':
           description: Cluster is reachable (status `green` or `yellow`).
@@ -143,6 +164,7 @@ paths:
         only `q` and `redirect_url`, and the client is expected to navigate to
         `redirect_url`.
       operationId: searchV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       parameters:
         - { $ref: '#/components/parameters/Q' }
         - name: start
@@ -299,6 +321,7 @@ paths:
         via `api.search.scroll=false` the endpoint responds with
         `invalid_request` (400).
       operationId: scrollSearchV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       parameters:
         - { $ref: '#/components/parameters/Q' }
         - name: sort
@@ -402,6 +425,7 @@ paths:
         (`api.search.export.rate.limit.per.minute`) per logged-in user, or per
         client IP for a guest.
       operationId: exportSearchV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       parameters:
         - name: format
           in: query
@@ -522,6 +546,7 @@ paths:
         (`api.search.similar.rate.limit.per.minute`) per logged-in user, or per
         client IP for a guest.
       operationId: similarDocumentsV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       parameters:
         - name: num
           in: query
@@ -553,6 +578,7 @@ paths:
       tags: [suggest]
       summary: Suggest words for an input prefix
       operationId: suggestWordsV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       parameters:
         - { $ref: '#/components/parameters/Q' }
         - name: num
@@ -599,6 +625,7 @@ paths:
       tags: [search]
       summary: List configured labels
       operationId: labelsV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       responses:
         '200':
           description: Labels returned.
@@ -619,6 +646,7 @@ paths:
         Returns `invalid_request` (400) when `web.api.popularword=false`,
         matching v1's "unsupported operation" semantics.
       operationId: popularWordsV2
+      security: [{}, { sessionCookie: [] }, { accessToken: [] }]
       parameters:
         - name: seed
           in: query
@@ -769,6 +797,7 @@ paths:
 
         This endpoint is exempt from CSRF (no token exists prior to login).
       operationId: authLoginV2
+      security: []
       requestBody:
         required: true
         content:
@@ -863,6 +892,7 @@ paths:
         was verified (two requests with the same `current_password` sent at
         once), the later one answers `conflict` (409) and does not change it.
       operationId: authPasswordV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -910,6 +940,7 @@ paths:
         the login it answers `429 rate_limited`; it takes no rate-limit slot
         itself.
       operationId: authPasskeyLoginOptionsV2
+      security: []
       responses:
         '200':
           description: The login options.
@@ -940,6 +971,7 @@ paths:
 
         Exempt from CSRF, like `/auth/login`.
       operationId: authPasskeyLoginVerifyV2
+      security: []
       requestBody:
         required: true
         content:
@@ -973,6 +1005,7 @@ paths:
         (`fess_user` row); a directory or SSO session gets an empty list and
         `false`, and cannot register a passkey.
       operationId: authPasskeyListV2
+      security: [{ sessionCookie: [] }]
       responses:
         '200':
           description: The passkeys.
@@ -999,6 +1032,7 @@ paths:
         does. A user has at most 20 passkeys: beyond that it answers `400`
         with `reason=too_many_passkeys`. Requires `X-Fess-CSRF-Token`.
       operationId: authPasskeyRegisterOptionsV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -1036,6 +1070,7 @@ paths:
         failure is one `400` with `reason=registration_failed`. Requires
         `X-Fess-CSRF-Token`.
       operationId: authPasskeyRegisterVerifyV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -1067,6 +1102,7 @@ paths:
         session that is not a local user's all answer the same `404`.
         Requires `X-Fess-CSRF-Token`.
       operationId: authPasskeyDeleteV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
         - name: credentialId
@@ -1350,6 +1386,7 @@ paths:
         responds with `invalid_request` (400); `GET /ui/config` reports the
         same state in `features.search_history`.
       operationId: searchHistoryV2
+      security: [{ sessionCookie: [] }]
       responses:
         '200':
           description: Recent searches returned.
@@ -1386,6 +1423,7 @@ paths:
       tags: [favorite]
       summary: Mark a document as a favorite
       operationId: favoritePostV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -1415,6 +1453,7 @@ paths:
       tags: [tag]
       summary: List the caller's tags
       operationId: tagsListV2
+      security: [{ sessionCookie: [] }]
       responses:
         '200':
           description: The caller's tags, by sort order and name.
@@ -1439,6 +1478,7 @@ paths:
         existing is `conflict` (409); the same name of another user is a
         different tag.
       operationId: tagsCreateV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -1480,6 +1520,7 @@ paths:
         `shared` only changes who sees the tag. A write that keeps losing a
         race with another writer is also `conflict`.
       operationId: tagsUpdateV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -1514,6 +1555,7 @@ paths:
         that keeps losing a race with another writer is `conflict` (409) and
         leaves the tag in place.
       operationId: tagsDeleteV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       responses:
@@ -1543,6 +1585,7 @@ paths:
         with the caller's roles; a document the caller cannot search is
         `not_found` (404).
       operationId: documentTagsListV2
+      security: [{ sessionCookie: [] }]
       responses:
         '200':
           description: Tags of the document.
@@ -1568,6 +1611,7 @@ paths:
         Every indexed document of the URL gets the tag when the tag queue is
         next processed (about a minute); the tag endpoints show it at once.
       operationId: documentTagsAddV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       requestBody:
@@ -1605,6 +1649,7 @@ paths:
         Removes the document's URL from a tag of the caller. Another user's
         tag is `forbidden` (403) or, when not visible, `not_found` (404).
       operationId: documentTagsRemoveV2
+      security: [{ sessionCookie: [] }]
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
       responses:
@@ -1655,6 +1700,33 @@ paths:
         '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
 components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: |-
+        The servlet session cookie. It is set by `POST /auth/login` and
+        `POST /auth/passkey/login/verify`, which also rotate the session id,
+        so a client must keep the cookie of the login response. It is
+        `HttpOnly`; the `Secure` attribute is added when
+        `session.cookie.secure` is enabled, and `SameSite` defaults to `Lax`
+        (`tomcat.sameSiteCookies`). The name does not change when sessions are
+        kept in the search engine (`FESS_SESSION_STORE`). `POST /auth/logout`
+        ends the session. State-changing requests additionally need the
+        `X-Fess-CSRF-Token` header (see the `CsrfHeader` parameter).
+    accessToken:
+      type: http
+      scheme: bearer
+      description: |-
+        An access token created by an administrator, sent as
+        `Authorization: Bearer <token>` (a bare `Authorization: <token>` is
+        accepted too). It decides which documents a search endpoint returns and,
+        while `login.required` is enabled, stands in for the login on the
+        operations that list it. It never stands in for a login on the other
+        endpoints (favorites, tags, search history, password, passkeys, chat,
+        click, cache). A token that is malformed, not registered or expired is
+        answered `401 auth_required`.
   parameters:
     Q:
       name: q
@@ -2112,8 +2184,8 @@ components:
                 doc_id: { type: string, description: The document the result is similar to. }
                 exec_time: { type: string, description: 'Elapsed time in seconds, as a decimal string.' }
                 query_time: { type: integer, format: int64 }
-                page_size: { type: integer, description: Number of documents asked for, after clamping. }
-                record_count: { type: integer, format: int64, description: Number of documents with the signature, not only those in `data`. }
+                page_size: { type: integer, description: 'Number of documents asked for, after clamping.' }
+                record_count: { type: integer, format: int64, description: 'Number of documents with the signature, not only those in data.' }
                 record_count_relation:
                   type: string
                   enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL_TO]
@@ -2679,7 +2751,7 @@ components:
       type: object
       required: [id, label, created_at]
       properties:
-        id: { type: string, description: The credential id, unpadded Base64url. }
+        id: { type: string, description: 'The credential id, unpadded Base64url.' }
         label: { type: string }
         created_at: { type: integer, format: int64, description: Epoch milliseconds. }
         last_used_at:
