@@ -37,6 +37,7 @@ import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
 /**
@@ -122,7 +123,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         return process(thumbnailId, responseData -> {
             if (!isImageMimeType(responseData)) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Thumbnail is not image: {} : {}", thumbnailId, responseData.getUrl());
+                    logger.debug("Thumbnail is not image: {} : {}", thumbnailId, CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
                 }
                 updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                 return false;
@@ -134,23 +135,25 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                     created = true;
                     break;
                 case FAILED:
-                    logger.warn("Failed to create thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
+                    logger.warn("Failed to create thumbnail: {} -> {}", thumbnailId,
+                            CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
                     break;
                 case INVALID_SIZE:
-                    logger.info("Unmatched thumbnail size: {} -> {}", thumbnailId, responseData.getUrl());
+                    logger.info("Unmatched thumbnail size: {} -> {}", thumbnailId, CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
                     break;
                 case NO_IMAGE:
                     if (logger.isDebugEnabled()) {
-                        logger.debug("No thumbnail: {} -> {}", thumbnailId, responseData.getUrl());
+                        logger.debug("No thumbnail: {} -> {}", thumbnailId, CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
                     }
                     break;
                 default:
-                    logger.error("Unknown thumbnail result: {} -> {}", thumbnailId, responseData.getUrl());
+                    logger.error("Unknown thumbnail result: {} -> {}", thumbnailId,
+                            CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
                     break;
                 }
             } catch (final Throwable t) {
-                logger.warn("Failed to create thumbnail: {} -> {} ({}:{})", thumbnailId, responseData.getUrl(),
-                        t.getClass().getCanonicalName(), t.getMessage());
+                logger.warn("Failed to create thumbnail: {} -> {} ({}:{})", thumbnailId,
+                        CredentialUrlUtil.removeUserInfo(responseData.getUrl()), t.getClass().getCanonicalName(), t.getMessage());
                 if (logger.isDebugEnabled()) {
                     logger.debug("Details for failed thumbnail creation.", t);
                 }

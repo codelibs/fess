@@ -34,6 +34,7 @@ import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.script.ScriptEngine;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
@@ -329,7 +330,7 @@ public class PathMappingHelper extends AbstractConfigHelper {
             }
         }
         if (logger.isDebugEnabled() && !StringUtil.equals(url, newUrl)) {
-            logger.debug("replace: {} -> {}", url, newUrl);
+            logger.debug("replace: {} -> {}", CredentialUrlUtil.removeUserInfo(url), CredentialUrlUtil.removeUserInfo(newUrl));
         }
         return newUrl;
     }

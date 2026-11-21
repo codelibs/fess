@@ -76,6 +76,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.XPath;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.codelibs.nekohtml.parsers.DOMParser;
@@ -384,10 +385,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
         if (noindex) {
-            logger.info("{}(robots=noindex{}): {}", label, nofollow ? ",nofollow" : "", responseData.getUrl());
+            logger.info("{}(robots=noindex{}): {}", label, nofollow ? ",nofollow" : "",
+                    CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
             robotsNoIndex.set(Boolean.TRUE);
         } else if (nofollow) {
-            logger.info("{}(robots=nofollow): {}", label, responseData.getUrl());
+            logger.info("{}(robots=nofollow): {}", label, CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
         }
         if (nofollow) {
             responseData.setNoFollow(true);
@@ -448,7 +450,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected boolean isValidCanonicalUrl(final String url, final String canonicalUrl) {
         if (url.startsWith("https:") && canonicalUrl.startsWith("http:")) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Invalid Canonical Url(https->http): {} -> {}", url, canonicalUrl);
+                logger.debug("Invalid Canonical Url(https->http): {} -> {}", CredentialUrlUtil.removeUserInfo(url),
+                        CredentialUrlUtil.removeUserInfoInText(canonicalUrl));
             }
             return false;
         }
@@ -471,7 +474,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
             final Set<RequestData> childUrlSet = new HashSet<>();
             childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
-            logger.info("Canonical URL redirect: from={}, to={}", responseData.getUrl(), canonicalUrl);
+            logger.info("Canonical URL redirect: from={}, to={}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()),
+                    CredentialUrlUtil.removeUserInfoInText(canonicalUrl));
             throw new ChildUrlsException(childUrlSet, this.getClass().getName() + "#putAdditionalData");
         }
 
@@ -540,7 +544,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             } else {
                 logger.debug("Content size is too large({} > {}): {}", responseData.getContentLength(),
-                        fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger(), responseData.getUrl());
+                        fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger(), CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
             }
         }
         // digest
@@ -755,7 +759,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final String resolveTarget = canonicalUrl.startsWith(":") ? u.getProtocol() + canonicalUrl : canonicalUrl;
             return new URL(u, resolveTarget).toString();
         } catch (final MalformedURLException e) {
-            logger.warn("Invalid canonical URL: baseUrl={}, canonicalUrl={}", baseUrl, canonicalUrl, e);
+            logger.warn("Invalid canonical URL: baseUrl={}, canonicalUrl={}", CredentialUrlUtil.removeUserInfo(baseUrl),
+                    CredentialUrlUtil.removeUserInfoInText(canonicalUrl), e);
         }
         return null;
     }
@@ -1218,20 +1223,22 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         if (u == null) {
-            logger.warn("Ignored child URL: childUrl={}, parentUrl={}", attrValue, url);
+            logger.warn("Ignored child URL: childUrl={}, parentUrl={}", CredentialUrlUtil.removeUserInfoInText(attrValue),
+                    CredentialUrlUtil.removeUserInfo(url.toString()));
             return;
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("URL conversion: original={}, converted={}", attrValue, u);
+            logger.debug("URL conversion: original={}, converted={}", CredentialUrlUtil.removeUserInfoInText(attrValue),
+                    CredentialUrlUtil.removeUserInfo(u));
         }
         if (StringUtil.isNotBlank(u)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Adding child URL: url={}", u);
+                logger.debug("Adding child URL: url={}", CredentialUrlUtil.removeUserInfo(u));
             }
             urlList.add(u);
         } else if (logger.isDebugEnabled()) {
-            logger.debug("Skipping child URL: url={}", u);
+            logger.debug("Skipping child URL: url={}", CredentialUrlUtil.removeUserInfo(u));
         }
     }
 
@@ -1309,7 +1316,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                             return thumbnailUrl;
                         }
                     } catch (final Exception e) {
-                        logger.debug("Failed to parse {} at {}", imgNode, responseData.getUrl(), e);
+                        logger.debug("Failed to parse {} at {}", imgNode, CredentialUrlUtil.removeUserInfo(responseData.getUrl()), e);
                     }
                 } else if (firstThumbnailUrl == null) {
                     firstThumbnailUrl = thumbnailUrl;
@@ -1320,7 +1327,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 return firstThumbnailUrl;
             }
         } catch (final Exception e) {
-            logger.warn("Failed to retrieve thumbnail url from {}", responseData.getUrl(), e);
+            logger.warn("Failed to retrieve thumbnail url from {}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()), e);
         }
         return null;
     }
@@ -1342,7 +1349,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse thumbnail url for {} : {}", url, attributes, e);
+                    logger.debug("Failed to parse thumbnail url for {} : {}", CredentialUrlUtil.removeUserInfo(url), attributes, e);
                 }
             }
         }
