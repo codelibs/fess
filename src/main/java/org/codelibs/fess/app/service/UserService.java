@@ -140,7 +140,8 @@ public class UserService {
      *
      * <p>A rename onto a name another user already holds is refused before anything is removed. So is a new user
      * (one that was not read, so it carries no sequence number) whose ID is already stored: it would replace that
-     * user, with its password and roles.</p>
+     * user, with its password and roles. The new user is written with create semantics, so a request that
+     * creates the same name at the same time is refused as well: exactly one of them is stored.</p>
      *
      * <p>With {@code authentication.local.username.policy=mapped}, a new user and a renamed one are also refused
      * when the name, once mapped by {@link SystemHelper#mapLocalUsername(String)}, is the mapped name of another
@@ -155,7 +156,7 @@ public class UserService {
      * @param user the user entity to store
      * @throws UserConflictException if the user is renamed to the name of another user
      * @throws UserConflictException under the mapped policy, if a new or renamed user's name collides with another user's or is a variant of an admin user name
-     * @throws UserConflictException if a new user has the ID of a stored one
+     * @throws UserConflictException if a new user has the ID of a stored one, or one is stored while it is being created
      * @throws UserChangedConcurrentlyException if the user was read and has been changed by someone else since
      */
     public void store(final User user) {
@@ -190,9 +191,7 @@ public class UserService {
                             "The user was changed by someone else, so it was not saved. Load it again and retry: username=" + username);
                 }
             } else {
-                userBhv.insertOrUpdate(user, op -> {
-                    op.setRefreshPolicy(Constants.TRUE);
-                });
+                insertNew(user);
             }
             if (passwordChangedAt != null) {
                 acceptPasswordChange(username, passwordChangedAt);
@@ -207,6 +206,28 @@ public class UserService {
             throw e;
         } finally {
             user.clearOriginalPassword();
+        }
+    }
+
+    /**
+     * Writes a new user that must not replace a stored one: the index rejects the write when a document with
+     * the ID of the user exists, which is how a second request that creates the same name at the same time
+     * is refused after {@link #removeInheritablePasskeys(User)} let both pass.
+     *
+     * @param user the new user
+     * @throws UserConflictException if a user with that ID is stored
+     */
+    private void insertNew(final User user) {
+        try {
+            userBhv.insert(user, op -> {
+                op.setCreate(true);
+                op.setRefreshPolicy(Constants.TRUE);
+            });
+        } catch (final RuntimeException e) {
+            if (isVersionConflict(e)) {
+                throw new UserConflictException("A user named " + user.getName() + " already exists");
+            }
+            throw e;
         }
     }
 
