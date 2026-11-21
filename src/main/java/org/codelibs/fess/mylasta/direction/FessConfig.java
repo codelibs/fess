@@ -2474,7 +2474,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g. bcrypt <br>
      * comment: <br>
      * Password hashing (new mechanism, Spring Security v5.8 compatible)<br>
-     * Supported: bcrypt (only, as of now)
+     * Supported: bcrypt (built in), or the id of a PasswordEncoder component named {id}PasswordEncoder that a plugin supplies
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppPasswordAlgorithm();
