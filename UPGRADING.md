@@ -198,6 +198,8 @@ Set a new password (at most 72 bytes) to get the full protection. A fresh instal
 `index.user.initial_password` is longer than 72 bytes fails to start before it creates the user index, with a
 message naming the property; an installation whose `admin` user already exists only logs a warning.
 
+**BCrypt hashes written by other systems verify.** A stored `{bcrypt}` hash with the `$2b$` prefix (Python's bcrypt and many other systems) or the `$2y$` prefix (PHP, `htpasswd -B`) now verifies like a `$2a$` one; before, the login of such a user always failed. New hashes are still written as `$2a$`, and an imported hash is re-hashed at login only when its cost is below `app.password.bcrypt.cost`, as before.
+
 **New setting `authentication.local.username.policy` (default `preserved`) to refuse local user names that differ
 only in case or width.** Fess compares local user names exactly as typed, as it did in 15.9.0: `Alice`, `alice`
 and `ＡＬＩＣＥ` (full-width letters) are three users, each with its own login. Set the key in `fess_config.properties`
