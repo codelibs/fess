@@ -157,9 +157,18 @@ public class FileRepositoryTest {
     }
 
     @Test
-    public void test_hasNoBuild_isFalseWhenTheMetadataCannotBeRead() {
+    public void test_hasNoBuild_isTrueWhenTheRepositoryHasNoMetadataForThePlugin() {
         final PluginSources sources = FessSetup.pluginSources(null, java.util.Map.of("repository", repositoryUrl()));
 
-        assertFalse(FessSetup.hasNoBuild(sources, "fess-ds-unpublished", "15.10", false));
+        assertTrue(FessSetup.hasNoBuild(sources, "fess-ds-unpublished", "15.10", false));
+    }
+
+    @Test
+    public void test_hasNoBuild_isFalseWhenTheMetadataIsUnreadable() throws Exception {
+        final Path broken = Files.createDirectories(group.resolve("fess-ds-broken"));
+        Files.writeString(broken.resolve("maven-metadata.xml"), "<metadata>");
+        final PluginSources sources = FessSetup.pluginSources(null, java.util.Map.of("repository", repositoryUrl()));
+
+        assertFalse(FessSetup.hasNoBuild(sources, "fess-ds-broken", "15.10", false));
     }
 }

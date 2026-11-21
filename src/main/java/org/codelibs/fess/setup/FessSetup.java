@@ -1056,7 +1056,7 @@ public final class FessSetup {
     static String resolveVersion(final PluginSources sources, final String artifactId, final String productVersion,
             final boolean development) throws SetupException {
         final List<String> problems = new ArrayList<>();
-        final List<String> versions = publishedVersions(sources, artifactId, development, problems);
+        final List<String> versions = publishedVersions(sources, artifactId, development, problems, new ArrayList<>());
         if (versions.isEmpty()) {
             throw new SetupException("Failed to read the published versions of " + artifactId + ": " + String.join("; ", problems));
         }
@@ -1066,21 +1066,26 @@ public final class FessSetup {
     /**
      * Reports whether a plugin is published but has no build for a given Fess line.
      *
-     * <p>This is the case {@code install plugin} refuses with "No release matches". A plugin
-     * whose metadata cannot be read is not reported: that is a failure to find out, and calling
-     * it "no build" would claim something the listing does not know.</p>
+     * <p>This is the case {@code install plugin} refuses with "No release matches". It is also
+     * the case of a plugin the repository index still lists but whose metadata every consulted
+     * repository answers 404 for -- one that was moved into the core. A plugin whose metadata
+     * cannot be read for any other reason (a network error, a 5xx, a malformed document) is not
+     * reported: that is a failure to find out, and calling it "no build" would claim something
+     * the listing does not know.</p>
      *
      * @param sources where plugins are published
      * @param artifactId the plugin name
      * @param productVersion the major.minor that Fess accepts, for example {@code 15.9}
      * @param development whether this is a snapshot build of Fess
-     * @return true when the repository publishes versions of the plugin and none fits
+     * @return true when no repository publishes a version of the plugin that fits
      */
     static boolean hasNoBuild(final PluginSources sources, final String artifactId, final String productVersion,
             final boolean development) {
-        final List<String> versions = publishedVersions(sources, artifactId, development, new ArrayList<>());
+        final List<String> problems = new ArrayList<>();
+        final List<String> absent = new ArrayList<>();
+        final List<String> versions = publishedVersions(sources, artifactId, development, problems, absent);
         if (versions.isEmpty()) {
-            return false;
+            return !absent.isEmpty() && absent.size() == problems.size();
         }
         try {
             PluginRepository.selectVersion(versions, productVersion, development);
@@ -1097,19 +1102,20 @@ public final class FessSetup {
      * @param artifactId the plugin name
      * @param development whether the snapshot repository is read as well
      * @param problems collects the reason a repository returned nothing
+     * @param absent collects the reasons that are a repository answering that it has no such plugin
      * @return the versions, empty when none could be read
      */
     private static List<String> publishedVersions(final PluginSources sources, final String artifactId, final boolean development,
-            final List<String> problems) {
+            final List<String> problems, final List<String> absent) {
         final List<String> versions = new ArrayList<>();
         if (sources.hasRelease()) {
-            versions.addAll(readVersions(sources.release(), artifactId, problems));
+            versions.addAll(readVersions(sources.release(), artifactId, problems, absent));
         } else {
             problems.add("no release repository is configured");
         }
         if (development) {
             if (sources.hasSnapshot()) {
-                versions.addAll(readVersions(sources.snapshot(), artifactId, problems));
+                versions.addAll(readVersions(sources.snapshot(), artifactId, problems, absent));
             } else {
                 problems.add("no snapshot repository is configured");
             }
@@ -1127,12 +1133,21 @@ public final class FessSetup {
      * @param repository the repository URL
      * @param artifactId the plugin name
      * @param problems collects the reason a repository returned nothing
+     * @param absent collects the reason too when it is the repository answering 404 for the metadata
      * @return the versions, empty when the metadata cannot be read
      */
-    private static List<String> readVersions(final String repository, final String artifactId, final List<String> problems) {
+    private static List<String> readVersions(final String repository, final String artifactId, final List<String> problems,
+            final List<String> absent) {
         try {
-            return PluginRepository
-                    .versionsFromMetadata(Downloader.readString(URI.create(PluginRepository.metadataUrl(repository, artifactId))));
+            final String url = PluginRepository.metadataUrl(repository, artifactId);
+            final String metadata = Downloader.readStringIfPresent(URI.create(url));
+            if (metadata == null) {
+                final String reason = "Failed to read " + url + ": not found";
+                problems.add(reason);
+                absent.add(reason);
+                return List.of();
+            }
+            return PluginRepository.versionsFromMetadata(metadata);
         } catch (final SetupException e) {
             problems.add(e.getMessage());
             return List.of();
