@@ -789,10 +789,11 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
                 logger.warn("Failed to upgrade password hash (update returned false). username={}", username);
             }
         } catch (final FessConfigurationException e) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("Skipped the upgrade of a password hash, the algorithm of app.password.algorithm cannot be resolved."
-                        + " The stored hash is kept. username={}, reason={}", username, e.getMessage());
-            }
+            // A configuration error that every login of a hashed user would repeat: report it once per configured value.
+            LogUtil.warnOnce(logger, "password-algorithm:" + ComponentUtil.getFessConfig().getAppPasswordAlgorithm(),
+                    "Skipped the upgrade of a password hash, the algorithm of app.password.algorithm cannot be resolved."
+                            + " The stored hash is kept. username={}, reason={}",
+                    username, e.getMessage());
         } catch (final Exception e) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed to upgrade password hash. username={}", username, e);

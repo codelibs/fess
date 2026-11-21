@@ -34,6 +34,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
 import org.codelibs.fess.opensearch.user.exentity.User;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
@@ -484,6 +485,38 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
         // a wrong password is refused the same way as always, without an exception
         assertFalse(loginAssist.doAuthenticateLocal("alice", "wrong").isPresent());
+    }
+
+    @Test
+    public void test_lazyUpgrade_unresolvableConfiguredAlgorithm_isWarnedOncePerAlgorithmNotPerLogin() throws Exception {
+        final String oldCostHash = "{bcrypt}" + BCrypt.hashpw("secret", BCrypt.gensalt(4));
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword(oldCostHash);
+        installUserBhv(stored);
+        installUserService();
+        testConfig.passwordAlgorithm = "gone-once-a";
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(FessLoginAssist.class);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertTrue(loginAssist.doAuthenticateLocal("alice", "secret").isPresent());
+            }
+            assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+            final String line = capture.warnings().get(0);
+            assertTrue(line.contains("app.password.algorithm"), line);
+            assertTrue(line.contains("username=alice"), line);
+            assertFalse(line.contains("secret"), line);
+            assertFalse(line.contains(oldCostHash), line);
+
+            // another unresolvable value is another condition and is reported once as well
+            testConfig.passwordAlgorithm = "gone-once-b";
+            assertTrue(loginAssist.doAuthenticateLocal("alice", "secret").isPresent());
+            assertTrue(loginAssist.doAuthenticateLocal("alice", "secret").isPresent());
+            assertEquals(2, capture.warnings().size(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
     }
 
     // ---------------------------------------------------------------------
