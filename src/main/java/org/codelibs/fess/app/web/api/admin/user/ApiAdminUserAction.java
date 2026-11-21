@@ -163,9 +163,13 @@ public class ApiAdminUserAction extends FessApiAdminAction {
             return null;
         });
         try {
+            // setting a password removes all passkeys of the user (see UserService#store)
+            final List<String> resetPasskeys =
+                    StringUtil.isNotBlank(body.password) ? userService.getPasskeyCredentialIds(entity.getName()) : List.of();
             userService.store(entity);
             if (StringUtil.isNotBlank(body.password)) {
                 activityHelper.passwordChanged(getUserBean(), entity.getName());
+                resetPasskeys.forEach(credentialId -> activityHelper.passkeyDeleted(getUserBean(), entity.getName(), credentialId));
             }
         } catch (final UserChangedConcurrentlyException e) {
             logger.info("The user was changed by someone else: id={}, username={}", body.id, body.name);

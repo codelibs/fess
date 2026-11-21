@@ -154,6 +154,11 @@ public class UserService {
      * external authentication manager are handled before that write, so a refused save does not
      * undo them.</p>
      *
+     * <p>When a read user is stored with a new password (an administrator sets it; a user changing
+     * their own goes through {@link #changePassword(String, String)} and keeps their passkeys), all
+     * passkeys of the user are removed once the user was written. A user stored without a new password
+     * keeps them.</p>
+     *
      * @param user the user entity to store
      * @throws UserConflictException if the user is renamed to the name of another user
      * @throws UserConflictException under the mapped policy, if a new or renamed user's name collides with another user's or is a variant of an admin user name
@@ -184,7 +189,8 @@ public class UserService {
                 user.setPasswordChangedAt(passwordChangedAt);
             }
 
-            if (hasVersion(user)) {
+            final boolean versioned = hasVersion(user);
+            if (versioned) {
                 // The user was read, and the whole document is written back: a change made in between
                 // (a password change, for one) must not be put back to what was read.
                 if (!updateIfUnchanged(user)) {
@@ -196,6 +202,9 @@ public class UserService {
             }
             if (passwordChangedAt != null) {
                 acceptPasswordChange(username, passwordChangedAt);
+                if (versioned) {
+                    removePasskeysOfResetPassword(user);
+                }
             }
 
             if (logger.isInfoEnabled()) {
@@ -230,6 +239,32 @@ public class UserService {
             }
             throw e;
         }
+    }
+
+    /**
+     * Removes all passkeys of a stored user whose password an administrator has just set. Whoever knew
+     * the old password may have registered a passkey, and a passkey would still sign in after the reset.
+     * It runs after the user was written, so a refused (conflicting) save removes nothing; if the removal
+     * itself fails the exception propagates and the caller reports the save as failed, so that it is retried.
+     *
+     * @param user the user that was written, with the new password
+     */
+    protected void removePasskeysOfResetPassword(final User user) {
+        passkeyService.deleteByUserName(user.getName());
+        if (logger.isInfoEnabled()) {
+            logger.info("Removed the passkeys of a user whose password was reset: username={}, id={}", user.getName(), user.getId());
+        }
+    }
+
+    /**
+     * Returns the shortened credential IDs of the passkeys of a user, for the audit log of the passkeys
+     * that {@link #store(User)} removes when a password is set.
+     *
+     * @param username the name of the user
+     * @return the shortened credential IDs, oldest first
+     */
+    public List<String> getPasskeyCredentialIds(final String username) {
+        return passkeyService.getPasskeys(username).stream().map(p -> PasskeyService.abbreviate(p.getId())).toList();
     }
 
     /**
