@@ -363,7 +363,7 @@ describe("passkey section", () => {
     expect(document.getElementById("passkey-error").textContent).toBe("error.server");
   });
 
-  it("is silent when the user dismisses the browser prompt", async () => {
+  it("says that the passkey operation did not complete when the user dismisses the browser prompt", async () => {
     api.post.mockResolvedValue({ challenge: "AQI", user: { id: "AwQ" } });
     create.mockRejectedValue(Object.assign(new Error("cancelled"), { name: "NotAllowedError" }));
     await mountAndLoad();
@@ -372,7 +372,8 @@ describe("passkey section", () => {
     await flush();
 
     expect(api.post).toHaveBeenCalledTimes(1);
-    expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(true);
+    expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(false);
+    expect(document.getElementById("passkey-error").textContent).toBe("auth.passkey_not_completed");
     expect(document.getElementById("passkey-success").classList.contains("d-none")).toBe(true);
   });
 

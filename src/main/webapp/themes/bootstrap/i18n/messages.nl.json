@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Te veel inlogpogingen. Probeer het later opnieuw.",
   "auth.password_change_required": "U moet uw wachtwoord bijwerken",
   "auth.passkey_login": "Inloggen met een passkey",
+  "auth.passkey_not_completed": "De passkey-bewerking is niet voltooid. Probeer het opnieuw of gebruik uw wachtwoord.",
   "chat.placeholder": "Stel een vraag...",
   "chat.send": "Verzenden",
   "chat.disabled": "Chat is uitgeschakeld op deze server.",

@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Çok fazla giriş denemesi. Daha sonra tekrar deneyin.",
   "auth.password_change_required": "Şifrenizi güncellemeniz gerekiyor",
   "auth.passkey_login": "Geçiş anahtarıyla giriş yap",
+  "auth.passkey_not_completed": "Geçiş anahtarı işlemi tamamlanamadı. Tekrar deneyin veya şifrenizi kullanın.",
   "chat.placeholder": "Soru sorun...",
   "chat.send": "Gönder",
   "chat.disabled": "Bu sunucuda sohbet devre dışı.",

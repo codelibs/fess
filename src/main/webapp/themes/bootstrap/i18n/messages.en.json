@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Too many login attempts. Try again later.",
   "auth.password_change_required": "You need to update your password",
   "auth.passkey_login": "Sign in with a passkey",
+  "auth.passkey_not_completed": "The passkey operation was not completed. Try again or use your password.",
   "chat.placeholder": "Ask a question...",
   "chat.send": "Send",
   "chat.disabled": "Chat is disabled on this server.",

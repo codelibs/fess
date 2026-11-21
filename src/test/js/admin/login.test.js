@@ -13,6 +13,7 @@ function page({ redirect = "", contextPath = "/fess" } = {}) {
   return `
 <form id="login"></form>
 <div id="passkey-error" class="d-none"><ul role="alert"><li>Invalid username or password.</li></ul></div>
+<div id="passkey-not-completed" class="alert alert-info d-none" role="alert">The passkey operation was not completed.</div>
 <button type="button" id="passkey-login-btn" class="d-none" data-redirect="${redirect}"></button>
 <input type="hidden" id="contextPath" value="${contextPath}" />`;
 }
@@ -212,7 +213,7 @@ describe("the passkey login", () => {
     expect(navigate).toHaveBeenCalledWith("/admin/");
   });
 
-  it("is silent when the user dismisses the prompt", async () => {
+  it("says that the passkey operation did not complete when the user dismisses the prompt", async () => {
     stubBrowser(vi.fn(async () => { throw new DOMException("dismissed", "NotAllowedError"); }));
     const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(options()));
     vi.stubGlobal("fetch", fetchMock);
@@ -220,14 +221,16 @@ describe("the passkey login", () => {
     await click();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(navigate).not.toHaveBeenCalled();
+    expect(document.getElementById("passkey-not-completed").classList.contains("d-none")).toBe(false);
     expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(true);
   });
 
-  it("is silent when the prompt is aborted", async () => {
+  it("says that the passkey operation did not complete when the prompt is aborted", async () => {
     stubBrowser(vi.fn(async () => { throw new DOMException("aborted", "AbortError"); }));
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse(options())));
     await mount(page());
     await click();
+    expect(document.getElementById("passkey-not-completed").classList.contains("d-none")).toBe(false);
     expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(true);
   });
 
@@ -257,6 +260,31 @@ describe("the passkey login", () => {
     await mount(page());
     await click();
     expect(document.getElementById("passkey-error").classList.contains("d-none")).toBe(false);
+  });
+
+  it("does not show the not-completed text for a failure other than a dismissed prompt", async () => {
+    stubBrowser(vi.fn(async () => { throw new DOMException("no authenticator", "NotSupportedError"); }));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse(options())));
+    await mount(page());
+    await click();
+    expect(document.getElementById("passkey-not-completed").classList.contains("d-none")).toBe(true);
+  });
+
+  it("hides the not-completed text when it is tried again", async () => {
+    const get = vi.fn()
+      .mockImplementationOnce(async () => { throw new DOMException("dismissed", "NotAllowedError"); })
+      .mockImplementationOnce(async () => assertion());
+    stubBrowser(get);
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(jsonResponse(options()))
+      .mockResolvedValueOnce(jsonResponse(options()))
+      .mockResolvedValueOnce(jsonResponse(accepted)));
+    const navigate = await mount(page());
+    await click();
+    expect(document.getElementById("passkey-not-completed").classList.contains("d-none")).toBe(false);
+    await click();
+    expect(document.getElementById("passkey-not-completed").classList.contains("d-none")).toBe(true);
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
 
   it("hides an earlier failure when it is tried again", async () => {

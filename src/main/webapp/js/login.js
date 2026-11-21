@@ -118,8 +118,12 @@ window.FessPasskeyLogin = (function() {
 
   function signIn(button) {
     var error = document.getElementById("passkey-error");
+    var incomplete = document.getElementById("passkey-not-completed");
     if (error) {
       error.classList.add("d-none");
+    }
+    if (incomplete) {
+      incomplete.classList.add("d-none");
     }
     button.disabled = true;
     return post("/auth/passkey/login/options", {})
@@ -134,9 +138,10 @@ window.FessPasskeyLogin = (function() {
         api.navigate(document.getElementById("contextPath").value + (isSafePath(saved) ? saved : DEFAULT_PATH));
       })
       .catch(function(e) {
-        // The user dismissed the browser's passkey prompt: nothing to report.
-        if (!isCancel(e) && error) {
-          error.classList.remove("d-none");
+        // The browser cannot tell a dismissed prompt from a refused user verification: say that it did not complete.
+        var shown = isCancel(e) ? incomplete : error;
+        if (shown) {
+          shown.classList.remove("d-none");
         }
       })
       .then(function() {

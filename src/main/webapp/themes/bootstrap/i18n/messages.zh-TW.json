@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "登入嘗試次數過多。請稍後重試。",
   "auth.password_change_required": "您需要更新密碼",
   "auth.passkey_login": "使用通行金鑰登入",
+  "auth.passkey_not_completed": "通行金鑰操作未完成。請重試或使用密碼。",
   "chat.placeholder": "提問...",
   "chat.send": "傳送",
   "chat.disabled": "此伺服器上的聊天功能已停用。",
