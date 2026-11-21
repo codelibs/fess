@@ -28,7 +28,6 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserConflictException;
-import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.User;
@@ -303,7 +302,7 @@ public class PasswordChangeHandler {
                     details.put("min_length", minLength);
                 }
             } else if ("errors.password_too_long".equals(validationError)) {
-                details.put("max_bytes", PasswordHashHelper.BCRYPT_MAX_PASSWORD_BYTES);
+                details.put("max_bytes", ComponentUtil.getPasswordHashHelper().getMaxPasswordBytes());
             }
             ComponentUtil.getV2EnvelopeWriter()
                     .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "weak password: " + validationError, details);

@@ -42,6 +42,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crypto.password.PasswordEncoder;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
@@ -93,9 +94,24 @@ public class SystemHelperTest extends UnitFessTestCase {
             }
         };
         envMap.clear();
+        ComponentUtil.register(new LimitedPasswordHashHelper(72), "passwordHashHelper");
         systemHelper.init();
         systemHelper.addShutdownHook(() -> {});
         ComponentUtil.register(systemHelper, "systemHelper");
+    }
+
+    /** A password hash helper with a fixed limit, so that the tests do not depend on app.password.algorithm. */
+    private static class LimitedPasswordHashHelper extends PasswordHashHelper {
+        private final int maxBytes;
+
+        LimitedPasswordHashHelper(final int maxBytes) {
+            this.maxBytes = maxBytes;
+        }
+
+        @Override
+        public int getMaxPasswordBytes() {
+            return maxBytes;
+        }
     }
 
     /** Builds a config whose four search-role prefixes are exactly the given values. */
@@ -270,17 +286,6 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_exceedsBcryptLimit() {
-        assertFalse(systemHelper.exceedsBcryptLimit(null));
-        assertFalse(systemHelper.exceedsBcryptLimit(""));
-        assertFalse(systemHelper.exceedsBcryptLimit("a".repeat(72)));
-        assertTrue(systemHelper.exceedsBcryptLimit("a".repeat(73)));
-        // bytes, not characters: 24 Japanese characters are 72 bytes, 25 are 75
-        assertFalse(systemHelper.exceedsBcryptLimit("あ".repeat(24)));
-        assertTrue(systemHelper.exceedsBcryptLimit("あ".repeat(25)));
-    }
-
-    @Test
     public void test_reportOverlongInitialPassword_warnsInTheWebappProcess() {
         assertEquals(1, overlongInitialPasswordWarnings(true, "a".repeat(80)).size());
         assertEquals(1, overlongInitialPasswordWarnings(true, "あ".repeat(25)).size());
@@ -301,6 +306,12 @@ public class SystemHelperTest extends UnitFessTestCase {
     @Test
     public void test_reportOverlongInitialPassword_silentInJobProcesses() {
         assertEquals(0, overlongInitialPasswordWarnings(false, "a".repeat(80)).size());
+    }
+
+    @Test
+    public void test_reportOverlongInitialPassword_noWarningWithoutALimit() {
+        ComponentUtil.register(new LimitedPasswordHashHelper(0), "passwordHashHelper");
+        assertEquals(0, overlongInitialPasswordWarnings(true, "a".repeat(200)).size());
     }
 
     private List<String> overlongInitialPasswordWarnings(final boolean webapp, final String password) {
@@ -1496,6 +1507,130 @@ public class SystemHelperTest extends UnitFessTestCase {
         // The limit counts UTF-8 bytes, not characters: 24 Japanese characters are 72 bytes, 25 are 75.
         assertEquals("", systemHelper.validatePassword("あ".repeat(24)));
         assertEquals("errors.password_too_long", systemHelper.validatePassword("あ".repeat(25)));
+    }
+
+    @Test
+    public void test_validatePassword_limitComesFromThePasswordHashHelper() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return null;
+            }
+
+            @Override
+            public int getPasswordMaxLengthOrDefault() {
+                return 100;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "";
+            }
+        });
+
+        // a helper (algorithm) with the limit of BCrypt refuses 73 bytes ...
+        ComponentUtil.register(new LimitedPasswordHashHelper(72), "passwordHashHelper");
+        assertEquals("errors.password_too_long", systemHelper.validatePassword("a".repeat(73)));
+        assertEquals("errors.password_too_long", systemHelper.validatePassword("\u3042".repeat(25)));
+        assertEquals("", systemHelper.validatePassword("a".repeat(72)));
+
+        // ... one without a limit does not; the field limit (password.max.length) still applies
+        ComponentUtil.register(new LimitedPasswordHashHelper(0), "passwordHashHelper");
+        assertEquals("", systemHelper.validatePassword("a".repeat(73)));
+        assertEquals("", systemHelper.validatePassword("a".repeat(100)));
+        assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(101)));
+
+        // another limit is honoured too
+        ComponentUtil.register(new LimitedPasswordHashHelper(80), "passwordHashHelper");
+        assertEquals("", systemHelper.validatePassword("a".repeat(80)));
+        assertEquals("errors.password_too_long", systemHelper.validatePassword("a".repeat(81)));
+    }
+
+    @Test
+    public void test_validatePassword_byteRuleFollowsThePluggedEncoder() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAppPasswordAlgorithm() {
+                return "limitless";
+            }
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return null;
+            }
+
+            @Override
+            public int getPasswordMaxLengthOrDefault() {
+                return 100;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "";
+            }
+        });
+        // an encoder supplied as <id>PasswordEncoder, without a limit of its own
+        ComponentUtil.register(new PasswordEncoder() {
+            @Override
+            public String encode(final String rawPassword) {
+                return rawPassword;
+            }
+
+            @Override
+            public boolean matches(final String rawPassword, final String encodedPassword) {
+                return rawPassword.equals(encodedPassword);
+            }
+        }, "limitlessPasswordEncoder");
+        ComponentUtil.register(new PasswordHashHelper(), "passwordHashHelper");
+
+        assertEquals("", systemHelper.validatePassword("a".repeat(73)));
+        assertEquals("", systemHelper.validatePassword("a".repeat(100)));
+        // only the algorithm-independent field limit remains
+        assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(101)));
     }
 
     @Test

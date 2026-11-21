@@ -18,6 +18,8 @@ package org.codelibs.fess.helper;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+import org.codelibs.fess.crypto.bcrypt.BCrypt;
+import org.codelibs.fess.crypto.password.PasswordEncoder;
 import org.codelibs.fess.exception.FessConfigurationException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -155,8 +157,104 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
-    // init() fail-fast behaviour
+    // password length limit of the algorithm
     // ---------------------------------------------------------------------
+
+    @Test
+    public void test_getMaxPasswordBytes_bcrypt() {
+        assertEquals(72, passwordHashHelper.getMaxPasswordBytes());
+    }
+
+    @Test
+    public void test_encode_acceptsUpTo72Bytes() {
+        final String password = "a".repeat(72);
+        assertTrue(passwordHashHelper.matches(password, passwordHashHelper.encode(password)));
+        // 24 x 3 bytes
+        final String multibyte = "\u3042".repeat(24);
+        assertTrue(passwordHashHelper.matches(multibyte, passwordHashHelper.encode(multibyte)));
+    }
+
+    @Test
+    public void test_encode_refusesOver72Bytes() {
+        try {
+            passwordHashHelper.encode("a".repeat(73));
+            fail("encode() must refuse a password over 72 bytes");
+        } catch (final IllegalArgumentException expected) {
+            // expected
+        }
+    }
+
+    @Test
+    public void test_encode_refusesOver72BytesCountedInUtf8() {
+        // 25 characters but 75 bytes
+        try {
+            passwordHashHelper.encode("\u3042".repeat(25));
+            fail("encode() must count bytes, not characters");
+        } catch (final IllegalArgumentException expected) {
+            // expected
+        }
+    }
+
+    @Test
+    public void test_encode_refusalDoesNotQuoteThePassword() {
+        final String password = "x".repeat(40) + "SECRET" + "y".repeat(40);
+        try {
+            passwordHashHelper.encode(password);
+            fail("encode() must refuse a password over 72 bytes");
+        } catch (final IllegalArgumentException expected) {
+            assertFalse(expected.getMessage(), expected.getMessage().contains("SECRET"));
+            assertTrue(expected.getMessage(), expected.getMessage().contains("86"));
+            assertTrue(expected.getMessage(), expected.getMessage().contains("72"));
+        }
+    }
+
+    @Test
+    public void test_matches_staysLenientForAHashMadeFromAnOverlongPassword() {
+        // A password set over 72 bytes before 15.10: its owner must keep logging in.
+        final String overlong = "a".repeat(80);
+        final String legacyHash = "{bcrypt}" + BCrypt.hashpw(overlong, BCrypt.gensalt(4));
+        assertTrue(passwordHashHelper.matches(overlong, legacyHash));
+        // only the first 72 bytes are compared, which is why a new password must be refused
+        assertTrue(passwordHashHelper.matches("a".repeat(72) + "another ending", legacyHash));
+        assertFalse(passwordHashHelper.matches("a".repeat(71) + "b", legacyHash));
+    }
+
+    @Test
+    public void test_exceedsMaxPasswordBytes() {
+        assertFalse(passwordHashHelper.exceedsMaxPasswordBytes(null));
+        assertFalse(passwordHashHelper.exceedsMaxPasswordBytes(""));
+        assertFalse(passwordHashHelper.exceedsMaxPasswordBytes("a".repeat(72)));
+        assertTrue(passwordHashHelper.exceedsMaxPasswordBytes("a".repeat(73)));
+        // bytes, not characters: 24 Japanese characters are 72 bytes, 25 are 75
+        assertFalse(passwordHashHelper.exceedsMaxPasswordBytes("\u3042".repeat(24)));
+        assertTrue(passwordHashHelper.exceedsMaxPasswordBytes("\u3042".repeat(25)));
+    }
+
+    // ---------------------------------------------------------------------
+    // init() validation, and an algorithm that cannot be resolved (nothing runs init() at start-up)
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_unresolvableAlgorithm_failsAtTheFirstHashWithAClearMessage_andVerifyingStillWorks() {
+        final String bcryptHash = passwordHashHelper.encode("secret");
+        testConfig.passwordAlgorithm = "gone";
+        try {
+            passwordHashHelper.encode("secret");
+            fail("encode() must refuse a configured algorithm that has no component");
+        } catch (final FessConfigurationException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("app.password.algorithm"));
+            assertTrue(expected.getMessage(), expected.getMessage().contains("gonePasswordEncoder"));
+        }
+        try {
+            passwordHashHelper.getMaxPasswordBytes();
+            fail("the limit of an unresolvable algorithm is unknown");
+        } catch (final FessConfigurationException expected) {
+            // expected
+        }
+        // timing padding never throws, and a stored hash of a resolvable id still verifies
+        passwordHashHelper.applyTimingPadding();
+        assertTrue(passwordHashHelper.matches("secret", bcryptHash));
+    }
 
     @Test
     public void test_init_failsFast_withUnknownAlgorithm() {
@@ -224,7 +322,7 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
     @Test
     public void test_upgradeEncoding_malformedBcryptHash_sameId_noCostUpgrade() {
         // A value with the expected prefix but an unparseable cost field must
-        // not be re-encoded solely due to cost parsing failure. parseBcryptCost
+        // not be re-encoded solely due to cost parsing failure. The cost parser
         // returns -1, so the cost-upgrade branch is skipped.
         assertFalse(passwordHashHelper.upgradeEncoding("{bcrypt}$2a$"));
         assertFalse(passwordHashHelper.upgradeEncoding("{bcrypt}garbage"));
@@ -262,29 +360,6 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
-    // parseBcryptCost
-    // ---------------------------------------------------------------------
-
-    @Test
-    public void test_parseBcryptCost_malformed() {
-        assertEquals(-1, passwordHashHelper.parseBcryptCost(null));
-        assertEquals(-1, passwordHashHelper.parseBcryptCost(""));
-        assertEquals(-1, passwordHashHelper.parseBcryptCost("$2a$"));
-        assertEquals(-1, passwordHashHelper.parseBcryptCost("short"));
-        assertEquals(-1, passwordHashHelper.parseBcryptCost("$2a$xx$abcdefghijklmnopqrstuvwxyz0123456789012345678901234"));
-        assertEquals(-1, passwordHashHelper.parseBcryptCost("2a$10$abc")); // missing leading $
-        assertEquals(-1, passwordHashHelper.parseBcryptCost("$2a10$abc")); // missing second $
-    }
-
-    @Test
-    public void test_parseBcryptCost_validHash() {
-        // Cost must be parseable from a real BCrypt encode output.
-        final String encoded = passwordHashHelper.encode("secret");
-        final String payload = encoded.substring("{bcrypt}".length());
-        assertEquals(10, passwordHashHelper.parseBcryptCost(payload));
-    }
-
-    // ---------------------------------------------------------------------
     // applyTimingPadding / isTimingSafeHash
     // ---------------------------------------------------------------------
 
@@ -297,40 +372,121 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
         }
     }
 
-    @Test
-    public void test_applyTimingPadding_initBuildsDummyEagerly() {
-        // init() is expected to eagerly generate the dummy hash so the first
-        // login does not pay the generation cost. Assert it is cached.
-        passwordHashHelper.init();
-        final String first;
-        final String second;
-        try {
-            final java.lang.reflect.Field f = PasswordHashHelper.class.getDeclaredField("dummyBcryptHash");
-            f.setAccessible(true);
-            first = (String) f.get(passwordHashHelper);
-            assertNotNull("init() must populate dummyBcryptHash eagerly", first);
-            assertTrue("dummy must be bcrypt-formatted: " + first, first.startsWith("{bcrypt}$2a$"));
-            // Second access must reuse the cached reference.
-            passwordHashHelper.applyTimingPadding();
-            second = (String) f.get(passwordHashHelper);
-        } catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
-        assertSame(first, second, "dummy hash must be cached across calls");
+    // ---------------------------------------------------------------------
+    // the algorithm is a replaceable component: <id>PasswordEncoder
+    // ---------------------------------------------------------------------
+
+    private LimitlessEncoder registerLimitlessEncoder() {
+        final LimitlessEncoder encoder = new LimitlessEncoder();
+        // not in the container: ComponentUtil falls back to this map, and tearDown clears it
+        ComponentUtil.register(encoder, "limitlessPasswordEncoder");
+        return encoder;
     }
 
     @Test
-    public void test_applyTimingPadding_reflectsConfiguredCost() {
-        testConfig.bcryptCost = 4;
-        passwordHashHelper.init();
+    public void test_pluggable_encodeAndMatchesRoundTrip() {
+        registerLimitlessEncoder();
+        testConfig.passwordAlgorithm = "limitless";
+        final String encoded = passwordHashHelper.encode("secret");
+        assertEquals("{limitless}t9secret", encoded);
+        assertTrue(passwordHashHelper.matches("secret", encoded));
+        assertFalse(passwordHashHelper.matches("Secret", encoded));
+    }
+
+    @Test
+    public void test_pluggable_configuredIdIsLowerCased() {
+        registerLimitlessEncoder();
+        testConfig.passwordAlgorithm = "LimitLess";
+        assertTrue(passwordHashHelper.encode("secret").startsWith("{limitless}"));
+    }
+
+    @Test
+    public void test_pluggable_existingBcryptHashStillVerifiesAndIsUpgraded() {
+        final String bcryptHash = passwordHashHelper.encode("secret");
+        assertTrue(bcryptHash.startsWith("{bcrypt}"));
+        registerLimitlessEncoder();
+        testConfig.passwordAlgorithm = "limitless";
+        assertTrue(passwordHashHelper.matches("secret", bcryptHash));
+        assertFalse(passwordHashHelper.matches("other", bcryptHash));
+        // another id than the one for new passwords is always re-encoded
+        assertTrue(passwordHashHelper.upgradeEncoding(bcryptHash));
+        // the encoder decides for its own hashes
+        assertFalse(passwordHashHelper.upgradeEncoding(passwordHashHelper.encode("secret")));
+        assertTrue(passwordHashHelper.upgradeEncoding("{limitless}old:secret"));
+    }
+
+    @Test
+    public void test_pluggable_upgradeEncodingHonoursTheSwitch() {
+        registerLimitlessEncoder();
+        testConfig.passwordAlgorithm = "limitless";
+        testConfig.upgradeEnabled = false;
+        assertFalse(passwordHashHelper.upgradeEncoding("{limitless}old:secret"));
+    }
+
+    @Test
+    public void test_pluggable_encoderWithoutLimit() {
+        registerLimitlessEncoder();
+        testConfig.passwordAlgorithm = "limitless";
+        assertTrue(passwordHashHelper.getMaxPasswordBytes() <= 0);
+        final String longPassword = "a".repeat(500);
+        assertFalse(passwordHashHelper.exceedsMaxPasswordBytes(longPassword));
+        assertTrue(passwordHashHelper.matches(longPassword, passwordHashHelper.encode(longPassword)));
+    }
+
+    @Test
+    public void test_pluggable_unknownIdKeepsTheOldBehaviour() {
+        assertFalse(passwordHashHelper.matches("secret", "{limitless}t9secret"));
+        assertFalse(passwordHashHelper.upgradeEncoding("{limitless}t9secret"));
+        assertFalse(passwordHashHelper.isTimingSafeHash("{limitless}t9secret"));
+        testConfig.passwordAlgorithm = "limitless";
         try {
-            final java.lang.reflect.Field f = PasswordHashHelper.class.getDeclaredField("dummyBcryptHash");
-            f.setAccessible(true);
-            final String dummy = (String) f.get(passwordHashHelper);
-            assertTrue("dummy must use configured cost: " + dummy, dummy.startsWith("{bcrypt}$2a$04$"));
-        } catch (final Exception e) {
-            throw new IllegalStateException(e);
+            passwordHashHelper.init();
+            fail("init() must refuse an algorithm without a PasswordEncoder component");
+        } catch (final FessConfigurationException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("limitless"));
         }
+    }
+
+    @Test
+    public void test_pluggable_aComponentThatIsNotAnEncoderIsNotAnEncoder() {
+        ComponentUtil.register(new Object(), "bogusPasswordEncoder");
+        assertFalse(passwordHashHelper.matches("secret", "{bogus}whatever"));
+        testConfig.passwordAlgorithm = "bogus";
+        try {
+            passwordHashHelper.init();
+            fail("init() must refuse a component that is not a PasswordEncoder");
+        } catch (final FessConfigurationException expected) {
+            // expected
+        }
+    }
+
+    @Test
+    public void test_pluggable_timingPaddingForACheapEncoder() {
+        final LimitlessEncoder encoder = registerLimitlessEncoder();
+        testConfig.passwordAlgorithm = "limitless";
+        passwordHashHelper.init();
+        passwordHashHelper.applyTimingPadding();
+        assertEquals(0, encoder.paddings);
+        assertFalse(passwordHashHelper.isTimingSafeHash("{limitless}t9secret"));
+    }
+
+    @Test
+    public void test_pluggable_timingPaddingForACostlyEncoder() {
+        final LimitlessEncoder encoder = registerLimitlessEncoder();
+        encoder.costly = true;
+        testConfig.passwordAlgorithm = "limitless";
+        passwordHashHelper.applyTimingPadding();
+        assertEquals(1, encoder.paddings);
+        assertTrue(passwordHashHelper.isTimingSafeHash("{limitless}t9secret"));
+        // never throws, even when the encoder does
+        encoder.failPadding = true;
+        passwordHashHelper.applyTimingPadding();
+    }
+
+    @Test
+    public void test_applyTimingPadding_neverThrowsOnAMisconfiguredAlgorithm() {
+        testConfig.passwordAlgorithm = "unknown-algo";
+        passwordHashHelper.applyTimingPadding();
     }
 
     @Test
@@ -353,6 +509,41 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
             sb.append(String.format("%02x", b & 0xff));
         }
         return sb.toString();
+    }
+
+    /** An encoder that is not bcrypt: no limit, never costly, nothing to upgrade unless the hash says so. */
+    private static class LimitlessEncoder implements PasswordEncoder {
+        boolean costly;
+        boolean failPadding;
+        int paddings;
+
+        @Override
+        public String encode(final String rawPassword) {
+            return "t9" + rawPassword;
+        }
+
+        @Override
+        public boolean matches(final String rawPassword, final String encodedPassword) {
+            return encode(rawPassword).equals(encodedPassword);
+        }
+
+        @Override
+        public boolean needsUpgrade(final String encodedPassword) {
+            return encodedPassword.startsWith("old:");
+        }
+
+        @Override
+        public boolean isVerificationCostly() {
+            return costly;
+        }
+
+        @Override
+        public void applyTimingPadding() {
+            paddings++;
+            if (failPadding) {
+                throw new IllegalStateException("padding failed");
+            }
+        }
     }
 
     /** Minimal FessConfig override for this test. */

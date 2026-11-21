@@ -234,6 +234,7 @@ public class UserService {
      *
      * @param username the username of the user
      * @param password the new password in plain text
+     * @throws IllegalArgumentException if the password is longer than the hash algorithm accepts; nothing is changed
      * @throws FessUserNotFoundException if the user is not found
      * @throws UserConflictException if the user was changed concurrently on each of the attempts
      */
@@ -270,6 +271,9 @@ public class UserService {
             logger.debug("Password change initiated for user: username={}", username);
         }
 
+        // Hash first: a password the algorithm refuses (IllegalArgumentException) must be found before
+        // AuthenticationManager.changePassword, which may already have changed the password in LDAP.
+        final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
         try {
             if (currentPassword != null) {
                 // refuse a stale request before the authentication manager is asked to change anything
@@ -278,7 +282,6 @@ public class UserService {
             }
             final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
             if (changed) {
-                final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
                 for (int attempt = 0; attempt < CONDITIONAL_WRITE_ATTEMPTS; attempt++) {
                     final OptionalEntity<User> found = userBhv.selectEntity(cb -> cb.query().setName_Equal(username));
                     if (!found.isPresent()) {

@@ -533,6 +533,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         };
         ComponentUtil.register(systemHelper, "systemHelper");
         ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.PasswordHashHelper(), "passwordHashHelper");
         try {
             final CapturingResponse res = new CapturingResponse();
             new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(

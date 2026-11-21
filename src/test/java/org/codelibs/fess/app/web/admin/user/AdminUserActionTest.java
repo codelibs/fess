@@ -23,6 +23,7 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.user.exentity.Group;
@@ -388,6 +389,7 @@ public class AdminUserActionTest extends UnitFessTestCase {
      */
     private String policyErrorOf(final String password) {
         ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.register(new PasswordHashHelper(), "passwordHashHelper");
         final CreateForm form = new CreateForm();
         form.crudMode = CrudMode.CREATE;
         form.password = password;

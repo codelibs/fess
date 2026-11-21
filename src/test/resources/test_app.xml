@@ -13,6 +13,10 @@
 	     showing up in the artifact. -->
 	<include path="fess_storage.xml" />
 
+	<!-- The password algorithm PasswordHashHelper resolves as "<id>PasswordEncoder" (declared in fess.xml,
+	     which the test container does not load). -->
+	<component name="bcryptPasswordEncoder" class="org.codelibs.fess.crypto.password.BcryptPasswordEncoder" />
+
 	<!-- Register systemProperties for test environment -->
 	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
 

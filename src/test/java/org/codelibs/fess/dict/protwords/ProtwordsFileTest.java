@@ -26,6 +26,7 @@ import java.util.Date;
 
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -77,6 +78,8 @@ public class ProtwordsFileTest extends UnitFessTestCase {
                 }
             }
         };
+        // SystemHelper.init() asks the password hash helper for its limit
+        ComponentUtil.register(new PasswordHashHelper(), "passwordHashHelper");
         systemHelper.init();
         ComponentUtil.register(systemHelper, "systemHelper");
 
