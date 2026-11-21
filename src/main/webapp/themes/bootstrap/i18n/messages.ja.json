@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "ログイン試行が多すぎます。しばらくしてからお試しください。",
   "auth.password_change_required": "パスワードを更新する必要があります",
   "auth.passkey_login": "パスキーでログイン",
+  "auth.passkey_not_completed": "パスキーの操作が完了しませんでした。もう一度試すか、パスワードを使ってください。",
   "chat.placeholder": "質問を入力...",
   "chat.send": "送信",
   "chat.disabled": "このサーバーではチャットが無効です。",

@@ -478,7 +478,7 @@ describe("passkey login button", () => {
     expect(document.getElementById("passkey-login-btn").disabled).toBe(false);
   });
 
-  it("stays silent when the user dismisses the browser prompt", async () => {
+  it("says that the passkey operation did not complete when the user dismisses the browser prompt", async () => {
     enable(true);
     document.body.innerHTML = FIXTURE;
     await attach();
@@ -490,8 +490,8 @@ describe("passkey login button", () => {
 
     expect(api.post).toHaveBeenCalledTimes(1); // no verify
     const err = document.getElementById("login-error");
-    expect(err.classList.contains("d-none")).toBe(true);
-    expect(err.textContent).toBe("");
+    expect(err.classList.contains("d-none")).toBe(false);
+    expect(err.textContent).toBe("auth.passkey_not_completed");
     expect(document.getElementById("passkey-login-btn").disabled).toBe(false);
   });
 

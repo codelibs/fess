@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
@@ -191,9 +192,9 @@ public class FessBoot extends TomcatBoot {
      * @param ports the ports of the connectors that did not start
      */
     protected void abortStartupOnPorts(final List<Integer> ports) {
-        System.err.println("Fess aborted the startup because the port " + ports
+        reportAbort("Fess aborted the startup because the port " + ports
                 + " could not be opened. Another process may already use it (see also the console output).");
-        System.exit(1);
+        exit(1);
     }
 
     /**
@@ -202,9 +203,37 @@ public class FessBoot extends TomcatBoot {
      * @param contextPaths the context paths of the web applications that did not start
      */
     protected void abortStartup(final List<String> contextPaths) {
-        System.err.println("Fess aborted the startup because the web application " + contextPaths
+        reportAbort("Fess aborted the startup because the web application " + contextPaths
                 + " failed to initialize. The cause is in logs/fess.log (see also the console output).");
-        System.exit(1);
+        exit(1);
+    }
+
+    /**
+     * Reports why the startup is aborted on the standard error and in the server log.
+     *
+     * <p>The standard error is discarded when Fess is started as a service (an init script runs it in the
+     * background with its output sent to /dev/null), so the reason is also logged at the highest level of the
+     * logging that runs here: the java.util.logging configured by {@code logging.properties}, which writes
+     * {@code server_*.log} in the log directory. Log4j is not used because it is not on this class path (the
+     * web application has it); {@code fess.log} is written by the web application.</p>
+     *
+     * <p>The logger is looked up here, not kept in a static field: this class is loaded before
+     * {@code main} points java.util.logging at {@code logging.properties}.</p>
+     *
+     * @param message the reason
+     */
+    protected void reportAbort(final String message) {
+        System.err.println(message);
+        Logger.getLogger(FessBoot.class.getName()).severe(message);
+    }
+
+    /**
+     * Terminates the JVM.
+     *
+     * @param status the exit status
+     */
+    protected void exit(final int status) {
+        System.exit(status);
     }
 
     /**

@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "बहुत अधिक लॉगिन प्रयास। बाद में पुनः प्रयास करें।",
   "auth.password_change_required": "आपको अपना पासवर्ड अपडेट करना होगा",
   "auth.passkey_login": "पासकी से साइन इन करें",
+  "auth.passkey_not_completed": "पासकी का ऑपरेशन पूरा नहीं हुआ। फिर से प्रयास करें या अपने पासवर्ड का उपयोग करें।",
   "chat.placeholder": "प्रश्न पूछें...",
   "chat.send": "भेजें",
   "chat.disabled": "इस सर्वर पर चैट अक्षम है।",

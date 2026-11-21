@@ -27,12 +27,14 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.crypto.bcrypt.BCrypt;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.PasswordHashHelper;
+import org.codelibs.fess.helper.RecordingActivityHelper;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
 import org.codelibs.fess.opensearch.user.exentity.User;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
@@ -57,6 +59,8 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
     private CountingPasswordHashHelper countingPm;
 
+    private RecordingActivityHelper audit;
+
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -68,6 +72,9 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         // Register PasswordHashHelper and (by default) a no-op UserService.
         ComponentUtil.register(countingPm, "passwordHashHelper");
         ComponentUtil.register(new RecordingUserService(), UserService.class.getCanonicalName());
+
+        audit = new RecordingActivityHelper();
+        ComponentUtil.register(audit, "activityHelper");
 
         loginAssist = new StubUserBhvLoginAssist();
     }
@@ -480,6 +487,38 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertFalse(loginAssist.doAuthenticateLocal("alice", "wrong").isPresent());
     }
 
+    @Test
+    public void test_lazyUpgrade_unresolvableConfiguredAlgorithm_isWarnedOncePerAlgorithmNotPerLogin() throws Exception {
+        final String oldCostHash = "{bcrypt}" + BCrypt.hashpw("secret", BCrypt.gensalt(4));
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword(oldCostHash);
+        installUserBhv(stored);
+        installUserService();
+        testConfig.passwordAlgorithm = "gone-once-a";
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(FessLoginAssist.class);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertTrue(loginAssist.doAuthenticateLocal("alice", "secret").isPresent());
+            }
+            assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+            final String line = capture.warnings().get(0);
+            assertTrue(line.contains("app.password.algorithm"), line);
+            assertTrue(line.contains("username=alice"), line);
+            assertFalse(line.contains("secret"), line);
+            assertFalse(line.contains(oldCostHash), line);
+
+            // another unresolvable value is another condition and is reported once as well
+            testConfig.passwordAlgorithm = "gone-once-b";
+            assertTrue(loginAssist.doAuthenticateLocal("alice", "secret").isPresent());
+            assertTrue(loginAssist.doAuthenticateLocal("alice", "secret").isPresent());
+            assertEquals(2, capture.warnings().size(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
     // ---------------------------------------------------------------------
     // needsLoginSessionSyncCheck
     // ---------------------------------------------------------------------
@@ -548,6 +587,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -556,10 +596,30 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         final CountingUserBhv bhv = installCountingUserBhv(assist, null); // the document is gone
         final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
         bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+        assist.session = bean;
 
         assertFalse(assist.callSyncCheckLoginSession(bean));
         assertEquals(1, bhv.selectCalls.get());
         assertEquals(1, assist.logoutCalls.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:user_not_found", audit.sessionEnds.get(0));
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_localUserDeleted_secondRequestOfTheEndedSessionWritesNoRecord() {
+        final ExposedLoginAssist assist = newExposedAssist();
+        installCountingUserBhv(assist, null); // the document is gone
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+        assist.session = bean;
+        // a second request of the session read the same bean before the first one ended it
+        final FessUserBean other = new FessUserBean(newLocalUser("alice"));
+        other.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertFalse(assist.callSyncCheckLoginSession(bean));
+        assertFalse(assist.callSyncCheckLoginSession(other));
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:user_not_found", audit.sessionEnds.get(0));
     }
 
     @Test
@@ -572,6 +632,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(1, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -586,6 +647,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -601,6 +663,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     // ---------------------------------------------------------------------
@@ -779,9 +842,20 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     private static class ExposedLoginAssist extends StubUserBhvLoginAssist {
         final AtomicInteger logoutCalls = new AtomicInteger(0);
 
+        /** The user bean of the login session, null when there is none. */
+        FessUserBean session;
+
+        @Override
+        protected OptionalThing<FessUserBean> getSessionUserBeanUnchecked() {
+            return OptionalThing.ofNullable(session, () -> {
+                throw new IllegalStateException("no session");
+            });
+        }
+
         @Override
         public void logout() {
             logoutCalls.incrementAndGet();
+            session = null;
         }
 
         boolean callSyncCheckLoginSession(final FessUserBean userBean) {

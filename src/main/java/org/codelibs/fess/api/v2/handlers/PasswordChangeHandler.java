@@ -51,7 +51,9 @@ import jakarta.servlet.http.HttpSession;
  * system's password policy ({@code SystemHelper#validatePassword}), and the
  * actual store is delegated to {@link UserService#changePassword(String, String, String)}, which
  * writes only while the stored password is still the verified {@code current_password}: when
- * another request has changed it in between, the response is {@code 409 conflict}.
+ * another request has changed it in between, the response is {@code 409 conflict}. That applies to a
+ * local {@link User}; for a directory (LDAP) login no stored password is compared, so two simultaneous
+ * changes may both succeed.
  * Confirm-password mismatch and a blank new password both yield
  * {@code 400 invalid_request}.</p>
  *

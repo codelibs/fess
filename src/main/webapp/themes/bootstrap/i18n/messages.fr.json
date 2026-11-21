@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
   "auth.password_change_required": "Vous devez mettre à jour votre mot de passe",
   "auth.passkey_login": "Se connecter avec une clé d'accès",
+  "auth.passkey_not_completed": "L’opération avec la clé d’accès n’a pas abouti. Réessayez ou utilisez votre mot de passe.",
   "chat.placeholder": "Posez une question...",
   "chat.send": "Envoyer",
   "chat.disabled": "Le chat est désactivé sur ce serveur.",

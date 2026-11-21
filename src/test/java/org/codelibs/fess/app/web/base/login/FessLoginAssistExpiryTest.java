@@ -18,15 +18,27 @@ package org.codelibs.fess.app.web.base.login;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.RecordingActivityHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Tests that a login session ends once the user says that its login has ended, and that every other session is left alone.
  */
 public class FessLoginAssistExpiryTest extends UnitFessTestCase {
+
+    private RecordingActivityHelper audit;
+
+    @Override
+    protected void setUp(final TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        audit = new RecordingActivityHelper();
+        ComponentUtil.register(audit, "activityHelper");
+    }
 
     @Test
     public void test_session_endsWhenTheLoginHasEnded() {
@@ -35,6 +47,8 @@ public class FessLoginAssistExpiryTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:idp_session_ended", audit.sessionEnds.get(0));
         assertNull(assist.session);
     }
 
@@ -45,6 +59,7 @@ public class FessLoginAssistExpiryTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -76,6 +91,7 @@ public class FessLoginAssistExpiryTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -84,6 +100,7 @@ public class FessLoginAssistExpiryTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     /** A login assist whose session is a field, so that it needs no servlet container. */

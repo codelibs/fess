@@ -243,8 +243,11 @@ function buildPasskeySection() {
       showSuccess(t("profile.passkey_registered"));
       await loadList();
     } catch (err) {
-      // The user dismissed the browser's prompt: nothing to report.
-      if (isPasskeyCancel(err)) return;
+      // The browser cannot tell a dismissed prompt from a refused user verification: say that it did not complete.
+      if (isPasskeyCancel(err)) {
+        showError(t("auth.passkey_not_completed"));
+        return;
+      }
       if (await handleSessionGone(err)) return;
       // A server or network failure is told as it is; anything the browser threw (the
       // authenticator refused, a passkey of it is already registered) is a failed registration.

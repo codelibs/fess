@@ -909,7 +909,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         // An SSO session carries only a name. The local fess_user of that name is another account: the SSO user must
         // not be able to change its password by knowing it, so the session is answered as no session is, like the
         // passkey endpoints do, and no password is looked at.
-        final StubFessLoginAssist stub = registerStubLoginAssist("alice", "secret-current").asLocalUser().asSsoSession();
+        final StubFessLoginAssist stub = registerStubLoginAssist("alice", "secret-current").asSsoSession();
         final boolean[] changed = { false };
         final org.codelibs.fess.app.service.UserService service = new org.codelibs.fess.app.service.UserService() {
             @Override
@@ -962,7 +962,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     public void passwordChange_directorySessionVerifiedOnlyByTheLocalHash_isAWrongCurrentPassword() throws Exception {
         // A directory login (LDAP, SPNEGO) whose bind fails falls back to the local user of the same name, whose hash
         // then verifies. The directory session does not own that password: it is answered as a wrong current password.
-        registerStubLoginAssist("alice", "secret-current").asLocalUser().asDirectorySession();
+        registerStubLoginAssist("alice", "secret-current").asDirectorySession();
         final boolean[] changed = { false };
         final org.codelibs.fess.app.service.UserService service = new org.codelibs.fess.app.service.UserService() {
             @Override
@@ -1370,22 +1370,26 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         /**
          * Makes the session belong to a directory user while {@link #findLoginUser} still answers with a local user,
          * as a directory login does when the password verifies only against the stored hash of the local user of
-         * that name.
+         * that name. It sets both halves itself (the local user answered, a directory session), so that no other
+         * method has to be called before it.
          *
          * @return this stub (fluent)
          */
         StubFessLoginAssist asDirectorySession() {
+            this.localUser = true;
             this.localSession = false;
             return this;
         }
 
         /**
          * Makes the session belong to a user that SAML, OpenID Connect or Entra ID authenticated,
-         * which is neither a local user nor a directory user.
+         * which is neither a local user nor a directory user, while {@link #findLoginUser} still answers with the
+         * local user of the same name. It sets both halves itself, so that no other method has to be called before it.
          *
          * @return this stub (fluent)
          */
         StubFessLoginAssist asSsoSession() {
+            this.localUser = true;
             this.ssoSession = true;
             return this;
         }

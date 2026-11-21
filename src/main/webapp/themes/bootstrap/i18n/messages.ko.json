@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "로그인 시도가 너무 많습니다. 나중에 다시 시도하세요.",
   "auth.password_change_required": "비밀번호를 갱신해야 합니다",
   "auth.passkey_login": "패스키로 로그인",
+  "auth.passkey_not_completed": "패스키 작업이 완료되지 않았습니다. 다시 시도하거나 비밀번호를 사용하세요.",
   "chat.placeholder": "질문을 입력하세요...",
   "chat.send": "전송",
   "chat.disabled": "이 서버에서는 채팅이 비활성화되어 있습니다.",

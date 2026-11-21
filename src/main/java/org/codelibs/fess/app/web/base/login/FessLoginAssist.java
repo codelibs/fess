@@ -68,6 +68,30 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     /** The seconds used when {@code password.changed.check.interval} is not a number. */
     protected static final int DEFAULT_PASSWORD_CHECK_INTERVAL = 60;
 
+    /** The reason written to the audit log when the identity provider ended the session. */
+    protected static final String SESSION_END_IDP_SESSION_ENDED = "idp_session_ended";
+
+    /** The reason written to the audit log when the password was changed after the session was opened. */
+    protected static final String SESSION_END_PASSWORD_CHANGED = "password_changed";
+
+    /**
+     * The reason written to the audit log when the document of the local user is not found by the name of the
+     * session, because it was deleted or the user was renamed.
+     */
+    protected static final String SESSION_END_USER_NOT_FOUND = "user_not_found";
+
+    /**
+     * The locks that make the audit record of an ended session be written by one request only. A lock is taken
+     * by the hash of the session ID, so that two requests of a session meet at the same lock.
+     */
+    private static final Object[] SESSION_END_LOCKS = new Object[64];
+
+    static {
+        for (int i = 0; i < SESSION_END_LOCKS.length; i++) {
+            SESSION_END_LOCKS[i] = new Object();
+        }
+    }
+
     /**
      * Default constructor.
      */
@@ -263,7 +287,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                  ---------------------
     /**
      * Gets the user bean of the login session, ending the session first when the login ended where it
-     * was made ({@link FessUser#isExpired()}) or the password of the user was changed after it was opened.
+     * was made ({@link FessUser#isExpired()}), the password of the user was changed after it was opened,
+     * or the user document of a local user was deleted.
      *
      * <p>Every way to ask who is logged in ends here, the admin screens as well as the search
      * and the {@code /api/v2} requests, so a session cannot outlive a password change by taking a
@@ -286,17 +311,91 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             if (logger.isInfoEnabled()) {
                 logger.info("Ended a login session that ended where it was made. username={}", saved.get().getUserId());
             }
-            logout();
+            endSession(saved.get(), SESSION_END_IDP_SESSION_ENDED);
             return getSessionUserBeanUnchecked();
         }
-        if (saved.isPresent() && isPasswordChangedAfterLogin(saved.get())) {
+        final String reason = saved.isPresent() ? findUserIndexEndReason(saved.get()) : null;
+        if (reason != null) {
             if (logger.isInfoEnabled()) {
-                logger.info("Ended a login session opened before the password was changed. username={}", saved.get().getUserId());
+                logger.info("Ended a login session opened before the password was changed, or of a user that no longer exists. username={}",
+                        saved.get().getUserId());
             }
-            logout();
+            endSession(saved.get(), reason);
             return getSessionUserBeanUnchecked();
         }
         return saved;
+    }
+
+    /**
+     * Ends the login session that Fess ended on its own and writes the audit record of it.
+     * A logout the user asks for is recorded by the logout action, not here.
+     *
+     * <p>Requests of one session can reach this at the same time, each with the user bean it read before the
+     * session ended. The session is looked at again under a lock that the requests of a session share, and only
+     * the request that still finds it ends it and writes the record. The lock is held in this node, so on a
+     * session that several nodes share, a request of another node can still write a second record.</p>
+     *
+     * @param userBean the user bean of the session that is ended
+     * @param reason why the session is ended, one of the {@code SESSION_END_*} constants
+     */
+    protected void endSession(final FessUserBean userBean, final String reason) {
+        synchronized (getSessionEndLock()) {
+            if (!hasSession()) {
+                return; // another request ended it first and wrote the record
+            }
+            logout();
+            ComponentUtil.getActivityHelper().sessionEnd(OptionalThing.of(userBean), reason);
+        }
+    }
+
+    /**
+     * Gets the lock for the session of the request, see {@link #endSession(FessUserBean, String)}.
+     *
+     * @return the lock
+     */
+    protected Object getSessionEndLock() {
+        final String id = LaRequestUtil.getOptionalRequest().map(request -> request.getSession(false)).map(session -> {
+            try {
+                return session.getId();
+            } catch (final IllegalStateException e) {
+                return null; // invalidated meanwhile
+            }
+        }).orElse(null);
+        return SESSION_END_LOCKS[id == null ? 0 : (id.hashCode() & Integer.MAX_VALUE) % SESSION_END_LOCKS.length];
+    }
+
+    /**
+     * Tells whether the request still has a login session.
+     *
+     * @return true if there is a user bean in the session
+     */
+    protected boolean hasSession() {
+        try {
+            return getSessionUserBeanUnchecked().isPresent();
+        } catch (final IllegalStateException e) {
+            return false; // invalidated meanwhile
+        }
+    }
+
+    /**
+     * Ends the login session when the sync check finds that the local user can no longer log in, that is,
+     * the user document is not found by the name of the session. The check ends the session itself, so the
+     * record is written here, by the request that still found the session when the check started
+     * (see {@link #endSession(FessUserBean, String)}).
+     *
+     * @param userBean the user bean of the session
+     * @return true if the session is still valid
+     */
+    @Override
+    protected boolean syncCheckLoginSessionIfNeeds(final FessUserBean userBean) {
+        synchronized (getSessionEndLock()) {
+            final boolean present = hasSession();
+            final boolean valid = super.syncCheckLoginSessionIfNeeds(userBean);
+            if (!valid && present) {
+                ComponentUtil.getActivityHelper().sessionEnd(OptionalThing.of(userBean), SESSION_END_USER_NOT_FOUND);
+            }
+            return valid;
+        }
     }
 
     /**
@@ -326,19 +425,21 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * so a request in between costs nothing. The session ends only when the stored time is later
      * than the remembered one, not when they merely differ: a node that has not yet seen a newer
      * change, or a document rewritten by a node that does not know the field, must not end a
-     * session that is still valid.</p>
+     * session that is still valid. It also ends when the index is read and holds no document for a local
+     * user any more; a read that fails ends nothing.</p>
      *
      * @param userBean the user bean of the session
-     * @return true if the session was opened before the latest password change
+     * @return the reason the session ends ({@link #SESSION_END_PASSWORD_CHANGED} when it was opened before the
+     *         latest password change, {@link #SESSION_END_USER_NOT_FOUND} when the document of the local user is not found), or null
      */
-    protected boolean isPasswordChangedAfterLogin(final FessUserBean userBean) {
+    protected String findUserIndexEndReason(final FessUserBean userBean) {
         final Long remembered = userBean.getPasswordChangedAt();
         if (remembered == null && userBean.getLoginTime() != null) {
-            return false; // a session of a user who is not a local user
+            return null; // a session of a user who is not a local user
         }
         final long now = currentTimeMillis();
         if (!isPasswordCheckDue(userBean, now)) {
-            return false;
+            return null;
         }
         final long threshold;
         if (remembered != null) {
@@ -349,12 +450,18 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             // created before it is ended too, and the user logs in once more.
             final OptionalLong created = getSessionCreationTime();
             if (!created.isPresent()) {
-                return false;
+                return null;
             }
             threshold = created.getAsLong();
         }
         userBean.setPasswordCheckTime(now);
-        return findPasswordChangedAt(userBean.getUserId()) > threshold;
+        final OptionalLong changedAt = findPasswordChangedAt(userBean.getUserId());
+        if (changedAt.isEmpty()) {
+            // The document of the user is gone. Only a local user has one to lose: for any other user the
+            // identity provider, not the user index, owns the account.
+            return userBean.getFessUser() instanceof User ? SESSION_END_USER_NOT_FOUND : null;
+        }
+        return changedAt.getAsLong() > threshold ? SESSION_END_PASSWORD_CHANGED : null;
     }
 
     /**
@@ -391,19 +498,20 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * Reads the time the password of a local user was last changed from the user index.
      *
      * <p>When the time cannot be read, the answer is 0, which is never later than what a session
-     * remembers: a login session is not ended because the search engine is unreachable.</p>
+     * remembers: a login session is not ended because the search engine is unreachable. An empty
+     * answer means that the index was read and holds no user of that name.</p>
      *
      * @param username the name of the user
-     * @return epoch milliseconds, or 0 when there is none
+     * @return epoch milliseconds (0 when there is none), or empty when the user does not exist
      */
-    protected long findPasswordChangedAt(final String username) {
+    protected OptionalLong findPasswordChangedAt(final String username) {
         try {
             return ComponentUtil.getComponent(UserService.class).getPasswordChangedAt(username);
         } catch (final RuntimeException e) {
             LogUtil.warnOnce(logger, "read",
                     "Could not read the time of the last password change, so login sessions are not checked against it until it can be read.",
                     e);
-            return 0L;
+            return OptionalLong.of(0L);
         }
     }
 
@@ -681,10 +789,11 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
                 logger.warn("Failed to upgrade password hash (update returned false). username={}", username);
             }
         } catch (final FessConfigurationException e) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("Skipped the upgrade of a password hash, the algorithm of app.password.algorithm cannot be resolved."
-                        + " The stored hash is kept. username={}, reason={}", username, e.getMessage());
-            }
+            // A configuration error that every login of a hashed user would repeat: report it once per configured value.
+            LogUtil.warnOnce(logger, "password-algorithm:" + ComponentUtil.getFessConfig().getAppPasswordAlgorithm(),
+                    "Skipped the upgrade of a password hash, the algorithm of app.password.algorithm cannot be resolved."
+                            + " The stored hash is kept. username={}, reason={}",
+                    username, e.getMessage());
         } catch (final Exception e) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed to upgrade password hash. username={}", username, e);

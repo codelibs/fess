@@ -137,6 +137,32 @@ public class PasswordHashHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_matches_bcryptHashWrittenByAnotherSystem_2bAnd2y() {
+        // Python bcrypt ($2b$) and Apache htpasswd -B ($2y$), as stored by an import or a manual edit
+        assertTrue(passwordHashHelper.matches("password", "{bcrypt}$2b$04$yPk3dip9vVghAiGk1hhBpedKK5XwXdIprS.TmgLADQUftkCMYgzCu"));
+        assertTrue(passwordHashHelper.matches("password", "{bcrypt}$2y$04$a0J.gcGLTR6mKJ0C2ZNKfeWdOXDdkEGjlG6TC3XN8t5aOZh3tBq1."));
+        assertFalse(passwordHashHelper.matches("passwort", "{bcrypt}$2b$04$yPk3dip9vVghAiGk1hhBpedKK5XwXdIprS.TmgLADQUftkCMYgzCu"));
+        assertFalse(passwordHashHelper.matches("passwort", "{bcrypt}$2y$04$a0J.gcGLTR6mKJ0C2ZNKfeWdOXDdkEGjlG6TC3XN8t5aOZh3tBq1."));
+        assertFalse(passwordHashHelper.matches("password", "{bcrypt}$2x$04$yPk3dip9vVghAiGk1hhBpedKK5XwXdIprS.TmgLADQUftkCMYgzCu"));
+    }
+
+    @Test
+    public void test_matches_truncatedBcryptHash_2bAnd2y_isFalse() {
+        assertFalse(passwordHashHelper.matches("password", "{bcrypt}$2b$"));
+        assertFalse(passwordHashHelper.matches("password", "{bcrypt}$2b$04$"));
+        assertFalse(passwordHashHelper.matches("password", "{bcrypt}$2y$04$a0J.gcGLTR6mKJ0C2ZNKfe"));
+    }
+
+    @Test
+    public void test_upgradeEncoding_2bAnd2y_onlyWhenTheCostIsLower() {
+        final String b = "{bcrypt}$2b$04$yPk3dip9vVghAiGk1hhBpedKK5XwXdIprS.TmgLADQUftkCMYgzCu";
+        final String y = "{bcrypt}$2y$10$K0jOpI2PuthXgKg.9vL55elfUpvkbw7ebuJxEOTqoCtPmVtoP.H1K";
+        testConfig.bcryptCost = 10;
+        assertTrue(passwordHashHelper.upgradeEncoding(b));
+        assertFalse(passwordHashHelper.upgradeEncoding(y));
+    }
+
+    @Test
     public void test_upgradeEncoding_disabled() {
         testConfig.upgradeEnabled = false;
         final String legacy = "f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7";
