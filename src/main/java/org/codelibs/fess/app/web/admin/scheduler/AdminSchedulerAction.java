@@ -434,7 +434,7 @@ public class AdminSchedulerAction extends FessAdminAction {
             }
         }).orElse(() -> {
             throwValidationError(messages -> {
-                messages.addErrorsFailedToStartJob(GLOBAL, id);
+                messages.addErrorsFailedToStopJob(GLOBAL, id);
             }, () -> asDetailsHtml(id));
         });
         return redirect(getClass());
