@@ -28,6 +28,7 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserConflictException;
+import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.User;
@@ -55,6 +56,14 @@ import jakarta.servlet.http.HttpSession;
  * changes may both succeed.
  * Confirm-password mismatch and a blank new password both yield
  * {@code 400 invalid_request}.</p>
+ *
+ * <p>Only the session of a local user or of a directory user may change a password. The session of a user that
+ * SAML, OpenID Connect or Entra ID authenticated carries only a name, which may also be the name of a local
+ * user, so it is answered {@code 401 auth_required} as no session is, before any password is looked at; the
+ * passkey endpoints answer such a session the same way. A directory session (an LDAP login, or SPNEGO, which
+ * looks the user up in the directory) changes the password in the directory, but the stored hash of a
+ * local user of the same name is not its to change: when {@code current_password} verifies only against that
+ * hash, it is answered as a wrong {@code current_password}.</p>
  *
  * <p>Request body shape:</p>
  * <pre>{@code
@@ -181,6 +190,17 @@ public class PasswordChangeHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
             return;
         }
+        // The password that current_password is checked against is the one of the local user (or the directory user)
+        // of that name, not of whoever the session belongs to: the session of SAML, OpenID Connect or Entra ID of the
+        // same name must not be able to change it.
+        final FessUser sessionUser = userBean.get().getFessUser();
+        if (!(sessionUser instanceof User || sessionUser instanceof LdapUser)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("/api/v2/auth/password: refused: userId={}, reason=not_a_local_or_directory_user", userBean.get().getUserId());
+            }
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
+            return;
+        }
         final Map<String, Object> body;
         try {
             body = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
@@ -273,7 +293,9 @@ public class PasswordChangeHandler {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password findLoginUser");
             return;
         }
-        if (verified == null || !verified.isPresent()) {
+        // A directory login falls back to the local user of the same name, and verifies the local hash. Only the session of
+        // that local user may change it; for any other session that password is not the one it owns, so it counts as wrong.
+        if (verified == null || !verified.isPresent() || (verified.get() instanceof User && !(sessionUser instanceof User))) {
             // Wrong current_password: consume one user-bucket slot. If the bucket has just
             // been exhausted, escalate to 429 with Retry-After (same pattern as LoginHandler).
             if (rate != null && userLimit > 0 && !rate.allow(LoginRateLimiter.Scope.USER, userId, userLimit, 60)) {
