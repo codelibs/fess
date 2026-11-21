@@ -708,6 +708,45 @@ public class PasskeyServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_register_lastPlaceBelowTheLimit_isStored() {
+        final String response = createCredential(newClient(ORIGIN), user("alice"));
+        for (int i = 0; i < PasskeyService.MAX_PASSKEYS_PER_USER - 1; i++) {
+            final Passkey passkey = new Passkey();
+            passkey.setId("id" + i);
+            passkey.setUserName("alice");
+            service.store.put(passkey.getId(), passkey);
+        }
+
+        assertNotNull(service.verifyRegistration(session, user("alice"), "laptop", response));
+        assertEquals(PasskeyService.MAX_PASSKEYS_PER_USER, service.store.size());
+    }
+
+    @Test
+    public void test_register_racingRegistrationsBringingTheUserOverTheLimit_withdrawThePasskey() {
+        final String response = createCredential(newClient(ORIGIN), user("alice"));
+        for (int i = 0; i < PasskeyService.MAX_PASSKEYS_PER_USER - 1; i++) {
+            final Passkey passkey = new Passkey();
+            passkey.setId("id" + i);
+            passkey.setUserName("alice");
+            service.store.put(passkey.getId(), passkey);
+        }
+        // five more registrations pass the check and are stored while this one is being stored
+        service.afterInsert = () -> {
+            for (int i = 0; i < 5; i++) {
+                final Passkey passkey = new Passkey();
+                passkey.setId("racer" + i);
+                passkey.setUserName("alice");
+                service.store.put(passkey.getId(), passkey);
+            }
+        };
+
+        assertRejected("reason=too_many_passkeys", () -> service.verifyRegistration(session, user("alice"), "laptop", response));
+
+        assertEquals(PasskeyService.MAX_PASSKEYS_PER_USER + 4, service.store.size(), "only the passkey of the refused request is removed");
+        assertFalse(service.store.values().stream().anyMatch(p -> "laptop".equals(p.getLabel())));
+    }
+
+    @Test
     public void test_abbreviate() {
         assertEquals("-", PasskeyService.abbreviate(null));
         assertEquals("AbCdEfGh", PasskeyService.abbreviate("AbCdEfGh"));
@@ -923,6 +962,9 @@ public class PasskeyServiceTest extends UnitFessTestCase {
 
         boolean insertConflict;
 
+        /** Runs once this service has stored a passkey, to let other registrations store theirs. */
+        Runnable afterInsert;
+
         Runnable onConflict;
 
         InMemoryPasskeyService() {
@@ -979,6 +1021,9 @@ public class PasskeyServiceTest extends UnitFessTestCase {
                 throw new PasskeyException("reason=duplicate_credential");
             }
             store.put(passkey.getId(), passkey);
+            if (afterInsert != null) {
+                afterInsert.run();
+            }
         }
 
         @Override
