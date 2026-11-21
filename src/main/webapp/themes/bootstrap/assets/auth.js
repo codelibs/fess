@@ -414,7 +414,10 @@ export function isPasskeyLoginAvailable() {
   return isPasskeyEnabled() && !!window.PublicKeyCredential && !!navigator.credentials;
 }
 
-/** True when a navigator.credentials call failed because the user dismissed the prompt (or it timed out). */
+/**
+ * True when a navigator.credentials call failed because the user dismissed the prompt, it timed out or
+ * the user verification was not satisfied (the browser raises the same error for all three).
+ */
 export function isPasskeyCancel(e) {
   return !!e && (e.name === "NotAllowedError" || e.name === "AbortError");
 }
@@ -661,9 +664,8 @@ export function attach() {
       const env = await api.post("/auth/passkey/login/verify", { credential: passkeyCredentialToJson(credential) });
       await finishLogin(env);
     } catch (e) {
-      // The user dismissed the browser's passkey prompt: nothing to report.
-      if (isPasskeyCancel(e)) return;
-      err.textContent = loginErrorMessage(e);
+      // The browser cannot tell a dismissed prompt from a refused user verification: say that it did not complete.
+      err.textContent = isPasskeyCancel(e) ? t("auth.passkey_not_completed") : loginErrorMessage(e);
       err.classList.remove("d-none");
     } finally {
       passkeyBtn.disabled = false;

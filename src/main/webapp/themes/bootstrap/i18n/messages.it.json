@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Troppi tentativi di accesso. Riprovare più tardi.",
   "auth.password_change_required": "Devi aggiornare la tua password",
   "auth.passkey_login": "Accedi con una passkey",
+  "auth.passkey_not_completed": "L’operazione con la passkey non è stata completata. Riprova o usa la tua password.",
   "chat.placeholder": "Fai una domanda...",
   "chat.send": "Invia",
   "chat.disabled": "La chat è disabilitata su questo server.",

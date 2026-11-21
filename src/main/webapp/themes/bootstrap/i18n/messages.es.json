@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Demasiados intentos de inicio de sesión. Inténtelo más tarde.",
   "auth.password_change_required": "Debe actualizar su contraseña",
   "auth.passkey_login": "Iniciar sesión con una llave de acceso",
+  "auth.passkey_not_completed": "La operación con la llave de acceso no se completó. Inténtelo de nuevo o use su contraseña.",
   "chat.placeholder": "Haga una pregunta...",
   "chat.send": "Enviar",
   "chat.disabled": "El chat está desactivado en este servidor.",

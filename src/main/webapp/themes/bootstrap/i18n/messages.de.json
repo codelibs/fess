@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Zu viele Anmeldeversuche. Bitte später erneut versuchen.",
   "auth.password_change_required": "Sie müssen Ihr Passwort aktualisieren",
   "auth.passkey_login": "Mit Passkey anmelden",
+  "auth.passkey_not_completed": "Der Vorgang mit dem Passkey wurde nicht abgeschlossen. Versuchen Sie es erneut oder verwenden Sie Ihr Passwort.",
   "chat.placeholder": "Frage stellen...",
   "chat.send": "Senden",
   "chat.disabled": "Chat ist auf diesem Server deaktiviert.",

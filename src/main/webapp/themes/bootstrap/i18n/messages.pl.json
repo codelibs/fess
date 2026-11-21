@@ -57,6 +57,7 @@
   "auth.error_rate_limited": "Zbyt wiele prób logowania. Spróbuj ponownie później.",
   "auth.password_change_required": "Musisz zaktualizować swoje hasło",
   "auth.passkey_login": "Zaloguj się kluczem dostępu",
+  "auth.passkey_not_completed": "Operacja z kluczem dostępu nie została ukończona. Spróbuj ponownie lub użyj hasła.",
   "chat.placeholder": "Zadaj pytanie...",
   "chat.send": "Wyślij",
   "chat.disabled": "Czat jest wyłączony na tym serwerze.",
