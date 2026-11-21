@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -34,6 +35,7 @@ import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
@@ -1783,6 +1785,62 @@ public class FessPropTest extends UnitFessTestCase {
         } finally {
             fessConfig.setThemeSettings(null);
             FessProp.propMap.clear();
+        }
+    }
+
+    private static FessConfig createUsernamePolicyConfig(final String policy) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAuthenticationLocalUsernamePolicy() {
+                return policy;
+            }
+        };
+    }
+
+    @Test
+    public void test_isLocalUsernameCaseMapped_shippedDefaultIsPreserved() {
+        // the value of fess_config.properties as shipped, read through the real configuration
+        assertEquals("preserved", ComponentUtil.getFessConfig().getAuthenticationLocalUsernamePolicy());
+        assertFalse(ComponentUtil.getFessConfig().isLocalUsernameCaseMapped());
+    }
+
+    @Test
+    public void test_isLocalUsernameCaseMapped_mappedAndPreserved() {
+        assertTrue(createUsernamePolicyConfig("mapped").isLocalUsernameCaseMapped());
+        assertTrue(createUsernamePolicyConfig("Mapped").isLocalUsernameCaseMapped());
+        assertTrue(createUsernamePolicyConfig(" MAPPED ").isLocalUsernameCaseMapped());
+        assertFalse(createUsernamePolicyConfig("preserved").isLocalUsernameCaseMapped());
+        assertFalse(createUsernamePolicyConfig("Preserved").isLocalUsernameCaseMapped());
+        // a blank value is the default, and says nothing
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessProp.class);
+        try {
+            assertFalse(createUsernamePolicyConfig("").isLocalUsernameCaseMapped());
+            assertFalse(createUsernamePolicyConfig("  ").isLocalUsernameCaseMapped());
+            assertFalse(createUsernamePolicyConfig(null).isLocalUsernameCaseMapped());
+            assertEquals(0, appender.renderedEvents().size());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_isLocalUsernameCaseMapped_unknownValueIsPreservedAndWarnedOnce() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessProp.class);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertFalse(createUsernamePolicyConfig("map\nped").isLocalUsernameCaseMapped());
+                assertFalse(createUsernamePolicyConfig("true").isLocalUsernameCaseMapped());
+            }
+            final List<String> events = appender.renderedEvents();
+            assertEquals(events.toString(), 1, events.size());
+            assertTrue(events.get(0), events.get(0).contains("authentication.local.username.policy"));
+            assertTrue(events.get(0), events.get(0).contains("preserved is used"));
+            // the value is written on one line
+            assertFalse(events.get(0), events.get(0).contains("map\nped"));
+        } finally {
+            appender.detach();
         }
     }
 }

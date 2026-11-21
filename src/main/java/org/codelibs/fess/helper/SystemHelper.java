@@ -28,11 +28,13 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Normalizer;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -1386,6 +1388,96 @@ public class SystemHelper {
      */
     public void setSystemCpuCheckInterval(final long systemCpuCheckInterval) {
         this.systemCpuCheckInterval = systemCpuCheckInterval;
+    }
+
+    /**
+     * The decomposition mappings of the fullwidth and halfwidth forms from U+FF5F to U+FFEE, indexed by the code
+     * point minus U+FF5F: the one-step {@code <wide>} and {@code <narrow>} mapping of the Unicode data, or the
+     * character itself where it has none (an unassigned code point). Halfwidth katakana, for one, map to the
+     * katakana, and the halfwidth voiced sound marks to the combining marks U+3099 and U+309A.
+     */
+    private static final String WIDTH_MAPPINGS =
+            "\u2985\u2986\u3002\u300C\u300D\u3001\u30FB\u30F2\u30A1\u30A3\u30A5\u30A7\u30A9\u30E3\u30E5\u30E7" //
+                    + "\u30C3\u30FC\u30A2\u30A4\u30A6\u30A8\u30AA\u30AB\u30AD\u30AF\u30B1\u30B3\u30B5\u30B7\u30B9\u30BB" //
+                    + "\u30BD\u30BF\u30C1\u30C4\u30C6\u30C8\u30CA\u30CB\u30CC\u30CD\u30CE\u30CF\u30D2\u30D5\u30D8\u30DB" //
+                    + "\u30DE\u30DF\u30E0\u30E1\u30E2\u30E4\u30E6\u30E8\u30E9\u30EA\u30EB\u30EC\u30ED\u30EF\u30F3\u3099" //
+                    + "\u309A\u3164\u3131\u3132\u3133\u3134\u3135\u3136\u3137\u3138\u3139\u313A\u313B\u313C\u313D\u313E" //
+                    + "\u313F\u3140\u3141\u3142\u3143\u3144\u3145\u3146\u3147\u3148\u3149\u314A\u314B\u314C\u314D\u314E" //
+                    + "\uFFBF\uFFC0\uFFC1\u314F\u3150\u3151\u3152\u3153\u3154\uFFC8\uFFC9\u3155\u3156\u3157\u3158\u3159" //
+                    + "\u315A\uFFD0\uFFD1\u315B\u315C\u315D\u315E\u315F\u3160\uFFD8\uFFD9\u3161\u3162\u3163\uFFDD\uFFDE" //
+                    + "\uFFDF\u00A2\u00A3\u00AC\u00AF\u00A6\u00A5\u20A9\uFFE7\u2502\u2190\u2191\u2192\u2193\u25A0\u25CB";
+
+    /**
+     * Returns the form of a local user name that {@code authentication.local.username.policy=mapped}
+     * compares: the fullwidth and halfwidth forms and the ideographic space are replaced by their decomposition,
+     * the result is lower-cased with the root locale, and then put in Unicode normalization form C.
+     * Nothing is trimmed, and no other character is folded: this is not NFKC, so ligatures, circled
+     * numbers and the like stay as they are.
+     *
+     * <p>This is the RFC 8265 {@code UsernameCaseMapped} profile: the width mapping covers the halfwidth
+     * forms too, so a halfwidth katakana name equals its fullwidth spelling (the halfwidth voiced mark becomes
+     * the combining mark U+3099, which the normalization joins to the kana before it). The root locale makes
+     * the result independent of the language of the JVM: {@code I} is {@code i} on a Turkish system too.
+     * U+0130 (capital I with dot above) becomes {@code i} followed by U+0307, which is not {@code i}.</p>
+     *
+     * <p>The mapped name is only used to decide whether two names collide. The name itself, the user ID
+     * and the permissions made from it are not changed.</p>
+     *
+     * @param name the user name, may be null
+     * @return the mapped name, or null if the given name is null
+     */
+    public String mapLocalUsername(final String name) {
+        if (name == null) {
+            return null;
+        }
+        final StringBuilder widthMapped = new StringBuilder(name.length());
+        for (int i = 0; i < name.length(); i++) {
+            widthMapped.append(mapWidth(name.charAt(i)));
+        }
+        return Normalizer.normalize(widthMapped.toString().toLowerCase(Locale.ROOT), Normalizer.Form.NFC);
+    }
+
+    /**
+     * Replaces a fullwidth or halfwidth form by its decomposition mapping, one step as in the Unicode data: the
+     * ideographic space (U+3000) by a space, U+FF01 to U+FF5E by the ASCII character 0xFEE0 below them, and the
+     * characters from U+FF5F to U+FFEE by {@link #WIDTH_MAPPINGS}. Any other character is returned as it is.
+     *
+     * @param c the character
+     * @return the character it is mapped to
+     */
+    private static char mapWidth(final char c) {
+        if (c == '\u3000') {
+            return ' ';
+        }
+        if (c >= '\uFF01' && c <= '\uFF5E') {
+            return (char) (c - 0xFEE0);
+        }
+        if (c >= '\uFF5F' && c <= '\uFFEE') {
+            return WIDTH_MAPPINGS.charAt(c - 0xFF5F);
+        }
+        return c;
+    }
+
+    /**
+     * Tells whether a local user name is a variant of one of the names {@code authentication.admin.users} lists:
+     * once mapped it equals an entry, but it is not that entry as written.
+     *
+     * <p>{@code authentication.admin.users.ignore.case} can make {@code Admin} an administrator when it is on, or
+     * when it is {@code auto} and LDAP is in use, so a local user must not be given such a spelling. A name that
+     * is, character for character, one of the entries is allowed, so the account of an administrator can be
+     * created again, while {@code Admin}, {@code ADMIN} or the fullwidth spelling of {@code admin} are not. The
+     * entries are split, trimmed and stripped of blanks the way {@code FessProp.isAdminUser} does.</p>
+     *
+     * @param name the name the user is to have
+     * @return true if the name must not be given
+     */
+    public boolean isAdminUserNameVariant(final String name) {
+        final String mapped = mapLocalUsername(name);
+        final List<String> entries = Arrays.stream(ComponentUtil.getFessConfig().getAuthenticationAdminUsers().split(","))
+                .map(String::trim)
+                .filter(StringUtil::isNotBlank)
+                .collect(Collectors.toList());
+        return !entries.contains(name) && entries.stream().anyMatch(entry -> mapped.equals(mapLocalUsername(entry)));
     }
 
     /**

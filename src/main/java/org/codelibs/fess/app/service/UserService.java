@@ -15,7 +15,12 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,11 +31,13 @@ import org.codelibs.fess.app.pager.UserPager;
 import org.codelibs.fess.exception.FessUserNotFoundException;
 import org.codelibs.fess.exception.UserChangedConcurrentlyException;
 import org.codelibs.fess.exception.UserConflictException;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -48,6 +55,9 @@ public class UserService {
 
     /** How many times a change of a user is tried when the user is changed in between. */
     private static final int CONDITIONAL_WRITE_ATTEMPTS = 3;
+
+    /** How many collision groups, and how many names with whitespace, the start-up warning lists. */
+    private static final int MAX_REPORTED_NAMES = 20;
 
     /**
      * Default constructor for UserService.
@@ -132,6 +142,11 @@ public class UserService {
      * (one that was not read, so it carries no sequence number) whose ID is already stored: it would replace that
      * user, with its password and roles.</p>
      *
+     * <p>With {@code authentication.local.username.policy=mapped}, a new user and a renamed one are also refused
+     * when the name, once mapped by {@link SystemHelper#mapLocalUsername(String)}, is the mapped name of another
+     * user or of an {@code authentication.admin.users} entry (other than the entry as written). Nothing is refused when a
+     * user is stored under the name it already has, so a pair that collides already stays editable.</p>
+     *
      * <p>A user that was read (it carries the sequence number and primary term it was read with) is written
      * on the condition that it has not been changed since. The passkeys that a rename removes and the
      * external authentication manager are handled before that write, so a refused save does not
@@ -139,6 +154,7 @@ public class UserService {
      *
      * @param user the user entity to store
      * @throws UserConflictException if the user is renamed to the name of another user
+     * @throws UserConflictException under the mapped policy, if a new or renamed user's name collides with another user's or is a variant of an admin user name
      * @throws UserConflictException if a new user has the ID of a stored one
      * @throws UserChangedConcurrentlyException if the user was read and has been changed by someone else since
      */
@@ -206,6 +222,7 @@ public class UserService {
         final String previousName =
                 StringUtil.isBlank(user.getId()) ? null : userBhv.selectByPK(user.getId()).map(User::getName).orElse(null);
         if (previousName == null) {
+            refuseMappedNameConflict(user);
             passkeyService.deleteByUserName(username);
         } else if (!hasVersion(user)) {
             // A user that was not read is a new one, and its ID is made from its name, so the stored row is
@@ -215,6 +232,7 @@ public class UserService {
             if (getUserByName(username).filter(other -> !user.getId().equals(other.getId())).isPresent()) {
                 throw new UserConflictException("A user named " + username + " already exists");
             }
+            refuseMappedNameConflict(user);
             passkeyService.deleteByUserName(previousName);
             passkeyService.deleteByUserName(username);
             if (logger.isInfoEnabled()) {
@@ -222,6 +240,122 @@ public class UserService {
                         user.getId());
             }
         }
+    }
+
+    /**
+     * Refuses a new name that collides with another user's, or is a variant of an authentication.admin.users entry, when the policy is mapped.
+     *
+     * <p>Does nothing, and reads nothing from the user index, under the default policy. Under mapped the
+     * stored users are walked in full (a point-in-time scan, with no limit on their number), since no
+     * mapped name is stored to look one up by. The user's own row is skipped, so that a rename that only
+     * changes the case or width of its own name is allowed.</p>
+     *
+     * @param user the user about to be stored, with its new name
+     * @throws UserConflictException if another user has the same mapped name, or the name is a variant of an admin user name
+     */
+    protected void refuseMappedNameConflict(final User user) {
+        if (!ComponentUtil.getFessConfig().isLocalUsernameCaseMapped()) {
+            return;
+        }
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final String username = user.getName();
+        if (systemHelper.isAdminUserNameVariant(username)) {
+            throw new UserConflictException("The name " + username
+                    + " is a variant of a name in authentication.admin.users (compared without regard to case and width)"
+                    + " by authentication.local.username.policy=mapped");
+        }
+        final String mappedName = systemHelper.mapLocalUsername(username);
+        final String id = user.getId();
+        final List<String> collidingNames = new ArrayList<>();
+        userBhv.selectCursor(cb -> cb.query().matchAll(), new EntityRowHandler<User>() {
+            @Override
+            public void handle(final User other) {
+                if (other.getName() != null && !Objects.equals(id, other.getId())
+                        && mappedName.equals(systemHelper.mapLocalUsername(other.getName()))) {
+                    collidingNames.add(other.getName());
+                }
+            }
+
+            @Override
+            public boolean isBreakCursor() {
+                return !collidingNames.isEmpty();
+            }
+        });
+        if (!collidingNames.isEmpty()) {
+            throw new UserConflictException("A user named " + username + " already exists as " + collidingNames.get(0)
+                    + ", and the names are compared without regard to case and width by authentication.local.username.policy=mapped");
+        }
+    }
+
+    /**
+     * Logs one WARN about the stored users whose names the mapped policy would not have let in, when the
+     * policy is mapped: names that collide with another one once mapped, and names that contain whitespace
+     * or control characters (which are easy to confuse with a name without them). Nothing is changed: the
+     * users stay as they are and can still log in and be edited. At most {@value #MAX_REPORTED_NAMES}
+     * collision groups and as many names with whitespace are listed, with the full counts.
+     *
+     * <p>It reads every user, so it is meant for the start of the webapp process. It never throws: a
+     * failure to read the users is logged at debug.</p>
+     *
+     * @return true if the warning was written
+     */
+    public boolean reportLocalUsernameProblems() {
+        try {
+            if (!ComponentUtil.getFessConfig().isLocalUsernameCaseMapped()) {
+                return false;
+            }
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final Map<String, List<String>> namesByMappedName = new LinkedHashMap<>();
+            final List<String> spacedNames = new ArrayList<>();
+            userBhv.selectCursor(cb -> cb.query().matchAll(), other -> {
+                final String name = other.getName();
+                if (name == null) {
+                    return;
+                }
+                namesByMappedName.computeIfAbsent(systemHelper.mapLocalUsername(name), k -> new ArrayList<>()).add(name);
+                if (name.codePoints().anyMatch(c -> Character.isWhitespace(c) || Character.isSpaceChar(c) || Character.isISOControl(c))) {
+                    spacedNames.add(name);
+                }
+            });
+            final List<List<String>> collisions =
+                    namesByMappedName.values().stream().filter(names -> names.size() > 1).collect(Collectors.toList());
+            if (collisions.isEmpty() && spacedNames.isEmpty()) {
+                return false;
+            }
+            logger.warn(
+                    "authentication.local.username.policy=mapped, and the users stored now would not all be accepted by it. Nothing is changed: they can log in and be edited"
+                            + " as before, but a new or renamed user is refused when its name collides. {} group(s) of names are the same once mapped"
+                            + " (first {}: {}). {} name(s) contain whitespace or control characters (first {}: {}).",
+                    collisions.size(), MAX_REPORTED_NAMES,
+                    collisions.stream()
+                            .limit(MAX_REPORTED_NAMES)
+                            .map(names -> names.stream().map(UserService::quoteName).collect(Collectors.joining(" = ")))
+                            .collect(Collectors.joining(", ")),
+                    spacedNames.size(), MAX_REPORTED_NAMES,
+                    spacedNames.stream().limit(MAX_REPORTED_NAMES).map(UserService::quoteName).collect(Collectors.joining(", ")));
+            return true;
+        } catch (final RuntimeException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Could not check the local user names against authentication.local.username.policy.", e);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Writes a user name for a log line: in quotes, with whitespace other than a plain space and control
+     * characters as their {@code \\uXXXX} escape, so that a name with a trailing blank or a line break is visible.
+     */
+    private static String quoteName(final String name) {
+        final StringBuilder buf = new StringBuilder(name.length() + 2).append('"');
+        name.codePoints().forEach(c -> {
+            if (c != ' ' && (Character.isWhitespace(c) || Character.isSpaceChar(c) || Character.isISOControl(c))) {
+                buf.append(String.format("\\u%04X", c));
+            } else {
+                buf.appendCodePoint(c);
+            }
+        });
+        return buf.append('"').toString();
     }
 
     /**

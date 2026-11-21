@@ -194,3 +194,30 @@ the warning about an insecure legacy MD5 hash is still written at each login unt
 Set a new password (at most 72 bytes) to get the full protection. A fresh installation whose
 `index.user.initial_password` is longer than 72 bytes fails to start before it creates the user index, with a
 message naming the property; an installation whose `admin` user already exists only logs a warning.
+
+**New setting `authentication.local.username.policy` (default `preserved`) to refuse local user names that differ
+only in case or width.** Fess compares local user names exactly as typed, as it did in 15.9.0: `Alice`, `alice`
+and `ＡＬＩＣＥ` (full-width letters) are three users, each with its own login. Set the key in `fess_config.properties`
+to `mapped` to refuse such a name when a local user is created or renamed on the admin screen or through the admin API.
+The names are compared after the full-width and half-width forms (such as half-width katakana) and the
+ideographic space are replaced by their decomposition mapping, the case is lowered with the root locale, and
+the result is put in Unicode normalization form C, as RFC 8265 `UsernameCaseMapped` does. A new
+or renamed user is refused when its mapped name is the mapped name of another user, or of an entry of
+`authentication.admin.users` without being that entry as written: `Admin` counts as an administrator when
+`authentication.admin.users.ignore.case` is on, or `auto` with LDAP. So `admin` can still be created (again) while
+`Admin`, `ADMIN` and the full-width spelling are refused. An unknown value is treated as `preserved` and logged once as a warning.
+
+`mapped` only applies this comparison mapping (width, case, normalization) to refuse a collision when a user is
+created or renamed. It does not enforce the character rules of the RFC 8265 profile: a name with spaces, symbols or
+control characters is still accepted, and only the start-up warning lists the stored names that contain
+whitespace or control characters. It does not change login, which still looks a user up by the name exactly as typed,
+the user ID, the stored name, the permission strings made from a name (`{user}Alice` and `{user}alice` in a role
+filter or a document's permissions) or the documents already indexed. A user that is saved under the name it already
+has is never refused, so users that collide today stay editable, and Fess lists up to 20 such groups in one warning
+at start.
+
+The check runs where a user is created or renamed on the admin screen or through the admin API. It is bypassed by
+a backup restore, by the initial `admin` load at first start, and by any direct write to the user index. Two
+administrators creating `Alice` and `alice` at the same moment can both succeed, since no mapped name is stored to
+enforce uniqueness. Folding names at login and in permissions would need a migration of the stored users, roles and
+indexed documents, and is not part of this setting.

@@ -50,6 +50,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.login.LoginManager;
@@ -1958,5 +1959,199 @@ public class SystemHelperTest extends UnitFessTestCase {
         } finally {
             appender.detach();
         }
+    }
+
+    // ---- authentication.local.username.policy=mapped: SystemHelper#mapLocalUsername
+
+    @Test
+    public void test_mapLocalUsername_lowersAsciiCase() {
+        assertEquals("alice", systemHelper.mapLocalUsername("Alice"));
+        assertEquals("alice", systemHelper.mapLocalUsername("ALICE"));
+        assertEquals("alice", systemHelper.mapLocalUsername("alice"));
+        assertEquals("user.name-1_x@example.com", systemHelper.mapLocalUsername("User.Name-1_X@Example.COM"));
+        assertEquals("", systemHelper.mapLocalUsername(""));
+        assertNull(systemHelper.mapLocalUsername(null));
+    }
+
+    @Test
+    public void test_mapLocalUsername_mapsFullwidthLatinDigitsAndSymbols() {
+        // U+FF21..: fullwidth A L I C E, then fullwidth digit one, low line and commercial at
+        assertEquals("alice", systemHelper.mapLocalUsername("\uFF21\uFF2C\uFF29\uFF23\uFF25"));
+        assertEquals("alice", systemHelper.mapLocalUsername("\uFF41\uFF4C\uFF49\uFF43\uFF45"));
+        assertEquals("a1_@b", systemHelper.mapLocalUsername("\uFF21\uFF11\uFF3F\uFF20\uFF22"));
+        assertEquals("a1_@b", systemHelper.mapLocalUsername("A1_@B"));
+        // mixed with ordinary characters
+        assertEquals("alice smith", systemHelper.mapLocalUsername("A\uFF4CICE Smith"));
+        // the other fullwidth signs: cent, pound, not, macron, broken bar, yen, won
+        assertEquals("\u00A2\u00A3\u00AC\u00AF\u00A6\u00A5\u20A9",
+                systemHelper.mapLocalUsername("\uFFE0\uFFE1\uFFE2\uFFE3\uFFE4\uFFE5\uFFE6"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_ideographicSpaceBecomesASpace_andNothingIsTrimmed() {
+        assertEquals("alice smith", systemHelper.mapLocalUsername("Alice\u3000Smith"));
+        assertEquals(systemHelper.mapLocalUsername("Alice Smith"), systemHelper.mapLocalUsername("Alice\u3000Smith"));
+        assertEquals(" alice ", systemHelper.mapLocalUsername("\u3000Alice\u3000"));
+        assertEquals("alice ", systemHelper.mapLocalUsername("Alice "));
+        Assertions.assertNotEquals(systemHelper.mapLocalUsername("alice"), systemHelper.mapLocalUsername("alice "));
+        // another kind of space is not touched
+        assertEquals("a\u00A0b", systemHelper.mapLocalUsername("A\u00A0B"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_everyCharacterOfTheWidthFormsBlockIsMappedByItsDecomposition() {
+        // the table must reach every character the block defines (all of them are fullwidth or halfwidth forms)
+        // and must agree with the Unicode data: the result is compatibility-equivalent to the character itself
+        for (int c = 0xFF00; c <= 0xFFEF; c++) {
+            if (!Character.isDefined(c)) {
+                continue;
+            }
+            final String name = new String(Character.toChars(c));
+            final String mapped = systemHelper.mapLocalUsername(name);
+            final String hex = "U+" + Integer.toHexString(c);
+            Assertions.assertNotEquals(name, mapped, hex + " is a fullwidth or halfwidth form");
+            assertEquals(hex, java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFKC).toLowerCase(Locale.ROOT),
+                    java.text.Normalizer.normalize(mapped, java.text.Normalizer.Form.NFKC));
+            // one step, not NFKC: a single character that is not folded further than the Unicode data does
+            assertEquals(hex, 1, mapped.codePointCount(0, mapped.length()));
+        }
+        // the one-step results that NFKC would carry further
+        assertEquals("\u00AF", systemHelper.mapLocalUsername("\uFFE3")); // fullwidth macron, not a space and a combining macron
+        assertEquals("\u3131", systemHelper.mapLocalUsername("\uFFA1")); // halfwidth hangul kiyeok, not the conjoining jamo
+        assertEquals("\u3164", systemHelper.mapLocalUsername("\uFFA0")); // halfwidth hangul filler
+        // the characters next to the block are not touched
+        assertEquals("\uFEFF", systemHelper.mapLocalUsername("\uFEFF"));
+        assertEquals("\uFFF9", systemHelper.mapLocalUsername("\uFFF9"));
+        assertEquals(" ", systemHelper.mapLocalUsername("\u3000"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_halfwidthKatakanaEqualsFullwidth() {
+        assertEquals("\u30AB", systemHelper.mapLocalUsername("\uFF76"));
+        assertEquals("\u30A2\u30A4\u30A6", systemHelper.mapLocalUsername("\uFF71\uFF72\uFF73"));
+        assertEquals(systemHelper.mapLocalUsername("\u30A2\u30A4\u30A6"), systemHelper.mapLocalUsername("\uFF71\uFF72\uFF73"));
+        // the halfwidth voiced mark becomes the combining mark, which the normalization joins to the kana before it
+        assertEquals("\u30AC\u30AE", systemHelper.mapLocalUsername("\uFF76\uFF9E\uFF77\uFF9E"));
+        assertEquals(systemHelper.mapLocalUsername("\u30AC"), systemHelper.mapLocalUsername("\uFF76\uFF9E"));
+        assertEquals("\u30D1", systemHelper.mapLocalUsername("\uFF8A\uFF9F")); // halfwidth HA and semi-voiced mark
+        // a halfwidth punctuation mark and the halfwidth hangul
+        assertEquals("\u300C\u30FB\u300D", systemHelper.mapLocalUsername("\uFF62\uFF65\uFF63"));
+        assertEquals("\u3131\u314F", systemHelper.mapLocalUsername("\uFFA1\uFFC2"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_japaneseNamesAreUnchanged() {
+        for (final String name : new String[] { "\u5C71\u7530\u592A\u90CE", // Yamada Taro in kanji
+                "\u3084\u307E\u3060", // hiragana
+                "\u30E4\u30DE\u30C0\u30FB\u30BF\u30ED\u30A6" }) { // katakana with a middle dot
+            assertEquals(name, systemHelper.mapLocalUsername(name));
+        }
+        // a Japanese name with Latin letters: only the letters change
+        assertEquals("\u5C71\u7530 taro", systemHelper.mapLocalUsername("\u5C71\u7530 TARO"));
+        assertEquals("\u5C71\u7530taro", systemHelper.mapLocalUsername("\u5C71\u7530\uFF34\uFF21\uFF32\uFF2F"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_composesCombiningAccents() {
+        final String precomposed = "caf\u00E9"; // e with acute
+        final String combining = "cafe\u0301";
+        Assertions.assertNotEquals(precomposed, combining);
+        assertEquals(precomposed, systemHelper.mapLocalUsername(combining));
+        assertEquals(systemHelper.mapLocalUsername(precomposed), systemHelper.mapLocalUsername(combining));
+        // a capital with a combining accent is lowered and composed too
+        assertEquals(precomposed, systemHelper.mapLocalUsername("CAFE\u0301"));
+        // Hangul syllable written as jamo is composed
+        assertEquals("\uD55C", systemHelper.mapLocalUsername("\u1112\u1161\u11AB"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_dottedCapitalIDoesNotCollideWithPlainI() {
+        // U+0130 lower-cases to i followed by U+0307 (combining dot above), not to i
+        final String mapped = systemHelper.mapLocalUsername("\u0130stanbul");
+        assertEquals("i\u0307stanbul", mapped);
+        Assertions.assertNotEquals(systemHelper.mapLocalUsername("Istanbul"), mapped);
+        assertEquals("istanbul", systemHelper.mapLocalUsername("ISTANBUL"));
+        // the dotless small i is a letter of its own
+        assertEquals("\u0131", systemHelper.mapLocalUsername("\u0131"));
+    }
+
+    @Test
+    public void test_mapLocalUsername_doesNotDependOnTheDefaultLocale() {
+        final Locale original = Locale.getDefault();
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+        try {
+            // with the Turkish locale String#toLowerCase would turn I into the dotless small i
+            assertEquals("\u0131", "I".toLowerCase());
+            assertEquals("i", systemHelper.mapLocalUsername("I"));
+            assertEquals("istanbul", systemHelper.mapLocalUsername("ISTANBUL"));
+            assertEquals("i\u0307", systemHelper.mapLocalUsername("\u0130"));
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
+    @Test
+    public void test_mapLocalUsername_doesNotApplyCompatibilityFoldingToOtherCharacters() {
+        // not NFKC: ligatures, circled digits, superscripts and the ohm sign are not folded to letters
+        assertEquals("\uFB01", systemHelper.mapLocalUsername("\uFB01")); // fi ligature
+        assertEquals("\u2460", systemHelper.mapLocalUsername("\u2460")); // circled digit one
+        assertEquals("\u00B2", systemHelper.mapLocalUsername("\u00B2")); // superscript two
+        assertEquals("\u00DF", systemHelper.mapLocalUsername("\u00DF")); // sharp s
+    }
+
+    @Test
+    public void test_mapLocalUsername_isIdempotent() {
+        for (final String name : new String[] { "Alice", "\uFF21\uFF4C\u0130", "CAFE\u0301", "\uFF76\uFF9E", "\u5C71\u7530\u3000TARO" }) {
+            final String once = systemHelper.mapLocalUsername(name);
+            assertEquals(once, systemHelper.mapLocalUsername(once));
+        }
+    }
+
+    // ---- authentication.local.username.policy=mapped: SystemHelper#isAdminUserNameVariant
+
+    private void useAdminUsers(final String adminUsers) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAuthenticationAdminUsers() {
+                return adminUsers;
+            }
+        });
+    }
+
+    @Test
+    public void test_isAdminUserNameVariant_guestIsAnOrdinaryName() {
+        useAdminUsers("admin");
+        assertFalse(systemHelper.isAdminUserNameVariant("guest"));
+        assertFalse(systemHelper.isAdminUserNameVariant("Guest"));
+        assertFalse(systemHelper.isAdminUserNameVariant("\uFF47\uFF55\uFF45\uFF53\uFF54"));
+    }
+
+    @Test
+    public void test_isAdminUserNameVariant_adminEntryItselfIsAllowedAndItsVariantsAreNot() {
+        useAdminUsers("admin");
+        assertFalse(systemHelper.isAdminUserNameVariant("admin"));
+        assertTrue(systemHelper.isAdminUserNameVariant("Admin"));
+        assertTrue(systemHelper.isAdminUserNameVariant("ADMIN"));
+        assertTrue(systemHelper.isAdminUserNameVariant("\uFF41\uFF44\uFF4D\uFF49\uFF4E"));
+        assertFalse(systemHelper.isAdminUserNameVariant("admin2"));
+        assertFalse(systemHelper.isAdminUserNameVariant("admi"));
+        assertFalse(systemHelper.isAdminUserNameVariant("admin "));
+    }
+
+    @Test
+    public void test_isAdminUserNameVariant_adminEntriesAreSplitTrimmedAndBlankFree() {
+        useAdminUsers(" admin , Root ,, operator,");
+        // each entry, as written (trimmed), is allowed; any other spelling is not
+        assertFalse(systemHelper.isAdminUserNameVariant("admin"));
+        assertFalse(systemHelper.isAdminUserNameVariant("Root"));
+        assertFalse(systemHelper.isAdminUserNameVariant("operator"));
+        assertTrue(systemHelper.isAdminUserNameVariant("ADMIN"));
+        assertTrue(systemHelper.isAdminUserNameVariant("root"));
+        assertTrue(systemHelper.isAdminUserNameVariant("Operator"));
+        assertFalse(systemHelper.isAdminUserNameVariant("admin2"));
+        // a blank entry reserves nothing, not even the empty name
+        assertFalse(systemHelper.isAdminUserNameVariant(""));
     }
 }
