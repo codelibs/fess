@@ -233,6 +233,41 @@ public class ActivityHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_sessionEnd() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.sessionEnd(createUser("testuser", new String[] { "111" }), "password_changed");
+        assertEquals("action:SESSION_END\tuser:testuser\treason:password_changed", localLogMsg.get());
+
+        activityHelper.sessionEnd(OptionalThing.empty(), null);
+        assertEquals("action:SESSION_END\tuser:-\treason:-", localLogMsg.get());
+    }
+
+    @Test
+    public void test_sessionEnd_isNotALogout() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.sessionEnd(createUser("testuser", new String[0]), "user_deleted");
+        assertFalse(localLogMsg.get().contains("action:LOGOUT"));
+    }
+
+    @Test
+    public void test_sessionEnd_userNameCannotForgeARecord() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.sessionEnd(createUser("x\naction:LOGIN\tuser:admin\u2028y\u0085z", new String[0]), "user_deleted");
+        final String msg = localLogMsg.get();
+        assertEquals("action:SESSION_END\tuser:x action:LOGIN_user:admin y z\treason:user_deleted", msg);
+        assertEquals(1, msg.lines().count());
+    }
+
+    @Test
+    public void test_sessionEnd_ecs() {
+        activityHelper.useEcsFormat = true;
+        activityHelper.sessionEnd(createUser("testuser", new String[0]), "idp_session_ended");
+        assertEquals(
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"SESSION_END\",\"labels.user\":\"testuser\",\"labels.reason\":\"idp_session_ended\"}",
+                localLogMsg.get());
+    }
+
+    @Test
     public void test_logout_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.logout(OptionalThing.empty());

@@ -177,6 +177,20 @@ public class ActivityHelper {
     }
 
     /**
+     * Log a login session that Fess ended, as opposed to one the user ended with a logout.
+     * It is a separate action so that it is not read as a user logout.
+     * @param user The user whose session was ended.
+     * @param reason Why the session was ended.
+     */
+    public void sessionEnd(final OptionalThing<FessUserBean> user, final String reason) {
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.SESSION_END.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("reason", reason != null ? reason : "-");
+        log(valueMap);
+    }
+
+    /**
      * Log the access activity.
      * @param user The user.
      * @param path The path.
@@ -446,6 +460,10 @@ public class ActivityHelper {
          * The logout action.
          */
         LOGOUT,
+        /**
+         * The action of a login session that Fess ended.
+         */
+        SESSION_END,
         /**
          * The access action.
          */

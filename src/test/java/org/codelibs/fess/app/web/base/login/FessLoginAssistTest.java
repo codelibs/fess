@@ -27,6 +27,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.crypto.bcrypt.BCrypt;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.PasswordHashHelper;
+import org.codelibs.fess.helper.RecordingActivityHelper;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -57,6 +58,8 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
     private CountingPasswordHashHelper countingPm;
 
+    private RecordingActivityHelper audit;
+
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -68,6 +71,9 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         // Register PasswordHashHelper and (by default) a no-op UserService.
         ComponentUtil.register(countingPm, "passwordHashHelper");
         ComponentUtil.register(new RecordingUserService(), UserService.class.getCanonicalName());
+
+        audit = new RecordingActivityHelper();
+        ComponentUtil.register(audit, "activityHelper");
 
         loginAssist = new StubUserBhvLoginAssist();
     }
@@ -548,6 +554,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -560,6 +567,8 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertFalse(assist.callSyncCheckLoginSession(bean));
         assertEquals(1, bhv.selectCalls.get());
         assertEquals(1, assist.logoutCalls.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:user_deleted", audit.sessionEnds.get(0));
     }
 
     @Test
@@ -572,6 +581,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(1, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -586,6 +596,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -601,6 +612,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     // ---------------------------------------------------------------------
