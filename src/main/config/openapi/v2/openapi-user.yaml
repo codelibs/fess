@@ -47,10 +47,12 @@ info:
     **Login requirement.** When the administrator enables `login.required`,
     every endpoint answers `401 auth_required` unless the request carries an
     authenticated session. Only `GET /health`, `GET /auth/me`,
-    `POST /auth/login`, `POST /auth/logout` and `GET /ui/config` stay
-    reachable, so that a client can still probe the service and complete the
-    login flow. The policy is default-deny: an endpoint introduced later is
-    gated until it is listed as reachable before login. While
+    `POST /auth/login`, `POST /auth/passkey/login/options`,
+    `POST /auth/passkey/login/verify`, `POST /auth/logout` and
+    `GET /ui/config` stay reachable, so that a client can still probe the
+    service and complete the login flow, with a password or a passkey. The
+    policy is default-deny: an endpoint introduced later is gated until it is
+    listed as reachable before login. While
     `login.required` is disabled — the default — no endpoint returns
     `401 auth_required` on this ground, and the individual `401` responses
     documented below apply only to the endpoints that require a user
