@@ -31,6 +31,7 @@ import org.codelibs.fess.exception.UserConflictException;
 import org.codelibs.fess.helper.PasswordHashHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -48,7 +49,9 @@ import jakarta.servlet.http.HttpSession;
  * {@code 400 invalid_request}, when wrong the response is
  * {@code 401 auth_required}. The new password is validated against the
  * system's password policy ({@code SystemHelper#validatePassword}), and the
- * actual store is delegated to {@link UserService#changePassword}.
+ * actual store is delegated to {@link UserService#changePassword(String, String, String)}, which
+ * writes only while the stored password is still the verified {@code current_password}: when
+ * another request has changed it in between, the response is {@code 409 conflict}.
  * Confirm-password mismatch and a blank new password both yield
  * {@code 400 invalid_request}.</p>
  *
@@ -307,11 +310,17 @@ public class PasswordChangeHandler {
             return;
         }
         try {
-            ComponentUtil.getComponent(UserService.class).changePassword(userId, newPw);
+            // Only a local user has a stored hash that current_password was verified against. A directory
+            // (LDAP) login succeeds without consulting it, and the local row of that name may hold another hash.
+            final String verifiedLocalPassword = verified.get() instanceof User ? currentPw : null;
+            ComponentUtil.getComponent(UserService.class).changePassword(userId, verifiedLocalPassword, newPw);
         } catch (final UserConflictException e) {
-            // the user was changed by someone else on each of the attempts of changePassword: nothing was written, so the client can simply retry
+            // the stored password is no longer current_password (another request changed it), or the user was changed by someone
+            // else on each of the attempts of changePassword: the local hash was not written
             logger.warn("[v2/password] the user was changed concurrently: userId={}", userId);
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.CONFLICT, "the user was changed concurrently; retry");
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeError(res, V2ErrorCode.CONFLICT,
+                            "the password or the user was changed concurrently; check the current password and retry");
             return;
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password changePassword");

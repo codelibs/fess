@@ -226,17 +226,54 @@ public class UserService {
      * Changes the password for a user identified by username.
      * Updates both the authentication manager and the database with the new encrypted password.
      *
+     * <p>The caller has not verified a current password (the user has just been authenticated another way,
+     * for a password the user was told to change, say). Use {@link #changePassword(String, String, String)}
+     * when the current password was verified, so that two requests cannot both succeed with it.</p>
+     *
      * @param username the username of the user
      * @param password the new password in plain text
      * @throws FessUserNotFoundException if the user is not found
      * @throws UserConflictException if the user was changed concurrently on each of the attempts
      */
     public void changePassword(final String username, final String password) {
+        changePassword(username, null, password);
+    }
+
+    /**
+     * Changes the password of a user whose current password the caller has just verified, on the condition
+     * that the stored password is still that one.
+     *
+     * <p>Two requests that verify the same current password at the same time must not both succeed: the
+     * second one's current password is no longer the stored one once the first has been written. So the
+     * stored password is compared with {@code currentPassword} once before the authentication manager is
+     * asked to change the password (a stale request is refused before it touches LDAP), and again on every
+     * attempt of the conditional write, on the user that attempt has just read. The comparison is made
+     * with {@link org.codelibs.fess.helper.PasswordHashHelper#matches}, not by comparing hash strings, so
+     * a retry caused by a change that leaves the password alone (the sessions of the user being ended, a
+     * re-hash at login that changes only the hash format, a passkey change) still succeeds.</p>
+     *
+     * <p>The authentication manager (LDAP) and the user index are two writes that are not atomic. When the
+     * conflict is found after the authentication manager has changed the password, that change is not
+     * undone: the external password is the new one while the local hash is not.</p>
+     *
+     * @param username the username of the user
+     * @param currentPassword the current password in plain text, which the caller has verified
+     * @param password the new password in plain text
+     * @throws FessUserNotFoundException if the user is not found
+     * @throws UserConflictException if the stored password is no longer the current password, or the user was
+     *         changed concurrently on each of the attempts
+     */
+    public void changePassword(final String username, final String currentPassword, final String password) {
         if (logger.isDebugEnabled()) {
             logger.debug("Password change initiated for user: username={}", username);
         }
 
         try {
+            if (currentPassword != null) {
+                // refuse a stale request before the authentication manager is asked to change anything
+                userBhv.selectEntity(cb -> cb.query().setName_Equal(username))
+                        .ifPresent(u -> verifyCurrentPassword(username, currentPassword, u));
+            }
             final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
             if (changed) {
                 final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
@@ -249,6 +286,9 @@ public class UserService {
                         throw new FessUserNotFoundException(username);
                     }
                     final User entity = found.get();
+                    if (currentPassword != null) {
+                        verifyCurrentPassword(username, currentPassword, entity);
+                    }
                     entity.setPassword(encodedPassword);
                     final long passwordChangedAt = nextPasswordChangedAt(entity);
                     entity.setPasswordChangedAt(passwordChangedAt);
@@ -271,6 +311,21 @@ public class UserService {
         } catch (final Exception e) {
             logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
             throw e;
+        }
+    }
+
+    /**
+     * Refuses the change when the stored password of the user is no longer the one the caller verified.
+     *
+     * @param username the username of the user
+     * @param currentPassword the current password in plain text
+     * @param stored the user as just read
+     * @throws UserConflictException if the stored password does not match {@code currentPassword}
+     */
+    private void verifyCurrentPassword(final String username, final String currentPassword, final User stored) {
+        if (!ComponentUtil.getPasswordHashHelper().matches(currentPassword, stored.getPassword())) {
+            throw new UserConflictException(
+                    "The password of the user was changed concurrently, so it was not changed again: username=" + username);
         }
     }
 

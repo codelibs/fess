@@ -858,6 +858,10 @@ paths:
         to the login page. Because the session is destroyed server-side,
         no `csrf_token` is returned; the SPA must obtain a fresh token
         after re-authenticating.
+
+        When another request has changed the password after `current_password`
+        was verified (two requests with the same `current_password` sent at
+        once), the later one answers `conflict` (409) and does not change it.
       operationId: authPasswordV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -878,6 +882,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '429': { $ref: '#/components/responses/RateLimited' }
@@ -1704,7 +1709,8 @@ components:
     Conflict:
       description: |-
         The request conflicts with the current state (e.g. a tag of the name
-        already exists, or the tag kept changing concurrently).
+        already exists, the tag kept changing concurrently, or the resource
+        or password was changed concurrently).
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorEnvelope' }

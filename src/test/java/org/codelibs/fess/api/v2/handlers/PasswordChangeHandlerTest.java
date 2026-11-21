@@ -867,13 +867,52 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_directoryUser_isNotComparedWithTheLocalHash() throws Exception {
+        // A directory (LDAP) login succeeds without consulting the local row of that name, which may hold another
+        // hash: the stale-password check of changePassword must not be asked to compare against it, or every
+        // change of such a user would be refused with 409.
+        registerStubLoginAssist("alice", "secret-current");
+        final String[] seenCurrent = { "unset" };
+        final org.codelibs.fess.app.service.UserService service = new org.codelibs.fess.app.service.UserService() {
+            @Override
+            public void changePassword(final String username, final String currentPassword, final String password) {
+                seenCurrent[0] = currentPassword;
+            }
+        };
+        ComponentUtil.register(service, "userService");
+        ComponentUtil.register(service, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            assertEquals(200, res.status, res.body());
+            assertNull(seenCurrent[0]);
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void passwordChange_concurrentUserChange_returns409() throws Exception {
         // changePassword gives up with UserConflictException when the user was changed by someone else on every
         // attempt. Nothing was written, so the client is told to retry (409), not that the server failed (500).
-        registerStubLoginAssist("alice", "secret-current");
+        registerStubLoginAssist("alice", "secret-current").asLocalUser();
+        final String[] seenCurrent = { null };
         final org.codelibs.fess.app.service.UserService conflicting = new org.codelibs.fess.app.service.UserService() {
             @Override
-            public void changePassword(final String username, final String password) {
+            public void changePassword(final String username, final String currentPassword, final String password) {
+                seenCurrent[0] = currentPassword;
                 throw new org.codelibs.fess.exception.UserConflictException("changed concurrently");
             }
         };
@@ -895,6 +934,8 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
             assertEquals(409, res.status, res.body());
             assertTrue(res.body().contains("\"code\":\"conflict\""), res.body());
+            // the verified current password goes to the service, which compares it with the stored one on every attempt
+            assertEquals("secret-current", seenCurrent[0]);
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.setFessLoginAssist(new FessLoginAssist());
@@ -1200,6 +1241,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         private final String userId;
         private final String expectedPw;
         private transient Runnable concurrentRequest = () -> {};
+        private boolean localUser = false;
 
         StubFessLoginAssist(final String userId, final String expectedPw) {
             this.userId = userId;
@@ -1216,6 +1258,17 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
          * @param hook action simulating a request that arrives during password verification
          * @return this stub (fluent)
          */
+        /**
+         * Makes {@link #findLoginUser} answer with a local user ({@code fess_user} row), as a login
+         * that was verified against the stored hash does, instead of a directory-style user.
+         *
+         * @return this stub (fluent)
+         */
+        StubFessLoginAssist asLocalUser() {
+            this.localUser = true;
+            return this;
+        }
+
         StubFessLoginAssist withConcurrentRequestDuringVerification(final Runnable hook) {
             this.concurrentRequest = hook;
             return this;
@@ -1232,6 +1285,11 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             concurrentRequest.run();
             // The handler always passes a LocalUserCredential; defensive-cast and check.
             if (credential instanceof final LocalUserCredential local && expectedPw.equals(local.getPassword())) {
+                if (localUser) {
+                    final org.codelibs.fess.opensearch.user.exentity.User u = new org.codelibs.fess.opensearch.user.exentity.User();
+                    u.setName(local.getUserId());
+                    return OptionalEntity.of(u);
+                }
                 return OptionalEntity.of(new StubFessUser(local.getUserId()));
             }
             return OptionalEntity.empty();
@@ -1316,7 +1374,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         }
 
         @Override
-        public void changePassword(final String username, final String password) {
+        public void changePassword(final String username, final String currentPassword, final String password) {
             changedCalled[0] = true;
         }
     }

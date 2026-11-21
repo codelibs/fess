@@ -47,6 +47,8 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
 
     private final List<String> accepted = new ArrayList<>();
 
+    private final List<String> ldapChanged = new ArrayList<>();
+
     private User stored;
 
     @Override
@@ -83,6 +85,12 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
             public String encode(final String rawPassword) {
                 return "{bcrypt}" + rawPassword;
             }
+
+            @Override
+            public boolean matches(final String rawPassword, final String storedPassword) {
+                // the hash format is not part of the comparison, as with the real helper
+                return storedPassword != null && storedPassword.replaceFirst("^\\{[^}]*\\}", "").equals(rawPassword);
+            }
         }, "passwordHashHelper");
         ComponentUtil.register(new AuthenticationManager() {
             @Override
@@ -91,6 +99,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
 
             @Override
             public boolean changePassword(final String username, final String password) {
+                ldapChanged.add(username);
                 return true;
             }
         }, "authenticationManager");
@@ -220,6 +229,135 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         assertEquals(1, written.size());
         assertEquals("{bcrypt}new-password", written.get(0).getPassword());
         assertEquals(1, accepted.size());
+    }
+
+    @Test
+    public void test_changePassword_withCurrentPassword_changesWhenItStillMatches() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}old"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                written.add(entity);
+            }
+        };
+
+        userService.changePassword("alice", "old", "new-password");
+
+        assertEquals(List.of("alice"), ldapChanged);
+        assertEquals(1, written.size());
+        assertEquals("{bcrypt}new-password", written.get(0).getPassword());
+        assertEquals(1, accepted.size());
+    }
+
+    @Test
+    public void test_changePassword_withCurrentPassword_staleIsRefusedBeforeLdapAndNothingIsWritten() {
+        // the stored password was changed after the caller verified "old"
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}changed"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                written.add(entity);
+            }
+        };
+
+        try {
+            userService.changePassword("alice", "old", "new-password");
+            fail();
+        } catch (final UserConflictException e) {
+            assertFalse(e.getMessage().contains("old"), e.getMessage());
+            assertFalse(e.getMessage().contains("new-password"), e.getMessage());
+        }
+        assertTrue(ldapChanged.isEmpty());
+        assertTrue(written.isEmpty());
+        assertTrue(accepted.isEmpty());
+    }
+
+    @Test
+    public void test_changePassword_withCurrentPassword_staleFoundInTheLoopIsRefusedAndNothingIsWritten() {
+        // another request changes the password after the first read (the one before the external change)
+        // and the write of this request loses the race: the retry re-reads the changed user
+        final int[] reads = { 0 };
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(versioned("alice", reads[0]++ < 2 ? "{bcrypt}old" : "{bcrypt}changed"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                if (written.isEmpty() && reads[0] == 2) {
+                    throw new RuntimeException("type=version_conflict_engine_exception");
+                }
+                written.add(entity);
+            }
+        };
+
+        try {
+            userService.changePassword("alice", "old", "new-password");
+            fail();
+        } catch (final UserConflictException e) {
+            // expected
+        }
+        assertEquals(3, reads[0]);
+        assertTrue(written.isEmpty());
+        assertTrue(accepted.isEmpty());
+        // the external change is not undone: that is the documented gap between the two writes
+        assertEquals(List.of("alice"), ldapChanged);
+    }
+
+    @Test
+    public void test_changePassword_withCurrentPassword_retryAfterAnUnrelatedChangeSucceeds() {
+        // the document is bumped between the read and the write, but the password is still the one that was
+        // verified (only its hash format differs): the change goes through
+        final int[] reads = { 0 };
+        final int[] updates = { 0 };
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(versioned("alice", reads[0]++ < 2 ? "{bcrypt}old" : "{bcrypt-rehashed}old"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                if (updates[0]++ == 0) {
+                    throw new RuntimeException("type=version_conflict_engine_exception");
+                }
+                written.add(entity);
+            }
+        };
+
+        userService.changePassword("alice", "old", "new-password");
+
+        assertEquals(2, updates[0]);
+        assertEquals(1, written.size());
+        assertEquals("{bcrypt}new-password", written.get(0).getPassword());
+        assertEquals(1, accepted.size());
+    }
+
+    @Test
+    public void test_changePassword_withCurrentPassword_userNotFound() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.empty();
+            }
+        };
+
+        try {
+            userService.changePassword("alice", "old", "new-password");
+            fail();
+        } catch (final org.codelibs.fess.exception.FessUserNotFoundException e) {
+            // expected
+        }
+        assertTrue(written.isEmpty());
     }
 
     @Test
