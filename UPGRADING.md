@@ -119,8 +119,9 @@ named in Japanese or with full-width letters is still accepted.
 admin screens and the admin API, an entry that has a zero-width space, a byte order mark or a control
 character where the `(allow)` / `(deny)` prefix or the name starts, such as `(deny)<U+200B>{user}name`, is
 rejected with a message asking to delete the character. Such a character is usually pasted in with the text.
-Until 15.9 the entry was saved without a word: a deny was dropped, so the document stayed visible to the
-person it was meant to be hidden from. A character of this kind inside a name is not refused.
+Until now such an entry was saved without a word, as a plain value that matches nobody, or dropped, so a deny
+that was meant to hide a document had no effect. A character of this kind inside a name, or at its end, is not
+refused.
 
 **An admin user edit form that is out of date is refused.** The edit form of a user now carries the version of
 the stored user. If the user was changed after the form was shown (by another administrator, by the user, or

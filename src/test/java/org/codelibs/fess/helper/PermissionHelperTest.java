@@ -629,6 +629,8 @@ public class PermissionHelperTest extends UnitFessTestCase {
         // the same character at the start of the name, after the marker
         assertTrue(permissionHelper.isInvisibleLeadEntry("(deny){user}\u200Bbob"));
         assertTrue(permissionHelper.isInvisibleLeadEntry("{role}\uFEFFadmin"));
+        // a tab right after the marker is a control character as well
+        assertTrue(permissionHelper.isInvisibleLeadEntry("{role}\tadmin"));
         // a control character that strip() keeps
         assertTrue(permissionHelper.isInvisibleLeadEntry("(deny)\u0085{user}bob"));
         assertTrue(permissionHelper.isInvisibleLeadEntry("(deny)\u0000{user}bob"));
