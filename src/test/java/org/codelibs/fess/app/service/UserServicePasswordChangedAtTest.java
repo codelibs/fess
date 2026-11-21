@@ -71,7 +71,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
             }
 
             @Override
-            public void insertOrUpdate(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
                 written.add(entity);
             }
 
@@ -394,8 +394,8 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
             }
 
             @Override
-            public void insertOrUpdate(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
-                calls.add("insertOrUpdate");
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                calls.add("insert");
             }
 
             @Override
@@ -448,8 +448,8 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
             }
 
             @Override
-            public void insertOrUpdate(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
-                calls.add("insertOrUpdate");
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                calls.add("insert");
             }
 
             @Override
@@ -463,7 +463,7 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
 
         userService.store(created);
 
-        assertEquals(List.of("insertOrUpdate"), calls);
+        assertEquals(List.of("insert"), calls);
     }
 
     @Test
