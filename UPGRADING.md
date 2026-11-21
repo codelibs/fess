@@ -115,6 +115,13 @@ Japanese keyboard types them) is rejected with a message asking for the half-wid
 deny that was meant to hide a document had no effect. The name after the marker is not changed, so a role
 named in Japanese or with full-width letters is still accepted.
 
+**A permission entry that starts with an invisible character is refused.** On the permission field of the
+admin screens and the admin API, an entry that has a zero-width space, a byte order mark or a control
+character where the `(allow)` / `(deny)` prefix or the name starts, such as `(deny)<U+200B>{user}name`, is
+rejected with a message asking to delete the character. Such a character is usually pasted in with the text.
+Until 15.9 the entry was saved without a word: a deny was dropped, so the document stayed visible to the
+person it was meant to be hidden from. A character of this kind inside a name is not refused.
+
 **An admin user edit form that is out of date is refused.** The edit form of a user now carries the version of
 the stored user. If the user was changed after the form was shown (by another administrator, by the user, or
 by the deletion of a role or group the user had), saving the form shows "The user was changed by someone else.
