@@ -145,7 +145,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
         assertEquals(1, audit.sessionEnds.size());
-        assertEquals("alice:user_deleted", audit.sessionEnds.get(0));
+        assertEquals("alice:user_not_found", audit.sessionEnds.get(0));
         assertNull(assist.session);
     }
 
@@ -167,7 +167,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
         assertEquals(1, audit.sessionEnds.size());
-        assertEquals("admin:user_deleted", audit.sessionEnds.get(0));
+        assertEquals("admin:user_not_found", audit.sessionEnds.get(0));
     }
 
     @Test
@@ -411,6 +411,49 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     public void test_acceptPasswordChange_withoutSession_doesNotFail() {
         assist.acceptPasswordChange("alice", 2000L);
         assertEquals(0, assist.saved.get());
+    }
+
+    // ---------------------------------------------------------------------
+    // one record for one ended session, however many requests see it
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_endSession_secondRequestWithThePreLogoutBeanWritesNoRecord() {
+        final FessUserBean bean = assist.createUserBean(localUser("alice", 500L));
+        assist.session = bean;
+
+        assist.endSession(bean, "password_changed");
+        assist.endSession(bean, "password_changed"); // another request that read the bean before the logout
+
+        assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+    }
+
+    @Test
+    public void test_endSession_parallelRequestsWriteOneRecord() throws Exception {
+        final FessUserBean bean = assist.createUserBean(localUser("alice", 500L));
+        assist.session = bean;
+        final int threads = 8;
+        final java.util.concurrent.CyclicBarrier start = new java.util.concurrent.CyclicBarrier(threads);
+        final java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        try {
+            final java.util.List<java.util.concurrent.Future<?>> futures = new java.util.ArrayList<>();
+            for (int i = 0; i < threads; i++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    assist.endSession(bean, "password_changed");
+                    return null;
+                }));
+            }
+            for (final java.util.concurrent.Future<?> future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
     }
 
     // ---------------------------------------------------------------------

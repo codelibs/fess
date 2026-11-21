@@ -74,8 +74,23 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     /** The reason written to the audit log when the password was changed after the session was opened. */
     protected static final String SESSION_END_PASSWORD_CHANGED = "password_changed";
 
-    /** The reason written to the audit log when the document of the local user was deleted. */
-    protected static final String SESSION_END_USER_DELETED = "user_deleted";
+    /**
+     * The reason written to the audit log when the document of the local user is not found by the name of the
+     * session, because it was deleted or the user was renamed.
+     */
+    protected static final String SESSION_END_USER_NOT_FOUND = "user_not_found";
+
+    /**
+     * The locks that make the audit record of an ended session be written by one request only. A lock is taken
+     * by the hash of the session ID, so that two requests of a session meet at the same lock.
+     */
+    private static final Object[] SESSION_END_LOCKS = new Object[64];
+
+    static {
+        for (int i = 0; i < SESSION_END_LOCKS.length; i++) {
+            SESSION_END_LOCKS[i] = new Object();
+        }
+    }
 
     /**
      * Default constructor.
@@ -313,30 +328,74 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
 
     /**
      * Ends the login session that Fess ended on its own and writes the audit record of it.
-     * A logout the user asked for is recorded by the logout action, not here.
+     * A logout the user asks for is recorded by the logout action, not here.
+     *
+     * <p>Requests of one session can reach this at the same time, each with the user bean it read before the
+     * session ended. The session is looked at again under a lock that the requests of a session share, and only
+     * the request that still finds it ends it and writes the record. The lock is held in this node, so on a
+     * session that several nodes share, a request of another node can still write a second record.</p>
      *
      * @param userBean the user bean of the session that is ended
      * @param reason why the session is ended, one of the {@code SESSION_END_*} constants
      */
     protected void endSession(final FessUserBean userBean, final String reason) {
-        logout();
-        ComponentUtil.getActivityHelper().sessionEnd(OptionalThing.of(userBean), reason);
+        synchronized (getSessionEndLock()) {
+            if (!hasSession()) {
+                return; // another request ended it first and wrote the record
+            }
+            logout();
+            ComponentUtil.getActivityHelper().sessionEnd(OptionalThing.of(userBean), reason);
+        }
+    }
+
+    /**
+     * Gets the lock for the session of the request, see {@link #endSession(FessUserBean, String)}.
+     *
+     * @return the lock
+     */
+    protected Object getSessionEndLock() {
+        final String id = LaRequestUtil.getOptionalRequest().map(request -> request.getSession(false)).map(session -> {
+            try {
+                return session.getId();
+            } catch (final IllegalStateException e) {
+                return null; // invalidated meanwhile
+            }
+        }).orElse(null);
+        return SESSION_END_LOCKS[id == null ? 0 : (id.hashCode() & Integer.MAX_VALUE) % SESSION_END_LOCKS.length];
+    }
+
+    /**
+     * Tells whether the request still has a login session.
+     *
+     * @return true if there is a user bean in the session
+     */
+    protected boolean hasSession() {
+        try {
+            return getSessionUserBeanUnchecked().isPresent();
+        } catch (final IllegalStateException e) {
+            return false; // invalidated meanwhile
+        }
     }
 
     /**
      * Ends the login session when the sync check finds that the local user can no longer log in, that is,
-     * the user document was deleted.
+     * the user document is not found by the name of the session. The check ends the session itself, so the
+     * record is written here, by the request that still found the session when the check started
+     * (see {@link #endSession(FessUserBean, String)}).
      *
      * @param userBean the user bean of the session
      * @return true if the session is still valid
      */
     @Override
     protected boolean syncCheckLoginSessionIfNeeds(final FessUserBean userBean) {
-        final boolean valid = super.syncCheckLoginSessionIfNeeds(userBean);
-        if (!valid) {
-            ComponentUtil.getActivityHelper().sessionEnd(OptionalThing.of(userBean), SESSION_END_USER_DELETED);
+        synchronized (getSessionEndLock()) {
+            final boolean present = hasSession();
+            final boolean valid = super.syncCheckLoginSessionIfNeeds(userBean);
+            if (!valid && present) {
+                ComponentUtil.getActivityHelper().sessionEnd(OptionalThing.of(userBean), SESSION_END_USER_NOT_FOUND);
+            }
+            return valid;
         }
-        return valid;
     }
 
     /**
@@ -371,7 +430,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      *
      * @param userBean the user bean of the session
      * @return the reason the session ends ({@link #SESSION_END_PASSWORD_CHANGED} when it was opened before the
-     *         latest password change, {@link #SESSION_END_USER_DELETED} when the local user was deleted), or null
+     *         latest password change, {@link #SESSION_END_USER_NOT_FOUND} when the document of the local user is not found), or null
      */
     protected String findUserIndexEndReason(final FessUserBean userBean) {
         final Long remembered = userBean.getPasswordChangedAt();
@@ -400,7 +459,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
         if (changedAt.isEmpty()) {
             // The document of the user is gone. Only a local user has one to lose: for any other user the
             // identity provider, not the user index, owns the account.
-            return userBean.getFessUser() instanceof User ? SESSION_END_USER_DELETED : null;
+            return userBean.getFessUser() instanceof User ? SESSION_END_USER_NOT_FOUND : null;
         }
         return changedAt.getAsLong() > threshold ? SESSION_END_PASSWORD_CHANGED : null;
     }

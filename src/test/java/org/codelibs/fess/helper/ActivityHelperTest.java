@@ -245,16 +245,16 @@ public class ActivityHelperTest extends UnitFessTestCase {
     @Test
     public void test_sessionEnd_isNotALogout() {
         activityHelper.useEcsFormat = false;
-        activityHelper.sessionEnd(createUser("testuser", new String[0]), "user_deleted");
+        activityHelper.sessionEnd(createUser("testuser", new String[0]), "user_not_found");
         assertFalse(localLogMsg.get().contains("action:LOGOUT"));
     }
 
     @Test
     public void test_sessionEnd_userNameCannotForgeARecord() {
         activityHelper.useEcsFormat = false;
-        activityHelper.sessionEnd(createUser("x\naction:LOGIN\tuser:admin\u2028y\u0085z", new String[0]), "user_deleted");
+        activityHelper.sessionEnd(createUser("x\naction:LOGIN\tuser:admin\u2028y\u0085z", new String[0]), "user_not_found");
         final String msg = localLogMsg.get();
-        assertEquals("action:SESSION_END\tuser:x action:LOGIN_user:admin y z\treason:user_deleted", msg);
+        assertEquals("action:SESSION_END\tuser:x action:LOGIN_user:admin y z\treason:user_not_found", msg);
         assertEquals(1, msg.lines().count());
     }
 

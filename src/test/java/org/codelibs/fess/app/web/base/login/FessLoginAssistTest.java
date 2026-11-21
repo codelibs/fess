@@ -563,12 +563,30 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         final CountingUserBhv bhv = installCountingUserBhv(assist, null); // the document is gone
         final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
         bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+        assist.session = bean;
 
         assertFalse(assist.callSyncCheckLoginSession(bean));
         assertEquals(1, bhv.selectCalls.get());
         assertEquals(1, assist.logoutCalls.get());
         assertEquals(1, audit.sessionEnds.size());
-        assertEquals("alice:user_deleted", audit.sessionEnds.get(0));
+        assertEquals("alice:user_not_found", audit.sessionEnds.get(0));
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_localUserDeleted_secondRequestOfTheEndedSessionWritesNoRecord() {
+        final ExposedLoginAssist assist = newExposedAssist();
+        installCountingUserBhv(assist, null); // the document is gone
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+        assist.session = bean;
+        // a second request of the session read the same bean before the first one ended it
+        final FessUserBean other = new FessUserBean(newLocalUser("alice"));
+        other.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertFalse(assist.callSyncCheckLoginSession(bean));
+        assertFalse(assist.callSyncCheckLoginSession(other));
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:user_not_found", audit.sessionEnds.get(0));
     }
 
     @Test
@@ -791,9 +809,20 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     private static class ExposedLoginAssist extends StubUserBhvLoginAssist {
         final AtomicInteger logoutCalls = new AtomicInteger(0);
 
+        /** The user bean of the login session, null when there is none. */
+        FessUserBean session;
+
+        @Override
+        protected OptionalThing<FessUserBean> getSessionUserBeanUnchecked() {
+            return OptionalThing.ofNullable(session, () -> {
+                throw new IllegalStateException("no session");
+            });
+        }
+
         @Override
         public void logout() {
             logoutCalls.incrementAndGet();
+            session = null;
         }
 
         boolean callSyncCheckLoginSession(final FessUserBean userBean) {

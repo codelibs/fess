@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -27,7 +28,7 @@ import org.dbflute.optional.OptionalThing;
 public class RecordingActivityHelper extends ActivityHelper {
 
     /** One entry, {@code user:reason}, for each session that was ended. */
-    public final List<String> sessionEnds = new ArrayList<>();
+    public final List<String> sessionEnds = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void sessionEnd(final OptionalThing<FessUserBean> user, final String reason) {
