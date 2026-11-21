@@ -184,7 +184,7 @@ ${fe:html(true)}
                                                 <c:if test="${data.directory.booleanValue()}">
                                                 <tr data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/" role="button" tabindex="0">
                                                     <td>
-                                                        <i class="fa fa-folder-open" aria-hidden="true" style="color:#F7C502;"></em>
+                                                        <i class="fa fa-folder-open" aria-hidden="true" style="color:#F7C502;"></i>
                                                             ${f:h(data.name)}
                                                     </td>
                                                     <td></td>
