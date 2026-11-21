@@ -90,6 +90,9 @@ public class PermissionHelper {
     /**
      * Encodes a permission string into a search role format.
      * Processes user, group, and role prefixes along with allow/deny prefixes.
+     * Any number of stacked {@code (allow)} / {@code (deny)} prefixes, in any order and case, collapse to
+     * one effect: the entry is denied when at least one of them is {@code (deny)}, so that
+     * {@code (allow)(deny){role}x} and {@code (deny)(allow){role}x} are both stored as {@code (deny){role}x}.
      *
      * @param value the permission string to encode
      * @return the encoded permission string, or null if the input is blank or invalid
@@ -100,21 +103,13 @@ public class PermissionHelper {
         }
 
         String permission = value.strip();
-        final String lowerValue = permission.toLowerCase(Locale.ROOT);
-        final String aclPrefix;
-        final boolean denied;
-        if (lowerValue.startsWith(allowPrefix)) {
-            permission = permission.substring(allowPrefix.length()).strip();
-            aclPrefix = StringUtil.EMPTY;
-            denied = false;
-        } else if (lowerValue.startsWith(denyPrefix)) {
-            permission = permission.substring(denyPrefix.length()).strip();
-            aclPrefix = ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix();
-            denied = true;
-        } else {
-            aclPrefix = StringUtil.EMPTY;
-            denied = false;
+        boolean denied = false;
+        // stacked prefixes collapse to one effect: a single (deny) among them denies the entry
+        for (String prefix = aclPrefixOf(permission); prefix != null; prefix = aclPrefixOf(permission)) {
+            denied |= prefix.equals(denyPrefix);
+            permission = permission.substring(prefix.length()).strip();
         }
+        final String aclPrefix = denied ? ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix() : StringUtil.EMPTY;
         if (StringUtil.isBlank(permission)) {
             return null;
         }
@@ -142,6 +137,23 @@ public class PermissionHelper {
             return null;
         }
         return permission;
+    }
+
+    /**
+     * Returns the {@code (allow)} / {@code (deny)} prefix the value starts with, compared without regard to case.
+     *
+     * @param value the permission entry
+     * @return the configured prefix, or null if the value starts with neither
+     */
+    private String aclPrefixOf(final String value) {
+        final String lower = value.toLowerCase(Locale.ROOT);
+        if (!allowPrefix.isEmpty() && lower.startsWith(allowPrefix)) {
+            return allowPrefix;
+        }
+        if (!denyPrefix.isEmpty() && lower.startsWith(denyPrefix)) {
+            return denyPrefix;
+        }
+        return null;
     }
 
     /**
@@ -272,11 +284,15 @@ public class PermissionHelper {
         }
         final String stripped = entry.strip();
         final String lower = stripped.toLowerCase(Locale.ROOT);
-        if (lower.startsWith(allowPrefix)) {
-            return startsWithWhitespace(stripped.substring(allowPrefix.length()));
+        String rest = stripped;
+        for (String prefix = aclPrefixOf(rest); prefix != null; prefix = aclPrefixOf(rest)) {
+            rest = rest.substring(prefix.length());
+            if (startsWithWhitespace(rest)) {
+                return true;
+            }
         }
-        if (lower.startsWith(denyPrefix)) {
-            return startsWithWhitespace(stripped.substring(denyPrefix.length()));
+        if (!rest.equals(stripped)) {
+            return false;
         }
         return startsWithWhitespace(entry)
                 && (lower.startsWith(userPrefix) || lower.startsWith(groupPrefix) || lower.startsWith(rolePrefix));
