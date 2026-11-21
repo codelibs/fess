@@ -78,6 +78,11 @@ public class PluginVersionResolutionTest {
         server.createContext("/", exchange -> {
             final String path = exchange.getRequestURI().getPath();
             requested.add(path);
+            if (path.startsWith("/broken/")) {
+                exchange.sendResponseHeaders(503, -1);
+                exchange.close();
+                return;
+            }
             final String body = switch (path) {
             case "/release/fess-ds-git/maven-metadata.xml" -> RELEASE_METADATA;
             case "/snapshot/fess-ds-git/maven-metadata.xml" -> SNAPSHOT_METADATA;
@@ -144,5 +149,35 @@ public class PluginVersionResolutionTest {
         final String base = "http://127.0.0.1:" + server.getAddress().getPort();
         assertEquals("15.9.0", FessSetup.resolveVersion(new PluginSources(base + "/release/", "", ""), "fess-ds-git", "15.9", true));
         assertEquals(List.of("/release/fess-ds-git/maven-metadata.xml"), List.copyOf(requested));
+    }
+
+    @Test
+    public void test_hasNoBuild_isTrueWhenTheRepositoryAnswers404ForThePlugin() {
+        assertTrue(FessSetup.hasNoBuild(sources("/empty/", "/empty/"), "fess-ds-git", "15.9", false));
+        assertTrue(FessSetup.hasNoBuild(sources("/empty/", "/empty/"), "fess-ds-git", "15.9", true));
+    }
+
+    @Test
+    public void test_hasNoBuild_isFalseWhenTheRepositoryAnswersAServerError() {
+        assertFalse(FessSetup.hasNoBuild(sources("/broken/", "/empty/"), "fess-ds-git", "15.9", false));
+    }
+
+    @Test
+    public void test_hasNoBuild_isFalseWhenOnlyOneOfTheRepositoriesAnswered404() {
+        assertFalse(FessSetup.hasNoBuild(sources("/empty/", "/broken/"), "fess-ds-git", "15.9", true));
+        assertFalse(FessSetup.hasNoBuild(sources("/broken/", "/empty/"), "fess-ds-git", "15.9", true));
+    }
+
+    @Test
+    public void test_hasNoBuild_isFalseWhenAnotherRepositoryHasAFittingBuild() {
+        assertFalse(FessSetup.hasNoBuild(sources("/empty/", "/snapshot/"), "fess-ds-git", "15.9", true));
+    }
+
+    @Test
+    public void test_hasNoBuild_isFalseOnANetworkError() {
+        final int closed = server.getAddress().getPort();
+        server.stop(0);
+        final String base = "http://127.0.0.1:" + closed;
+        assertFalse(FessSetup.hasNoBuild(new PluginSources(base + "/release/", base + "/snapshot/", ""), "fess-ds-git", "15.9", false));
     }
 }
