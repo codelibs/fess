@@ -72,7 +72,7 @@ public class UserServicePasswordLimitTest extends UnitFessTestCase {
             }
 
             @Override
-            public void insertOrUpdate(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
                 written.add(entity);
             }
 

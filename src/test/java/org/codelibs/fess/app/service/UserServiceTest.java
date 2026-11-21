@@ -1049,6 +1049,81 @@ public class UserServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_store_create_isWrittenWithCreateSemantics() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        final AtomicReference<org.codelibs.fesen.opensearch.action.index.IndexRequest> request = new AtomicReference<>();
+        final UserBhv bhv = userService.userBhv;
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return bhv.selectByPK(id);
+            }
+
+            @Override
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                final IndexRequestBuilder builder =
+                        new IndexRequestBuilder(null, org.codelibs.fesen.opensearch.action.index.IndexAction.INSTANCE);
+                opLambda.callback(builder);
+                request.set(builder.request());
+            }
+        };
+
+        userService.store(storedUser("id-alice", "alice"));
+
+        assertEquals(org.codelibs.fesen.opensearch.action.DocWriteRequest.OpType.CREATE, request.get().opType());
+        assertEquals(org.codelibs.fesen.opensearch.action.support.WriteRequest.RefreshPolicy.IMMEDIATE, request.get().getRefreshPolicy());
+    }
+
+    @Test
+    public void test_store_create_losingARaceForTheSameName_isRefusedLikeAnExistingName() {
+        final List<String> calls = new ArrayList<>();
+        // nobody holds the name when it is looked up, and another request stores it before this one writes
+        installStoreStubs(calls, null, false);
+        final UserBhv bhv = userService.userBhv;
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return bhv.selectByPK(id);
+            }
+
+            @Override
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new RuntimeException(
+                        "opensearch said: version_conflict_engine_exception [id-alice]: version conflict, document already exists");
+            }
+        };
+
+        final UserConflictException e = org.junit.jupiter.api.Assertions.assertThrows(UserConflictException.class,
+                () -> userService.store(storedUser("id-alice", "alice")));
+
+        assertEquals("A user named alice already exists", e.getMessage());
+    }
+
+    @Test
+    public void test_store_create_writeFailureOtherThanAConflict_isNotTakenForOne() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        final UserBhv bhv = userService.userBhv;
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return bhv.selectByPK(id);
+            }
+
+            @Override
+            public void insert(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new IllegalStateException("search engine is down");
+            }
+        };
+
+        final IllegalStateException e = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+                () -> userService.store(storedUser("id-alice", "alice")));
+
+        assertEquals("search engine is down", e.getMessage());
+    }
+
+    @Test
     public void test_store_read_userWithItsOwnName_isStillUpdated() {
         final List<String> calls = new ArrayList<>();
         installStoreStubs(calls, "alice", false);
@@ -1142,7 +1217,7 @@ public class UserServiceTest extends UnitFessTestCase {
             }
 
             @Override
-            public void insertOrUpdate(final User entity,
+            public void insert(final User entity,
                     final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
                 calls.add("user:" + entity.getName());
             }
