@@ -455,6 +455,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: A permission entry must be written with half-width characters. Write it as {0} or {1}. */
     public static final String ERRORS_invalid_permission_fullwidth = "{errors.invalid_permission_fullwidth}";
 
+    /** The key of the message: A permission entry must not start with an invisible character (such as a zero-width space or a byte order mark), or have one right after (allow) or (deny). Delete it and write the entry as {0} or {1}. */
+    public static final String ERRORS_invalid_permission_invisible = "{errors.invalid_permission_invisible}";
+
     /** The key of the message: Failed to upload theme: {0} */
     public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
 
@@ -2795,6 +2798,22 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidPermissionFullwidth(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_permission_fullwidth, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_permission_invisible' with parameters.
+     * <pre>
+     * message: A permission entry must not start with an invisible character (such as a zero-width space or a byte order mark), or have one right after (allow) or (deny). Delete it and write the entry as {0} or {1}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidPermissionInvisible(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_permission_invisible, arg0, arg1));
         return this;
     }
 

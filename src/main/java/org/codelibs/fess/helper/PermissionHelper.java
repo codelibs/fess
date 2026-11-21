@@ -176,7 +176,59 @@ public class PermissionHelper {
         } else if (hasFullWidthSyntaxEntry(typedPermissions(permissionsText))) {
             messages.addErrorsInvalidPermissionFullwidth(Constants.PERMISSIONS, denyPrefix + userPrefix + "name",
                     allowPrefix + userPrefix + "name");
+        } else if (hasInvisibleLeadEntry(typedPermissions(permissionsText))) {
+            messages.addErrorsInvalidPermissionInvisible(Constants.PERMISSIONS, denyPrefix + userPrefix + "name",
+                    allowPrefix + userPrefix + "name");
         }
+    }
+
+    /**
+     * Returns whether any line of the permission entries starts with an invisible character (see
+     * {@link #isInvisibleLeadEntry(String)}).
+     *
+     * @param permissionsText the permission entries, separated by line breaks (may be null)
+     * @return true if a line is such an entry
+     */
+    public boolean hasInvisibleLeadEntry(final String permissionsText) {
+        return StringUtil.isNotBlank(permissionsText)
+                && split(permissionsText, "\n").get(stream -> stream.anyMatch(this::isInvisibleLeadEntry));
+    }
+
+    /**
+     * Returns whether a permission entry starts with an invisible character, such as a zero-width space or a
+     * byte order mark, either at the start of the entry or right after an {@code (allow)} / {@code (deny)}
+     * prefix. Such a character is not whitespace to Java and does not change under Unicode normalisation, so the
+     * entry passes the other checks, yet {@link #encode(String)} no longer finds the {@code {user}},
+     * {@code {group}} or {@code {role}} marker: a deny is dropped without a word, and a plain value is stored
+     * that matches nobody. The invisible character is typically pasted in with the text.
+     * <p>
+     * Only the lead of the entry is judged. A character of the same kind inside a name stays valid, because the
+     * zero-width joiner is part of emoji sequences.
+     * </p>
+     *
+     * @param entry a single permission entry (may be null)
+     * @return true if the entry has an invisible character where its prefix or marker should start
+     */
+    public boolean isInvisibleLeadEntry(final String entry) {
+        if (StringUtil.isBlank(entry)) {
+            return false;
+        }
+        String rest = entry.strip();
+        if (startsWithInvisible(rest)) {
+            return true;
+        }
+        for (String prefix = aclPrefixOf(rest); prefix != null; prefix = aclPrefixOf(rest)) {
+            rest = rest.substring(prefix.length());
+            if (startsWithInvisible(rest)) {
+                return true;
+            }
+            rest = rest.strip();
+        }
+        return false;
+    }
+
+    private static boolean startsWithInvisible(final String value) {
+        return !value.isEmpty() && Character.getType(value.codePointAt(0)) == Character.FORMAT;
     }
 
     /**

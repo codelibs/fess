@@ -613,6 +613,64 @@ public class PermissionHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_isInvisibleLeadEntry_invisibleCharacterWhereTheSyntaxStarts() {
+        // a zero-width space or a byte order mark right after the prefix: encode() would drop the deny
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(deny)\u200B{user}bob"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(deny)\uFEFF{role}x"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(DENY)\u2060{group}staff"));
+        // at the start of the entry, also in front of a prefix, and after stacked prefixes
+        assertTrue(permissionHelper.isInvisibleLeadEntry("\u200B{user}bob"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("\uFEFF(deny){user}bob"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("  \uFEFF(deny){user}bob"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(allow)(deny)\u200B{role}x"));
+        // a plain value that starts with one is also refused: it matches nobody
+        assertTrue(permissionHelper.isInvisibleLeadEntry("\u200Bdevelopers"));
+    }
+
+    @Test
+    public void test_isInvisibleLeadEntry_acceptedEntries() {
+        assertFalse(permissionHelper.isInvisibleLeadEntry(null));
+        assertFalse(permissionHelper.isInvisibleLeadEntry(""));
+        assertFalse(permissionHelper.isInvisibleLeadEntry("{user}bob"));
+        assertFalse(permissionHelper.isInvisibleLeadEntry("(deny){user}bob"));
+        assertFalse(permissionHelper.isInvisibleLeadEntry("(allow)(deny){role}x"));
+        assertFalse(permissionHelper.isInvisibleLeadEntry("developers"));
+        // an invisible character inside a name is part of the name (the zero-width joiner of an emoji sequence)
+        assertFalse(permissionHelper.isInvisibleLeadEntry("{role}\uD83D\uDC68\u200D\uD83D\uDCBB"));
+        assertFalse(permissionHelper.isInvisibleLeadEntry("(deny){user}a\u200Bb"));
+        // whitespace is the business of isSpacedEntry
+        assertFalse(permissionHelper.isInvisibleLeadEntry("(deny) {user}bob"));
+    }
+
+    @Test
+    public void test_validateEntries_invisibleLead() {
+        final FessMessages ng = new FessMessages();
+        permissionHelper.validateEntries("{user}alice\n(deny)\u200B{user}bob", ng);
+        assertTrue(ng.hasMessageOf("permissions"));
+
+        final FessMessages ok = new FessMessages();
+        permissionHelper.validateEntries("{user}alice\n(deny){user}bob\n{role}\uD83D\uDC68\u200D\uD83D\uDCBB", ok);
+        assertTrue(ok.isEmpty());
+    }
+
+    @Test
+    public void test_invisibleMessage_usesOnlyItsTwoArguments() throws Exception {
+        final java.io.File dir = new java.io.File("src/main/resources");
+        final java.io.File[] files = dir.listFiles((d, name) -> name.startsWith("fess_message") && name.endsWith(".properties"));
+        assertTrue(files.length >= 17);
+        for (final java.io.File file : files) {
+            final java.util.Properties props = new java.util.Properties();
+            try (java.io.Reader reader = new java.io.InputStreamReader(new java.io.FileInputStream(file), StandardCharsets.UTF_8)) {
+                props.load(reader);
+            }
+            final String message = props.getProperty("errors.invalid_permission_invisible");
+            assertNotNull(message, file.getName());
+            assertTrue(message.contains("{0}") && message.contains("{1}"), file.getName());
+            assertTrue(message.replaceAll("\\{[01]\\}", "").replaceAll("[^{}]", "").isEmpty(), file.getName());
+        }
+    }
+
     private static UserPrincipal user(final String name) {
         return new UserPrincipal() {
             @Override
