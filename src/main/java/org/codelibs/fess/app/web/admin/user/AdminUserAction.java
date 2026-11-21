@@ -328,9 +328,13 @@ public class AdminUserAction extends FessAdminAction {
         verifyToken(this::asEditHtml);
         getUserToUpdate(form).ifPresent(entity -> {
             try {
+                // setting a password removes all passkeys of the user (see UserService#store)
+                final List<String> resetPasskeys =
+                        StringUtil.isNotBlank(form.password) ? userService.getPasskeyCredentialIds(entity.getName()) : List.of();
                 userService.store(entity);
                 if (StringUtil.isNotBlank(form.password)) {
                     activityHelper.passwordChanged(getUserBean(), entity.getName());
+                    resetPasskeys.forEach(credentialId -> activityHelper.passkeyDeleted(getUserBean(), entity.getName(), credentialId));
                 }
                 logger.info("Updated user: {}", entity.getName());
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));

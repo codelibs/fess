@@ -1015,6 +1015,70 @@ public class UserServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_store_updateWithNewPassword_removesAllPasskeysAfterTheUserIsWritten() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        final User user = readUser("id-alice", "alice");
+        user.setOriginalPassword("reset-by-admin");
+
+        userService.store(user);
+
+        // after the write: a refused (conflicting) save must not remove them
+        assertEquals(List.of("auth:alice", "user:alice", "passkeys:alice"), calls);
+    }
+
+    @Test
+    public void test_store_updateWithNewPassword_conflict_keepsThePasskeys() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        final UserBhv bhv = userService.userBhv;
+        userService.userBhv = new UserBhv() {
+            @Override
+            public org.dbflute.optional.OptionalEntity<User> selectByPK(final String id) {
+                return bhv.selectByPK(id);
+            }
+
+            @Override
+            public void update(final User entity,
+                    final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("opensearch said: version_conflict_engine_exception [seqNo=7]");
+            }
+        };
+        final User user = readUser("id-alice", "alice");
+        user.setOriginalPassword("reset-by-admin");
+
+        org.junit.jupiter.api.Assertions.assertThrows(org.codelibs.fess.exception.UserChangedConcurrentlyException.class,
+                () -> userService.store(user));
+
+        assertEquals(List.of("auth:alice"), calls);
+    }
+
+    @Test
+    public void test_store_updateWithNewPassword_passkeyRemovalFailure_failsTheStore() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", true);
+        final User user = readUser("id-alice", "alice");
+        user.setOriginalPassword("reset-by-admin");
+
+        final IllegalStateException e =
+                org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> userService.store(user));
+
+        assertEquals("simulated passkey failure", e.getMessage());
+    }
+
+    @Test
+    public void test_store_create_withPassword_removesThePasskeysOnlyBeforeTheWrite() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        final User user = storedUser("id-alice", "alice");
+        user.setOriginalPassword("initial");
+
+        userService.store(user);
+
+        assertEquals(List.of("passkeys:alice", "auth:alice", "user:alice"), calls);
+    }
+
+    @Test
     public void test_store_rename_ontoAnotherUsersName_isRefusedBeforeAnythingIsRemoved() {
         final List<String> calls = new ArrayList<>();
         installStoreStubs(calls, "alice", false, storedUser("id-bob", "bob"));

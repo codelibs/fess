@@ -518,6 +518,76 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
         assertEquals(List.of("alice@" + changedAt), accepted);
     }
 
+    private void installReadUserStore() {
+        userService.userBhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectByPK(final String id) {
+                return OptionalEntity.of(versioned("alice", "{bcrypt}old"));
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                written.add(entity);
+            }
+        };
+    }
+
+    @Test
+    public void test_changePassword_ofTheUserHimself_keepsThePasskeys() {
+        final List<String> removed = new ArrayList<>();
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+                removed.add(userName);
+            }
+        };
+
+        userService.changePassword("alice", "new-password");
+        userService.changePassword("alice", "new-password", "newer-password");
+
+        assertEquals(2, written.size());
+        assertTrue(removed.isEmpty());
+    }
+
+    @Test
+    public void test_store_ofAReadUserWithNewPassword_removesThePasskeys() {
+        final List<String> removed = new ArrayList<>();
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+                removed.add(userName);
+            }
+        };
+        final User user = versioned("alice", "{bcrypt}typed");
+        user.setId("YWxpY2U");
+        user.setOriginalPassword("typed");
+        installReadUserStore();
+
+        userService.store(user);
+
+        assertEquals(List.of("alice"), removed);
+        assertEquals(1, written.size());
+    }
+
+    @Test
+    public void test_store_ofAReadUserWithoutNewPassword_keepsThePasskeys() {
+        final List<String> removed = new ArrayList<>();
+        userService.passkeyService = new PasskeyService() {
+            @Override
+            public void deleteByUserName(final String userName) {
+                removed.add(userName);
+            }
+        };
+        final User user = versioned("alice", "{bcrypt}old");
+        user.setId("YWxpY2U");
+        installReadUserStore();
+
+        userService.store(user);
+
+        assertEquals(1, written.size());
+        assertTrue(removed.isEmpty());
+    }
+
     @Test
     public void test_store_withoutNewPassword_keepsTheTime() {
         final User user = new User();
