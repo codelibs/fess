@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -581,10 +582,12 @@ public class UserService {
      * Gets when the password of a local user was last changed.
      *
      * @param username the username of the user
-     * @return epoch milliseconds, or 0 when the user has no recorded password change or does not exist
+     * @return epoch milliseconds, 0 when the user has no recorded password change, or empty when the user does not exist
      */
-    public long getPasswordChangedAt(final String username) {
-        return userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).map(User::getPasswordChangedAt).orElse(0L);
+    public OptionalLong getPasswordChangedAt(final String username) {
+        return userBhv.selectEntity(cb -> cb.query().setName_Equal(username))
+                .map(user -> OptionalLong.of(user.getPasswordChangedAt() != null ? user.getPasswordChangedAt().longValue() : 0L))
+                .orElse(OptionalLong.empty());
     }
 
     /**

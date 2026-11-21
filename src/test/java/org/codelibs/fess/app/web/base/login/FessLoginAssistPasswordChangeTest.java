@@ -18,7 +18,9 @@ package org.codelibs.fess.app.web.base.login;
 import java.util.Hashtable;
 import java.util.OptionalLong;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.app.service.UserService;
@@ -114,6 +116,92 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     public void test_session_keptWhenLookupFails() {
         assist.session = assist.createUserBean(localUser("alice", null));
         service.failure = new IllegalStateException("search engine is down");
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertEquals(0, assist.logouts.get());
+    }
+
+    // ---------------------------------------------------------------------
+    // the session of a user that was deleted
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_session_endsWhenTheLocalUserWasDeleted() {
+        assist.session = assist.createUserBean(localUser("alice", 500L));
+        service.deleted.add("alice");
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(1, assist.logouts.get());
+        assertNull(assist.session);
+    }
+
+    @Test
+    public void test_session_endsWhenTheLocalUserWithoutPasswordChangeWasDeleted() {
+        assist.session = assist.createUserBean(localUser("alice", null));
+        service.deleted.add("alice");
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(1, assist.logouts.get());
+    }
+
+    @Test
+    public void test_session_endsWhenTheConfiguredAdminUserWasDeleted() {
+        assist.session = assist.createUserBean(localUser("admin", 500L));
+        service.deleted.add("admin");
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(1, assist.logouts.get());
+    }
+
+    @Test
+    public void test_sessionOpenedBeforeTheFieldExisted_endsWhenTheLocalUserWasDeleted() {
+        assist.session = new FessUserBean(localUser("alice", null));
+        assist.sessionCreated = 500L;
+        service.deleted.add("alice");
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(1, assist.logouts.get());
+    }
+
+    @Test
+    public void test_session_ofOtherUserKeptWhenAnotherUserWasDeleted() {
+        assist.session = assist.createUserBean(localUser("alice", 500L));
+        service.deleted.add("bob");
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertEquals(0, assist.logouts.get());
+    }
+
+    @Test
+    public void test_session_deletedUserIsNoticedAtTheNextLook() {
+        config.interval = 10;
+        assist.session = assist.createUserBean(localUser("alice", 500L));
+        assertTrue(assist.getSavedUserBean().isPresent());
+        service.deleted.add("alice");
+
+        assertTrue(assist.getSavedUserBean().isPresent()); // within the interval
+        assertEquals(1, service.reads.get());
+
+        assist.now += 11_000L;
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(2, service.reads.get());
+    }
+
+    @Test
+    public void test_session_keptWhenLookupFailsForADeletedUser() {
+        assist.session = assist.createUserBean(localUser("alice", 500L));
+        service.deleted.add("alice");
+        service.failure = new IllegalStateException("search engine is down");
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertEquals(0, assist.logouts.get());
+    }
+
+    @Test
+    public void test_ldapSessionOpenedBeforeTheFieldExisted_keptWithoutLocalDocument() {
+        assist.session = new FessUserBean(new LdapUser(new Hashtable<>(), "bob")); // nothing recorded
+        assist.sessionCreated = 500L;
+        service.deleted.add("bob");
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
@@ -385,16 +473,18 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
     private static class StampService extends UserService {
         final Map<String, Long> stamps = new HashMap<>();
+        /** The names of the users whose document is gone. */
+        final Set<String> deleted = new HashSet<>();
         final AtomicInteger reads = new AtomicInteger();
         RuntimeException failure;
 
         @Override
-        public long getPasswordChangedAt(final String username) {
+        public OptionalLong getPasswordChangedAt(final String username) {
             reads.incrementAndGet();
             if (failure != null) {
                 throw failure;
             }
-            return stamps.getOrDefault(username, 0L);
+            return deleted.contains(username) ? OptionalLong.empty() : OptionalLong.of(stamps.getOrDefault(username, 0L));
         }
     }
 
