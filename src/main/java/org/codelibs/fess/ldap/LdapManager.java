@@ -584,13 +584,17 @@ public class LdapManager {
      * session comes back here. {@code FAILED} is written too, so that the other node does not wait for a result
      * that is not coming. Failures are logged and swallowed: the user has the groups in this node either way.</p>
      *
+     * <p>A session that was refreshed from the store while the walk ran holds a restored copy of the user, not the instance
+     * the walk published into, so the sessions are found by the user and the copy is given the result.</p>
+     *
      * @param ldapUser the user whose permission state was just settled
      */
     protected void persistSession(final LdapUser ldapUser) {
         try {
             if (ComponentUtil.hasComponent("sessionStore")) {
                 ComponentUtil.<SessionStore> getComponent("sessionStore")
-                        .persistHolding(value -> value instanceof final FessUserBean bean && bean.getFessUser() == ldapUser);
+                        .persistHolding(value -> value instanceof final FessUserBean bean
+                                && bean.getFessUser() instanceof final LdapUser held && held.takeResolutionOf(ldapUser));
             }
         } catch (final Exception e) {
             logger.warn("Failed to write the session of {} to the session store.", ldapUser.getName(), e);

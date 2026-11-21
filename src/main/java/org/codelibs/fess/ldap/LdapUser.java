@@ -153,6 +153,37 @@ public class LdapUser implements FessUser {
         return nameFromProvider;
     }
 
+    /**
+     * Takes over the result of the nested-group resolution of a user that is this user, when this one is the copy a session
+     * store restored while the resolution was running.
+     *
+     * <p>The resolution publishes into the instance that scheduled it. When another request of the session refreshed the
+     * session from the store in the meantime, the session holds a restored copy instead, which stays {@code PENDING}. The
+     * copy is the same user (same name, asserted by the same kind of source), so it takes the permissions and the state.
+     * Only a copy that is still {@code PENDING}, or that already holds exactly this result, takes it.</p>
+     *
+     * @param resolved The user whose resolution ended, with {@code RESOLVED} or {@code FAILED}.
+     * @return true if this user is {@code resolved} or now holds its result, false if it is another user or is settled otherwise.
+     */
+    public boolean takeResolutionOf(final LdapUser resolved) {
+        if (this == resolved) {
+            return true;
+        }
+        final String[] resolvedPermissions = resolved.permissions;
+        final PermissionState resolvedState = resolved.getPermissionState();
+        if (resolvedPermissions == null || resolvedState == PermissionState.PENDING || !name.equals(resolved.name)
+                || nameFromProvider != resolved.nameFromProvider) {
+            return false;
+        }
+        if (getPermissionState() == PermissionState.PENDING) {
+            // Permissions first, as everywhere: a reader that sees the state must not see the set it replaced.
+            permissions = resolvedPermissions;
+            permissionState = resolvedState;
+            return true;
+        }
+        return permissionState == resolvedState && Arrays.equals(permissions, resolvedPermissions);
+    }
+
     @Override
     public String getName() {
         return name;

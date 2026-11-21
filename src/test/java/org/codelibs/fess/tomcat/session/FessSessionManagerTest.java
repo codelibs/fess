@@ -682,4 +682,109 @@ public class FessSessionManagerTest {
         second.join(10_000L);
         assertEquals(2, saves.get());
     }
+
+    private static final String[] DIRECT = { "1carol", "2A1" };
+
+    private static final String[] FULL = { "1carol", "2A1", "2A0" };
+
+    /** Makes the fake store keep and hand out copies of the users, as the real one does by serializing them. */
+    private static void storeCopiesUsers(final FakeSessionStore store) {
+        store.copier = v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
+                && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser u
+                        ? new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser(u.getName(),
+                                u.isNameFromProvider(), u.getResolvedPermissions(), u.getPermissionState()))
+                        : v;
+        store.describer = v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
+                && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser u
+                        ? u.getName() + "/" + u.getPermissionState() + "/" + String.join(",", u.getResolvedPermissions())
+                        : String.valueOf(v);
+    }
+
+    private static org.codelibs.fess.ldap.LdapUser userOf(final FessSession session) {
+        return (org.codelibs.fess.ldap.LdapUser) ((org.codelibs.fess.mylasta.action.FessUserBean) session.getAttribute("user"))
+                .getFessUser();
+    }
+
+    /** The predicate of LdapManager#persistSession for the user whose nested groups were resolved. */
+    private static java.util.function.Predicate<Object> holdsUserOf(final org.codelibs.fess.ldap.LdapUser resolved) {
+        return v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
+                && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser held && held.takeResolutionOf(resolved);
+    }
+
+    @Test
+    public void test_persistHolding_reachesTheCopyThatARefreshPutInPlaceOfTheUser() throws Exception {
+        // the walk of node A runs while a request of the session on node B changes the store and a request on node A reads that
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        final FessSessionManager nodeA = newManager(store);
+        final FessSessionManager nodeB = newManager(store);
+        final org.codelibs.fess.ldap.LdapUser original =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        final FessSession onA =
+                request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(original)));
+        final String id = onA.getId();
+
+        request(nodeB, id, false, s -> s.setAttribute("seen", "on B"));
+        request(nodeA, id, false, null);
+        // the precondition of the case: the session of node A now holds a restored copy, and the walk will end in the original
+        assertNotSame(original, userOf(onA));
+        assertEquals("on B", onA.getAttribute("seen"));
+
+        final org.codelibs.fess.ldap.LdapUser walked =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED);
+        nodeA.persistHolding(holdsUserOf(walked));
+
+        // the other node reads the settled state
+        final FessSession onB = request(nodeB, id, false, null);
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onB).getPermissionState());
+        assertEquals(java.util.List.of(FULL), java.util.List.of(userOf(onB).getResolvedPermissions()));
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onA).getPermissionState());
+    }
+
+    @Test
+    public void test_persistHolding_doesNotUndoAChangeThatAnotherNodeMadeMeanwhile() throws Exception {
+        // node A last read the store before node B changed another attribute; the background write of node A must keep it
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        final FessSessionManager nodeA = newManager(store);
+        final FessSessionManager nodeB = newManager(store);
+        final org.codelibs.fess.ldap.LdapUser original =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        final FessSession onA =
+                request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(original)));
+        final String id = onA.getId();
+        request(nodeB, id, false, s -> s.setAttribute("seen", "on B"));
+        assertNull(onA.getAttribute("seen"));
+
+        final org.codelibs.fess.ldap.LdapUser walked =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED);
+        nodeA.persistHolding(holdsUserOf(walked));
+
+        final FessSession onB = request(newManager(store), id, false, null);
+        assertEquals("on B", onB.getAttribute("seen"));
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onB).getPermissionState());
+        assertEquals(java.util.List.of(FULL), java.util.List.of(userOf(onB).getResolvedPermissions()));
+    }
+
+    @Test
+    public void test_persistHolding_leavesAnotherUsersSessionAndAnIdleSessionAlone() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        final FessSessionManager manager = newManager(store);
+        final FessSession dave = request(manager, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(
+                new org.codelibs.fess.ldap.LdapUser("dave", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING))));
+        final FessSession carol = request(manager, null, true,
+                s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser("carol",
+                        false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING))));
+        // idle past its timeout, not yet swept: a background save must not expire it
+        carol.setMaxInactiveInterval(1);
+        Thread.sleep(1_200L);
+        store.calls.clear();
+
+        manager.persistHolding(holdsUserOf(
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED)));
+
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.PENDING, userOf(dave).getPermissionState());
+        assertTrue(carol.isAlive(), "the background save expired an idle session");
+    }
 }

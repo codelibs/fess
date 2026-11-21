@@ -223,7 +223,8 @@ public class SessionStore {
      * when the next request of that session came to this node. It does nothing when the session store is not in
      * use.</p>
      *
-     * @param holds tells whether an attribute value is the one that changed.
+     * @param holds tells whether an attribute value is, or is a copy of, the one that changed. It may bring a copy up to date
+     *        before it accepts it, and may be asked about a value more than once.
      */
     @SuppressWarnings("unchecked")
     public void persistHolding(final Predicate<Object> holds) {

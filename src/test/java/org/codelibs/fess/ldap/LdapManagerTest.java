@@ -878,15 +878,27 @@ public class LdapManagerTest extends UnitFessTestCase {
             }
         }, "sessionStore");
         final LdapManager ldapManager = new LdapManager();
-        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        final String[] resolved = { "1testuser", "2parent", "2child" };
+        final LdapUser ldapUser = new LdapUser("testuser", false, resolved, FessUser.PermissionState.RESOLVED);
 
         ldapManager.persistSession(ldapUser);
 
         final java.util.function.Predicate<Object> holds = asked.get();
         assertNotNull(holds);
+        // the instance that was resolved is held
         assertTrue(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(ldapUser)));
+        // a restored copy of the same user that is still PENDING is held too (a refresh from the store replaced the instance),
+        // and takes the result
+        final LdapUser copy = new LdapUser("testuser", false, new String[] { "1testuser", "2parent" }, FessUser.PermissionState.PENDING);
+        assertTrue(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(copy)));
+        assertEquals(FessUser.PermissionState.RESOLVED, copy.getPermissionState());
+        assertEquals(List.of(resolved), List.of(copy.getResolvedPermissions()));
+        // the same copy again, now that it holds the result
+        assertTrue(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(copy)));
         // another user, a bean without a user, and a value that is no user bean are not this session
-        assertFalse(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(new LdapUser(new Hashtable<>(), "testuser"))));
+        final LdapUser other = new LdapUser("another", false, new String[] { "1another" }, FessUser.PermissionState.PENDING);
+        assertFalse(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(other)));
+        assertEquals(FessUser.PermissionState.PENDING, other.getPermissionState());
         assertFalse(holds.test(org.codelibs.fess.mylasta.action.FessUserBean.empty()));
         assertFalse(holds.test("testuser"));
     }

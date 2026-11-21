@@ -828,4 +828,53 @@ public class LdapUserTest extends UnitFessTestCase {
         assertTrue("nested group lost from " + permissions, permissions.contains("2parent1"));
         assertTrue("user permission lost from " + permissions, permissions.contains("1testuser"));
     }
+
+    private static LdapUser restored(final String name, final boolean fromProvider, final String[] permissions,
+            final FessUser.PermissionState state) {
+        return new LdapUser(name, fromProvider, permissions, state);
+    }
+
+    @Test
+    public void test_takeResolutionOf_givesTheRestoredCopyOfTheSameUserTheResult() {
+        final String[] full = { "1carol", "2A1", "2A0" };
+        final LdapUser resolved = restored("carol", false, full, FessUser.PermissionState.RESOLVED);
+        final LdapUser copy = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.PENDING);
+
+        assertTrue(copy.takeResolutionOf(resolved));
+        assertEquals(FessUser.PermissionState.RESOLVED, copy.getPermissionState());
+        assertEquals(java.util.List.of(full), java.util.List.of(copy.getResolvedPermissions()));
+        // asked again, it already holds the result
+        assertTrue(copy.takeResolutionOf(resolved));
+
+        // a walk that failed is passed on as well
+        final LdapUser failed = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.FAILED);
+        final LdapUser pending = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.PENDING);
+        assertTrue(pending.takeResolutionOf(failed));
+        assertEquals(FessUser.PermissionState.FAILED, pending.getPermissionState());
+    }
+
+    @Test
+    public void test_takeResolutionOf_refusesAnotherUserAndASettledOne() {
+        final LdapUser resolved = restored("carol", false, new String[] { "1carol", "2A0" }, FessUser.PermissionState.RESOLVED);
+        final String[] own = { "1carol" };
+
+        final LdapUser otherName = restored("dave", false, own, FessUser.PermissionState.PENDING);
+        assertFalse(otherName.takeResolutionOf(resolved));
+        assertEquals(FessUser.PermissionState.PENDING, otherName.getPermissionState());
+        assertEquals(java.util.List.of(own), java.util.List.of(otherName.getResolvedPermissions()));
+
+        // the name asserted by an identity provider is not the name typed at a form
+        assertFalse(restored("carol", true, own, FessUser.PermissionState.PENDING).takeResolutionOf(resolved));
+
+        // a copy that another node already settled is not overwritten with this node's answer
+        final LdapUser settled = restored("carol", false, new String[] { "1carol", "2X" }, FessUser.PermissionState.RESOLVED);
+        assertFalse(settled.takeResolutionOf(resolved));
+        assertEquals(java.util.List.of("1carol", "2X"), java.util.List.of(settled.getResolvedPermissions()));
+
+        // nothing to give: the walk has not ended, or the user has no permissions yet
+        final LdapUser pending = restored("carol", false, own, FessUser.PermissionState.PENDING);
+        assertFalse(pending.takeResolutionOf(restored("carol", false, own, FessUser.PermissionState.PENDING)));
+        assertFalse(pending.takeResolutionOf(new LdapUser(new java.util.Hashtable<>(), "carol")));
+        assertEquals(FessUser.PermissionState.PENDING, pending.getPermissionState());
+    }
 }

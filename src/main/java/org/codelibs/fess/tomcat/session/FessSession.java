@@ -75,6 +75,16 @@ public class FessSession extends StandardSession {
     }
 
     /**
+     * Tells whether the session has not been invalidated or expired, without the idle timeout check of
+     * {@link #isValid()}, which expires an idle session as a side effect. For a thread that is not serving a request of this session.
+     *
+     * @return {@code true} if the session was neither invalidated nor expired
+     */
+    public boolean isAlive() {
+        return isValidInternal();
+    }
+
+    /**
      * Marks the session as explicitly invalidated, which makes the manager delete it from the store.
      */
     @Override

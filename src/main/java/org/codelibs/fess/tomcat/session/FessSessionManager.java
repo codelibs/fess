@@ -297,7 +297,7 @@ public class FessSessionManager extends ManagerBase {
     }
 
     private void persist(final FessSession session, final Function<Map<String, Object>, Object> save) {
-        if (session.isDoNotPersist() || !session.isValid()) {
+        if (session.isDoNotPersist() || !session.isAlive()) {
             return;
         }
         final Map<String, Object> args = idArgs(session.getIdInternal());
@@ -428,21 +428,40 @@ public class FessSessionManager extends ManagerBase {
      * {@link #persistTouched()} it needs no request: it is for a background thread that changed an object a session
      * holds. Failures are logged and swallowed.
      *
-     * @param holds tells whether an attribute value is the one that changed
+     * <p>The predicate may be asked about the same value more than once, and may bring a value up to date before it
+     * accepts it: a session that this node refreshed from the store holds copies of the objects it held before, so the
+     * object the background thread changed is not necessarily in the session. For a session that matches, the state of the
+     * store is read again first (what other nodes wrote since this node last read it is kept) and the predicate is
+     * applied to what the session holds then, so that a write of this node never undoes a change of another.</p>
+     *
+     * @param holds tells whether an attribute value is, or is a copy of, the one that changed
      */
     protected void persistHolding(final Predicate<Object> holds) {
         for (final Session session : findSessions()) {
-            if (!(session instanceof final FessSession fessSession) || !fessSession.isValid()) {
+            if (!(session instanceof final FessSession fessSession) || !fessSession.isAlive()) {
                 continue;
             }
             try {
-                if (fessSession.snapshotAttributes().values().stream().anyMatch(holds)) {
-                    persist(fessSession);
+                if (!holdsAny(fessSession, holds)) {
+                    continue;
+                }
+                synchronized (fessSession.getPersistLock()) {
+                    final Function<Map<String, Object>, Object> load = operation(OP_LOAD);
+                    if (load != null && refresh(fessSession, load) == null) {
+                        continue;
+                    }
+                    if (holdsAny(fessSession, holds)) {
+                        persist(fessSession);
+                    }
                 }
             } catch (final RuntimeException e) {
                 warn("Failed to save the session after one of its attributes changed.", e);
             }
         }
+    }
+
+    private static boolean holdsAny(final FessSession session, final Predicate<Object> holds) {
+        return session.snapshotAttributes().values().stream().anyMatch(holds);
     }
 
     /**
