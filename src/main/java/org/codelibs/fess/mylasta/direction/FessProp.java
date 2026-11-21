@@ -47,6 +47,7 @@ import java.util.stream.Stream;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
+import org.apache.logging.log4j.LogManager;
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
@@ -58,6 +59,7 @@ import org.codelibs.fess.ldap.LdapUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.ThemeSettingsUtil;
 import org.codelibs.fess.util.JvmUtil;
 import org.codelibs.fess.util.PrunedTag;
@@ -1537,6 +1539,34 @@ public interface FessProp {
     String getAuthenticationAdminUsers();
 
     String getAuthenticationAdminUsersIgnoreCase();
+
+    String getAuthenticationLocalUsernamePolicy();
+
+    /**
+     * Tells whether authentication.local.username.policy is {@code mapped}: creating or renaming a local
+     * user is then refused when the name, once its width, case and Unicode composition are folded, equals
+     * that of another user or of a reserved name. Nothing but that refusal changes.
+     *
+     * <p>{@code preserved} -- the shipped value -- and a blank value are the default, which compares names
+     * exactly as typed. Any other value is treated the same way, with one WARN that names it, because an
+     * operator who typed {@code Mapped } or {@code map} would otherwise believe the refusal is on.
+     * The value is compared without regard to case and with the blanks around it dropped.</p>
+     *
+     * @return true when the policy is mapped
+     */
+    default boolean isLocalUsernameCaseMapped() {
+        final String value = getAuthenticationLocalUsernamePolicy();
+        final String policy = value == null ? "" : value.strip();
+        if ("mapped".equalsIgnoreCase(policy)) {
+            return true;
+        }
+        if (!policy.isEmpty() && !"preserved".equalsIgnoreCase(policy)) {
+            LogUtil.warnOnce(LogManager.getLogger(FessProp.class), "username.policy",
+                    "authentication.local.username.policy is {}, which is neither preserved nor mapped, so preserved is used.",
+                    LogUtil.sanitize(policy));
+        }
+        return false;
+    }
 
     /**
      * Tells whether the names authentication.admin.users reserves are compared without regard to case.

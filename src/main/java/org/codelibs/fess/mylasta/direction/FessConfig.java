@@ -1420,6 +1420,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. auto */
     String AUTHENTICATION_ADMIN_USERS_IGNORE_CASE = "authentication.admin.users.ignore.case";
 
+    /** The key of the configuration. e.g. preserved */
+    String AUTHENTICATION_LOCAL_USERNAME_POLICY = "authentication.local.username.policy";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
@@ -7533,6 +7536,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminUsersIgnoreCase();
+
+    /**
+     * Get the value for the key 'authentication.local.username.policy'. <br>
+     * The value is, e.g. preserved <br>
+     * comment: Whether creating or renaming a local user also refuses a name that differs from another name only in case, width or Unicode composition: preserved or mapped. preserved compares names exactly as typed. mapped refuses a name that equals the name of another user or of an authentication.admin.users entry (other than the entry as written) once folded (Alice and alice, fullwidth and ASCII letters). Login, user IDs, stored names and permissions are not changed. An unknown value is treated as preserved.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAuthenticationLocalUsernamePolicy();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -13876,6 +13887,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.AUTHENTICATION_ADMIN_USERS_IGNORE_CASE);
         }
 
+        public String getAuthenticationLocalUsernamePolicy() {
+            return get(FessConfig.AUTHENTICATION_LOCAL_USERNAME_POLICY);
+        }
+
         public String getAuthenticationAdminRoles() {
             return get(FessConfig.AUTHENTICATION_ADMIN_ROLES);
         }
@@ -16155,6 +16170,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CLIPBOARD_COPY_ICON_ENABLED, "true");
             defaultMap.put(FessConfig.SEARCH_RESULT_LINK_SCHEMES, "http,https,ftp,ftps,file,smb,smb1,storage,s3,gcs");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
+            defaultMap.put(FessConfig.AUTHENTICATION_LOCAL_USERNAME_POLICY, "preserved");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
             defaultMap.put(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS, "");
             defaultMap.put(FessConfig.ROLE_SEARCH_DEFAULT_DISPLAY_PERMISSIONS, "{role}guest");

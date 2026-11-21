@@ -22,12 +22,14 @@ import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.logic.AccessContextLogic;
 import org.codelibs.fess.app.service.ScheduledJobService;
+import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.MissingScriptEngineReporter;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.JobLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.SystemUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.job.LaCron;
@@ -85,6 +87,14 @@ public class AllJobScheduler implements LaJobScheduler {
         scheduledJobService.start(cron);
         // Every script engine plugin has registered by now, and nothing has run yet.
         new MissingScriptEngineReporter().report();
+        // The user index exists by now. Only the webapp reports: it is the process that stores users.
+        if (SystemUtil.isWebappProcess()) {
+            try {
+                ComponentUtil.getComponent(UserService.class).reportLocalUsernameProblems();
+            } catch (final RuntimeException e) {
+                logger.debug("Could not report the local user names.", e);
+            }
+        }
 
         final String myName = fessConfig.getSchedulerTargetName();
         if (StringUtil.isNotBlank(myName)) {

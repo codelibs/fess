@@ -1131,6 +1131,17 @@ public class UserServiceTest extends UnitFessTestCase {
             }
 
             @Override
+            public void selectCursor(final CBCall<UserCB> cbLambda, final org.dbflute.bhv.readable.EntityRowHandler<User> entityLambda) {
+                userScans++;
+                for (final User user : storedUsers) {
+                    if (entityLambda.isBreakCursor()) {
+                        break;
+                    }
+                    entityLambda.handle(user);
+                }
+            }
+
+            @Override
             public void insertOrUpdate(final User entity,
                     final RequestOptionCall<org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder> opLambda) {
                 calls.add("user:" + entity.getName());
@@ -1148,6 +1159,353 @@ public class UserServiceTest extends UnitFessTestCase {
                 calls.add("auth:" + user.getName());
             }
         }, "authenticationManager");
+    }
+
+    /** How many times the stubbed user index was scanned in full. */
+    private int userScans;
+
+    /** The users the stubbed user index holds, as a scan sees them. */
+    private List<User> storedUsers = new ArrayList<>();
+
+    /**
+     * Sets the policy and the admin user names, and registers the helper that maps the names.
+     *
+     * @param policy the value of authentication.local.username.policy
+     */
+    private void useUsernamePolicy(final String policy) {
+        ComponentUtil.setFessConfig(new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAuthenticationLocalUsernamePolicy() {
+                return policy;
+            }
+
+            @Override
+            public String getAuthenticationAdminUsers() {
+                return "admin";
+            }
+        });
+        ComponentUtil.register(new org.codelibs.fess.helper.SystemHelper(), "systemHelper");
+    }
+
+    private void assertRefused(final String message, final User user) {
+        final UserConflictException e =
+                org.junit.jupiter.api.Assertions.assertThrows(UserConflictException.class, () -> userService.store(user));
+        assertTrue(e.getMessage(), e.getMessage().contains(message));
+        assertFalse(e instanceof org.codelibs.fess.exception.UserChangedConcurrentlyException);
+    }
+
+    // ---- authentication.local.username.policy
+
+    @Test
+    public void test_store_create_preserved_aCaseVariantOfAnotherUserIsCreated() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        // the shipped value, read from fess_config.properties, and no helper registered for the mapping
+
+        userService.store(storedUser("id-Alice", "Alice"));
+        userService.store(storedUser("id-ALICE", "ALICE"));
+        userService.store(storedUser("id-guest", "Guest"));
+        userService.store(storedUser("id-admin", "Admin"));
+
+        assertEquals(List.of("passkeys:Alice", "auth:Alice", "user:Alice", "passkeys:ALICE", "auth:ALICE", "user:ALICE", "passkeys:Guest",
+                "auth:Guest", "user:Guest", "passkeys:Admin", "auth:Admin", "user:Admin"), calls);
+        assertEquals("the stored users are not read under preserved", 0, userScans);
+    }
+
+    @Test
+    public void test_store_create_unknownPolicyBehavesAsPreserved() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        useUsernamePolicy("map");
+
+        userService.store(storedUser("id-Alice", "Alice"));
+
+        assertEquals(List.of("passkeys:Alice", "auth:Alice", "user:Alice"), calls);
+        assertEquals(0, userScans);
+    }
+
+    @Test
+    public void test_store_rename_preserved_ontoACaseVariantIsAllowed() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "bob", false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        useUsernamePolicy("preserved");
+
+        userService.store(readUser("id-bob", "Alice"));
+
+        assertEquals(List.of("passkeys:bob", "passkeys:Alice", "auth:Alice", "user:Alice"), calls);
+        assertEquals(0, userScans);
+    }
+
+    @Test
+    public void test_store_create_mapped_caseVariantOfAnotherUserIsRefused() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        useUsernamePolicy("mapped");
+
+        assertRefused("A user named Alice already exists as alice", storedUser("id-Alice", "Alice"));
+        assertRefused("A user named ALICE already exists as alice", storedUser("id-ALICE", "ALICE"));
+        // fullwidth letters, and a decomposed accent against a precomposed one
+        assertRefused("already exists as alice", storedUser("id-wide", "\uFF41\uFF4C\uFF49\uFF43\uFF45"));
+        storedUsers.add(storedUser("id-cafe", "caf\u00E9"));
+        assertRefused("already exists as caf\u00E9", storedUser("id-cafe2", "CAFE\u0301"));
+
+        assertEquals("neither the passkeys nor the user document may be touched", List.of(), calls);
+    }
+
+    @Test
+    public void test_store_create_mapped_otherNamesAreCreated() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-taro", "\u5C71\u7530\u592A\u90CE"));
+        useUsernamePolicy("mapped");
+
+        userService.store(storedUser("id-bob", "Bob"));
+        userService.store(storedUser("id-alice2", "alice2"));
+        // the dotted capital I is not an i, and a katakana name next to a different katakana name is fine
+        userService.store(storedUser("id-i", "\u0130"));
+        storedUsers.add(storedUser("id-ka", "\u30AB"));
+        userService.store(storedUser("id-ki", "\uFF77"));
+
+        assertEquals(List.of("passkeys:Bob", "auth:Bob", "user:Bob", "passkeys:alice2", "auth:alice2", "user:alice2", "passkeys:\u0130",
+                "auth:\u0130", "user:\u0130", "passkeys:\uFF77", "auth:\uFF77", "user:\uFF77"), calls);
+        assertEquals(4, userScans);
+    }
+
+    @Test
+    public void test_store_create_mapped_halfwidthKatakanaOfAnotherUsersNameIsRefused() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        storedUsers.add(storedUser("id-ka", "\u30AB"));
+        storedUsers.add(storedUser("id-ga", "\u30AC"));
+        useUsernamePolicy("mapped");
+
+        assertRefused("already exists as \u30AB", storedUser("id-ka2", "\uFF76"));
+        // halfwidth KA and the voiced mark are the voiced katakana
+        assertRefused("already exists as \u30AC", storedUser("id-ga2", "\uFF76\uFF9E"));
+
+        assertEquals(List.of(), calls);
+    }
+
+    @Test
+    public void test_store_create_mapped_guestIsAnOrdinaryNameThatOnlyCollisionsRefuse() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        useUsernamePolicy("mapped");
+
+        userService.store(storedUser("id-guest", "guest"));
+        assertEquals(List.of("passkeys:guest", "auth:guest", "user:guest"), calls);
+
+        // once a user holds it, another spelling collides like any other name
+        storedUsers.add(storedUser("id-guest", "guest"));
+        assertRefused("A user named Guest already exists as guest", storedUser("id-Guest", "Guest"));
+    }
+
+    @Test
+    public void test_store_create_mapped_adminEntryItselfIsCreatedAndItsVariantsAreRefused() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, null, false);
+        useUsernamePolicy("mapped");
+
+        assertRefused("is a variant of a name in authentication.admin.users", storedUser("id-Admin", "Admin"));
+        assertRefused("is a variant of a name in authentication.admin.users", storedUser("id-ADMIN", "ADMIN"));
+        assertRefused("is a variant of a name in authentication.admin.users", storedUser("id-wide", "\uFF41\uFF44\uFF4D\uFF49\uFF4E"));
+        assertEquals(List.of(), calls);
+        assertEquals(0, userScans);
+
+        // authentication.admin.users lists admin and no user holds it in this index: it can be created again
+        userService.store(storedUser("id-admin", "admin"));
+        assertEquals(List.of("passkeys:admin", "auth:admin", "user:admin"), calls);
+    }
+
+    @Test
+    public void test_store_rename_mapped_ontoACaseVariantOfAnotherUserIsRefused() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "carol", false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-carol", "carol"));
+        useUsernamePolicy("mapped");
+
+        assertRefused("A user named Alice already exists as alice", readUser("id-carol", "Alice"));
+
+        assertEquals("neither the passkeys of either name nor the user document may be touched", List.of(), calls);
+    }
+
+    @Test
+    public void test_store_rename_mapped_ontoACaseVariantOfItsOwnNameIsAllowed() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-bob", "bob"));
+        useUsernamePolicy("mapped");
+
+        userService.store(readUser("id-alice", "Alice"));
+
+        assertEquals(List.of("passkeys:alice", "passkeys:Alice", "auth:Alice", "user:Alice"), calls);
+    }
+
+    @Test
+    public void test_store_rename_mapped_ontoAnUnusedNameIsAllowed() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-bob", "bob"));
+        useUsernamePolicy("mapped");
+
+        userService.store(readUser("id-alice", "alicia"));
+
+        assertEquals(List.of("passkeys:alice", "passkeys:alicia", "auth:alicia", "user:alicia"), calls);
+    }
+
+    @Test
+    public void test_store_rename_mapped_adminUserNameVariants() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        useUsernamePolicy("mapped");
+
+        assertRefused("is a variant of a name in authentication.admin.users", readUser("id-alice", "ADMIN"));
+        assertEquals(List.of(), calls);
+
+        // the holder of admin gets no exemption for a variant of it
+        installStoreStubs(calls, "admin", false);
+        assertRefused("is a variant of a name in authentication.admin.users", readUser("id-admin", "Admin"));
+        assertEquals(List.of(), calls);
+
+        // while a user named Admin, from before the policy, may take the exact name
+        installStoreStubs(calls, "Admin", false);
+        userService.store(readUser("id-Admin", "admin"));
+        assertEquals(List.of("passkeys:Admin", "passkeys:admin", "auth:admin", "user:admin"), calls);
+    }
+
+    @Test
+    public void test_store_update_mapped_userThatIsNotRenamedIsNeverRefused() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "Alice", false);
+        // a pair that collides already, and an Admin next to admin
+        storedUsers.add(storedUser("id-Alice", "Alice"));
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-admin", "admin"));
+        storedUsers.add(storedUser("id-Admin", "Admin"));
+        useUsernamePolicy("mapped");
+
+        userService.store(readUser("id-Alice", "Alice"));
+        assertEquals(List.of("auth:Alice", "user:Alice"), calls);
+
+        calls.clear();
+        installStoreStubs(calls, "Admin", false);
+        userService.store(readUser("id-Admin", "Admin"));
+        assertEquals(List.of("auth:Admin", "user:Admin"), calls);
+
+        assertEquals("an update without a rename reads no other user", 0, userScans);
+    }
+
+    @Test
+    public void test_store_create_mapped_onAnExistingExactNameIsStillRefusedAsBefore() {
+        final List<String> calls = new ArrayList<>();
+        installStoreStubs(calls, "alice", false);
+        useUsernamePolicy("mapped");
+
+        final UserConflictException e = org.junit.jupiter.api.Assertions.assertThrows(UserConflictException.class,
+                () -> userService.store(storedUser("id-alice", "alice")));
+
+        assertEquals("A user named alice already exists", e.getMessage());
+        assertEquals(List.of(), calls);
+    }
+
+    // ---- the start-up report
+
+    @Test
+    public void test_reportLocalUsernameProblems_preservedReadsNothing() {
+        installStoreStubs(new ArrayList<>(), null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-Alice", "Alice"));
+
+        assertFalse(userService.reportLocalUsernameProblems());
+        assertEquals(0, userScans);
+    }
+
+    @Test
+    public void test_reportLocalUsernameProblems_nothingToReport() {
+        installStoreStubs(new ArrayList<>(), null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-bob", "bob"));
+        useUsernamePolicy("mapped");
+        final org.codelibs.fess.unit.LogCapturingAppender appender = org.codelibs.fess.unit.LogCapturingAppender.attach(UserService.class);
+        try {
+            assertFalse(userService.reportLocalUsernameProblems());
+            assertEquals(List.of(), appender.renderedEvents());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_reportLocalUsernameProblems_collisionsAndWhitespaceAreWarnedOnceInOneLine() {
+        installStoreStubs(new ArrayList<>(), null, false);
+        storedUsers.add(storedUser("id-alice", "alice"));
+        storedUsers.add(storedUser("id-Alice", "Alice"));
+        storedUsers.add(storedUser("id-bob", "bob"));
+        storedUsers.add(storedUser("id-trailing", "carol "));
+        storedUsers.add(storedUser("id-newline", "dave\n2026-01-01 00:00:00,000 [main] ERROR forged"));
+        storedUsers.add(storedUser("id-wide", "eve\u3000x"));
+        useUsernamePolicy("mapped");
+        final org.codelibs.fess.unit.LogCapturingAppender appender = org.codelibs.fess.unit.LogCapturingAppender.attach(UserService.class);
+        try {
+            assertTrue(userService.reportLocalUsernameProblems());
+            final List<String> events = appender.renderedEvents();
+            assertEquals(events.toString(), 1, events.size());
+            final String line = events.get(0);
+            assertTrue(line, line.contains("1 group(s) of names are the same once mapped (first 20: \"alice\" = \"Alice\")"));
+            assertTrue(line, line.contains("3 name(s) contain whitespace or control characters"));
+            assertTrue(line, line.contains("\"carol \""));
+            assertTrue(line, line.contains("\"eve\\u3000x\""));
+            assertTrue(line, line.contains("dave\\u000A2026"));
+            assertFalse(line, line.contains("\n2026"));
+            assertEquals("the report changes nothing", 1, userScans);
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_reportLocalUsernameProblems_listsAtMostTwentyGroupsAndCountsAll() {
+        installStoreStubs(new ArrayList<>(), null, false);
+        for (int i = 0; i < 25; i++) {
+            storedUsers.add(storedUser("id-a" + i, "user" + i));
+            storedUsers.add(storedUser("id-b" + i, "USER" + i));
+        }
+        useUsernamePolicy("mapped");
+        final org.codelibs.fess.unit.LogCapturingAppender appender = org.codelibs.fess.unit.LogCapturingAppender.attach(UserService.class);
+        try {
+            assertTrue(userService.reportLocalUsernameProblems());
+            final String line = appender.renderedEvents().get(0);
+            assertTrue(line, line.contains("25 group(s) of names are the same once mapped (first 20:"));
+            assertTrue(line, line.contains("\"user19\" = \"USER19\""));
+            assertFalse(line, line.contains("\"user20\""));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_reportLocalUsernameProblems_aFailureToReadDoesNotThrow() {
+        installStoreStubs(new ArrayList<>(), null, false);
+        userService.userBhv = new UserBhv() {
+            @Override
+            public void selectCursor(final CBCall<UserCB> cbLambda, final org.dbflute.bhv.readable.EntityRowHandler<User> entityLambda) {
+                throw new IllegalStateException("search engine is down");
+            }
+        };
+        useUsernamePolicy("mapped");
+
+        assertFalse(userService.reportLocalUsernameProblems());
     }
 
     @Test

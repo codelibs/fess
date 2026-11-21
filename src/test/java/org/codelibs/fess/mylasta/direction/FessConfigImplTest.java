@@ -442,6 +442,16 @@ public class FessConfigImplTest extends UnitFessTestCase {
         assertEquals(shippedValue.trim(), loadPartialProperties().get(KEY_ONLY_IN_BUNDLED_DEFAULT));
     }
 
+    // authentication.local.username.policy is new in 15.10, so the file of an upgraded installation does not
+    // have it: both the bundled file and the generated default map must give preserved, never fail or mapped.
+    @Test
+    public void test_usernamePolicy_missingFromTheDeployedFileIsPreserved() throws Exception {
+        assertEquals("preserved", loadShippedConfig().getProperty(FessConfig.AUTHENTICATION_LOCAL_USERNAME_POLICY));
+        assertEquals("preserved", loadPartialProperties().get(FessConfig.AUTHENTICATION_LOCAL_USERNAME_POLICY));
+        assertEquals("preserved",
+                new FessConfig.SimpleImpl().prepareGeneratedDefaultMap().get(FessConfig.AUTHENTICATION_LOCAL_USERNAME_POLICY));
+    }
+
     // The system property channel stays ahead of the bundled defaults, so an administrator can
     // still pin a value for a key the deployed file has not caught up with.
     @Test
