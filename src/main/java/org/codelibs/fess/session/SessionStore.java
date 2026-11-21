@@ -24,7 +24,9 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,6 +86,9 @@ public class SessionStore {
 
     /** The name of the {@link ServletContext} attribute that holds the operations. */
     public static final String CONTEXT_ATTRIBUTE = "fess.session.store";
+
+    /** The name of the {@link ServletContext} attribute through which the Tomcat side saves the sessions that hold a value. */
+    public static final String PERSIST_HOLDING_ATTRIBUTE = "fess.session.persistHolding";
 
     /** The environment variable that selects the session store. */
     public static final String ENV_NAME = "FESS_SESSION_STORE";
@@ -207,6 +212,27 @@ public class SessionStore {
         } catch (final RuntimeException e) {
             logger.debug("No servlet context.", e);
             return null;
+        }
+    }
+
+    /**
+     * Saves, right away, the sessions of this node that hold an attribute value the predicate accepts.
+     *
+     * <p>A session is saved at the end of the request that touched it. An object that a session holds and that a
+     * background task changes later (the nested groups of an LDAP user) would otherwise reach the other nodes only
+     * when the next request of that session came to this node. It does nothing when the session store is not in
+     * use.</p>
+     *
+     * @param holds tells whether an attribute value is the one that changed.
+     */
+    @SuppressWarnings("unchecked")
+    public void persistHolding(final Predicate<Object> holds) {
+        if (!isEnabled()) {
+            return;
+        }
+        final ServletContext servletContext = getServletContext();
+        if (servletContext != null && servletContext.getAttribute(PERSIST_HOLDING_ATTRIBUTE) instanceof final Consumer<?> persist) {
+            ((Consumer<Predicate<Object>>) persist).accept(holds);
         }
     }
 

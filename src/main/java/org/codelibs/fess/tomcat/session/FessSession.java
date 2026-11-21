@@ -51,6 +51,9 @@ public class FessSession extends StandardSession {
     /** Whether {@link #invalidate()} was called, as opposed to an expiry by timeout. */
     protected transient volatile boolean invalidated;
 
+    /** Held while the session is written to the store, see {@link FessSessionManager#persist(FessSession)}. */
+    private final transient Object persistLock = new Object();
+
     /**
      * Creates a session.
      *
@@ -95,6 +98,15 @@ public class FessSession extends StandardSession {
             persistedAt = 0L;
         }
         super.setId(id, notify);
+    }
+
+    /**
+     * Returns the lock that serializes the writes of this session to the store.
+     *
+     * @return the lock
+     */
+    public Object getPersistLock() {
+        return persistLock;
     }
 
     /**

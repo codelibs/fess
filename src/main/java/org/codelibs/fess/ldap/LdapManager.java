@@ -60,10 +60,12 @@ import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.exception.LdapConfigurationException;
 import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.Group;
 import org.codelibs.fess.opensearch.user.exentity.Role;
 import org.codelibs.fess.opensearch.user.exentity.User;
+import org.codelibs.fess.session.SessionStore;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.OptionalUtil;
@@ -569,6 +571,29 @@ public class LdapManager {
                 // The read-then-write is not atomic, but both writers are only reporting.
                 ldapUser.setPermissionState(PermissionState.FAILED);
             }
+        }
+        persistSession(ldapUser);
+    }
+
+    /**
+     * Writes the sessions that hold the user to the session store, if one is in use.
+     *
+     * <p>The nested-group result lives in this node's memory, and a session is written at the end of a request,
+     * which this task is not part of. Without this, another node that only ever receives requests of the session
+     * restores the user from the store with the direct groups and {@code PENDING}, for as long as no request of the
+     * session comes back here. {@code FAILED} is written too, so that the other node does not wait for a result
+     * that is not coming. Failures are logged and swallowed: the user has the groups in this node either way.</p>
+     *
+     * @param ldapUser the user whose permission state was just settled
+     */
+    protected void persistSession(final LdapUser ldapUser) {
+        try {
+            if (ComponentUtil.hasComponent("sessionStore")) {
+                ComponentUtil.<SessionStore> getComponent("sessionStore")
+                        .persistHolding(value -> value instanceof final FessUserBean bean && bean.getFessUser() == ldapUser);
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to write the session of {} to the session store.", ldapUser.getName(), e);
         }
     }
 

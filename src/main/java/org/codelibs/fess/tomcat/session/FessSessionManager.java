@@ -24,7 +24,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.Context;
@@ -58,6 +60,12 @@ import org.apache.tomcat.util.ExceptionUtils;
  * <li>{@value #OP_DELETE}: {@code {id}} to {@code null}.</li>
  * <li>{@value #OP_PURGE}: {@code {}} to the number of deleted expired sessions.</li>
  * </ul>
+ *
+ * <p>The other direction is a {@code Consumer<Predicate<Object>>} that this manager stores in the ServletContext
+ * attribute {@value #PERSIST_HOLDING_ATTRIBUTE} while it runs: it saves every session of this node that holds an
+ * attribute value the predicate accepts, right away and on the calling thread. A background task that changed an
+ * object a session holds, outside of any request, uses it so that the other nodes see the change before the next request
+ * of that session reaches this node.</p>
  */
 public class FessSessionManager extends ManagerBase {
 
@@ -65,6 +73,9 @@ public class FessSessionManager extends ManagerBase {
 
     /** The ServletContext attribute that holds the bridge. */
     public static final String BRIDGE_ATTRIBUTE = "fess.session.store";
+
+    /** The ServletContext attribute that holds the function saving the sessions that hold a given value. */
+    public static final String PERSIST_HOLDING_ATTRIBUTE = "fess.session.persistHolding";
 
     /** The bridge operation that reads a session. */
     public static final String OP_LOAD = "load";
@@ -275,7 +286,18 @@ public class FessSessionManager extends ManagerBase {
      */
     protected void persist(final FessSession session) {
         final Function<Map<String, Object>, Object> save = operation(OP_SAVE);
-        if (save == null || session.isDoNotPersist() || !session.isValid()) {
+        if (save == null) {
+            return;
+        }
+        // The snapshot and the write of one session never interleave with another's, so that a write of an older
+        // snapshot (the end of a request) cannot land after a newer one (a background change) and undo it.
+        synchronized (session.getPersistLock()) {
+            persist(session, save);
+        }
+    }
+
+    private void persist(final FessSession session, final Function<Map<String, Object>, Object> save) {
+        if (session.isDoNotPersist() || !session.isValid()) {
             return;
         }
         final Map<String, Object> args = idArgs(session.getIdInternal());
@@ -402,6 +424,28 @@ public class FessSessionManager extends ManagerBase {
     }
 
     /**
+     * Saves every session of this node that holds an attribute value the predicate accepts. Unlike
+     * {@link #persistTouched()} it needs no request: it is for a background thread that changed an object a session
+     * holds. Failures are logged and swallowed.
+     *
+     * @param holds tells whether an attribute value is the one that changed
+     */
+    protected void persistHolding(final Predicate<Object> holds) {
+        for (final Session session : findSessions()) {
+            if (!(session instanceof final FessSession fessSession) || !fessSession.isValid()) {
+                continue;
+            }
+            try {
+                if (fessSession.snapshotAttributes().values().stream().anyMatch(holds)) {
+                    persist(fessSession);
+                }
+            } catch (final RuntimeException e) {
+                warn("Failed to save the session after one of its attributes changed.", e);
+            }
+        }
+    }
+
+    /**
      * Records that the current thread touched a session.
      *
      * @param session the session
@@ -472,12 +516,21 @@ public class FessSessionManager extends ManagerBase {
     @Override
     protected synchronized void startInternal() throws LifecycleException {
         super.startInternal();
+        final Context context = getContext();
+        if (context != null) {
+            final Consumer<Predicate<Object>> persistHolding = this::persistHolding;
+            context.getServletContext().setAttribute(PERSIST_HOLDING_ATTRIBUTE, persistHolding);
+        }
         setState(LifecycleState.STARTING);
     }
 
     @Override
     protected synchronized void stopInternal() throws LifecycleException {
         setState(LifecycleState.STOPPING);
+        final Context context = getContext();
+        if (context != null) {
+            context.getServletContext().removeAttribute(PERSIST_HOLDING_ATTRIBUTE);
+        }
         // Local copies only: expiry does not delete from the store, so the sessions stay usable on other nodes.
         for (final Session session : findSessions()) {
             try {

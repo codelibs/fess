@@ -627,6 +627,28 @@ public class SessionStoreTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_persistHolding_callsTheFunctionThatTheTomcatSideStored() {
+        final List<java.util.function.Predicate<Object>> received = new ArrayList<>();
+        final java.util.function.Consumer<java.util.function.Predicate<Object>> persist = received::add;
+        final java.util.function.Predicate<Object> holds = value -> true;
+
+        // not selected: nothing is called, even if something stored a function
+        store.contextAttributes.put(SessionStore.PERSIST_HOLDING_ATTRIBUTE, persist);
+        store.persistHolding(holds);
+        assertTrue(received.isEmpty());
+
+        // selected, but the Tomcat side stored nothing (a plain Tomcat session manager): nothing happens
+        store.env.put(SessionStore.ENV_NAME, "opensearch");
+        store.contextAttributes.clear();
+        store.persistHolding(holds);
+
+        store.contextAttributes.put(SessionStore.PERSIST_HOLDING_ATTRIBUTE, persist);
+        store.persistHolding(holds);
+        assertEquals(1, received.size());
+        assertSame(holds, received.get(0));
+    }
+
+    @Test
     public void test_init_caseInsensitive() throws Exception {
         store.env.put(SessionStore.ENV_NAME, "OpenSearch");
         store.init();

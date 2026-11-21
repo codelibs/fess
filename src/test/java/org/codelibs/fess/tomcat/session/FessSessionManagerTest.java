@@ -583,4 +583,103 @@ public class FessSessionManagerTest {
         manager.load();
         manager.unload();
     }
+
+    @Test
+    public void test_persistHolding_savesTheSessionThatHoldsTheChangedObject_withoutARequest() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        // a mutable value that a session holds and that something other than a request changes; its text is its content
+        final java.util.concurrent.atomic.AtomicReference<String> user = new java.util.concurrent.atomic.AtomicReference<>("PENDING");
+        final FessSession holder = request(manager, null, true, s -> s.setAttribute("user", user));
+        final FessSession other = request(manager, null, true, s -> s.setAttribute("user", "someone else"));
+        assertTrue(String.valueOf(store.docs.get(holder.getId()).get("digest")).contains("PENDING"));
+
+        user.set("RESOLVED");
+        // the end of a request is the only save: without help, the store keeps the old content
+        assertTrue(String.valueOf(store.docs.get(holder.getId()).get("digest")).contains("PENDING"));
+
+        store.calls.clear();
+        manager.persistHolding(value -> value == user);
+
+        // only the session that holds it is written, and the store now has the new content
+        assertEquals(1, store.count("save"));
+        assertTrue(String.valueOf(store.docs.get(holder.getId()).get("digest")).contains("RESOLVED"));
+        assertTrue(String.valueOf(store.docs.get(other.getId()).get("digest")).contains("someone else"));
+    }
+
+    @Test
+    public void test_persistHolding_withoutBridgeOrMatch_doesNothing() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        request(manager, null, true, s -> s.setAttribute("user", "alice"));
+        store.calls.clear();
+        manager.persistHolding(value -> "bob".equals(value));
+        assertTrue(store.calls.isEmpty());
+
+        final FessSessionManager memory = newManager(null);
+        request(memory, null, true, s -> s.setAttribute("user", "alice"));
+        memory.persistHolding(value -> "alice".equals(value));
+    }
+
+    @Test
+    public void test_persistHolding_survivesAFailingStoreAndPredicate() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        request(manager, null, true, s -> s.setAttribute("user", "alice"));
+        request(manager, null, true, s -> s.setAttribute("user", "bob"));
+        // a predicate that throws for one session must not stop the others
+        final java.util.concurrent.atomic.AtomicInteger asked = new java.util.concurrent.atomic.AtomicInteger();
+        manager.persistHolding(value -> {
+            asked.incrementAndGet();
+            throw new IllegalStateException("broken predicate");
+        });
+        assertEquals(2, asked.get());
+
+        store.down = true;
+        manager.persistHolding(value -> true);
+    }
+
+    @Test
+    public void test_persist_doesNotInterleaveTheWritesOfOneSession() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v1"));
+
+        // the first write waits in the store; a second one for the same session must not start (and snapshot) before it ends
+        final java.util.concurrent.CountDownLatch inSave = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.atomic.AtomicInteger saves = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>> bridge = store.bridge();
+        final java.util.function.Function<java.util.Map<String, Object>, Object> save = bridge.get(FessSessionManager.OP_SAVE);
+        bridge.put(FessSessionManager.OP_SAVE, args -> {
+            if (saves.incrementAndGet() == 1) {
+                inSave.countDown();
+                try {
+                    release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            return save.apply(args);
+        });
+        final FessSessionManager slow = newManager(null);
+        final org.apache.catalina.Context context = slow.getContext();
+        context.getServletContext().setAttribute(FessSessionManager.BRIDGE_ATTRIBUTE, bridge);
+        final FessSession local = (FessSession) slow.createSession(session.getId());
+        local.setAttribute("k", "v2");
+
+        final Thread first = new Thread(() -> slow.persist(local));
+        first.start();
+        assertTrue(inSave.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        final Thread second = new Thread(() -> slow.persist(local));
+        second.start();
+        second.join(500L);
+        assertTrue(second.isAlive(), "the second write started while the first one was in progress");
+        assertEquals(1, saves.get());
+
+        release.countDown();
+        first.join(10_000L);
+        second.join(10_000L);
+        assertEquals(2, saves.get());
+    }
 }

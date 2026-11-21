@@ -283,6 +283,27 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_roundTrip_userBean_ldapUser_resolvedWithTheNestedGroups() {
+        // what another node reads once the node that resolved the nested groups has written the session again
+        final String[] nested = { "1carol", "Rdev", "Gstaff", "Gparent-of-staff" };
+        final LdapUser resolved = new LdapUser("carol", false, nested, PermissionState.RESOLVED);
+
+        final byte[] bytes = serializer.toBytes(Map.of("u", new FessUserBean(resolved)));
+        final LdapUser restored = (LdapUser) ((FessUserBean) serializer.fromBytes(bytes).get("u")).getFessUser();
+
+        assertEquals(PermissionState.RESOLVED, restored.getPermissionState());
+        assertEquals(List.of(nested), Arrays.asList(restored.getResolvedPermissions()));
+        assertEquals(List.of(nested), Arrays.asList(restored.getPermissions()));
+
+        // and the same for a walk that failed
+        final LdapUser failed = new LdapUser("carol", false, new String[] { "1carol", "Rdev" }, PermissionState.FAILED);
+        final LdapUser restoredFailed =
+                (LdapUser) ((FessUserBean) serializer.fromBytes(serializer.toBytes(Map.of("u", new FessUserBean(failed)))).get("u"))
+                        .getFessUser();
+        assertEquals(PermissionState.FAILED, restoredFailed.getPermissionState());
+    }
+
+    @Test
     public void test_roundTrip_userBean_empty() {
         final FessUserBean restored = (FessUserBean) roundTrip("u", FessUserBean.empty()).get("u");
         assertEquals(Constants.EMPTY_USER_ID, restored.getUserId());
