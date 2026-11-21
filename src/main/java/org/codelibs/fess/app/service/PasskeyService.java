@@ -322,7 +322,9 @@ public class PasskeyService {
      * @param label the name the user gives to the passkey
      * @param responseJson the registration response (PublicKeyCredential JSON)
      * @return the stored passkey
-     * @throws PasskeyException when the response does not verify or the credential is already registered
+     * @throws PasskeyException when the response does not verify, the credential is already registered, or
+     *         the user has {@value #MAX_PASSKEYS_PER_USER} passkeys already, also when other registrations of the
+     *         user running at the same time bring it over the limit (then none of those is kept)
      */
     public Passkey verifyRegistration(final HttpSession session, final User user, final String label, final String responseJson) {
         final PendingChallenge challenge = consumeChallenge(session, REGISTRATION_CHALLENGE_KEY);
@@ -365,6 +367,12 @@ public class PasskeyService {
         passkey.setLabel(trimmedLabel);
         passkey.setCreatedAt(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         insert(passkey);
+        if (findByUserName(challenge.userName()).size() > MAX_PASSKEYS_PER_USER) {
+            // Registrations that passed the check above together (on this node or another) have all been stored. Each of
+            // them sees the surplus, withdraws its own passkey and fails, so that the user is never left above the limit.
+            deleteBy(challenge.userName(), credentialId);
+            throw new PasskeyException("reason=too_many_passkeys, credentialId=" + abbreviate(credentialId));
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Registered a passkey: credentialId={}", abbreviate(credentialId));
         }
