@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.RecordingActivityHelper;
 import org.codelibs.fess.ldap.LdapUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -47,6 +48,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
     private SessionAssist assist;
 
+    private RecordingActivityHelper audit;
+
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -54,6 +57,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(config);
         service = new StampService();
         ComponentUtil.register(service, UserService.class.getCanonicalName());
+        audit = new RecordingActivityHelper();
+        ComponentUtil.register(audit, "activityHelper");
         assist = new SessionAssist();
     }
 
@@ -74,6 +79,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:password_changed", audit.sessionEnds.get(0));
         assertNull(assist.session);
     }
 
@@ -84,6 +91,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:password_changed", audit.sessionEnds.get(0));
     }
 
     @Test
@@ -93,6 +102,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -101,6 +111,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -119,6 +130,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     // ---------------------------------------------------------------------
@@ -132,6 +144,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("alice:user_not_found", audit.sessionEnds.get(0));
         assertNull(assist.session);
     }
 
@@ -142,6 +156,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
     }
 
     @Test
@@ -151,6 +166,8 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+        assertEquals("admin:user_not_found", audit.sessionEnds.get(0));
     }
 
     @Test
@@ -161,6 +178,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
     }
 
     @Test
@@ -170,6 +188,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -195,6 +214,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -205,6 +225,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     // ---------------------------------------------------------------------
@@ -222,6 +243,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
     }
 
     @Test
@@ -232,6 +254,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -241,6 +264,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -272,6 +296,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         assertFalse(assist.getSavedUserBean().isPresent());
         assertEquals(0, service.reads.get());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     // ---------------------------------------------------------------------
@@ -352,6 +377,7 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         assertEquals(1, assist.saved.get()); // stored again, so a replicated session notices
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
@@ -378,12 +404,56 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         assertEquals(Long.valueOf(2000L), assist.session.getPasswordChangedAt());
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
     }
 
     @Test
     public void test_acceptPasswordChange_withoutSession_doesNotFail() {
         assist.acceptPasswordChange("alice", 2000L);
         assertEquals(0, assist.saved.get());
+    }
+
+    // ---------------------------------------------------------------------
+    // one record for one ended session, however many requests see it
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_endSession_secondRequestWithThePreLogoutBeanWritesNoRecord() {
+        final FessUserBean bean = assist.createUserBean(localUser("alice", 500L));
+        assist.session = bean;
+
+        assist.endSession(bean, "password_changed");
+        assist.endSession(bean, "password_changed"); // another request that read the bean before the logout
+
+        assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
+    }
+
+    @Test
+    public void test_endSession_parallelRequestsWriteOneRecord() throws Exception {
+        final FessUserBean bean = assist.createUserBean(localUser("alice", 500L));
+        assist.session = bean;
+        final int threads = 8;
+        final java.util.concurrent.CyclicBarrier start = new java.util.concurrent.CyclicBarrier(threads);
+        final java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        try {
+            final java.util.List<java.util.concurrent.Future<?>> futures = new java.util.ArrayList<>();
+            for (int i = 0; i < threads; i++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    assist.endSession(bean, "password_changed");
+                    return null;
+                }));
+            }
+            for (final java.util.concurrent.Future<?> future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertEquals(1, assist.logouts.get());
+        assertEquals(1, audit.sessionEnds.size());
     }
 
     // ---------------------------------------------------------------------
