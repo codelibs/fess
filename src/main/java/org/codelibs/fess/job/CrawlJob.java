@@ -467,6 +467,7 @@ public class CrawlJob extends ExecJob {
         }
 
         final File propFile = ComponentUtil.getSystemHelper().createTempFile(getExecuteType() + "_", ".properties");
+        boolean completed = false;
         try {
             cmdList.add("-p");
             cmdList.add(propFile.getAbsolutePath());
@@ -503,6 +504,7 @@ public class CrawlJob extends ExecJob {
                 out.append("Exit Code: ").append(exitValue).append("\nOutput:\n").append(it.getOutput());
                 throw new JobProcessingException(out.toString());
             }
+            completed = true;
         } catch (final JobProcessingException e) {
             throw e;
         } catch (final Exception e) {
@@ -510,12 +512,31 @@ public class CrawlJob extends ExecJob {
         } finally {
             try {
                 processHelper.destroyProcess(sessionId);
+                if (!completed) {
+                    // stopped, timed out, or failed: the process could not write its session
+                    storeUnfinishedSession();
+                }
             } finally {
                 if (propFile != null && !propFile.delete()) {
                     logger.warn("Failed to delete properties file: {}", propFile.getAbsolutePath());
                 }
                 deleteTempDir(ownTmpDir);
             }
+        }
+    }
+
+    /**
+     * Gives the crawling session a state and an end time after its crawler process ended abnormally. A
+     * process that is stopped or killed on a timeout cannot write them, because it keeps them in memory
+     * until it finishes.
+     */
+    protected void storeUnfinishedSession() {
+        try {
+            if (ComponentUtil.getCrawlingInfoHelper().storeUnfinishedSession(sessionId)) {
+                logger.info("Recorded the end of the unfinished crawling session: sessionId={}", sessionId);
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to record the end of the crawling session: sessionId={}", sessionId, e);
         }
     }
 

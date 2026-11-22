@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -87,6 +88,37 @@ public class CrawlJobTest extends UnitFessTestCase {
         assertNull(crawlJob.dataConfigIds);
         assertEquals(-2, crawlJob.documentExpires);
         assertEquals(-1, crawlJob.hotThreadInterval);
+    }
+
+    // the end of a stopped crawl is recorded on its session, and a failure to record it does not hide the stop
+    @Test
+    public void test_storeUnfinishedSession() {
+        final List<String> recorded = new ArrayList<>();
+        ComponentUtil.register(new CrawlingInfoHelper() {
+            @Override
+            public synchronized boolean storeUnfinishedSession(final String sessionId) {
+                recorded.add(sessionId);
+                return true;
+            }
+        }, "crawlingInfoHelper");
+        crawlJob.sessionId = "20261109012345";
+
+        crawlJob.storeUnfinishedSession();
+
+        assertEquals(List.of("20261109012345"), recorded);
+    }
+
+    @Test
+    public void test_storeUnfinishedSession_failureIsNotThrown() {
+        ComponentUtil.register(new CrawlingInfoHelper() {
+            @Override
+            public synchronized boolean storeUnfinishedSession(final String sessionId) {
+                throw new IllegalStateException("the index is not available");
+            }
+        }, "crawlingInfoHelper");
+        crawlJob.sessionId = "20261109012345";
+
+        crawlJob.storeUnfinishedSession();
     }
 
     // Test namespace setter

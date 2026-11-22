@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.security.MessageDigestUtil;
 import org.codelibs.fess.Constants;
@@ -141,6 +143,43 @@ public class CrawlingInfoHelper {
         }
 
         infoMap = null;
+    }
+
+    /**
+     * Records on a crawling session that its crawler process was ended from outside (stopped, or killed
+     * on a timeout), so that the session shows a state and an end time.
+     * The crawler process keeps the parameters of a session in memory and writes them when it finishes,
+     * so a process that is killed writes none. Nothing is written for a session that is not stored or
+     * that already carries an end time. The counts of the crawl are in the memory of the process that
+     * was killed, and are not recorded.
+     *
+     * @param sessionId the session ID of the crawler process, as it was given to the process
+     * @return true if the parameters were stored
+     */
+    public synchronized boolean storeUnfinishedSession(final String sessionId) {
+        final String id = sessionId.replace('-', '_'); // the crawler process names its session so
+        final CrawlingInfoService service = getCrawlingInfoService();
+        final CrawlingInfo crawlingInfo = service.getLast(id);
+        if (crawlingInfo == null || getInfoMap(id).containsKey(Constants.CRAWLER_END_TIME)) {
+            return false;
+        }
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final Map<String, String> params = new LinkedHashMap<>();
+        params.put(Constants.CRAWLER_STATUS, Constants.F.toString());
+        params.put(Constants.CRAWLER_END_TIME, new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND).format(new Date(now)));
+        if (crawlingInfo.getCreatedTime() != null) {
+            params.put(Constants.CRAWLER_EXEC_TIME, Long.toString(now - crawlingInfo.getCreatedTime()));
+        }
+        final List<CrawlingInfoParam> crawlingInfoParamList = new ArrayList<>();
+        for (final Map.Entry<String, String> entry : params.entrySet()) {
+            final CrawlingInfoParam crawlingInfoParam = new CrawlingInfoParam();
+            crawlingInfoParam.setCrawlingInfoId(crawlingInfo.getId());
+            crawlingInfoParam.setKey(entry.getKey());
+            crawlingInfoParam.setValue(entry.getValue());
+            crawlingInfoParamList.add(crawlingInfoParam);
+        }
+        service.storeInfo(crawlingInfoParamList);
+        return true;
     }
 
     /**
