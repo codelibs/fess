@@ -112,6 +112,7 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
+        body.permissions = permissionsOrDefault(body.permissions);
         body.crudMode = CrudMode.CREATE;
         // The create screens fill this in through CreateForm#initialize, which an API request
         // never runs. Without it the setting records no script type, and an unset type means
@@ -143,9 +144,17 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
+        // A request without "permissions" leaves the permission of the stored setting as it is; anything else is
+        // stored as sent, so that the body of a GET can be sent back unchanged (an empty permission is "").
+        final boolean keepPermissions = body.permissions == null;
+        final String[] storedPermissions =
+                keepPermissions ? dataConfigService.getDataConfig(body.id).map(DataConfig::getPermissions).orElse(null) : null;
         body.crudMode = CrudMode.EDIT;
         verifyVersionNo(body.id, body.versionNo, dataConfigService.getDataConfig(body.id).map(e -> e.getVersionNo()).orElse(null));
         final DataConfig dataConfig = getDataConfig(body).map(entity -> {
+            if (keepPermissions) {
+                entity.setPermissions(storedPermissions);
+            }
             try {
                 dataConfigService.store(entity);
             } catch (final Exception e) {

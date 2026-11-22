@@ -76,6 +76,27 @@ public abstract class FessApiAdminAction extends FessApiAction {
     }
 
     /**
+     * Gives a crawl setting that is being created the default permission when the request names none.
+     * <p>
+     * The create screens prefill the permission field with {@code role.search.default.display.permissions}
+     * ({@code {role}guest}). A request of this API never runs that prefill, and a setting without a permission
+     * has documents that no search shows, administrators included, with nothing in the response or the logs to say so.
+     * A permission that the caller sent is kept as is.
+     * </p>
+     * <p>
+     * Only a POST calls this. A PUT stores what it carries, like the edit screens, because the body of a GET
+     * (which has an empty {@code permissions} for a setting without one) has to be sendable back unchanged: a PUT that
+     * omits {@code permissions} (null) keeps the permission of the stored setting, and an empty one stores none.
+     * </p>
+     *
+     * @param permissions the permissions of the request, one per line, may be null or blank
+     * @return the permissions of the request, or the default one when it has none
+     */
+    protected String permissionsOrDefault(final String permissions) {
+        return StringUtil.isBlank(permissions) ? fessConfig.getSearchDefaultDisplayPermission() : permissions;
+    }
+
+    /**
      * Checks whether this action works only with the CodeLibs plugins of the search engine.
      * <p>
      * When it does and the search engine runs without them ({@code FessConfig#isFesenPluginless()}),
