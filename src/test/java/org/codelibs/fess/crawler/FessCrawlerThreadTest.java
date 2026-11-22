@@ -885,6 +885,39 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isContentUpdated_head404DeletesTheDocument() {
+        assertGoneHeadDeletesTheDocument(404);
+    }
+
+    // 410 Gone says that the page was removed on purpose, which is as final as a 404
+    @Test
+    public void test_isContentUpdated_head410DeletesTheDocument() {
+        assertGoneHeadDeletesTheDocument(410);
+    }
+
+    private void assertGoneHeadDeletesTheDocument(final int status) {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\""));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(status, null);
+
+        assertFalse(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+
+        assertEquals(1, env.client.requests.size());
+        assertEquals(RequestData.Method.HEAD, env.client.requests.get(0).getMethod());
+        assertEquals(List.of(env.indexingHelper.id), env.indexingHelper.deletedIds);
+        assertNull(crawlerThread.conditionalGetState);
+    }
+
+    @Test
+    public void test_isContentUpdated_head410WithLastModifiedIsNotAConditionalGet() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("last_modified", INDEXED_LAST_MODIFIED);
+        doc.put("etag", "\"v1\"");
+        assertNull(crawlerThread.resolveConditionalHeaders(doc, headResponse(410, new Date())));
+    }
+
+    @Test
     public void test_isContentUpdated_noIndexedLastModifiedSendsNoHead() {
         final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, "\"v1\""));
         final RecordingCrawlerThread crawlerThread = env.thread;
@@ -1118,6 +1151,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         final Map<String, Object> document;
         String[] fields;
         String id;
+        final List<String> deletedIds = new ArrayList<>();
         final List<String> updatedFields = new ArrayList<>();
 
         RecordingIndexingHelper(final Map<String, Object> document) {
@@ -1146,6 +1180,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
 
         @Override
         public boolean deleteDocument(final SearchEngineClient searchEngineClient, final String id) {
+            deletedIds.add(id);
             return true;
         }
     }

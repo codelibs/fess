@@ -138,6 +138,20 @@ public class FessCrawlerThread extends CrawlerThread {
      */
     protected ConditionalGetState conditionalGetState;
 
+    /** The HTTP status code of a page that was removed for good (410 Gone). */
+    protected static final int GONE_STATUS_CODE = 410;
+
+    /**
+     * Tells whether a status code says that the page does not exist any more: 404 Not Found, or 410 Gone,
+     * which is sent for a page that was removed on purpose. The indexed document of such a page is deleted.
+     *
+     * @param httpStatusCode the HTTP status code of the response
+     * @return true for 404 and 410
+     */
+    protected static boolean isGone(final int httpStatusCode) {
+        return httpStatusCode == Constants.NOT_FOUND_STATUS_CODE || httpStatusCode == GONE_STATUS_CODE;
+    }
+
     /**
      * Determines whether the content at the given URL has been updated since the last crawl.
      * This method implements incremental crawling by comparing timestamps and checking document
@@ -145,7 +159,7 @@ public class FessCrawlerThread extends CrawlerThread {
      *
      * <p>For an http or https URL whose indexed document cannot be judged by a HEAD request and its
      * Last-Modified (no indexed last_modified, no Last-Modified in the HEAD response, or a HEAD status
-     * other than 200 and 404), the GET is sent as a conditional request with the indexed ETag and
+     * other than 200, 404 and 410), the GET is sent as a conditional request with the indexed ETag and
      * last_modified; see {@link #createRequestData(UrlQueue)} and
      * {@link #processResponse(UrlQueue, ResponseData)}.</p>
      *
@@ -255,10 +269,10 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Accessing document: url={}, status={}", urlQueue.getLogUrl(), httpStatusCode);
                 }
-                if (httpStatusCode == Constants.NOT_FOUND_STATUS_CODE) {
+                if (isGone(httpStatusCode)) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     if (!indexingHelper.deleteDocument(searchEngineClient, id) && logger.isDebugEnabled()) {
-                        logger.debug("Failed to delete document: status={}, url={}", Constants.NOT_FOUND_STATUS_CODE, urlQueue.getLogUrl());
+                        logger.debug("Failed to delete document: status={}, url={}", httpStatusCode, urlQueue.getLogUrl());
                     }
                     return false;
                 }
@@ -341,7 +355,7 @@ public class FessCrawlerThread extends CrawlerThread {
     /**
      * Resolves the validators of a conditional GET for an indexed document. A conditional GET is used
      * when the HEAD comparison cannot decide: the document has no last_modified, the HEAD response has
-     * no Last-Modified, or the HEAD status is neither 200 nor 404.
+     * no Last-Modified, or the HEAD status is none of 200, 404 and 410.
      *
      * @param document the indexed document
      * @param headResponse the HEAD response, or null if no HEAD request was sent
@@ -353,7 +367,7 @@ public class FessCrawlerThread extends CrawlerThread {
         final Date lastModified = DocumentUtil.getValue(document, fessConfig.getIndexFieldLastModified(), Date.class);
         if (lastModified != null && headResponse != null && headResponse.getLastModified() != null) {
             final int httpStatusCode = headResponse.getHttpStatusCode();
-            if (httpStatusCode == Constants.OK_STATUS_CODE || httpStatusCode == Constants.NOT_FOUND_STATUS_CODE) {
+            if (httpStatusCode == Constants.OK_STATUS_CODE || isGone(httpStatusCode)) {
                 return null;
             }
         }
