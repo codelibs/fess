@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.app.service.PasskeyService;
 import org.codelibs.fess.util.LogUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +32,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class WebApiManagerFactory {
 
     private static final Logger logger = LogManager.getLogger(WebApiManagerFactory.class);
+
+    /** The longest path segment that the DEBUG lines print as is (a credential id is at least 22 characters). */
+    protected static final int LOGGED_SEGMENT_MAX_LENGTH = 20;
 
     /**
      * Path prefixes of the REST APIs that were split out of core, each paired with the plugin
@@ -77,12 +81,13 @@ public class WebApiManagerFactory {
     public WebApiManager get(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
         if (logger.isDebugEnabled()) {
-            logger.debug("Looking for WebApiManager. servletPath={}, registeredManagers={}", servletPath, webApiManagers.length);
+            logger.debug("Looking for WebApiManager. servletPath={}, registeredManagers={}", toLoggablePath(servletPath),
+                    webApiManagers.length);
         }
         for (final WebApiManager webApiManager : webApiManagers) {
             if (webApiManager.matches(request)) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("WebApiManager matched. servletPath={}, manager={}", servletPath,
+                    logger.debug("WebApiManager matched. servletPath={}, manager={}", toLoggablePath(servletPath),
                             webApiManager.getClass().getSimpleName());
                 }
                 return webApiManager;
@@ -90,9 +95,37 @@ public class WebApiManagerFactory {
         }
         reportUnservedLegacyApi(servletPath);
         if (logger.isDebugEnabled()) {
-            logger.debug("No WebApiManager matched. servletPath={}", servletPath);
+            logger.debug("No WebApiManager matched. servletPath={}", toLoggablePath(servletPath));
         }
         return null;
+    }
+
+    /**
+     * Shortens the path for the DEBUG lines of {@link #get(HttpServletRequest)}.
+     *
+     * <p>A path can contain an identifier that identifies a secret, such as the credential id of
+     * {@code DELETE /api/v2/auth/passkey/{id}}, so every segment longer than
+     * {@value #LOGGED_SEGMENT_MAX_LENGTH} characters is cut the way {@link PasskeyService#abbreviate}
+     * cuts a credential id: its first characters followed by {@code ...}. The names of the
+     * endpoints are shorter than that and stay readable. The path is looked at before it is routed, so a
+     * trailing slash or an extra segment does not hide the identifier.</p>
+     *
+     * @param servletPath The servlet path of the request, may be null
+     * @return The path with every overlong segment abbreviated
+     */
+    protected String toLoggablePath(final String servletPath) {
+        if (servletPath == null) {
+            return null;
+        }
+        final String[] segments = servletPath.split("/", -1);
+        boolean changed = false;
+        for (int i = 0; i < segments.length; i++) {
+            if (segments[i].length() > LOGGED_SEGMENT_MAX_LENGTH) {
+                segments[i] = PasskeyService.abbreviate(segments[i]);
+                changed = true;
+            }
+        }
+        return changed ? String.join("/", segments) : servletPath;
     }
 
     /**

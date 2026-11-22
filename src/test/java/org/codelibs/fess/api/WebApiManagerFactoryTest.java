@@ -288,4 +288,51 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
             capture.detach();
         }
     }
+
+    /**
+     * The credential id of {@code DELETE /api/v2/auth/passkey/{id}} is the last segment of the path, and
+     * the DEBUG lines print the path: they keep only the first 8 characters, the way PasskeyService does.
+     */
+    @Test
+    public void test_get_debugLinesAbbreviateTheCredentialIdOfAPasskeyPath() {
+        final String credentialId = "0DOZNx_pXr3hJ8mQ2bYvKfWqL7sTuEaC5gHnPdRzO1k";
+        final String path = "/api/v2/auth/passkey/" + credentialId;
+        for (final boolean matched : new boolean[] { false, true }) {
+            final WebApiManagerFactory factory = new WebApiManagerFactory();
+            if (matched) {
+                factory.add(newManager("/api/v2", true));
+            }
+            final LogCapturingAppender capture = LogCapturingAppender.attach(WebApiManagerFactory.class.getName(), Level.DEBUG);
+            try {
+                factory.get(newRequest(path));
+                factory.get(newRequest(path + "/"));
+                final List<String> rendered = capture.renderedEvents();
+                assertFalse(rendered.isEmpty());
+                for (final String line : rendered) {
+                    assertFalse(line.contains(credentialId), line);
+                    assertFalse(line.contains("0DOZNx_pX"), line);
+                }
+                assertTrue(rendered.toString(), rendered.get(0).contains("servletPath=/api/v2/auth/passkey/0DOZNx_p..."));
+            } finally {
+                capture.detach();
+            }
+        }
+    }
+
+    @Test
+    public void test_toLoggablePath() {
+        final WebApiManagerFactory factory = new WebApiManagerFactory();
+        assertNull(factory.toLoggablePath(null));
+        assertEquals("", factory.toLoggablePath(""));
+        assertEquals("/", factory.toLoggablePath("/"));
+        assertEquals("/api/v2/search", factory.toLoggablePath("/api/v2/search"));
+        assertEquals("/api/v2/auth/passkey", factory.toLoggablePath("/api/v2/auth/passkey"));
+        assertEquals("/api/v2/auth/passkey/register/options", factory.toLoggablePath("/api/v2/auth/passkey/register/options"));
+        assertEquals("/api/v2/auth/passkey/01234567...", factory.toLoggablePath("/api/v2/auth/passkey/0123456789abcdefghijklmnopq"));
+        assertEquals("/api/v2/auth/passkey/", factory.toLoggablePath("/api/v2/auth/passkey/"));
+        assertEquals("0123456789abcdef", factory.toLoggablePath("0123456789abcdef"));
+        // not only the last segment: a trailing slash or a segment after the id must not hide it
+        assertEquals("/api/v2/auth/passkey/01234567.../", factory.toLoggablePath("/api/v2/auth/passkey/0123456789abcdefghijklmnopq/"));
+        assertEquals("/api/v2/auth/passkey/01234567.../x", factory.toLoggablePath("/api/v2/auth/passkey/0123456789abcdefghijklmnopq/x"));
+    }
 }
