@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -211,6 +212,9 @@ public class SearchEngineClient implements Client {
     private static final Logger logger = LogManager.getLogger(SearchEngineClient.class);
 
     private static final String DOC_INDEX = "fess";
+
+    /** The ID of the block of a closed index, which is not a write refusal of the kind a full disk causes. */
+    private static final String INDEX_CLOSED_BLOCK_ID = "4";
 
     private static final String LOG_INDEX_PREFIX = "fess_log";
 
@@ -2766,6 +2770,58 @@ public class SearchEngineClient implements Client {
         } catch (final OpenSearchException e) {
             throw new SearchEngineClientException("Failed to process a ping request.", e);
         }
+    }
+
+    /**
+     * Tells whether the search engine refuses writes: an index (or the whole cluster) carries a block at the
+     * write level, as the read-only block that OpenSearch puts on every index when the disk passes the
+     * flood-stage watermark. Such a cluster still answers searches, and its health is green.
+     * A closed index is not counted, and neither is a cluster state that could not be read.
+     *
+     * @return true if a write is refused by a block
+     */
+    public boolean isWriteBlocked() {
+        try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_cluster/state/blocks").execute()) {
+            if (response.getHttpStatusCode() == 200) {
+                return hasWriteBlock(response.getContent(SearchEngineCurl.jsonParser()));
+            }
+        } catch (final Exception e) {
+            logger.debug("Failed to read the blocks of the cluster state.", e);
+        }
+        return false;
+    }
+
+    /**
+     * Looks for a write-level block in the {@code blocks} of a cluster state response.
+     *
+     * @param state the response of {@code GET /_cluster/state/blocks}
+     * @return true if the cluster or an index that is not closed has a block at the write level
+     */
+    protected static boolean hasWriteBlock(final Map<String, Object> state) {
+        if (!(state.get("blocks") instanceof final Map<?, ?> blocks)) {
+            return false;
+        }
+        if (blocks.get("global") instanceof final Map<?, ?> global && hasWriteLevel(global, null)) {
+            return true;
+        }
+        if (blocks.get("indices") instanceof final Map<?, ?> indices) {
+            for (final Object index : indices.values()) {
+                if (index instanceof final Map<?, ?> indexBlocks && hasWriteLevel(indexBlocks, INDEX_CLOSED_BLOCK_ID)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasWriteLevel(final Map<?, ?> blocks, final String ignoredId) {
+        for (final Map.Entry<?, ?> entry : blocks.entrySet()) {
+            if (!String.valueOf(entry.getKey()).equals(ignoredId) && entry.getValue() instanceof final Map<?, ?> block
+                    && block.get("levels") instanceof final Collection<?> levels && levels.contains("write")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
