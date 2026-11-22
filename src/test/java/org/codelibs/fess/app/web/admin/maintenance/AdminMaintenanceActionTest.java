@@ -118,6 +118,14 @@ public class AdminMaintenanceActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getCatEndpoint_asksTheClusterManagerEndpointForMaster() {
+        final AdminMaintenanceAction action = new AdminMaintenanceAction();
+        assertEquals("cluster_manager", action.getCatEndpoint("master"));
+        assertEquals("health", action.getCatEndpoint("health"));
+        assertEquals("nodes", action.getCatEndpoint("nodes"));
+    }
+
+    @Test
     public void test_isAccessTokenIndex() {
         assertTrue(AdminMaintenanceAction.isAccessTokenIndex("fess_config.access_token"));
         assertTrue(AdminMaintenanceAction.isAccessTokenIndex("custom_config.access_token"));

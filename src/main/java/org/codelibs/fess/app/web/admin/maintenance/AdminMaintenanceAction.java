@@ -306,13 +306,25 @@ public class AdminMaintenanceAction extends FessAdminAction {
             final ZipEntry entry = new ZipEntry(id + "/es_cat_" + name + ".txt");
             try {
                 zos.putNextEntry(entry);
-                try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_cat/" + name).param("v", "").execute()) {
+                try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_cat/" + getCatEndpoint(name)).param("v", "").execute()) {
                     CopyUtil.copy(response.getContentAsStream(), zos);
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to access /_cat/{}", name, e);
             }
         });
+    }
+
+    /**
+     * Returns the CAT endpoint that serves the given diagnostic name. {@code _cat/master} is a deprecated alias of
+     * {@code _cat/cluster_manager}, and the engine logs a deprecation for every use of it; the entry in the ZIP keeps
+     * the name {@code master}.
+     *
+     * @param name the diagnostic name in {@link #CAT_NAMES}
+     * @return the name of the CAT endpoint to request
+     */
+    protected String getCatEndpoint(final String name) {
+        return "master".equals(name) ? "cluster_manager" : name;
     }
 
     /**
