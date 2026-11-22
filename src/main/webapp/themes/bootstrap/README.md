@@ -27,6 +27,7 @@ bootstrap/
 │   ├── i18n.js           # JSON bundle loader; server ui_locale, then navigator.language
 │   ├── format.js         # formatting helpers and the whitelist HTML sanitizer
 │   ├── markdown.js       # minimal Markdown renderer for chat answers
+│   ├── theme-init.js     # sets data-bs-theme from the system light/dark setting (data-theme on <html> overrides)
 │   ├── logo.png          # home page logo
 │   ├── logo-head.png     # header logo
 │   ├── styles.css        # overrides on top of vendor/bootstrap/bootstrap.min.css
