@@ -59,6 +59,8 @@ import org.apache.tomcat.util.ExceptionUtils;
  * {@code {gone=true}} and the session is expired locally.</li>
  * <li>{@value #OP_DELETE}: {@code {id}} to {@code null}.</li>
  * <li>{@value #OP_PURGE}: {@code {}} to the number of deleted expired sessions.</li>
+ * <li>{@value #OP_RECONCILE}: {@code {local, incoming}}, the attributes the session holds and the ones just read from the
+ * store (changed in place before they are applied), to whether the incoming attributes hold what the session held. Optional.</li>
  * </ul>
  *
  * <p>The other direction is a {@code Consumer<Predicate<Object>>} that this manager stores in the ServletContext
@@ -88,6 +90,9 @@ public class FessSessionManager extends ManagerBase {
 
     /** The bridge operation that deletes the expired sessions. */
     public static final String OP_PURGE = "purge";
+
+    /** The optional bridge operation that lets what a session holds take over a state read from the store. */
+    public static final String OP_RECONCILE = "reconcile";
 
     /** The number of session ids remembered as not to be written. */
     protected static final int DO_NOT_PERSIST_LIMIT = 1024;
@@ -273,11 +278,34 @@ public class FessSessionManager extends ManagerBase {
             return session;
         }
         final boolean changed = !String.valueOf(state.get("digest")).equals(session.getDigest());
+        if (changed) {
+            reconcile(session, state);
+        }
         apply(session, state, changed);
         if (changed) {
             session.setPersistedAt(System.currentTimeMillis());
         }
         return session;
+    }
+
+    /**
+     * Lets the web application carry what this node knows over to the attributes that are about to replace it. When it does,
+     * the session differs from the store afterwards, so the write at the end of the request brings the store right.
+     */
+    private void reconcile(final FessSession session, final Map<String, Object> state) {
+        final Function<Map<String, Object>, Object> reconcile = operation(OP_RECONCILE);
+        final Object incoming = state.get("attributes");
+        if (reconcile == null || !(incoming instanceof Map)) {
+            return;
+        }
+        final Map<String, Object> args = new HashMap<>();
+        args.put("local", session.snapshotAttributes());
+        args.put("incoming", incoming);
+        try {
+            reconcile.apply(args);
+        } catch (final RuntimeException e) {
+            warn("Failed to reconcile the session with the session store. The state of the store is applied as it is.", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -332,6 +360,11 @@ public class FessSessionManager extends ManagerBase {
             }
         } catch (final RuntimeException e) {
             warn("Failed to save the session to the session store.", e);
+        }
+        if (session.isInvalidated()) {
+            // The logout deleted the document while this write was in the store. For a session that had none yet, the
+            // write created it, which would let the cookie of the logged-out session in on every node.
+            deleteFromStore(session.getIdInternal());
         }
     }
 

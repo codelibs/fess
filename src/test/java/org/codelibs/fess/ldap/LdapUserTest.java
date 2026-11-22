@@ -908,4 +908,26 @@ public class LdapUserTest extends UnitFessTestCase {
         // a session that settled by itself with an equal result is not this walk's: no write for it
         assertFalse(restored("carol", false, full.clone(), FessUser.PermissionState.RESOLVED).takeResolutionOf(resolved));
     }
+
+    @Test
+    public void test_takeResolutionOf_readsTheStateOfAUserThatIsBeingPublishedBeforeItsPermissions() {
+        // the walk publishes the permissions, then the state; the reader must not see the state with the set it replaced
+        final String[] direct = { "1carol", "2A1" };
+        final String[] full = { "1carol", "2A1", "2A0" };
+        final LdapUser walking = new LdapUser("carol", false, direct, FessUser.PermissionState.PENDING) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public FessUser.PermissionState getPermissionState() {
+                permissions = full;
+                permissionState = FessUser.PermissionState.RESOLVED;
+                return super.getPermissionState();
+            }
+        };
+        final LdapUser copy = new LdapUser("carol", false, direct, FessUser.PermissionState.PENDING);
+
+        assertTrue(copy.takeResolutionOf(walking));
+        assertEquals(FessUser.PermissionState.RESOLVED, copy.getPermissionState());
+        assertEquals(java.util.List.of(full), java.util.List.of(copy.getResolvedPermissions()));
+    }
 }

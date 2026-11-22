@@ -165,15 +165,18 @@ public class LdapUser implements FessUser {
      * publishes its own result. A copy that already took this result (it holds the same array) matches again; one that
      * settled by itself with an equal result does not.</p>
      *
-     * @param resolved The user whose resolution ended, with {@code RESOLVED} or {@code FAILED}.
+     * @param resolved The user whose resolution ended, with {@code RESOLVED} or {@code FAILED}, or the instance of a session that
+     *        a resolution may be publishing into right now (its state is read before its permissions).
      * @return true if this user is {@code resolved} or now holds its result, false if it is another user or is settled otherwise.
      */
     public boolean takeResolutionOf(final LdapUser resolved) {
         if (this == resolved) {
             return true;
         }
-        final String[] resolvedPermissions = resolved.permissions;
+        // The state first, then the set: the walk publishes the set before the state, so a state that is seen
+        // here comes with its set, whereas the other order could pair the direct groups with RESOLVED.
         final PermissionState resolvedState = resolved.getPermissionState();
+        final String[] resolvedPermissions = resolved.permissions;
         if (resolvedPermissions == null || resolvedState == PermissionState.PENDING || permissions == null || !name.equals(resolved.name)
                 || nameFromProvider != resolved.nameFromProvider) {
             return false;

@@ -45,6 +45,19 @@ class FakeSessionStore {
     /** The text that stands for a value in the digest; by default its string form. */
     volatile java.util.function.Function<Object, String> describer = String::valueOf;
 
+    /** Whether the bridge offers the reconcile operation, as the web application does. */
+    volatile boolean reconciles;
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> localOf(final Map<String, Object> args) {
+        return (Map<String, Object>) args.get("local");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> incomingOf(final Map<String, Object> args) {
+        return (Map<String, Object>) args.get("incoming");
+    }
+
     private Map<String, Object> copyOf(final Map<String, Object> attributes) {
         final Map<String, Object> copy = new HashMap<>();
         attributes.forEach((name, value) -> copy.put(name, copier.apply(value)));
@@ -57,6 +70,12 @@ class FakeSessionStore {
         ops.put(FessSessionManager.OP_SAVE, this::save);
         ops.put(FessSessionManager.OP_DELETE, this::delete);
         ops.put(FessSessionManager.OP_PURGE, this::purge);
+        if (reconciles) {
+            ops.put(FessSessionManager.OP_RECONCILE, args -> {
+                check("reconcile");
+                return org.codelibs.fess.session.SessionStore.takeSettledUsers(localOf(args), incomingOf(args));
+            });
+        }
         return ops;
     }
 
