@@ -185,6 +185,8 @@ paths:
             of the top fused results are not in the keyword results' window, and
             shifts `start` back so that the later pages follow the fused ones
             without a gap or a repeat. When it is left out the shift is 0.
+            A value above half of `rank.fusion.window_size` (100 by default) is
+            used as that half; it is not refused.
             Depends on `query.max.search.result.offset`.
           required: false
           schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
