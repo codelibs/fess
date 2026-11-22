@@ -34,6 +34,7 @@ import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -160,6 +161,26 @@ public class AccessTokenService {
      */
     public OptionalEntity<Set<String>> getTokenPermissions(final HttpServletRequest request) {
         return resolvePermissions(request, false);
+    }
+
+    /**
+     * Get the name of the registered token the request carries.
+     *
+     * <p>It is for the audit log, which names the caller of an API request that has no session. An
+     * unregistered token has no name, and neither does a request without a token. The expiry is not
+     * checked: a request turned away because its token expired is still recorded with the name.
+     *
+     * @param request The request.
+     * @return The name of the token, empty when the request carries no registered token (or the token has no name).
+     */
+    public OptionalThing<String> getTokenName(final HttpServletRequest request) {
+        final String token = ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request);
+        if (StringUtil.isBlank(token)) {
+            return OptionalThing.empty();
+        }
+        return accessTokenBhv.selectEntity(cb -> {
+            cb.query().setToken_Term(token);
+        }).map(AccessToken::getName);
     }
 
     /**

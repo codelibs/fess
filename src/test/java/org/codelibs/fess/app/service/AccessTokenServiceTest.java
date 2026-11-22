@@ -17,8 +17,10 @@ package org.codelibs.fess.app.service;
 
 import java.util.Set;
 
+import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.opensearch.config.exentity.AccessToken;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,5 +101,16 @@ public class AccessTokenServiceTest extends UnitFessTestCase {
 
         assertEquals(1, permissions.size());
         assertTrue(permissions.contains("1guest"));
+    }
+
+    /**
+     * A request without a token has no token name, so the audit log keeps its dash.
+     */
+    @Test
+    public void test_getTokenName_noToken() {
+        ComponentUtil.register(new AccessTokenHelper(), "accessTokenHelper");
+        final AccessTokenService service = new AccessTokenService();
+
+        assertFalse(service.getTokenName(getMockRequest()).isPresent());
     }
 }

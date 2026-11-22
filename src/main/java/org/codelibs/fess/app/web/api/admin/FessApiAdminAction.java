@@ -17,10 +17,12 @@ package org.codelibs.fess.app.web.api.admin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.FessApiAction;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
@@ -89,15 +91,39 @@ public abstract class FessApiAdminAction extends FessApiAction {
     /**
      * Records a request that the access token check turned away as {@code ACCESS_DENIED}.
      * <p>
-     * The user is {@code -} because a rejected request has no session to name, and only the request
-     * path is written: neither the access token nor its parameter ever reaches the audit log.
+     * The user is the name of the access token when the request carries a registered one (an expired
+     * token, or one that lacks the administrative permission) and {@code -} otherwise, and only the
+     * request path is written: neither the access token nor its parameter ever reaches the audit log.
      * </p>
      *
      * @param runtime the action runtime context of the rejected request
      */
     @Override
     protected void onAccessDenied(final ActionRuntime runtime) {
-        activityHelper.accessDenied(getUserBean(), runtime.getRequestPath());
+        activityHelper.accessDenied(getAuditUser(), runtime.getRequestPath());
+    }
+
+    /**
+     * Gets the name that the audit log records as the user of this request.
+     * <p>
+     * It is the logged-in user when the request carries a session. A request that carries only an
+     * access token has no user, so the name of the token says whose call it was; the token itself is
+     * never used. It is {@code -} when neither is known.
+     * </p>
+     *
+     * @return the user id, the access token name, or {@code -}
+     */
+    protected String getAuditUser() {
+        return getUserBean().map(FessUserBean::getUserId).orElseGet(() -> {
+            try {
+                return accessTokenService.getTokenName(request).filter(StringUtil::isNotBlank).orElse("-");
+            } catch (final RuntimeException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to resolve the access token name for the audit log.", e);
+                }
+                return "-";
+            }
+        });
     }
 
     /**
@@ -105,8 +131,8 @@ public abstract class FessApiAdminAction extends FessApiAction {
      * <p>
      * This runs only after {@link #godHandPrologue(ActionRuntime)} has accepted the access token,
      * so every administrative change made through this API leaves an {@code ACCESS} record. The
-     * user is the logged-in user when the request carries a session and {@code -} otherwise; the
-     * access token itself is never written. An action that {@link #requiresEnginePlugins() requires
+     * user is the logged-in user when the request carries a session, the name of the access token
+     * when it carries only a token, and {@code -} otherwise; the access token itself is never written. An action that {@link #requiresEnginePlugins() requires
      * the plugins} is then turned away with HTTP 404 when the search engine runs without them.
      * </p>
      *
@@ -115,7 +141,7 @@ public abstract class FessApiAdminAction extends FessApiAction {
      */
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) {
-        activityHelper.access(getUserBean(), runtime.getRequestPath(), runtime.getExecuteMethod().getName());
+        activityHelper.access(getAuditUser(), runtime.getRequestPath(), runtime.getExecuteMethod().getName());
         if (requiresEnginePlugins() && fessConfig.isFesenPluginless()) {
             return asJson(
                     new ApiErrorResponse().message("This API is not available when the search engine runs without the CodeLibs plugins.")

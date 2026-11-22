@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
+import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -39,6 +40,8 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaMessenger;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class FessApiAdminActionTest extends UnitFessTestCase {
 
@@ -66,6 +69,50 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
         assertEquals("admin", capturedLogs.get(0).get("user"));
         assertEquals("/api/admin/user/setting", capturedLogs.get(0).get("path"));
         assertEquals("put$setting", capturedLogs.get(0).get("execute"));
+    }
+
+    @Test
+    public void test_hookBefore_recordsTheNameOfTheAccessToken() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final FessApiAdminAction action = createAction(capturedLogs, OptionalThing.empty(), true, OptionalThing.of("ops-token"));
+
+        action.hookBefore(new TestActionRuntime("/api/admin/labeltype/setting", "post$setting"));
+
+        assertEquals(1, capturedLogs.size());
+        assertEquals("ops-token", capturedLogs.get(0).get("user"));
+    }
+
+    @Test
+    public void test_hookBefore_theLoggedInUserWinsOverTheTokenName() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final FessApiAdminAction action =
+                createAction(capturedLogs, OptionalThing.of(new FessUserBean(new TestUser("admin"))), true, OptionalThing.of("ops-token"));
+
+        action.hookBefore(new TestActionRuntime("/api/admin/user/setting", "put$setting"));
+
+        assertEquals("admin", capturedLogs.get(0).get("user"));
+    }
+
+    @Test
+    public void test_hookBefore_aBlankTokenNameIsRecordedAsDash() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final FessApiAdminAction action = createAction(capturedLogs, OptionalThing.empty(), true, OptionalThing.of(" "));
+
+        action.hookBefore(new TestActionRuntime("/api/admin/labeltype/setting", "post$setting"));
+
+        assertEquals("-", capturedLogs.get(0).get("user"));
+    }
+
+    @Test
+    public void test_godHandPrologue_recordsTheTokenNameWhenTheTokenIsNotAdmin() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        ComponentUtil.register(new SystemHelper(), "systemHelper"); // ApiResult reads the product version
+        final FessApiAdminAction action = createAction(capturedLogs, OptionalThing.empty(), false, OptionalThing.of("search-only"));
+
+        action.godHandPrologue(new TestActionRuntime("/api/admin/labeltype/setting", "post$setting"));
+
+        assertEquals("ACCESS_DENIED", capturedLogs.get(0).get("action"));
+        assertEquals("search-only", capturedLogs.get(0).get("user"));
     }
 
     @Test
@@ -153,7 +200,7 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
             final boolean requiresEnginePlugins) {
         final ActivityHelper spyActivityHelper = new ActivityHelper() {
             @Override
-            public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
+            public void access(final String user, final String path, final String execute) {
                 final Map<String, String> log = new LinkedHashMap<>();
                 log.put("path", path);
                 log.put("execute", execute);
@@ -161,7 +208,7 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
             }
 
             @Override
-            public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+            public void accessDenied(final String user, final String path) {
                 // not under test here
             }
         };
@@ -203,21 +250,26 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
 
     private FessApiAdminAction createAction(final List<Map<String, String>> capturedLogs, final OptionalThing<FessUserBean> userBean,
             final boolean accessAllowed) {
+        return createAction(capturedLogs, userBean, accessAllowed, OptionalThing.empty());
+    }
+
+    private FessApiAdminAction createAction(final List<Map<String, String>> capturedLogs, final OptionalThing<FessUserBean> userBean,
+            final boolean accessAllowed, final OptionalThing<String> tokenName) {
         final ActivityHelper spyActivityHelper = new ActivityHelper() {
             @Override
-            public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
+            public void access(final String user, final String path, final String execute) {
                 final Map<String, String> log = new LinkedHashMap<>();
-                log.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+                log.put("user", user);
                 log.put("path", path);
                 log.put("execute", execute);
                 capturedLogs.add(log);
             }
 
             @Override
-            public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+            public void accessDenied(final String user, final String path) {
                 final Map<String, String> log = new LinkedHashMap<>();
                 log.put("action", "ACCESS_DENIED");
-                log.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+                log.put("user", user);
                 log.put("path", path);
                 capturedLogs.add(log);
             }
@@ -226,6 +278,12 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
             {
                 activityHelper = spyActivityHelper;
                 viewHelper = new ViewHelper();
+                accessTokenService = new AccessTokenService() {
+                    @Override
+                    public OptionalThing<String> getTokenName(final HttpServletRequest request) {
+                        return tokenName;
+                    }
+                };
             }
 
             @Override
