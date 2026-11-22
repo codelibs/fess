@@ -23,8 +23,14 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
-		<Rewrite name="AppFile">
+		<!-- the wire and header loggers of the HTTP client write the Authorization header and the
+		     user:password@ of a URL (a Location header or a link in a page) as they are on the wire -->
+		<Rewrite name="MaskedFile">
 			<AppenderRef ref="AppRollingFile" />
+			<CredentialMaskRewritePolicy loggers="org.apache.hc.client5.http.wire,org.apache.hc.client5.http.headers" />
+		</Rewrite>
+		<Rewrite name="AppFile">
+			<AppenderRef ref="MaskedFile" />
 			<ErrorToWarnRewritePolicy loggers="org.apache.fontbox,org.apache.pdfbox,org.apache.poi" />
 		</Rewrite>
 		<RollingFile name="StatsFile" fileName="${log.file.basedir}/fess-urls.log"
