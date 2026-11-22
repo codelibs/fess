@@ -136,6 +136,17 @@ hash, ending the other sessions of the user when a passkey is removed, a passwor
 reads a user and waits across such a write is refused as well. Until 15.9 the API applied a body with any `version_no`; it only refused a write that
 collides with another one at the same moment.
 
+**The other admin APIs refuse a stale `version_no` too.** `PUT /api/admin/<name>/setting` now compares the
+`version_no` of its body with the stored one and refuses a stale one with "The setting was changed by someone
+else. Reload it and try again." (HTTP 400, `status` 1) before anything is written. It covers `accesstoken`,
+`badword`, `boostdoc`, `dataconfig`, `duplicatehost`, `elevateword`, `fileauth`, `fileconfig`, `group`,
+`keymatch`, `labeltype`, `pathmap`, `relatedcontent`, `relatedquery`, `reqheader`, `role`, `scheduler`,
+`webauth` and `webconfig`. Until 15.9 `version_no` was required but never compared (and the API returned `-1`
+for it), so a script that sent a constant has to send the `version_no` it has just read from
+`GET /api/admin/<name>/setting/{id}` (or the list) and read the setting again after a refusal. The admin screens
+of these settings do not compare it. The APIs that have no `version_no` (for example `general`, `theme`, `dict`)
+and `tagtype` (which has its own `seq_no` check) are unchanged.
+
 **A user who is already signed in no longer gets the login form.** `GET /login/` now redirects the user to the
 page a login would lead to: the dashboard for an administrator, the first admin screen the roles allow for a user
 with some admin role, the search page for anyone else. An anonymous visitor still gets the form. To sign in as

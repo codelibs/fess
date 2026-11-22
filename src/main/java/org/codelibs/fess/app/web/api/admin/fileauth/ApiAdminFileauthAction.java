@@ -153,6 +153,7 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         keepStoredPassword(body);
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, fileAuthService.getFileAuthentication(body.id).map(e -> e.getVersionNo()).orElse(null));
         final FileAuthentication fileAuth = getFileAuthentication(body).map(entity -> {
             try {
                 fileAuthService.store(entity);

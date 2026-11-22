@@ -158,7 +158,8 @@ public abstract class CrudTestBase extends ITBase {
 
         for (Map<String, Object> setting : settings) {
             final Map<String, Object> requestBody = new HashMap<>(updateMap);
-            requestBody.put("version_no", 1);
+            // the version read with the setting: the API refuses a body whose version is not the stored one
+            requestBody.put("version_no", setting.getOrDefault("version_no", 1));
             final String idKey = getIdKey();
             if (setting.containsKey(idKey)) {
                 requestBody.put(idKey, setting.get(idKey));

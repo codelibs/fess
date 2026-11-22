@@ -653,7 +653,8 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
 
         private long timeoutInMillis = -1;
 
-        private Boolean version;
+        // the version of a document is what an edit carries to tell that it is out of date
+        private Boolean version = Boolean.TRUE;
 
         private Boolean seqNoAndPrimaryTerm = Boolean.TRUE;
 

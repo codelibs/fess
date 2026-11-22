@@ -135,6 +135,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, pathMappingService.getPathMapping(body.id).map(e -> e.getVersionNo()).orElse(null));
         final PathMapping entity = getPathMapping(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
                 messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);

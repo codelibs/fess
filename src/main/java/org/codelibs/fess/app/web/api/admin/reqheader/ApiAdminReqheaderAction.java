@@ -152,6 +152,7 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, reqHeaderService.getRequestHeader(body.id).map(e -> e.getVersionNo()).orElse(null));
         final RequestHeader reqHeader = getRequestHeader(body).map(entity -> {
             try {
                 reqHeaderService.store(entity);

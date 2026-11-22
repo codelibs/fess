@@ -151,6 +151,7 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, fileConfigService.getFileConfig(body.id).map(e -> e.getVersionNo()).orElse(null));
         final FileConfig fileConfig = getFileConfig(body).map(entity -> {
             try {
                 fileConfigService.store(entity);
