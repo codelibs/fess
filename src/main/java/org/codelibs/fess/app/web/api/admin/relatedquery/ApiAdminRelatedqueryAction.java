@@ -142,6 +142,7 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, relatedQueryService.getRelatedQuery(body.id).map(e -> e.getVersionNo()).orElse(null));
         final RelatedQuery relatedQuery = getRelatedQuery(body).map(entity -> {
             try {
                 relatedQueryService.store(entity);

@@ -154,6 +154,7 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         keepStoredPassword(body);
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, webAuthService.getWebAuthentication(body.id).map(e -> e.getVersionNo()).orElse(null));
         final WebAuthentication webAuth = getWebAuthentication(body).map(entity -> {
             try {
                 webAuthService.store(entity);

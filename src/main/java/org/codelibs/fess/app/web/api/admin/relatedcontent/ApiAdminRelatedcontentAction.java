@@ -142,6 +142,7 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> validateRelatedContent(body, messages));
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, relatedContentService.getRelatedContent(body.id).map(e -> e.getVersionNo()).orElse(null));
         final RelatedContent relatedContent = getRelatedContent(body).map(entity -> {
             try {
                 relatedContentService.store(entity);

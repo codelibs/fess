@@ -124,4 +124,34 @@ public abstract class FessApiAdminAction extends FessApiAction {
         }
         return super.hookBefore(runtime);
     }
+
+    /**
+     * Tells whether a stored document was changed since the {@code version_no} of a request was read.
+     *
+     * @param stored the version of the stored document, or null if it is not known
+     * @param requested the {@code version_no} the request carries
+     * @return true if both are known and differ. A version that was not read (null or negative) cannot be
+     *         compared, and the request is not judged stale.
+     */
+    public static boolean isStaleVersion(final Long stored, final Number requested) {
+        return stored != null && stored.longValue() >= 0L && requested != null && stored.longValue() != requested.longValue();
+    }
+
+    /**
+     * Refuses an update whose {@code version_no} is not the version of the stored document, so that a change
+     * made since the document was read is not overwritten. Call it before the body is applied.
+     *
+     * @param id the ID of the document to update, for the log
+     * @param requested the {@code version_no} the request carries
+     * @param stored the version of the stored document, or null if there is no such document (it is
+     *        reported as not found by the caller)
+     */
+    protected void verifyVersionNo(final String id, final Number requested, final Long stored) {
+        if (isStaleVersion(stored, requested)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("The version_no of an update is stale: id={}, requestedVersion={}, storedVersion={}", id, requested, stored);
+            }
+            throwValidationErrorApi(messages -> messages.addErrorsSettingChangedConcurrently(GLOBAL));
+        }
+    }
 }

@@ -139,6 +139,7 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, keyMatchService.getKeyMatch(body.id).map(e -> e.getVersionNo()).orElse(null));
         final KeyMatch keyMatch = getKeyMatch(body).map(entity -> {
             try {
                 keyMatchService.store(entity);

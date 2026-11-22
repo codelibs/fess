@@ -135,6 +135,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, accessTokenService.getAccessToken(body.id).map(e -> e.getVersionNo()).orElse(null));
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
             try {
                 accessTokenService.store(entity);

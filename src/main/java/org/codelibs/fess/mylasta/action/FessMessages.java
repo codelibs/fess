@@ -560,6 +560,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The user was changed by someone else. Reload it and try again. */
     public static final String ERRORS_user_changed_concurrently = "{errors.user_changed_concurrently}";
 
+    /** The key of the message: The setting was changed by someone else. Reload it and try again. */
+    public static final String ERRORS_setting_changed_concurrently = "{errors.setting_changed_concurrently}";
+
     /** The key of the message: The regular expression after "regex:" is invalid: {0} */
     public static final String ERRORS_relatedcontent_invalid_regex = "{errors.relatedcontent_invalid_regex}";
 
@@ -3303,6 +3306,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsUserChangedConcurrently(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_user_changed_concurrently));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.setting_changed_concurrently' with parameters.
+     * <pre>
+     * message: The setting was changed by someone else. Reload it and try again.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsSettingChangedConcurrently(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_setting_changed_concurrently));
         return this;
     }
 

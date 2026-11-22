@@ -144,6 +144,7 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
+        verifyVersionNo(body.id, body.versionNo, dataConfigService.getDataConfig(body.id).map(e -> e.getVersionNo()).orElse(null));
         final DataConfig dataConfig = getDataConfig(body).map(entity -> {
             try {
                 dataConfigService.store(entity);

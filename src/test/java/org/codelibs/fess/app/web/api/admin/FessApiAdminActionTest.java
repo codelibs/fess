@@ -43,6 +43,17 @@ import org.lastaflute.web.validation.VaMessenger;
 public class FessApiAdminActionTest extends UnitFessTestCase {
 
     @Test
+    public void test_isStaleVersion() {
+        assertTrue(FessApiAdminAction.isStaleVersion(4L, 3));
+        assertTrue(FessApiAdminAction.isStaleVersion(4L, 5L));
+        assertFalse(FessApiAdminAction.isStaleVersion(4L, 4));
+        // a version that was not read cannot be compared
+        assertFalse(FessApiAdminAction.isStaleVersion(-1L, 3));
+        assertFalse(FessApiAdminAction.isStaleVersion(null, 3));
+        assertFalse(FessApiAdminAction.isStaleVersion(4L, null));
+    }
+
+    @Test
     public void test_hookBefore_recordsAccessForATokenRequest() {
         final List<Map<String, String>> capturedLogs = new ArrayList<>();
         final FessApiAdminAction action = createAction(capturedLogs, OptionalThing.empty(), true);
