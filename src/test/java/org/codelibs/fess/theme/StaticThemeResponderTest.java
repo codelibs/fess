@@ -928,6 +928,8 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         assertTrue(StaticThemeResponder.isBlockedFilename("THEME.YML"));
         assertTrue(StaticThemeResponder.isBlockedFilename("README.md"));
         assertTrue(StaticThemeResponder.isBlockedFilename("CHANGELOG.md"));
+        assertTrue(StaticThemeResponder.isBlockedFilename("DESIGN.md"));
+        assertTrue(StaticThemeResponder.isBlockedFilename("design.md"));
         assertTrue(StaticThemeResponder.isBlockedFilename("LICENSE"));
         assertTrue(StaticThemeResponder.isBlockedFilename("LICENSE.txt"));
         assertTrue(StaticThemeResponder.isBlockedFilename("license-apache.txt"));
@@ -944,6 +946,7 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         assertTrue(StaticThemeResponder.isBlockedPath("theme.yml"));
         assertTrue(StaticThemeResponder.isBlockedPath("a/b/.env"));
         assertTrue(StaticThemeResponder.isBlockedPath("a/LICENSE.txt"));
+        assertTrue(StaticThemeResponder.isBlockedPath("a/DESIGN.md"));
         // So is every directory above it: one that starts with a dot hides what is below it.
         assertTrue(StaticThemeResponder.isBlockedPath(".attic-t-1760000000000-1a2b3c4d/index.html"));
         assertTrue(StaticThemeResponder.isBlockedPath(".staging-0a1b2c3d/content/assets/app.js"));

@@ -208,6 +208,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
                 { "/themes/beta/theme.yml", "/themes/beta/theme.yml" }, //
                 { "/themes/beta/README.md", "/themes/beta/README.md" }, //
                 { "/themes/beta/CHANGELOG.md", "/themes/beta/CHANGELOG.md" }, //
+                { "/themes/beta/DESIGN.md", "/themes/beta/DESIGN.md" }, //
+                { "/themes/alpha/design.md", "/themes/alpha/design.md" }, //
                 { "/themes/beta/sub/LICENSE.txt", "/themes/beta/sub/LICENSE.txt" }, //
                 { "/themes/beta/.env", "/themes/beta/.env" }, //
                 { "/themes/.attic-alpha-1760000000000-1a2b3c4d/index.html", "/themes/.attic-alpha-1760000000000-1a2b3c4d/index.html" }, //

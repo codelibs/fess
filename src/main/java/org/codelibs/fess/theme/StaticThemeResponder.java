@@ -507,7 +507,8 @@ public class StaticThemeResponder {
      * <ul>
      *   <li>Any file whose name starts with {@code "."} (dotfile, e.g. {@code .env}).</li>
      *   <li>{@code theme.yml} — the manifest is internal metadata, not a servable asset.</li>
-     *   <li>{@code README.md}, {@code CHANGELOG.md} — documentation leakage.</li>
+     *   <li>{@code README.md}, {@code CHANGELOG.md}, {@code DESIGN.md} — documentation leakage
+     *       ({@code DESIGN.md} is left out of a theme ZIP, but a directory copied by hand keeps it).</li>
      *   <li>Any file whose lowercase name starts with {@code "license"} (e.g.
      *       {@code LICENSE}, {@code LICENSE.txt}).</li>
      * </ul>
@@ -523,7 +524,7 @@ public class StaticThemeResponder {
             return true;
         }
         final String lower = filename.toLowerCase(Locale.ROOT);
-        if ("theme.yml".equals(lower) || "readme.md".equals(lower) || "changelog.md".equals(lower)) {
+        if ("theme.yml".equals(lower) || "readme.md".equals(lower) || "changelog.md".equals(lower) || "design.md".equals(lower)) {
             return true;
         }
         if (lower.startsWith("license")) {
