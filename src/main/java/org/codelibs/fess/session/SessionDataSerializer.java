@@ -1188,6 +1188,9 @@ public class SessionDataSerializer {
 
         @Override
         public void write(final Kryo kryo, final Output output, final LdapUser user) {
+            // The state before the permissions: the writers set the permissions first, so a state read here
+            // is never newer than the permissions read after it.
+            final PermissionState state = user.getPermissionState();
             final String[] permissions = user.getResolvedPermissions();
             if (permissions == null) {
                 // getPermissions() would search the directory in the thread that closes a request
@@ -1196,7 +1199,7 @@ public class SessionDataSerializer {
             output.writeString(user.getName());
             output.writeBoolean(user.isNameFromProvider());
             writeStrings(output, permissions);
-            output.writeString(user.getPermissionState().name());
+            output.writeString(state.name());
         }
 
         @Override

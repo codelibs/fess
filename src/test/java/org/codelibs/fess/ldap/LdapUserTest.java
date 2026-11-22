@@ -877,4 +877,35 @@ public class LdapUserTest extends UnitFessTestCase {
         assertFalse(pending.takeResolutionOf(new LdapUser(new java.util.Hashtable<>(), "carol")));
         assertEquals(FessUser.PermissionState.PENDING, pending.getPermissionState());
     }
+
+    @Test
+    public void test_takeResolutionOf_refusesAnInstanceThatHasNoPermissionsYet() {
+        // still inside getPermissions(): it publishes its own result, and would put the direct groups back over this one
+        final LdapUser resolved = restored("carol", false, new String[] { "1carol", "2A0" }, FessUser.PermissionState.RESOLVED);
+        final LdapUser live = new LdapUser(new java.util.Hashtable<>(), "carol");
+        live.setPermissionState(FessUser.PermissionState.PENDING);
+
+        assertFalse(live.takeResolutionOf(resolved));
+        assertNull(live.getResolvedPermissions());
+        assertEquals(FessUser.PermissionState.PENDING, live.getPermissionState());
+    }
+
+    @Test
+    public void test_takeResolutionOf_aFailedCopyTakesALaterResolved_andASettledEqualOneIsLeftAlone() {
+        final String[] full = { "1carol", "2A1", "2A0" };
+        final LdapUser resolved = restored("carol", false, full, FessUser.PermissionState.RESOLVED);
+
+        final LdapUser failed = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.FAILED);
+        assertTrue(failed.takeResolutionOf(resolved));
+        assertEquals(FessUser.PermissionState.RESOLVED, failed.getPermissionState());
+        assertEquals(java.util.List.of(full), java.util.List.of(failed.getResolvedPermissions()));
+
+        // a RESOLVED does not replace a FAILED the other way round
+        final LdapUser failedWalk = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.FAILED);
+        final LdapUser resolvedCopy = restored("carol", false, full.clone(), FessUser.PermissionState.RESOLVED);
+        assertFalse(resolvedCopy.takeResolutionOf(failedWalk));
+
+        // a session that settled by itself with an equal result is not this walk's: no write for it
+        assertFalse(restored("carol", false, full.clone(), FessUser.PermissionState.RESOLVED).takeResolutionOf(resolved));
+    }
 }

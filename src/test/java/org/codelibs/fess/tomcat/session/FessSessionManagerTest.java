@@ -683,6 +683,38 @@ public class FessSessionManagerTest {
         assertEquals(2, saves.get());
     }
 
+    @Test
+    public void test_refresh_waitsForAWriteOfTheSameSession() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v1"));
+
+        // a state read before a write must not be applied after it: the read waits for the write that holds the lock
+        final java.util.concurrent.CountDownLatch locked = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final Thread writer = new Thread(() -> {
+            synchronized (session.getPersistLock()) {
+                locked.countDown();
+                try {
+                    release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        writer.start();
+        assertTrue(locked.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        final Thread reader = new Thread(() -> manager.refresh(session, store.bridge().get(FessSessionManager.OP_LOAD)));
+        reader.start();
+        reader.join(500L);
+        assertTrue(reader.isAlive(), "the state was read while a write of the session was in progress");
+
+        release.countDown();
+        reader.join(10_000L);
+        assertFalse(reader.isAlive());
+        writer.join(10_000L);
+    }
+
     private static final String[] DIRECT = { "1carol", "2A1" };
 
     private static final String[] FULL = { "1carol", "2A1", "2A0" };

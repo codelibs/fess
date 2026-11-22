@@ -160,7 +160,10 @@ public class LdapUser implements FessUser {
      * <p>The resolution publishes into the instance that scheduled it. When another request of the session refreshed the
      * session from the store in the meantime, the session holds a restored copy instead, which stays {@code PENDING}. The
      * copy is the same user (same name, asserted by the same kind of source), so it takes the permissions and the state.
-     * Only a copy that is still {@code PENDING}, or that already holds exactly this result, takes it.</p>
+     * Only a copy that is still {@code PENDING}, or that holds {@code FAILED} where this result is {@code RESOLVED}, takes it,
+     * and only once it has permissions of its own: an instance that has none is still inside {@link #getPermissions()} and
+     * publishes its own result. A copy that already took this result (it holds the same array) matches again; one that
+     * settled by itself with an equal result does not.</p>
      *
      * @param resolved The user whose resolution ended, with {@code RESOLVED} or {@code FAILED}.
      * @return true if this user is {@code resolved} or now holds its result, false if it is another user or is settled otherwise.
@@ -171,17 +174,18 @@ public class LdapUser implements FessUser {
         }
         final String[] resolvedPermissions = resolved.permissions;
         final PermissionState resolvedState = resolved.getPermissionState();
-        if (resolvedPermissions == null || resolvedState == PermissionState.PENDING || !name.equals(resolved.name)
+        if (resolvedPermissions == null || resolvedState == PermissionState.PENDING || permissions == null || !name.equals(resolved.name)
                 || nameFromProvider != resolved.nameFromProvider) {
             return false;
         }
-        if (getPermissionState() == PermissionState.PENDING) {
+        final PermissionState state = getPermissionState();
+        if (state == PermissionState.PENDING || state == PermissionState.FAILED && resolvedState == PermissionState.RESOLVED) {
             // Permissions first, as everywhere: a reader that sees the state must not see the set it replaced.
             permissions = resolvedPermissions;
             permissionState = resolvedState;
             return true;
         }
-        return permissionState == resolvedState && Arrays.equals(permissions, resolvedPermissions);
+        return permissions == resolvedPermissions && state == resolvedState;
     }
 
     @Override

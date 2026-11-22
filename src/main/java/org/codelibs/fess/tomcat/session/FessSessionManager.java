@@ -241,6 +241,14 @@ public class FessSessionManager extends ManagerBase {
      * @return the session, or {@code null} if the store dropped it (invalidated or expired on another node)
      */
     protected Session refresh(final FessSession session, final Function<Map<String, Object>, Object> load) {
+        // The read and its application are one step with respect to the writes of this session, so that a state read
+        // before a background write (persistHolding) cannot be applied after it and put the older attributes back.
+        synchronized (session.getPersistLock()) {
+            return refreshLocked(session, load);
+        }
+    }
+
+    private Session refreshLocked(final FessSession session, final Function<Map<String, Object>, Object> load) {
         final Map<String, Object> state;
         try {
             final Map<String, Object> args = idArgs(session.getIdInternal());
