@@ -626,6 +626,14 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertTrue(permissionHelper.isInvisibleLeadEntry("(allow)(deny)\u200B{role}x"));
         // a plain value that starts with one is also refused: it matches nobody
         assertTrue(permissionHelper.isInvisibleLeadEntry("\u200Bdevelopers"));
+        // the same character at the start of the name, after the marker
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(deny){user}\u200Bbob"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("{role}\uFEFFadmin"));
+        // a tab right after the marker is a control character as well
+        assertTrue(permissionHelper.isInvisibleLeadEntry("{role}\tadmin"));
+        // a control character that strip() keeps
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(deny)\u0085{user}bob"));
+        assertTrue(permissionHelper.isInvisibleLeadEntry("(deny)\u0000{user}bob"));
     }
 
     @Test
@@ -639,6 +647,8 @@ public class PermissionHelperTest extends UnitFessTestCase {
         // an invisible character inside a name is part of the name (the zero-width joiner of an emoji sequence)
         assertFalse(permissionHelper.isInvisibleLeadEntry("{role}\uD83D\uDC68\u200D\uD83D\uDCBB"));
         assertFalse(permissionHelper.isInvisibleLeadEntry("(deny){user}a\u200Bb"));
+        // the end of a name is not judged
+        assertFalse(permissionHelper.isInvisibleLeadEntry("(deny){user}bob\u200B"));
         // whitespace is the business of isSpacedEntry
         assertFalse(permissionHelper.isInvisibleLeadEntry("(deny) {user}bob"));
     }

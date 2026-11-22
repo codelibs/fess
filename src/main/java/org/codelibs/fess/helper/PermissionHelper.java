@@ -195,15 +195,16 @@ public class PermissionHelper {
     }
 
     /**
-     * Returns whether a permission entry starts with an invisible character, such as a zero-width space or a
-     * byte order mark, either at the start of the entry or right after an {@code (allow)} / {@code (deny)}
-     * prefix. Such a character is not whitespace to Java and does not change under Unicode normalisation, so the
+     * Returns whether a permission entry starts with an invisible character, such as a zero-width space, a
+     * byte order mark or a control character, at the start of the entry, right after an {@code (allow)} /
+     * {@code (deny)} prefix, or right after the {@code {user}} / {@code {group}} / {@code {role}} marker. Such a character is not whitespace to Java and does not change under Unicode normalisation, so the
      * entry passes the other checks, yet {@link #encode(String)} no longer finds the {@code {user}},
      * {@code {group}} or {@code {role}} marker: a deny is dropped without a word, and a plain value is stored
      * that matches nobody. The invisible character is typically pasted in with the text.
      * <p>
-     * Only the lead of the entry is judged. A character of the same kind inside a name stays valid, because the
-     * zero-width joiner is part of emoji sequences.
+     * Only the lead of the entry and of its name are judged. A character of the same kind inside or at the end of
+     * a name stays valid, because the zero-width joiner is part of emoji sequences and a direction mark can belong
+     * to a name written right to left.
      * </p>
      *
      * @param entry a single permission entry (may be null)
@@ -224,11 +225,21 @@ public class PermissionHelper {
             }
             rest = rest.strip();
         }
+        final String lower = rest.toLowerCase(Locale.ROOT);
+        for (final String marker : new String[] { userPrefix, groupPrefix, rolePrefix }) {
+            if (lower.startsWith(marker)) {
+                return startsWithInvisible(rest.substring(marker.length()));
+            }
+        }
         return false;
     }
 
     private static boolean startsWithInvisible(final String value) {
-        return !value.isEmpty() && Character.getType(value.codePointAt(0)) == Character.FORMAT;
+        if (value.isEmpty()) {
+            return false;
+        }
+        final int first = value.codePointAt(0);
+        return Character.getType(first) == Character.FORMAT || Character.isISOControl(first);
     }
 
     /**
