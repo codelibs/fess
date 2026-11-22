@@ -715,7 +715,9 @@ function buildResultCard(d, queryId, order) {
   const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, idx0, state.requestedTime);
 
   // --- h3.title > a.link ---
-  const h3 = el("h3", { className: "title text-truncate" });
+  // dir="auto" on the block, not the <a>: the browser takes the direction of an Arabic or Hebrew
+  // title from its first strong character, and the block's alignment follows it.
+  const h3 = el("h3", { className: "title text-truncate", attrs: { dir: "auto" } });
   const a = el("a", {
     className: "link",
     attrs: {
@@ -754,7 +756,7 @@ function buildResultCard(d, queryId, order) {
     thumbWrap.appendChild(thumbA);
     body.appendChild(thumbWrap);
   }
-  const description = el("div", { className: "description" });
+  const description = el("div", { className: "description", attrs: { dir: "auto" } });
   // content_description is server-escaped HTML; digest is the raw index field,
   // so escape it here to meet the contract renderHighlightedSnippet() expects.
   // Without that, a digest like "Michael Froh <msfroh@example.com>" would have

@@ -254,6 +254,13 @@ describe("buildResultCard", () => {
     expect(li.querySelector(".description").textContent).toBe("");
   });
 
+  it("lets the browser pick the direction of the title and the snippet (dir=auto on the blocks, not on the URL)", () => {
+    const li = buildResultCard({ doc_id: "d1", title: "T", url: "https://ex.com/p", content_description: "x" }, "q1", 1);
+    expect(li.querySelector("h3").getAttribute("dir")).toBe("auto");
+    expect(li.querySelector(".description").getAttribute("dir")).toBe("auto");
+    expect(li.querySelector("cite").closest("[dir]")).toBeNull();
+  });
+
   it("tolerates a null config (features default to {})", () => {
     api.getConfig.mockReturnValue(null);
     expect(() => buildResultCard({ doc_id: "d", title: "T", url: "https://e.com" }, "q", 1))

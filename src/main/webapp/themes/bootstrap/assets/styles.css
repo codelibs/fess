@@ -282,6 +282,8 @@ footer[role="contentinfo"] {
 #result .title a:visited { color: #014c8c; }
 /* Thumbnail + description sit on one flex row (thumbnail left, text right). */
 #result .body { display: flex; align-items: flex-start; }
+/* The snippet takes the rest of the row: shrink-wrapped, a right-to-left snippet (dir="auto") would sit at the left edge of it. */
+#result .body .description { flex: 1 1 auto; min-width: 0; }
 /* Site path shown as non-italic green, like JSP (#00852c: 4.78:1 on white, WCAG AA). */
 #result .site cite { color: #00852c; font-style: normal; }
 /* "More" link is desktop-hidden (shown only on phones, see media query below). */
