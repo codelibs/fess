@@ -1344,6 +1344,23 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * The theme follows the system's light/dark setting through theme-init.js: a classic script (the CSP
+     * forbids inline ones) that runs before the first stylesheet, on top of the static light default.
+     */
+    @Test
+    public void test_indexHtml_followsSystemColorScheme() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("<html lang=\"en\" data-bs-theme=\"light\">"),
+                "<html> keeps the light default for a browser without scripts");
+        final int init = html.indexOf("<script src=\"{{themePath}}/assets/theme-init.js\"></script>");
+        assertTrue(init >= 0, "index.html must load theme-init.js as a classic script");
+        assertTrue(init < html.indexOf("<link rel=\"stylesheet\""), "theme-init.js must run before the first stylesheet (no light flash)");
+        final String js = Files.readString(THEME_DIR.resolve("assets/theme-init.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("(prefers-color-scheme: dark)"), "theme-init.js must read the system setting");
+        assertTrue(js.contains("data-theme"), "an explicit data-theme on <html> must win over the system");
+    }
+
+    /**
      * R4-5: index.html facet panel must use Bootstrap's offcanvas-md pattern so it
      * is accessible as a drawer on small screens and as an inline sidebar on ≥md.
      * Preserved: facet-body and facet-clear must still be present.

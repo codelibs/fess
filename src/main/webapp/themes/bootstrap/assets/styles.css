@@ -319,3 +319,16 @@ footer[role="contentinfo"] {
     padding: .35rem; background: var(--bs-dark); border: 1px solid var(--bs-border-color-translucent); border-radius: var(--fess-card-radius); box-shadow: 0 .25rem .75rem rgba(0,0,0,.3); }
   #header-nav.show .nav-link { padding: .6rem .75rem; }
 }
+
+/* Dark colour scheme (theme-init.js sets data-bs-theme="dark" when the system asks for it).
+   Bootstrap's own variables already switch; these are the few fixed light colours above. */
+[data-bs-theme="dark"] .result-card .result-url, [data-bs-theme="dark"] cite.result-site-path, [data-bs-theme="dark"] #result .site cite { color: var(--bs-success-text-emphasis); }
+[data-bs-theme="dark"] #result .title a:visited { color: #b197fc; }
+[data-bs-theme="dark"] .result-thumbnail { background: var(--bs-tertiary-bg); }
+[data-bs-theme="dark"] .error-detail { background: var(--bs-tertiary-bg); border-left-color: var(--bs-border-color); }
+[data-bs-theme="dark"] .help-section h2 { border-bottom-color: var(--bs-border-color); }
+[data-bs-theme="dark"] .help-section code { background: var(--bs-tertiary-bg); }
+[data-bs-theme="dark"] .chat-welcome { background: none; }
+[data-bs-theme="dark"] .chat-welcome-title { color: var(--bs-emphasis-color); }
+/* The home logo is dark blue on a transparent background; on a dark page it is turned white. */
+[data-bs-theme="dark"] #home-view .mainLogo img { filter: brightness(0) invert(1); }
