@@ -36,12 +36,46 @@ class FakeSessionStore {
     volatile int purges;
     volatile int unchangedLoads;
 
+    /**
+     * What a real store does to attribute values: it keeps a serialized snapshot and hands every reader its own copy.
+     * By default the values are shared, which is enough for immutable ones.
+     */
+    volatile java.util.function.UnaryOperator<Object> copier = v -> v;
+
+    /** The text that stands for a value in the digest; by default its string form. */
+    volatile java.util.function.Function<Object, String> describer = String::valueOf;
+
+    /** Whether the bridge offers the reconcile operation, as the web application does. */
+    volatile boolean reconciles;
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> localOf(final Map<String, Object> args) {
+        return (Map<String, Object>) args.get("local");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> incomingOf(final Map<String, Object> args) {
+        return (Map<String, Object>) args.get("incoming");
+    }
+
+    private Map<String, Object> copyOf(final Map<String, Object> attributes) {
+        final Map<String, Object> copy = new HashMap<>();
+        attributes.forEach((name, value) -> copy.put(name, copier.apply(value)));
+        return copy;
+    }
+
     Map<String, Function<Map<String, Object>, Object>> bridge() {
         final Map<String, Function<Map<String, Object>, Object>> ops = new HashMap<>();
         ops.put(FessSessionManager.OP_LOAD, this::load);
         ops.put(FessSessionManager.OP_SAVE, this::save);
         ops.put(FessSessionManager.OP_DELETE, this::delete);
         ops.put(FessSessionManager.OP_PURGE, this::purge);
+        if (reconciles) {
+            ops.put(FessSessionManager.OP_RECONCILE, args -> {
+                check("reconcile");
+                return org.codelibs.fess.session.SessionStore.takeSettledUsers(localOf(args), incomingOf(args));
+            });
+        }
         return ops;
     }
 
@@ -61,7 +95,7 @@ class FakeSessionStore {
         }
         final Map<String, Object> result = new HashMap<>(doc);
         if (args.get("digest") == null || !args.get("digest").equals(doc.get("digest"))) {
-            result.put("attributes", new HashMap<>((Map<String, Object>) doc.get("attributes")));
+            result.put("attributes", copyOf((Map<String, Object>) doc.get("attributes")));
         } else {
             result.remove("attributes");
             unchangedLoads++;
@@ -81,7 +115,9 @@ class FakeSessionStore {
         // like the real store: attributes it cannot keep (here: names starting with "skip") are reported, not stored
         final java.util.Set<String> skipped = new java.util.TreeSet<>();
         attributes.keySet().removeIf(n -> n.startsWith("skip") && skipped.add(n));
-        final String digest = String.valueOf(new java.util.TreeMap<>(attributes));
+        final java.util.Map<String, String> described = new java.util.TreeMap<>();
+        attributes.forEach((name, value) -> described.put(name, describer.apply(value)));
+        final String digest = String.valueOf(described);
         final long now = System.currentTimeMillis();
         final long persistedAt = args.get("persistedAt") instanceof final Number n ? n.longValue() : 0L;
         final boolean stored = persistedAt > 0;
@@ -104,7 +140,7 @@ class FakeSessionStore {
         next.put("lastAccessedTime", args.get("lastAccessedTime"));
         next.put("maxInactiveInterval", args.get("maxInactiveInterval"));
         next.put("digest", digest);
-        next.put("attributes", new HashMap<>(attributes));
+        next.put("attributes", copyOf(attributes));
         next.put("expiredTime", (Long) args.get("lastAccessedTime") + ((Integer) args.get("maxInactiveInterval")) * 1000L);
         docs.put(id, next);
         if (stored && digest.equals(args.get("digest"))) {

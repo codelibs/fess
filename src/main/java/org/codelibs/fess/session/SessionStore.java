@@ -24,7 +24,9 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +37,8 @@ import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fess.exception.HashAlgorithmUnavailableException;
 import org.codelibs.fess.exception.SessionStoreException;
+import org.codelibs.fess.ldap.LdapUser;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -70,6 +74,8 @@ import jakarta.servlet.ServletContext;
  *   session id in on every node, so the result is {@code gone} and the caller must drop the session.</li>
  *   <li>{@code delete}: {@code {id}} to {@code null}.</li>
  *   <li>{@code purge}: {@code {}} to the number of expired documents deleted.</li>
+ *   <li>{@code reconcile}: {@code {local, incoming}}, the attributes a session holds and the ones read from the store
+ *   (changed in place), to whether a user in {@code incoming} holds the result of the same user in {@code local} afterwards.</li>
  * </ul>
  *
  * <p>The document id is the SHA-256 of the session id, because the session id is a bearer secret.
@@ -84,6 +90,9 @@ public class SessionStore {
 
     /** The name of the {@link ServletContext} attribute that holds the operations. */
     public static final String CONTEXT_ATTRIBUTE = "fess.session.store";
+
+    /** The name of the {@link ServletContext} attribute through which the Tomcat side saves the sessions that hold a value. */
+    public static final String PERSIST_HOLDING_ATTRIBUTE = "fess.session.persistHolding";
 
     /** The environment variable that selects the session store. */
     public static final String ENV_NAME = "FESS_SESSION_STORE";
@@ -211,6 +220,28 @@ public class SessionStore {
     }
 
     /**
+     * Saves, right away, the sessions of this node that hold an attribute value the predicate accepts.
+     *
+     * <p>A session is saved at the end of the request that touched it. An object that a session holds and that a
+     * background task changes later (the nested groups of an LDAP user) would otherwise reach the other nodes only
+     * when the next request of that session came to this node. It does nothing when the session store is not in
+     * use.</p>
+     *
+     * @param holds tells whether an attribute value is, or is a copy of, the one that changed. It may bring a copy up to date
+     *        before it accepts it, and may be asked about a value more than once.
+     */
+    @SuppressWarnings("unchecked")
+    public void persistHolding(final Predicate<Object> holds) {
+        if (!isEnabled()) {
+            return;
+        }
+        final ServletContext servletContext = getServletContext();
+        if (servletContext != null && servletContext.getAttribute(PERSIST_HOLDING_ATTRIBUTE) instanceof final Consumer<?> persist) {
+            ((Consumer<Predicate<Object>>) persist).accept(holds);
+        }
+    }
+
+    /**
      * Creates the operations that the Tomcat side calls.
      *
      * @return the operations by name.
@@ -221,7 +252,48 @@ public class SessionStore {
         operations.put("save", this::save);
         operations.put("delete", this::delete);
         operations.put("purge", this::purge);
+        operations.put("reconcile", this::reconcile);
         return operations;
+    }
+
+    /**
+     * Lets what a session holds in this node take over what a state read from the store would replace it with.
+     *
+     * <p>Another node can save a session after it read it and before this node's background task settled the nested
+     * groups of the user, which puts {@code PENDING} back into the store. Applying that state would replace the settled
+     * user of this node with the unsettled one, and nobody settles it again. A user that is unsettled in the incoming
+     * attributes takes the result of the same user held here, see {@link LdapUser#takeResolutionOf(LdapUser)}. The
+     * session is then different from the store, so the next write of it brings the store right.</p>
+     *
+     * @param args {@code local}: the attributes the session holds, {@code incoming}: the attributes read from the store,
+     *        which are changed in place.
+     * @return {@code true} if an incoming user holds the result of the one held here afterwards.
+     */
+    @SuppressWarnings("unchecked")
+    protected Object reconcile(final Map<String, Object> args) {
+        return takeSettledUsers((Map<String, Object>) args.get("local"), (Map<String, Object>) args.get("incoming"));
+    }
+
+    /**
+     * Gives each user in {@code incoming} that is not settled the result of the user of the same name in {@code local}.
+     *
+     * @param local the attributes a session holds
+     * @param incoming the attributes read from the store
+     * @return {@code true} if an incoming user holds the result of the user held here afterwards
+     */
+    public static boolean takeSettledUsers(final Map<String, Object> local, final Map<String, Object> incoming) {
+        if (local == null || incoming == null) {
+            return false;
+        }
+        boolean taken = false;
+        for (final Map.Entry<String, Object> entry : incoming.entrySet()) {
+            if (entry.getValue() instanceof final FessUserBean bean && bean.getFessUser() instanceof final LdapUser restored
+                    && local.get(entry.getKey()) instanceof final FessUserBean heldBean
+                    && heldBean.getFessUser() instanceof final LdapUser held && restored != held) {
+                taken |= restored.takeResolutionOf(held);
+            }
+        }
+        return taken;
     }
 
     // ===================================================================================

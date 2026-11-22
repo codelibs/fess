@@ -416,6 +416,55 @@ public class FessSessionManagerTest {
     }
 
     @Test
+    public void test_changeSessionId_waitsForAWriteOfTheOldIdAndTheNewIdIsWrittenAfterIt() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v1"));
+        final String oldId = session.getId();
+
+        // a write that has read the old id waits in the store while the login rotates the id
+        final java.util.concurrent.CountDownLatch inSave = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        // the manager keeps the map it was given, so the operation is replaced in that map
+        @SuppressWarnings("unchecked")
+        final java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>> bridge =
+                (java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>>) manager.getContext()
+                        .getServletContext()
+                        .getAttribute(FessSessionManager.BRIDGE_ATTRIBUTE);
+        final java.util.function.Function<java.util.Map<String, Object>, Object> save = bridge.get(FessSessionManager.OP_SAVE);
+        bridge.put(FessSessionManager.OP_SAVE, args -> {
+            inSave.countDown();
+            try {
+                release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return save.apply(args);
+        });
+        session.setAttribute("k", "v2");
+
+        final Thread writer = new Thread(() -> manager.persist(session));
+        writer.start();
+        assertTrue(inSave.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        final java.util.concurrent.atomic.AtomicReference<String> rotated = new java.util.concurrent.atomic.AtomicReference<>();
+        final Thread rotation = new Thread(() -> rotated.set(manager.rotateSessionId(session)));
+        rotation.start();
+        rotation.join(500L);
+        assertTrue(rotation.isAlive(), "the id was changed while a write under the old id was in progress");
+
+        release.countDown();
+        writer.join(10_000L);
+        rotation.join(10_000L);
+        final String newId = rotated.get();
+        assertNotEquals(oldId, newId);
+        assertFalse(store.docs.containsKey(oldId), "the old document is gone and is not written again");
+        manager.persist(session);
+        assertTrue(store.docs.containsKey(newId));
+        assertTrue(session.isValid(), "the renamed session is not expired as gone");
+        assertEquals(0, store.gones);
+    }
+
+    @Test
     public void test_changeSessionId_resetsPersistedAt() throws Exception {
         final FakeSessionStore store = new FakeSessionStore();
         final FessSessionManager manager = newManager(store);
@@ -582,5 +631,356 @@ public class FessSessionManagerTest {
         final FessSessionManager manager = newManager(null);
         manager.load();
         manager.unload();
+    }
+
+    @Test
+    public void test_persistHolding_savesTheSessionThatHoldsTheChangedObject_withoutARequest() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        // a mutable value that a session holds and that something other than a request changes; its text is its content
+        final java.util.concurrent.atomic.AtomicReference<String> user = new java.util.concurrent.atomic.AtomicReference<>("PENDING");
+        final FessSession holder = request(manager, null, true, s -> s.setAttribute("user", user));
+        final FessSession other = request(manager, null, true, s -> s.setAttribute("user", "someone else"));
+        assertTrue(String.valueOf(store.docs.get(holder.getId()).get("digest")).contains("PENDING"));
+
+        user.set("RESOLVED");
+        // the end of a request is the only save: without help, the store keeps the old content
+        assertTrue(String.valueOf(store.docs.get(holder.getId()).get("digest")).contains("PENDING"));
+
+        store.calls.clear();
+        manager.persistHolding(value -> value == user);
+
+        // only the session that holds it is written, and the store now has the new content
+        assertEquals(1, store.count("save"));
+        assertTrue(String.valueOf(store.docs.get(holder.getId()).get("digest")).contains("RESOLVED"));
+        assertTrue(String.valueOf(store.docs.get(other.getId()).get("digest")).contains("someone else"));
+    }
+
+    @Test
+    public void test_persistHolding_withoutBridgeOrMatch_doesNothing() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        request(manager, null, true, s -> s.setAttribute("user", "alice"));
+        store.calls.clear();
+        manager.persistHolding(value -> "bob".equals(value));
+        assertTrue(store.calls.isEmpty());
+
+        final FessSessionManager memory = newManager(null);
+        request(memory, null, true, s -> s.setAttribute("user", "alice"));
+        memory.persistHolding(value -> "alice".equals(value));
+    }
+
+    @Test
+    public void test_persistHolding_survivesAFailingStoreAndPredicate() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        request(manager, null, true, s -> s.setAttribute("user", "alice"));
+        request(manager, null, true, s -> s.setAttribute("user", "bob"));
+        // a predicate that throws for one session must not stop the others
+        final java.util.concurrent.atomic.AtomicInteger asked = new java.util.concurrent.atomic.AtomicInteger();
+        manager.persistHolding(value -> {
+            asked.incrementAndGet();
+            throw new IllegalStateException("broken predicate");
+        });
+        assertEquals(2, asked.get());
+
+        store.down = true;
+        manager.persistHolding(value -> true);
+    }
+
+    @Test
+    public void test_persist_doesNotInterleaveTheWritesOfOneSession() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v1"));
+
+        // the first write waits in the store; a second one for the same session must not start (and snapshot) before it ends
+        final java.util.concurrent.CountDownLatch inSave = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.atomic.AtomicInteger saves = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>> bridge = store.bridge();
+        final java.util.function.Function<java.util.Map<String, Object>, Object> save = bridge.get(FessSessionManager.OP_SAVE);
+        bridge.put(FessSessionManager.OP_SAVE, args -> {
+            if (saves.incrementAndGet() == 1) {
+                inSave.countDown();
+                try {
+                    release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            return save.apply(args);
+        });
+        final FessSessionManager slow = newManager(null);
+        final org.apache.catalina.Context context = slow.getContext();
+        context.getServletContext().setAttribute(FessSessionManager.BRIDGE_ATTRIBUTE, bridge);
+        final FessSession local = (FessSession) slow.createSession(session.getId());
+        local.setAttribute("k", "v2");
+
+        final Thread first = new Thread(() -> slow.persist(local));
+        first.start();
+        assertTrue(inSave.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        final Thread second = new Thread(() -> slow.persist(local));
+        second.start();
+        second.join(500L);
+        assertTrue(second.isAlive(), "the second write started while the first one was in progress");
+        assertEquals(1, saves.get());
+
+        release.countDown();
+        first.join(10_000L);
+        second.join(10_000L);
+        assertEquals(2, saves.get());
+    }
+
+    @Test
+    public void test_refresh_waitsForAWriteOfTheSameSession() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v1"));
+
+        // a state read before a write must not be applied after it: the read waits for the write that holds the lock
+        final java.util.concurrent.CountDownLatch locked = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final Thread writer = new Thread(() -> {
+            synchronized (session.getPersistLock()) {
+                locked.countDown();
+                try {
+                    release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        writer.start();
+        assertTrue(locked.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        final Thread reader = new Thread(() -> manager.refresh(session, store.bridge().get(FessSessionManager.OP_LOAD)));
+        reader.start();
+        reader.join(500L);
+        assertTrue(reader.isAlive(), "the state was read while a write of the session was in progress");
+
+        release.countDown();
+        reader.join(10_000L);
+        assertFalse(reader.isAlive());
+        writer.join(10_000L);
+    }
+
+    private static final String[] DIRECT = { "1carol", "2A1" };
+
+    private static final String[] FULL = { "1carol", "2A1", "2A0" };
+
+    /** Makes the fake store keep and hand out copies of the users, as the real one does by serializing them. */
+    private static void storeCopiesUsers(final FakeSessionStore store) {
+        store.copier = v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
+                && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser u
+                        ? new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser(u.getName(),
+                                u.isNameFromProvider(), u.getResolvedPermissions().clone(), u.getPermissionState()))
+                        : v;
+        store.describer = v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
+                && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser u
+                        ? u.getName() + "/" + u.getPermissionState() + "/" + String.join(",", u.getResolvedPermissions())
+                        : String.valueOf(v);
+    }
+
+    private static org.codelibs.fess.ldap.LdapUser userOf(final FessSession session) {
+        return (org.codelibs.fess.ldap.LdapUser) ((org.codelibs.fess.mylasta.action.FessUserBean) session.getAttribute("user"))
+                .getFessUser();
+    }
+
+    /** The predicate of LdapManager#persistSession for the user whose nested groups were resolved. */
+    private static java.util.function.Predicate<Object> holdsUserOf(final org.codelibs.fess.ldap.LdapUser resolved) {
+        return v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
+                && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser held && held.takeResolutionOf(resolved);
+    }
+
+    @Test
+    public void test_persistHolding_reachesTheCopyThatARefreshPutInPlaceOfTheUser() throws Exception {
+        // the walk of node A runs while a request of the session on node B changes the store and a request on node A reads that
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        final FessSessionManager nodeA = newManager(store);
+        final FessSessionManager nodeB = newManager(store);
+        final org.codelibs.fess.ldap.LdapUser original =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        final FessSession onA =
+                request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(original)));
+        final String id = onA.getId();
+
+        request(nodeB, id, false, s -> s.setAttribute("seen", "on B"));
+        request(nodeA, id, false, null);
+        // the precondition of the case: the session of node A now holds a restored copy, and the walk will end in the original
+        assertNotSame(original, userOf(onA));
+        assertEquals("on B", onA.getAttribute("seen"));
+
+        final org.codelibs.fess.ldap.LdapUser walked =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED);
+        nodeA.persistHolding(holdsUserOf(walked));
+
+        // the other node reads the settled state
+        final FessSession onB = request(nodeB, id, false, null);
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onB).getPermissionState());
+        assertEquals(java.util.List.of(FULL), java.util.List.of(userOf(onB).getResolvedPermissions()));
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onA).getPermissionState());
+    }
+
+    @Test
+    public void test_persistHolding_doesNotUndoAChangeThatAnotherNodeMadeMeanwhile() throws Exception {
+        // node A last read the store before node B changed another attribute; the background write of node A must keep it
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        final FessSessionManager nodeA = newManager(store);
+        final FessSessionManager nodeB = newManager(store);
+        final org.codelibs.fess.ldap.LdapUser original =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        final FessSession onA =
+                request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(original)));
+        final String id = onA.getId();
+        request(nodeB, id, false, s -> s.setAttribute("seen", "on B"));
+        assertNull(onA.getAttribute("seen"));
+
+        final org.codelibs.fess.ldap.LdapUser walked =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED);
+        nodeA.persistHolding(holdsUserOf(walked));
+
+        final FessSession onB = request(newManager(store), id, false, null);
+        assertEquals("on B", onB.getAttribute("seen"));
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onB).getPermissionState());
+        assertEquals(java.util.List.of(FULL), java.util.List.of(userOf(onB).getResolvedPermissions()));
+    }
+
+    @Test
+    public void test_persistHolding_leavesAnotherUsersSessionAndAnIdleSessionAlone() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        final FessSessionManager manager = newManager(store);
+        final FessSession dave = request(manager, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(
+                new org.codelibs.fess.ldap.LdapUser("dave", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING))));
+        final FessSession carol = request(manager, null, true,
+                s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser("carol",
+                        false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING))));
+        // idle past its timeout, not yet swept: a background save must not expire it
+        carol.setMaxInactiveInterval(1);
+        Thread.sleep(1_200L);
+        store.calls.clear();
+
+        manager.persistHolding(holdsUserOf(
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED)));
+
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.PENDING, userOf(dave).getPermissionState());
+        assertTrue(carol.isAlive(), "the background save expired an idle session");
+    }
+
+    @Test
+    public void test_refresh_aStaleSaveOfAnotherNodeDoesNotLeaveTheUserUnsettledEverywhere() throws Exception {
+        // node B read the session while the user was PENDING, node A settled it meanwhile, and node B saved what it had read
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        store.reconciles = true;
+        final FessSessionManager nodeA = newManager(store);
+        final FessSessionManager nodeB = newManager(store);
+        final org.codelibs.fess.ldap.LdapUser original =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        final FessSession onA =
+                request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(original)));
+        final String id = onA.getId();
+        final org.codelibs.fess.ldap.LdapUser walked =
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED);
+
+        request(nodeB, id, false, s -> {
+            s.setAttribute("seen", "on B");
+            nodeA.persistHolding(holdsUserOf(walked));
+        });
+        // the store has the older user again, with the attribute of node B
+        assertTrue(store.describer.apply(
+                store.docs.values().iterator().next().get("attributes") instanceof final java.util.Map<?, ?> m ? m.get("user") : null)
+                .contains("PENDING"));
+
+        request(nodeA, id, false, null);
+        assertEquals("on B", onA.getAttribute("seen"));
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onA).getPermissionState());
+        assertEquals(java.util.List.of(FULL), java.util.List.of(userOf(onA).getResolvedPermissions()));
+
+        // the request of node A wrote it back, so the other node and a node that never saw the session read the settled user
+        final FessSession again = request(nodeB, id, false, null);
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(again).getPermissionState());
+        final FessSession fresh = request(newManager(store), id, false, null);
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(fresh).getPermissionState());
+        assertEquals("on B", fresh.getAttribute("seen"));
+    }
+
+    @Test
+    public void test_refresh_neverCarriesAUserOfAnotherAccountOrUnsettlesASettledOne() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        storeCopiesUsers(store);
+        store.reconciles = true;
+        final FessSessionManager nodeA = newManager(store);
+        final FessSessionManager nodeB = newManager(store);
+        final FessSession onA = request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(
+                new org.codelibs.fess.ldap.LdapUser("carol", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED))));
+        final String id = onA.getId();
+
+        // another account in the store (a new login of the same cookie is impossible, the id rotates, but the guard must hold anyway)
+        request(nodeB, id, false, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(
+                new org.codelibs.fess.ldap.LdapUser("dave", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING))));
+        request(nodeA, id, false, null);
+        assertEquals("dave", userOf(onA).getName());
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.PENDING, userOf(onA).getPermissionState());
+
+        // a settled user in the store is never replaced by a user of this node that is still unsettled
+        final FessSession onA2 = request(nodeA, null, true, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(
+                new org.codelibs.fess.ldap.LdapUser("erin", false, DIRECT, org.codelibs.fess.entity.FessUser.PermissionState.PENDING))));
+        request(nodeB, onA2.getId(), false, s -> s.setAttribute("user", new org.codelibs.fess.mylasta.action.FessUserBean(
+                new org.codelibs.fess.ldap.LdapUser("erin", false, FULL, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED))));
+        request(nodeA, onA2.getId(), false, null);
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, userOf(onA2).getPermissionState());
+    }
+
+    /** Starts a write of the session that waits in the store, invalidates the session meanwhile, and lets the write end. */
+    private FakeSessionStore invalidateWhileAWriteIsInTheStore(final boolean persistedBefore) throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final java.util.concurrent.CountDownLatch inSave = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>> bridge = store.bridge();
+        final java.util.function.Function<java.util.Map<String, Object>, Object> save = bridge.get(FessSessionManager.OP_SAVE);
+        final java.util.concurrent.atomic.AtomicBoolean armed = new java.util.concurrent.atomic.AtomicBoolean();
+        bridge.put(FessSessionManager.OP_SAVE, args -> {
+            if (armed.compareAndSet(true, false)) {
+                inSave.countDown();
+                try {
+                    release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            return save.apply(args);
+        });
+        final FessSessionManager manager = newManager(null);
+        manager.getContext().getServletContext().setAttribute(FessSessionManager.BRIDGE_ATTRIBUTE, bridge);
+        final FessSession session = (FessSession) manager.createSession(null);
+        session.setAttribute("user", "carol");
+        if (persistedBefore) {
+            manager.persist(session);
+            assertEquals(1, store.docs.size());
+        }
+        session.setAttribute("seen", "again");
+        armed.set(true);
+        final Thread writer = new Thread(() -> manager.persist(session));
+        writer.start();
+        assertTrue(inSave.await(10, java.util.concurrent.TimeUnit.SECONDS));
+
+        session.invalidate();
+        release.countDown();
+        writer.join(10_000L);
+        assertFalse(writer.isAlive());
+        return store;
+    }
+
+    @Test
+    public void test_invalidateWhileAWriteIsInTheStore_neverStoredSessionIsNotLeftBehind() throws Exception {
+        assertTrue(invalidateWhileAWriteIsInTheStore(false).docs.isEmpty(), "the write recreated the document of a logged-out session");
+    }
+
+    @Test
+    public void test_invalidateWhileAWriteIsInTheStore_storedSessionIsNotLeftBehind() throws Exception {
+        assertTrue(invalidateWhileAWriteIsInTheStore(true).docs.isEmpty(), "the write kept the document of a logged-out session");
     }
 }

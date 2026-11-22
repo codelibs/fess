@@ -24,7 +24,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.Context;
@@ -57,7 +59,15 @@ import org.apache.tomcat.util.ExceptionUtils;
  * {@code {gone=true}} and the session is expired locally.</li>
  * <li>{@value #OP_DELETE}: {@code {id}} to {@code null}.</li>
  * <li>{@value #OP_PURGE}: {@code {}} to the number of deleted expired sessions.</li>
+ * <li>{@value #OP_RECONCILE}: {@code {local, incoming}}, the attributes the session holds and the ones just read from the
+ * store (changed in place before they are applied), to whether the incoming attributes hold what the session held. Optional.</li>
  * </ul>
+ *
+ * <p>The other direction is a {@code Consumer<Predicate<Object>>} that this manager stores in the ServletContext
+ * attribute {@value #PERSIST_HOLDING_ATTRIBUTE} while it runs: it saves every session of this node that holds an
+ * attribute value the predicate accepts, right away and on the calling thread. A background task that changed an
+ * object a session holds, outside of any request, uses it so that the other nodes see the change before the next request
+ * of that session reaches this node.</p>
  */
 public class FessSessionManager extends ManagerBase {
 
@@ -65,6 +75,9 @@ public class FessSessionManager extends ManagerBase {
 
     /** The ServletContext attribute that holds the bridge. */
     public static final String BRIDGE_ATTRIBUTE = "fess.session.store";
+
+    /** The ServletContext attribute that holds the function saving the sessions that hold a given value. */
+    public static final String PERSIST_HOLDING_ATTRIBUTE = "fess.session.persistHolding";
 
     /** The bridge operation that reads a session. */
     public static final String OP_LOAD = "load";
@@ -77,6 +90,9 @@ public class FessSessionManager extends ManagerBase {
 
     /** The bridge operation that deletes the expired sessions. */
     public static final String OP_PURGE = "purge";
+
+    /** The optional bridge operation that lets what a session holds take over a state read from the store. */
+    public static final String OP_RECONCILE = "reconcile";
 
     /** The number of session ids remembered as not to be written. */
     protected static final int DO_NOT_PERSIST_LIMIT = 1024;
@@ -230,6 +246,14 @@ public class FessSessionManager extends ManagerBase {
      * @return the session, or {@code null} if the store dropped it (invalidated or expired on another node)
      */
     protected Session refresh(final FessSession session, final Function<Map<String, Object>, Object> load) {
+        // The read and its application are one step with respect to the writes of this session, so that a state read
+        // before a background write (persistHolding) cannot be applied after it and put the older attributes back.
+        synchronized (session.getPersistLock()) {
+            return refreshLocked(session, load);
+        }
+    }
+
+    private Session refreshLocked(final FessSession session, final Function<Map<String, Object>, Object> load) {
         final Map<String, Object> state;
         try {
             final Map<String, Object> args = idArgs(session.getIdInternal());
@@ -254,11 +278,34 @@ public class FessSessionManager extends ManagerBase {
             return session;
         }
         final boolean changed = !String.valueOf(state.get("digest")).equals(session.getDigest());
+        if (changed) {
+            reconcile(session, state);
+        }
         apply(session, state, changed);
         if (changed) {
             session.setPersistedAt(System.currentTimeMillis());
         }
         return session;
+    }
+
+    /**
+     * Lets the web application carry what this node knows over to the attributes that are about to replace it. When it does,
+     * the session differs from the store afterwards, so the write at the end of the request brings the store right.
+     */
+    private void reconcile(final FessSession session, final Map<String, Object> state) {
+        final Function<Map<String, Object>, Object> reconcile = operation(OP_RECONCILE);
+        final Object incoming = state.get("attributes");
+        if (reconcile == null || !(incoming instanceof Map)) {
+            return;
+        }
+        final Map<String, Object> args = new HashMap<>();
+        args.put("local", session.snapshotAttributes());
+        args.put("incoming", incoming);
+        try {
+            reconcile.apply(args);
+        } catch (final RuntimeException e) {
+            warn("Failed to reconcile the session with the session store. The state of the store is applied as it is.", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -275,7 +322,18 @@ public class FessSessionManager extends ManagerBase {
      */
     protected void persist(final FessSession session) {
         final Function<Map<String, Object>, Object> save = operation(OP_SAVE);
-        if (save == null || session.isDoNotPersist() || !session.isValid()) {
+        if (save == null) {
+            return;
+        }
+        // The snapshot and the write of one session never interleave with another's, so that a write of an older
+        // snapshot (the end of a request) cannot land after a newer one (a background change) and undo it.
+        synchronized (session.getPersistLock()) {
+            persist(session, save);
+        }
+    }
+
+    private void persist(final FessSession session, final Function<Map<String, Object>, Object> save) {
+        if (session.isDoNotPersist() || !session.isAlive()) {
             return;
         }
         final Map<String, Object> args = idArgs(session.getIdInternal());
@@ -303,6 +361,11 @@ public class FessSessionManager extends ManagerBase {
         } catch (final RuntimeException e) {
             warn("Failed to save the session to the session store.", e);
         }
+        if (session.isInvalidated()) {
+            // The logout deleted the document while this write was in the store. For a session that had none yet, the
+            // write created it, which would let the cookie of the logged-out session in on every node.
+            deleteFromStore(session.getIdInternal());
+        }
     }
 
     @Override
@@ -316,10 +379,20 @@ public class FessSessionManager extends ManagerBase {
     @Override
     protected void changeSessionId(final Session session, final String newId, final boolean notifySessionListeners,
             final boolean notifyContainerListeners) {
-        final String oldId = session.getIdInternal();
-        super.changeSessionId(session, newId, notifySessionListeners, notifyContainerListeners);
-        if (oldId != null && session instanceof FessSession) {
-            deleteFromStore(oldId);
+        if (!(session instanceof final FessSession fessSession)) {
+            super.changeSessionId(session, newId, notifySessionListeners, notifyContainerListeners);
+            return;
+        }
+        // Under the lock of the writes of the session: a write (persistHolding runs on another thread) reads the id inside
+        // that lock, so it happens wholly before this change, under the old id that is deleted below, or wholly after it,
+        // under the new one. Otherwise it could create the old document again, or hand the result of the old id (digest,
+        // persistedAt) to the renamed session, whose next write would then find no document and expire it.
+        synchronized (fessSession.getPersistLock()) {
+            final String oldId = session.getIdInternal();
+            super.changeSessionId(session, newId, notifySessionListeners, notifyContainerListeners);
+            if (oldId != null) {
+                deleteFromStore(oldId);
+            }
         }
     }
 
@@ -402,6 +475,47 @@ public class FessSessionManager extends ManagerBase {
     }
 
     /**
+     * Saves every session of this node that holds an attribute value the predicate accepts. Unlike
+     * {@link #persistTouched()} it needs no request: it is for a background thread that changed an object a session
+     * holds. Failures are logged and swallowed.
+     *
+     * <p>The predicate may be asked about the same value more than once, and may bring a value up to date before it
+     * accepts it: a session that this node refreshed from the store holds copies of the objects it held before, so the
+     * object the background thread changed is not necessarily in the session. For a session that matches, the state of the
+     * store is read again first (what other nodes wrote since this node last read it is kept) and the predicate is
+     * applied to what the session holds then, so that a write of this node never undoes a change of another.</p>
+     *
+     * @param holds tells whether an attribute value is, or is a copy of, the one that changed
+     */
+    protected void persistHolding(final Predicate<Object> holds) {
+        for (final Session session : findSessions()) {
+            if (!(session instanceof final FessSession fessSession) || !fessSession.isAlive()) {
+                continue;
+            }
+            try {
+                if (!holdsAny(fessSession, holds)) {
+                    continue;
+                }
+                synchronized (fessSession.getPersistLock()) {
+                    final Function<Map<String, Object>, Object> load = operation(OP_LOAD);
+                    if (load != null && refresh(fessSession, load) == null) {
+                        continue;
+                    }
+                    if (holdsAny(fessSession, holds)) {
+                        persist(fessSession);
+                    }
+                }
+            } catch (final RuntimeException e) {
+                warn("Failed to save the session after one of its attributes changed.", e);
+            }
+        }
+    }
+
+    private static boolean holdsAny(final FessSession session, final Predicate<Object> holds) {
+        return session.snapshotAttributes().values().stream().anyMatch(holds);
+    }
+
+    /**
      * Records that the current thread touched a session.
      *
      * @param session the session
@@ -472,12 +586,21 @@ public class FessSessionManager extends ManagerBase {
     @Override
     protected synchronized void startInternal() throws LifecycleException {
         super.startInternal();
+        final Context context = getContext();
+        if (context != null) {
+            final Consumer<Predicate<Object>> persistHolding = this::persistHolding;
+            context.getServletContext().setAttribute(PERSIST_HOLDING_ATTRIBUTE, persistHolding);
+        }
         setState(LifecycleState.STARTING);
     }
 
     @Override
     protected synchronized void stopInternal() throws LifecycleException {
         setState(LifecycleState.STOPPING);
+        final Context context = getContext();
+        if (context != null) {
+            context.getServletContext().removeAttribute(PERSIST_HOLDING_ATTRIBUTE);
+        }
         // Local copies only: expiry does not delete from the store, so the sessions stay usable on other nodes.
         for (final Session session : findSessions()) {
             try {

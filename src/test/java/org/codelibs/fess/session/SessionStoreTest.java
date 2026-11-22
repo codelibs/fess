@@ -612,7 +612,7 @@ public class SessionStoreTest extends UnitFessTestCase {
         final Object operations = store.contextAttributes.get("fess.session.store");
         assertNotNull(operations);
         final Map<String, Function<Map<String, Object>, Object>> map = (Map<String, Function<Map<String, Object>, Object>>) operations;
-        assertEquals(java.util.Set.of("load", "save", "delete", "purge"), map.keySet());
+        assertEquals(java.util.Set.of("load", "save", "delete", "purge", "reconcile"), map.keySet());
 
         // the operations are the working ones
         final Map<String, Object> saved = (Map<String, Object>) map.get("save").apply(saveArgs(null, null, "a"));
@@ -622,8 +622,41 @@ public class SessionStoreTest extends UnitFessTestCase {
         assertNull(map.get("load").apply(idArgs()));
         assertEquals(3L, map.get("purge").apply(new HashMap<>()));
 
+        // reconcile hands the settled user of the session to the unsettled one read from the store
+        final org.codelibs.fess.ldap.LdapUser restored = new org.codelibs.fess.ldap.LdapUser("carol", false, new String[] { "1carol" },
+                org.codelibs.fess.entity.FessUser.PermissionState.PENDING);
+        final Map<String, Object> reconcileArgs = new HashMap<>();
+        reconcileArgs.put("local",
+                Map.of("user", new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser("carol", false,
+                        new String[] { "1carol", "2A0" }, org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED))));
+        reconcileArgs.put("incoming", Map.of("user", new org.codelibs.fess.mylasta.action.FessUserBean(restored)));
+        assertEquals(Boolean.TRUE, map.get("reconcile").apply(reconcileArgs));
+        assertEquals(org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED, restored.getPermissionState());
+
         store.destroy();
         assertNull(store.contextAttributes.get("fess.session.store"));
+    }
+
+    @Test
+    public void test_persistHolding_callsTheFunctionThatTheTomcatSideStored() {
+        final List<java.util.function.Predicate<Object>> received = new ArrayList<>();
+        final java.util.function.Consumer<java.util.function.Predicate<Object>> persist = received::add;
+        final java.util.function.Predicate<Object> holds = value -> true;
+
+        // not selected: nothing is called, even if something stored a function
+        store.contextAttributes.put(SessionStore.PERSIST_HOLDING_ATTRIBUTE, persist);
+        store.persistHolding(holds);
+        assertTrue(received.isEmpty());
+
+        // selected, but the Tomcat side stored nothing (a plain Tomcat session manager): nothing happens
+        store.env.put(SessionStore.ENV_NAME, "opensearch");
+        store.contextAttributes.clear();
+        store.persistHolding(holds);
+
+        store.contextAttributes.put(SessionStore.PERSIST_HOLDING_ATTRIBUTE, persist);
+        store.persistHolding(holds);
+        assertEquals(1, received.size());
+        assertSame(holds, received.get(0));
     }
 
     @Test
@@ -678,5 +711,31 @@ public class SessionStoreTest extends UnitFessTestCase {
         assertEquals(Long.MAX_VALUE, store.calculateExpiredTime(1_000L, 0));
         assertEquals(Long.MAX_VALUE, store.calculateExpiredTime(1_000L, -1));
         assertEquals(1_000L + Integer.MAX_VALUE * 1000L, store.calculateExpiredTime(1_000L, Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void test_takeSettledUsers_givesTheResultToTheSameUserOnlyAndIgnoresOtherValues() {
+        final String[] direct = { "1carol" };
+        final String[] full = { "1carol", "2A0" };
+        final org.codelibs.fess.entity.FessUser.PermissionState pending = org.codelibs.fess.entity.FessUser.PermissionState.PENDING;
+        final org.codelibs.fess.entity.FessUser.PermissionState resolved = org.codelibs.fess.entity.FessUser.PermissionState.RESOLVED;
+        final org.codelibs.fess.ldap.LdapUser restored = new org.codelibs.fess.ldap.LdapUser("carol", false, direct, pending);
+        final org.codelibs.fess.ldap.LdapUser other = new org.codelibs.fess.ldap.LdapUser("dave", false, direct, pending);
+        final Map<String, Object> incoming = new HashMap<>();
+        incoming.put("user", new org.codelibs.fess.mylasta.action.FessUserBean(restored));
+        incoming.put("other", new org.codelibs.fess.mylasta.action.FessUserBean(other));
+        incoming.put("text", "carol");
+        final Map<String, Object> local = new HashMap<>();
+        local.put("user",
+                new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser("carol", false, full, resolved)));
+        local.put("other",
+                new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser("carol", false, full, resolved)));
+        local.put("text", "x");
+
+        assertTrue(SessionStore.takeSettledUsers(local, incoming));
+        assertEquals(resolved, restored.getPermissionState());
+        assertEquals(pending, other.getPermissionState());
+        assertFalse(SessionStore.takeSettledUsers(null, incoming));
+        assertFalse(SessionStore.takeSettledUsers(local, null));
     }
 }

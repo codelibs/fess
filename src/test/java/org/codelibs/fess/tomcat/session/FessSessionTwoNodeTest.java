@@ -56,6 +56,9 @@ public class FessSessionTwoNodeTest {
     /** A request on hold waits for it. */
     private volatile java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
 
+    /** A mutable value that a session holds, changed from outside of any request. */
+    private final java.util.concurrent.atomic.AtomicReference<String> held = new java.util.concurrent.atomic.AtomicReference<>("PENDING");
+
     private Tomcat start(final String name) throws Exception {
         final File dir = new File(baseDir, name);
         dir.mkdirs();
@@ -79,6 +82,8 @@ public class FessSessionTwoNodeTest {
                 if (session != null) {
                     if ("set".equals(op)) {
                         session.setAttribute("user", req.getParameter("v"));
+                    } else if ("hold-object".equals(op)) {
+                        session.setAttribute("held", held);
                     } else if ("logout".equals(op)) {
                         session.invalidate();
                         body = "bye";
@@ -105,7 +110,9 @@ public class FessSessionTwoNodeTest {
                     } else if ("rotate".equals(op)) {
                         req.changeSessionId();
                     }
-                    if (!"logout".equals(op)) {
+                    if (!"logout".equals(op) && req.getParameter("name") != null) {
+                        body = String.valueOf(session.getAttribute(req.getParameter("name")));
+                    } else if (!"logout".equals(op)) {
                         body = String.valueOf(session.getAttribute("user"));
                     }
                 }
@@ -233,5 +240,31 @@ public class FessSessionTwoNodeTest {
     public void test_logoutWhileRequestInFlight_touchedSessionIsNotRecreated() throws Exception {
         store.touchIntervalMs = 0L;
         assertDeletedSessionStaysDeleted("op=hold");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void persistHolding(final Tomcat node, final java.util.function.Predicate<Object> holds) {
+        final Object function =
+                ((Context) node.getHost().findChildren()[0]).getServletContext().getAttribute(FessSessionManager.PERSIST_HOLDING_ATTRIBUTE);
+        assertTrue(function instanceof java.util.function.Consumer);
+        ((java.util.function.Consumer<java.util.function.Predicate<Object>>) function).accept(holds);
+    }
+
+    @Test
+    public void test_changeMadeOutsideARequest_reachesTheStoreOnlyOncePersisted() throws Exception {
+        final String cookie = get(nodeA, "op=hold-object", null)[1];
+        final String id = cookie.substring("JSESSIONID=".length());
+        assertTrue(String.valueOf(store.docs.get(id).get("digest")).contains("PENDING"));
+
+        // the change of a background task: node A holds the new value, the store does not
+        held.set("RESOLVED");
+        assertTrue(String.valueOf(store.docs.get(id).get("digest")).contains("PENDING"));
+
+        // the function the manager publishes to the web application, which runs on a thread of its own
+        final Thread background = new Thread(() -> persistHolding(nodeA, value -> value == held));
+        background.start();
+        background.join(10_000L);
+
+        assertTrue(String.valueOf(store.docs.get(id).get("digest")).contains("RESOLVED"));
     }
 }

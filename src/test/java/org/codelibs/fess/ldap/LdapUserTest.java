@@ -828,4 +828,106 @@ public class LdapUserTest extends UnitFessTestCase {
         assertTrue("nested group lost from " + permissions, permissions.contains("2parent1"));
         assertTrue("user permission lost from " + permissions, permissions.contains("1testuser"));
     }
+
+    private static LdapUser restored(final String name, final boolean fromProvider, final String[] permissions,
+            final FessUser.PermissionState state) {
+        return new LdapUser(name, fromProvider, permissions, state);
+    }
+
+    @Test
+    public void test_takeResolutionOf_givesTheRestoredCopyOfTheSameUserTheResult() {
+        final String[] full = { "1carol", "2A1", "2A0" };
+        final LdapUser resolved = restored("carol", false, full, FessUser.PermissionState.RESOLVED);
+        final LdapUser copy = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.PENDING);
+
+        assertTrue(copy.takeResolutionOf(resolved));
+        assertEquals(FessUser.PermissionState.RESOLVED, copy.getPermissionState());
+        assertEquals(java.util.List.of(full), java.util.List.of(copy.getResolvedPermissions()));
+        // asked again, it already holds the result
+        assertTrue(copy.takeResolutionOf(resolved));
+
+        // a walk that failed is passed on as well
+        final LdapUser failed = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.FAILED);
+        final LdapUser pending = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.PENDING);
+        assertTrue(pending.takeResolutionOf(failed));
+        assertEquals(FessUser.PermissionState.FAILED, pending.getPermissionState());
+    }
+
+    @Test
+    public void test_takeResolutionOf_refusesAnotherUserAndASettledOne() {
+        final LdapUser resolved = restored("carol", false, new String[] { "1carol", "2A0" }, FessUser.PermissionState.RESOLVED);
+        final String[] own = { "1carol" };
+
+        final LdapUser otherName = restored("dave", false, own, FessUser.PermissionState.PENDING);
+        assertFalse(otherName.takeResolutionOf(resolved));
+        assertEquals(FessUser.PermissionState.PENDING, otherName.getPermissionState());
+        assertEquals(java.util.List.of(own), java.util.List.of(otherName.getResolvedPermissions()));
+
+        // the name asserted by an identity provider is not the name typed at a form
+        assertFalse(restored("carol", true, own, FessUser.PermissionState.PENDING).takeResolutionOf(resolved));
+
+        // a copy that another node already settled is not overwritten with this node's answer
+        final LdapUser settled = restored("carol", false, new String[] { "1carol", "2X" }, FessUser.PermissionState.RESOLVED);
+        assertFalse(settled.takeResolutionOf(resolved));
+        assertEquals(java.util.List.of("1carol", "2X"), java.util.List.of(settled.getResolvedPermissions()));
+
+        // nothing to give: the walk has not ended, or the user has no permissions yet
+        final LdapUser pending = restored("carol", false, own, FessUser.PermissionState.PENDING);
+        assertFalse(pending.takeResolutionOf(restored("carol", false, own, FessUser.PermissionState.PENDING)));
+        assertFalse(pending.takeResolutionOf(new LdapUser(new java.util.Hashtable<>(), "carol")));
+        assertEquals(FessUser.PermissionState.PENDING, pending.getPermissionState());
+    }
+
+    @Test
+    public void test_takeResolutionOf_refusesAnInstanceThatHasNoPermissionsYet() {
+        // still inside getPermissions(): it publishes its own result, and would put the direct groups back over this one
+        final LdapUser resolved = restored("carol", false, new String[] { "1carol", "2A0" }, FessUser.PermissionState.RESOLVED);
+        final LdapUser live = new LdapUser(new java.util.Hashtable<>(), "carol");
+        live.setPermissionState(FessUser.PermissionState.PENDING);
+
+        assertFalse(live.takeResolutionOf(resolved));
+        assertNull(live.getResolvedPermissions());
+        assertEquals(FessUser.PermissionState.PENDING, live.getPermissionState());
+    }
+
+    @Test
+    public void test_takeResolutionOf_aFailedCopyTakesALaterResolved_andASettledEqualOneIsLeftAlone() {
+        final String[] full = { "1carol", "2A1", "2A0" };
+        final LdapUser resolved = restored("carol", false, full, FessUser.PermissionState.RESOLVED);
+
+        final LdapUser failed = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.FAILED);
+        assertTrue(failed.takeResolutionOf(resolved));
+        assertEquals(FessUser.PermissionState.RESOLVED, failed.getPermissionState());
+        assertEquals(java.util.List.of(full), java.util.List.of(failed.getResolvedPermissions()));
+
+        // a RESOLVED does not replace a FAILED the other way round
+        final LdapUser failedWalk = restored("carol", false, new String[] { "1carol", "2A1" }, FessUser.PermissionState.FAILED);
+        final LdapUser resolvedCopy = restored("carol", false, full.clone(), FessUser.PermissionState.RESOLVED);
+        assertFalse(resolvedCopy.takeResolutionOf(failedWalk));
+
+        // a session that settled by itself with an equal result is not this walk's: no write for it
+        assertFalse(restored("carol", false, full.clone(), FessUser.PermissionState.RESOLVED).takeResolutionOf(resolved));
+    }
+
+    @Test
+    public void test_takeResolutionOf_readsTheStateOfAUserThatIsBeingPublishedBeforeItsPermissions() {
+        // the walk publishes the permissions, then the state; the reader must not see the state with the set it replaced
+        final String[] direct = { "1carol", "2A1" };
+        final String[] full = { "1carol", "2A1", "2A0" };
+        final LdapUser walking = new LdapUser("carol", false, direct, FessUser.PermissionState.PENDING) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public FessUser.PermissionState getPermissionState() {
+                permissions = full;
+                permissionState = FessUser.PermissionState.RESOLVED;
+                return super.getPermissionState();
+            }
+        };
+        final LdapUser copy = new LdapUser("carol", false, direct, FessUser.PermissionState.PENDING);
+
+        assertTrue(copy.takeResolutionOf(walking));
+        assertEquals(FessUser.PermissionState.RESOLVED, copy.getPermissionState());
+        assertEquals(java.util.List.of(full), java.util.List.of(copy.getResolvedPermissions()));
+    }
 }

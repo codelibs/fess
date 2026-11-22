@@ -818,6 +818,106 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals(3, published.get().length);
     }
 
+    /** Records the state the user is in when the session is written, as the settled state must reach the other nodes. */
+    private LdapManager sessionWritingManager(final List<FessUser.PermissionState> writtenIn, final boolean walkFails) {
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void processSubRoles(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet) {
+                if (walkFails) {
+                    throw new org.codelibs.fess.exception.LdapOperationException("Failed to search.");
+                }
+                roleSet.add("2parent");
+            }
+
+            @Override
+            protected void persistSession(final LdapUser user) {
+                writtenIn.add(user.getPermissionState());
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+        return ldapManager;
+    }
+
+    @Test
+    public void test_updateSubRoles_writesTheSessionOnceTheUserIsResolved() {
+        registerGroupResolvingConfig();
+        final List<FessUser.PermissionState> writtenIn = new ArrayList<>();
+        final LdapManager ldapManager = sessionWritingManager(writtenIn, false);
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapUser.setPermissionState(FessUser.PermissionState.PENDING);
+
+        ldapManager.updateSubRoles(ldapUser, "dc=example,dc=com", java.util.Set.of("CN=group1"), "(member=%s)",
+                new java.util.HashSet<>(List.of("2group1")), java.util.Set.of(), roles -> {});
+
+        // once, and after RESOLVED was set: what is written is what the other nodes will see
+        assertEquals(List.of(FessUser.PermissionState.RESOLVED), writtenIn);
+    }
+
+    @Test
+    public void test_updateSubRoles_writesTheSessionWhenTheWalkFailed() {
+        registerGroupResolvingConfig();
+        final List<FessUser.PermissionState> writtenIn = new ArrayList<>();
+        final LdapManager ldapManager = sessionWritingManager(writtenIn, true);
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapUser.setPermissionState(FessUser.PermissionState.PENDING);
+
+        ldapManager.updateSubRoles(ldapUser, "dc=example,dc=com", java.util.Set.of("CN=group1"), "(member=%s)",
+                new java.util.HashSet<>(List.of("2group1")), java.util.Set.of(), roles -> {});
+
+        assertEquals(List.of(FessUser.PermissionState.FAILED), writtenIn);
+    }
+
+    @Test
+    public void test_persistSession_asksTheStoreForTheSessionsThatHoldThisUser() {
+        final AtomicReference<java.util.function.Predicate<Object>> asked = new AtomicReference<>();
+        ComponentUtil.register(new org.codelibs.fess.session.SessionStore() {
+            @Override
+            public void persistHolding(final java.util.function.Predicate<Object> holds) {
+                asked.set(holds);
+            }
+        }, "sessionStore");
+        final LdapManager ldapManager = new LdapManager();
+        final String[] resolved = { "1testuser", "2parent", "2child" };
+        final LdapUser ldapUser = new LdapUser("testuser", false, resolved, FessUser.PermissionState.RESOLVED);
+
+        ldapManager.persistSession(ldapUser);
+
+        final java.util.function.Predicate<Object> holds = asked.get();
+        assertNotNull(holds);
+        // the instance that was resolved is held
+        assertTrue(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(ldapUser)));
+        // a restored copy of the same user that is still PENDING is held too (a refresh from the store replaced the instance),
+        // and takes the result
+        final LdapUser copy = new LdapUser("testuser", false, new String[] { "1testuser", "2parent" }, FessUser.PermissionState.PENDING);
+        assertTrue(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(copy)));
+        assertEquals(FessUser.PermissionState.RESOLVED, copy.getPermissionState());
+        assertEquals(List.of(resolved), List.of(copy.getResolvedPermissions()));
+        // the same copy again, now that it holds the result
+        assertTrue(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(copy)));
+        // another user, a bean without a user, and a value that is no user bean are not this session
+        final LdapUser other = new LdapUser("another", false, new String[] { "1another" }, FessUser.PermissionState.PENDING);
+        assertFalse(holds.test(new org.codelibs.fess.mylasta.action.FessUserBean(other)));
+        assertEquals(FessUser.PermissionState.PENDING, other.getPermissionState());
+        assertFalse(holds.test(org.codelibs.fess.mylasta.action.FessUserBean.empty()));
+        assertFalse(holds.test("testuser"));
+    }
+
+    @Test
+    public void test_persistSession_neverThrows() {
+        // no session store component at all
+        new LdapManager().persistSession(new LdapUser(new Hashtable<>(), "testuser"));
+
+        // a store that fails
+        ComponentUtil.register(new org.codelibs.fess.session.SessionStore() {
+            @Override
+            public void persistHolding(final java.util.function.Predicate<Object> holds) {
+                throw new IllegalStateException("store down");
+            }
+        }, "sessionStore");
+        new LdapManager().persistSession(new LdapUser(new Hashtable<>(), "testuser"));
+    }
+
     @Test
     public void test_updateSubRoles_doesNotDowngradeAStateAnotherWalkAlreadySettled() {
         // Two concurrent first requests each schedule a walk. If one succeeds and a later one fails,

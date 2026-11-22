@@ -51,6 +51,9 @@ public class FessSession extends StandardSession {
     /** Whether {@link #invalidate()} was called, as opposed to an expiry by timeout. */
     protected transient volatile boolean invalidated;
 
+    /** Held while the session is written to the store, see {@link FessSessionManager#persist(FessSession)}. */
+    private final transient Object persistLock = new Object();
+
     /**
      * Creates a session.
      *
@@ -69,6 +72,16 @@ public class FessSession extends StandardSession {
         if (manager instanceof final FessSessionManager fessManager) {
             fessManager.markAccessed(this);
         }
+    }
+
+    /**
+     * Tells whether the session has not been invalidated or expired, without the idle timeout check of
+     * {@link #isValid()}, which expires an idle session as a side effect. For a thread that is not serving a request of this session.
+     *
+     * @return {@code true} if the session was neither invalidated nor expired
+     */
+    public boolean isAlive() {
+        return isValidInternal();
     }
 
     /**
@@ -95,6 +108,15 @@ public class FessSession extends StandardSession {
             persistedAt = 0L;
         }
         super.setId(id, notify);
+    }
+
+    /**
+     * Returns the lock that serializes the writes of this session to the store.
+     *
+     * @return the lock
+     */
+    public Object getPersistLock() {
+        return persistLock;
     }
 
     /**
