@@ -1069,7 +1069,7 @@ public class SessionDataSerializer {
             kryo.writeClassAndObject(output, bean.getFessUser());
             writeLong(output, bean.getPasswordChangedAt());
             writeLong(output, bean.getLoginTime());
-            writeLong(output, bean.getPasswordCheckTime());
+            writeLong(output, bean.getUserCheckTime());
             output.writeString(bean.getLastestSyncCheckTime().map(LocalDateTime::toString).orElse(null));
             output.writeString(bean.getUserLocale().map(Locale::toLanguageTag).orElse(null));
             output.writeString(bean.getUserTimeZone().map(TimeZone::getID).orElse(null));
@@ -1080,7 +1080,7 @@ public class SessionDataSerializer {
             final FessUserBean bean = new FessUserBean((FessUser) kryo.readClassAndObject(input));
             bean.setPasswordChangedAt(readLong(input));
             bean.setLoginTime(readLong(input));
-            bean.setPasswordCheckTime(readLong(input));
+            bean.setUserCheckTime(readLong(input));
             final String syncCheckTime = input.readString();
             if (syncCheckTime != null) {
                 bean.manageLastestSyncCheckTime(LocalDateTime.parse(syncCheckTime));

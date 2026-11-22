@@ -17,7 +17,10 @@ package org.codelibs.fess.app.web.base.login;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.OptionalLong;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +69,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     private static final Logger logger = LogManager.getLogger(FessLoginAssist.class);
 
     /** The seconds used when {@code password.changed.check.interval} is not a number. */
-    protected static final int DEFAULT_PASSWORD_CHECK_INTERVAL = 60;
+    protected static final int DEFAULT_USER_CHECK_INTERVAL = 60;
 
     /** The reason written to the audit log when the identity provider ended the session. */
     protected static final String SESSION_END_IDP_SESSION_ENDED = "idp_session_ended";
@@ -79,6 +82,12 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * session, because it was deleted or the user was renamed.
      */
     protected static final String SESSION_END_USER_NOT_FOUND = "user_not_found";
+
+    /**
+     * The reason written to the audit log when the roles or the groups of the local user were changed after the
+     * session was opened: an administrator edited the user, or deleted a role or a group the user had.
+     */
+    protected static final String SESSION_END_PERMISSIONS_CHANGED = "permissions_changed";
 
     /**
      * The locks that make the audit record of an ended session be written by one request only. A lock is taken
@@ -317,8 +326,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
         final String reason = saved.isPresent() ? findUserIndexEndReason(saved.get()) : null;
         if (reason != null) {
             if (logger.isInfoEnabled()) {
-                logger.info("Ended a login session opened before the password was changed, or of a user that no longer exists. username={}",
-                        saved.get().getUserId());
+                logger.info(
+                        "Ended a login session opened before the password, the roles or the groups were changed, or of a user that no longer exists. username={}, reason={}",
+                        saved.get().getUserId(), reason);
             }
             endSession(saved.get(), reason);
             return getSessionUserBeanUnchecked();
@@ -418,10 +428,10 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     }
 
     /**
-     * Tests whether the password of the user was changed after the session was opened.
+     * Tests whether the password, the roles or the groups of the user were changed after the session was opened.
      *
-     * <p>The user index is asked only when the session has not been checked for
-     * {@code password.changed.check.interval} seconds (see {@link FessUserBean#getPasswordCheckTime()}),
+     * <p>The user index is asked, with one read of the user document, only when the session has not been checked for
+     * {@code password.changed.check.interval} seconds (see {@link FessUserBean#getUserCheckTime()}),
      * so a request in between costs nothing. The session ends only when the stored time is later
      * than the remembered one, not when they merely differ: a node that has not yet seen a newer
      * change, or a document rewritten by a node that does not know the field, must not end a
@@ -430,7 +440,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      *
      * @param userBean the user bean of the session
      * @return the reason the session ends ({@link #SESSION_END_PASSWORD_CHANGED} when it was opened before the
-     *         latest password change, {@link #SESSION_END_USER_NOT_FOUND} when the document of the local user is not found), or null
+     *         latest password change, {@link #SESSION_END_PERMISSIONS_CHANGED} when the roles or the groups of a local
+     *         user differ from the ones it was opened with, {@link #SESSION_END_USER_NOT_FOUND} when the document of the
+     *         local user is not found), or null
      */
     protected String findUserIndexEndReason(final FessUserBean userBean) {
         final Long remembered = userBean.getPasswordChangedAt();
@@ -438,7 +450,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             return null; // a session of a user who is not a local user
         }
         final long now = currentTimeMillis();
-        if (!isPasswordCheckDue(userBean, now)) {
+        if (!isUserCheckDue(userBean, now)) {
             return null;
         }
         final long threshold;
@@ -454,64 +466,88 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             }
             threshold = created.getAsLong();
         }
-        userBean.setPasswordCheckTime(now);
-        final OptionalLong changedAt = findPasswordChangedAt(userBean.getUserId());
-        if (changedAt.isEmpty()) {
+        userBean.setUserCheckTime(now);
+        final User stored;
+        try {
+            stored = ComponentUtil.getComponent(UserService.class).getUserByName(userBean.getUserId()).orElse(null);
+        } catch (final RuntimeException e) {
+            // Not being able to read the user ends nothing: a login session is not ended because the search engine is unreachable.
+            LogUtil.warnOnce(logger, "read",
+                    "Could not read the user, so login sessions are not checked against the last password change, the roles and the groups until it can be read.",
+                    e);
+            return null;
+        }
+        if (stored == null) {
             // The document of the user is gone. Only a local user has one to lose: for any other user the
             // identity provider, not the user index, owns the account.
             return userBean.getFessUser() instanceof User ? SESSION_END_USER_NOT_FOUND : null;
         }
-        return changedAt.getAsLong() > threshold ? SESSION_END_PASSWORD_CHANGED : null;
+        final Long changedAt = stored.getPasswordChangedAt();
+        if (changedAt != null && changedAt.longValue() > threshold) {
+            return SESSION_END_PASSWORD_CHANGED;
+        }
+        return isPermissionChanged(userBean, stored) ? SESSION_END_PERMISSIONS_CHANGED : null;
     }
 
     /**
-     * Tests whether the session is due for a look at the stored time of the last password change.
+     * Tests whether the roles or the groups of a local user were changed after the session was opened.
+     *
+     * <p>The session keeps the user document it was opened with, so its roles and groups are what the user
+     * may search by. They are compared with the document that is stored now (the one that
+     * {@link #findUserIndexEndReason(FessUserBean)} has just read, so this costs no read of its own), as sets:
+     * the order of the entries means nothing. It does not matter who changed them, the edit screen, the admin
+     * API or the deletion of a role or a group (which takes the entry out of the users that have it). A user
+     * that is not a local user gets its roles from the identity provider at each login, so nothing is compared.</p>
+     *
+     * @param userBean the user bean of the session
+     * @param stored the user document that is stored now
+     * @return true if the stored roles or groups differ from the ones of the session
+     */
+    protected boolean isPermissionChanged(final FessUserBean userBean, final User stored) {
+        if (!(userBean.getFessUser() instanceof final User opened)) {
+            return false;
+        }
+        return !isSameNames(opened.getRoles(), stored.getRoles()) || !isSameNames(opened.getGroups(), stored.getGroups());
+    }
+
+    private static boolean isSameNames(final String[] opened, final String[] stored) {
+        return toNameSet(opened).equals(toNameSet(stored));
+    }
+
+    private static Set<String> toNameSet(final String[] names) {
+        return names == null ? Set.of() : Arrays.stream(names).filter(StringUtil::isNotBlank).collect(Collectors.toSet());
+    }
+
+    /**
+     * Tests whether the session is due for a look at the stored user document (see
+     * {@link #findUserIndexEndReason(FessUserBean)}).
      *
      * @param userBean the user bean of the session
      * @param now the current time in epoch milliseconds
      * @return true if the user index is to be asked
      */
-    protected boolean isPasswordCheckDue(final FessUserBean userBean, final long now) {
-        final Long checked = userBean.getPasswordCheckTime();
+    protected boolean isUserCheckDue(final FessUserBean userBean, final long now) {
+        final Long checked = userBean.getUserCheckTime();
         if (checked == null) {
             return true;
         }
-        return now - checked.longValue() >= getPasswordCheckInterval() * 1000L;
+        return now - checked.longValue() >= getUserCheckInterval() * 1000L;
     }
 
     /**
-     * Gets the seconds between two looks at the stored time of the last password change.
+     * Gets the seconds between two looks at the stored user document. The setting that holds it,
+     * {@code password.changed.check.interval}, paces the check of the roles and the groups as well as the one of
+     * the password, and its name mentions only the password.
      *
      * @return the seconds; 0 or less looks on every request
      */
-    protected int getPasswordCheckInterval() {
+    protected int getUserCheckInterval() {
         try {
             return ComponentUtil.getFessConfig().getPasswordChangedCheckIntervalAsInteger().intValue();
         } catch (final RuntimeException e) {
             LogUtil.warnOnce(logger, "interval", "password.changed.check.interval is not a number, so {} seconds is used.",
-                    DEFAULT_PASSWORD_CHECK_INTERVAL, e);
-            return DEFAULT_PASSWORD_CHECK_INTERVAL;
-        }
-    }
-
-    /**
-     * Reads the time the password of a local user was last changed from the user index.
-     *
-     * <p>When the time cannot be read, the answer is 0, which is never later than what a session
-     * remembers: a login session is not ended because the search engine is unreachable. An empty
-     * answer means that the index was read and holds no user of that name.</p>
-     *
-     * @param username the name of the user
-     * @return epoch milliseconds (0 when there is none), or empty when the user does not exist
-     */
-    protected OptionalLong findPasswordChangedAt(final String username) {
-        try {
-            return ComponentUtil.getComponent(UserService.class).getPasswordChangedAt(username);
-        } catch (final RuntimeException e) {
-            LogUtil.warnOnce(logger, "read",
-                    "Could not read the time of the last password change, so login sessions are not checked against it until it can be read.",
-                    e);
-            return OptionalLong.of(0L);
+                    DEFAULT_USER_CHECK_INTERVAL, e);
+            return DEFAULT_USER_CHECK_INTERVAL;
         }
     }
 

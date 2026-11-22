@@ -19,6 +19,7 @@ import java.util.Hashtable;
 import java.util.OptionalLong;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,6 +33,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -225,6 +227,124 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
 
         assertTrue(assist.getSavedUserBean().isPresent());
         assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
+    }
+
+    // ---------------------------------------------------------------------
+    // the session of a user whose roles or groups were changed
+    // ---------------------------------------------------------------------
+
+    private static User withRolesAndGroups(final String name, final String[] roles, final String[] groups) {
+        final User user = localUser(name, 500L);
+        user.setRoles(roles);
+        user.setGroups(groups);
+        return user;
+    }
+
+    @Test
+    public void test_session_endsWhenARoleWasTakenAway() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", new String[] { "cm9sZTE", "cm9sZTI" }, new String[0]));
+        service.stamps.put("alice", 500L);
+        service.users.put("alice", withRolesAndGroups("alice", new String[] { "cm9sZTE" }, new String[0]));
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(1, assist.logouts.get());
+        assertEquals(List.of("alice:permissions_changed"), audit.sessionEnds);
+    }
+
+    @Test
+    public void test_session_endsWhenARoleWasAdded() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", null, null));
+        service.users.put("alice", withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(List.of("alice:permissions_changed"), audit.sessionEnds);
+    }
+
+    @Test
+    public void test_session_endsWhenAGroupWasChanged() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", new String[0], new String[] { "Z3JvdXAx" }));
+        service.users.put("alice", withRolesAndGroups("alice", new String[0], new String[] { "Z3JvdXAy" }));
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(List.of("alice:permissions_changed"), audit.sessionEnds);
+    }
+
+    @Test
+    public void test_session_keptWhenTheRolesOnlyChangedOrder() {
+        assist.session =
+                assist.createUserBean(withRolesAndGroups("alice", new String[] { "cm9sZTE", "cm9sZTI" }, new String[] { "Z3JvdXAx" }));
+        service.users.put("alice", withRolesAndGroups("alice", new String[] { "cm9sZTI", "cm9sZTE" }, new String[] { "Z3JvdXAx" }));
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertEquals(0, assist.logouts.get());
+        assertTrue(audit.sessionEnds.isEmpty());
+    }
+
+    @Test
+    public void test_session_keptWhenNoRoleAndAnEmptyListAreTheSame() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", null, null));
+        service.users.put("alice", withRolesAndGroups("alice", new String[0], new String[0]));
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertTrue(audit.sessionEnds.isEmpty());
+    }
+
+    @Test
+    public void test_session_keptWhenTheStoredDocumentHasNoPasswordChangeTime() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+        service.users.put("alice", withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+        service.users.get("alice").setPasswordChangedAt(null);
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertTrue(audit.sessionEnds.isEmpty());
+    }
+
+    @Test
+    public void test_session_passwordChangeIsTheReasonWhenTheRolesChangedToo() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+        service.stamps.put("alice", 1000L);
+        service.users.put("alice", withRolesAndGroups("alice", null, null));
+
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(List.of("alice:password_changed"), audit.sessionEnds);
+    }
+
+    @Test
+    public void test_session_rolesAreLookedAtOnlyWhenTheCheckIsDue() {
+        config.interval = 10;
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+        service.users.put("alice", withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+        assertTrue(assist.getSavedUserBean().isPresent());
+        service.users.put("alice", withRolesAndGroups("alice", null, null));
+
+        assertTrue(assist.getSavedUserBean().isPresent()); // within the interval
+        assertEquals(1, service.reads.get());
+
+        assist.now += 11_000L;
+        assertFalse(assist.getSavedUserBean().isPresent());
+        assertEquals(List.of("alice:permissions_changed"), audit.sessionEnds);
+        assertEquals(2, service.reads.get()); // one read of the user document per due check, for the password and the roles together
+    }
+
+    @Test
+    public void test_session_keptWhenTheRolesCannotBeRead() {
+        assist.session = assist.createUserBean(withRolesAndGroups("alice", new String[] { "cm9sZTE" }, null));
+        service.users.put("alice", withRolesAndGroups("alice", null, null));
+        service.failure = new IllegalStateException("search engine is down");
+
+        assertTrue(assist.getSavedUserBean().isPresent());
+        assertTrue(audit.sessionEnds.isEmpty());
+    }
+
+    @Test
+    public void test_ldapSession_keptWhateverTheLocalDocumentSays() {
+        assist.session = new FessUserBean(new LdapUser(new Hashtable<>(), "bob"));
+        assist.session.setPasswordChangedAt(0L);
+        service.stamps.put("bob", 0L);
+        service.users.put("bob", withRolesAndGroups("bob", new String[] { "cm9sZTE" }, null));
+
+        assertTrue(assist.getSavedUserBean().isPresent());
         assertTrue(audit.sessionEnds.isEmpty());
     }
 
@@ -542,19 +662,35 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     }
 
     private static class StampService extends UserService {
+        /** The time of the last password change that is stored now, by name; a user without an entry has 0. */
         final Map<String, Long> stamps = new HashMap<>();
         /** The names of the users whose document is gone. */
         final Set<String> deleted = new HashSet<>();
+        /** The number of reads of a user document, which is one per due check. */
         final AtomicInteger reads = new AtomicInteger();
         RuntimeException failure;
 
+        /** The roles and the groups of the documents that are stored now, by name (a user without an entry has none). */
+        final Map<String, User> users = new HashMap<>();
+
         @Override
-        public OptionalLong getPasswordChangedAt(final String username) {
+        public OptionalEntity<User> getUserByName(final String username) {
             reads.incrementAndGet();
             if (failure != null) {
                 throw failure;
             }
-            return deleted.contains(username) ? OptionalLong.empty() : OptionalLong.of(stamps.getOrDefault(username, 0L));
+            if (deleted.contains(username)) {
+                return OptionalEntity.empty();
+            }
+            final boolean listed = users.containsKey(username);
+            final User stored = listed ? users.get(username) : new User();
+            stored.setName(username);
+            if (stamps.containsKey(username)) {
+                stored.setPasswordChangedAt(stamps.get(username));
+            } else if (!listed) {
+                stored.setPasswordChangedAt(0L);
+            }
+            return OptionalEntity.of(stored);
         }
     }
 

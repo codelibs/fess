@@ -625,24 +625,6 @@ public class UserServicePasswordChangedAtTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getPasswordChangedAt() {
-        assertEquals(0L, userService.getPasswordChangedAt("alice").getAsLong());
-        stored.setPasswordChangedAt(123L);
-        assertEquals(123L, userService.getPasswordChangedAt("alice").getAsLong());
-    }
-
-    @Test
-    public void test_getPasswordChangedAt_unknownUser() {
-        userService.userBhv = new UserBhv() {
-            @Override
-            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
-                return OptionalEntity.empty();
-            }
-        };
-        assertTrue(userService.getPasswordChangedAt("ghost").isEmpty());
-    }
-
-    @Test
     public void test_changePassword_outsideARequest_stillSucceeds() {
         final AtomicReference<RuntimeException> thrown = new AtomicReference<>();
         ComponentUtil.setFessLoginAssist(new FessLoginAssist() {
