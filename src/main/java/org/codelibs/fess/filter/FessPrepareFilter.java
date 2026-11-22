@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.zip.ZipFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,7 +58,7 @@ public class FessPrepareFilter extends LastaPrepareFilter {
     }
 
     /**
-     * Initializes the container, after saying which plugin jars are installed twice.
+     * Initializes the container, after saying which plugin jars are installed twice or cannot be read.
      *
      * <p>Two versions of one plugin are both loaded, and when the older one comes first the
      * container fails to initialize with an error about a class of the plugin that never says
@@ -68,6 +69,7 @@ public class FessPrepareFilter extends LastaPrepareFilter {
         final String pluginDir = servletContext.getRealPath("/WEB-INF/plugin");
         if (pluginDir != null) {
             duplicatedPlugins(Path.of(pluginDir)).forEach(logger::error);
+            unreadablePlugins(Path.of(pluginDir)).forEach(logger::warn);
         }
         super.initializeContainer(servletContext);
     }
@@ -105,6 +107,41 @@ public class FessPrepareFilter extends LastaPrepareFilter {
                         + artifactId + " installs the version of this release.");
             }
         });
+        return messages;
+    }
+
+    /**
+     * Describes each jar of the plugin directory that cannot be opened as a jar (an empty, truncated or
+     * not-a-zip file).
+     *
+     * <p>Fess starts without such a jar, and the web application server reports it only in its own log
+     * ({@code server_0.log}), so without this the only trace in {@code fess.log} is a missing plugin.</p>
+     *
+     * @param directory the plugin directory
+     * @return one message per unreadable jar, empty when there is none or the directory cannot be read
+     */
+    static List<String> unreadablePlugins(final Path directory) {
+        final List<String> messages = new ArrayList<>();
+        if (Files.isDirectory(directory)) {
+            try (Stream<Path> files = Files.list(directory)) {
+                files.filter(Files::isRegularFile).filter(file -> file.getFileName().toString().endsWith(".jar")).sorted().forEach(file -> {
+                    try (ZipFile zip = new ZipFile(file.toFile())) {
+                        // the central directory is readable
+                    } catch (final IOException e) {
+                        final String name = file.getFileName().toString();
+                        final Matcher matcher = PLUGIN_JAR.matcher(name);
+                        final String hint = matcher.matches() && isPluginName(matcher.group(1))
+                                ? " Remove it with fess-setup remove plugin " + matcher.group(1) + ", then install the plugin again."
+                                : " Remove the file.";
+                        messages.add(
+                                "The plugin jar " + file + " cannot be opened as a jar and is not used (" + e.getMessage() + ")." + hint);
+                    }
+                });
+            } catch (final IOException | UncheckedIOException e) {
+                logger.debug("Failed to check the plugin directory: {}", directory, e);
+                return List.of();
+            }
+        }
         return messages;
     }
 
