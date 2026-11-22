@@ -108,8 +108,14 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
 
     @Override
     public FormMappingOption adjustFormMapping() {
-        return new FormMappingOption()
-                .filterSimpleTextParameter((parameter, meta) -> parameter.trim().replace("\r\n", "\n").replace('\r', '\n'));
+        return new FormMappingOption().filterSimpleTextParameter((parameter, meta) -> {
+            // A password is taken as typed. The JSON login and the admin API (which do not go through this filter)
+            // never trimmed it, so trimming it here would let the same password work in one entrance and not in another.
+            if (meta.getPropertyName().toLowerCase(Locale.ROOT).endsWith("password")) {
+                return parameter;
+            }
+            return parameter.trim().replace("\r\n", "\n").replace('\r', '\n');
+        });
     }
 
     @Override

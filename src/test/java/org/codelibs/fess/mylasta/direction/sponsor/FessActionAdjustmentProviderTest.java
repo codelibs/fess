@@ -24,6 +24,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.ruts.process.populate.FormSimpleTextParameterFilter;
+import org.lastaflute.web.ruts.process.populate.FormSimpleTextParameterMeta;
 
 public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
 
@@ -151,6 +153,19 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         final List<String> generated =
                 collectHeaders(new FessActionAdjustmentProvider(createFessConfigWithResponseHeaders(generatedDefault)), "text/html");
         assertEquals(shipped, generated);
+    }
+
+    @Test
+    public void test_adjustFormMapping_trimsTextButNotPasswords() {
+        final FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(createFessConfigWithResponseHeaders(""));
+        final FormSimpleTextParameterFilter filter = provider.adjustFormMapping().getSimpleTextParameterFilter().get();
+        final FormSimpleTextParameterMeta name = new FormSimpleTextParameterMeta("name", String.class);
+        assertEquals("a\nb", filter.filter("  a\r\nb \r", name));
+
+        for (final String property : new String[] { "password", "confirmPassword", "spnegoPreauthPassword" }) {
+            final FormSimpleTextParameterMeta meta = new FormSimpleTextParameterMeta(property, String.class);
+            assertEquals(property, " lead and trail ", filter.filter(" lead and trail ", meta));
+        }
     }
 
     private List<String> collectHeaders(final FessActionAdjustmentProvider provider, final String mimeType) {
