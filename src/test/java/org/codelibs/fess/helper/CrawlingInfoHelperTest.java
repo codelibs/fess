@@ -394,6 +394,85 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         crawlingInfoHelper.updateParams(sessionId, null, -1);
     }
 
+    private List<CrawlingInfoParam> storeUnfinished(final CrawlingInfo session, final List<CrawlingInfoParam> existingParams,
+            final boolean[] result) {
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return 5_000_000L;
+            }
+        }, "systemHelper");
+        final List<CrawlingInfoParam> stored = new ArrayList<>();
+        ComponentUtil.register(new CrawlingInfoService() {
+            @Override
+            public CrawlingInfo getLast(final String sessionId) {
+                // the crawler process names its session with underscores
+                assertEquals("20261109_012345", sessionId);
+                return session;
+            }
+
+            @Override
+            public List<CrawlingInfoParam> getLastCrawlingInfoParamList(final String sessionId) {
+                return existingParams;
+            }
+
+            @Override
+            public void storeInfo(final List<CrawlingInfoParam> crawlingInfoParamList) {
+                stored.addAll(crawlingInfoParamList);
+            }
+        }, CrawlingInfoService.class.getCanonicalName());
+        result[0] = crawlingInfoHelper.storeUnfinishedSession("20261109-012345");
+        return stored;
+    }
+
+    @Test
+    public void test_storeUnfinishedSession_recordsStateAndEndTime() {
+        final CrawlingInfo session = new CrawlingInfo();
+        session.setId("info-1");
+        session.setCreatedTime(1_000_000L);
+        final boolean[] result = new boolean[1];
+
+        final List<CrawlingInfoParam> stored = storeUnfinished(session, new ArrayList<>(), result);
+
+        assertTrue(result[0]);
+        final Map<String, String> params = new HashMap<>();
+        for (final CrawlingInfoParam param : stored) {
+            assertEquals("info-1", param.getCrawlingInfoId());
+            params.put(param.getKey(), param.getValue());
+        }
+        assertEquals(Constants.F.toString(), params.get(Constants.CRAWLER_STATUS));
+        assertEquals("4000000", params.get(Constants.CRAWLER_EXEC_TIME));
+        assertTrue(params.get(Constants.CRAWLER_END_TIME).matches("\\d{4}-\\d{2}-\\d{2}T.*"), params.get(Constants.CRAWLER_END_TIME));
+    }
+
+    // a process that finished writes its own end time, and what it wrote is not overwritten
+    @Test
+    public void test_storeUnfinishedSession_keepsAFinishedSession() {
+        final CrawlingInfo session = new CrawlingInfo();
+        session.setId("info-1");
+        session.setCreatedTime(1_000_000L);
+        final CrawlingInfoParam endTime = new CrawlingInfoParam();
+        endTime.setKey(Constants.CRAWLER_END_TIME);
+        endTime.setValue("2026-11-09T01:30:00.000+0900");
+        final boolean[] result = new boolean[1];
+
+        final List<CrawlingInfoParam> stored = storeUnfinished(session, List.of(endTime), result);
+
+        assertFalse(result[0]);
+        assertTrue(stored.isEmpty());
+    }
+
+    // the process was killed before it stored its session
+    @Test
+    public void test_storeUnfinishedSession_noSession() {
+        final boolean[] result = new boolean[1];
+
+        final List<CrawlingInfoParam> stored = storeUnfinished(null, new ArrayList<>(), result);
+
+        assertFalse(result[0]);
+        assertTrue(stored.isEmpty());
+    }
+
     @Test
     public void test_updateParams_noSession() {
         final String sessionId = "non-existent-session";
