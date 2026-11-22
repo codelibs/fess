@@ -1361,6 +1361,19 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * A result's title and snippet carry dir="auto" on their blocks so an Arabic or Hebrew hit reads right to left
+     * while the URL line stays left to right.
+     */
+    @Test
+    public void test_searchJs_resultTitleAndSnippetUseDirAuto() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("el(\"h3\", { className: \"title text-truncate\", attrs: { dir: \"auto\" } })"),
+                "result title <h3> must carry dir=auto");
+        assertTrue(js.contains("el(\"div\", { className: \"description\", attrs: { dir: \"auto\" } })"),
+                "result snippet <div> must carry dir=auto");
+    }
+
+    /**
      * R4-5: index.html facet panel must use Bootstrap's offcanvas-md pattern so it
      * is accessible as a drawer on small screens and as an inline sidebar on ≥md.
      * Preserved: facet-body and facet-clear must still be present.
