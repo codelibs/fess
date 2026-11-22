@@ -38,6 +38,9 @@ public class HealthHandler {
     /** The engine status reported when the search engine cannot be reached at all. */
     protected static final String UNAVAILABLE_STATUS = "UNAVAILABLE";
 
+    /** The engine status reported when the cluster is healthy but refuses writes. */
+    protected static final String DEGRADED_STATUS = "YELLOW";
+
     /** The ping status reported when there was no response to read one from. */
     protected static final int PING_STATUS_ERROR = 1;
 
@@ -59,6 +62,17 @@ public class HealthHandler {
     }
 
     /**
+     * Tells whether the search engine refuses writes, as it does when the disk is past the flood-stage
+     * watermark. The cluster health stays green then, so it has to be asked separately. Separated so a
+     * test can drive it without a search engine.
+     *
+     * @return true if an index or the cluster has a write block
+     */
+    protected boolean isWriteBlocked() {
+        return ComponentUtil.getSearchEngineClient().isWriteBlocked();
+    }
+
+    /**
      * Processes one health check request.
      *
      * @param request the incoming HTTP request
@@ -73,7 +87,13 @@ public class HealthHandler {
         }
         try {
             final PingResponse ping = ping();
-            final String clusterStatus = ping.getClusterStatus();
+            String clusterStatus = ping.getClusterStatus();
+            if ("green".equalsIgnoreCase(clusterStatus) && isWriteBlocked()) {
+                // Searches work, but nothing can be written: a crawl, a setting or an index change fails. That is
+                // degraded, not healthy, and a full disk is the commonest way to get here. Why is not said:
+                // this endpoint is anonymous, and the admin API tells an operator more.
+                clusterStatus = DEGRADED_STATUS;
+            }
             final Map<String, Object> engine = new LinkedHashMap<>();
             // The OpenSearch cluster name is intentionally omitted from this anonymous endpoint
             // to avoid leaking deployment metadata; only the coarse status and ping_status are

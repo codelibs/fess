@@ -23,6 +23,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fesen.opensearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.codelibs.fesen.opensearch.cluster.health.ClusterHealthStatus;
+import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -125,6 +128,76 @@ public class HealthHandlerTest extends UnitFessTestCase {
         assertFalse(body.contains("\"cluster_name\""), body);
         // Same as /api/v2/search: a 503 for an unavailable engine tells the client when to retry.
         assertEquals("5", res.getHeader("Retry-After"));
+    }
+
+    private HealthHandler handlerOf(final ClusterHealthStatus status, final boolean writeBlocked) {
+        return new HealthHandler() {
+            @Override
+            protected PingResponse ping() {
+                return new PingResponse(new ClusterHealthResponse() {
+                    @Override
+                    public String getClusterName() {
+                        return "test-cluster";
+                    }
+
+                    @Override
+                    public ClusterHealthStatus getStatus() {
+                        return status;
+                    }
+
+                    @Override
+                    public boolean isTimedOut() {
+                        return false;
+                    }
+                });
+            }
+
+            @Override
+            protected boolean isWriteBlocked() {
+                return writeBlocked;
+            }
+        };
+    }
+
+    /**
+     * A full disk puts a read-only block on every index while the cluster health stays green: the endpoint
+     * must not report that as healthy, and must not say why (it is anonymous).
+     */
+    @Test
+    public void test_health_greenClusterWithWriteBlock_isYellowWithoutDetails() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        handlerOf(ClusterHealthStatus.GREEN, true).handle(new StubRequest("/api/v2/health"), res);
+        final String body = res.body();
+        assertEquals(200, res.status, body);
+        assertTrue(body.contains("\"status\":\"YELLOW\""), body);
+        assertTrue(body.contains("\"ping_status\":0"), body);
+        assertFalse(body.toLowerCase().contains("block"), body);
+        assertFalse(body.toLowerCase().contains("read"), body);
+        assertFalse(body.contains("\"cluster_name\""), body);
+    }
+
+    @Test
+    public void test_health_greenClusterWithoutWriteBlock_isGreen() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        handlerOf(ClusterHealthStatus.GREEN, false).handle(new StubRequest("/api/v2/health"), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"status\":\"GREEN\""), res.body());
+    }
+
+    @Test
+    public void test_health_yellowClusterStaysYellow() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        handlerOf(ClusterHealthStatus.YELLOW, true).handle(new StubRequest("/api/v2/health"), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"status\":\"YELLOW\""), res.body());
+    }
+
+    @Test
+    public void test_health_redClusterStaysUnavailable() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        handlerOf(ClusterHealthStatus.RED, true).handle(new StubRequest("/api/v2/health"), res);
+        assertEquals(503, res.status, res.body());
+        assertTrue(res.body().contains("\"status\":\"RED\""), res.body());
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
