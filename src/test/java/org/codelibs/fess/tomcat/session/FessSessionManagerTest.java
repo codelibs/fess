@@ -416,6 +416,55 @@ public class FessSessionManagerTest {
     }
 
     @Test
+    public void test_changeSessionId_waitsForAWriteOfTheOldIdAndTheNewIdIsWrittenAfterIt() throws Exception {
+        final FakeSessionStore store = new FakeSessionStore();
+        final FessSessionManager manager = newManager(store);
+        final FessSession session = request(manager, null, true, s -> s.setAttribute("k", "v1"));
+        final String oldId = session.getId();
+
+        // a write that has read the old id waits in the store while the login rotates the id
+        final java.util.concurrent.CountDownLatch inSave = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        // the manager keeps the map it was given, so the operation is replaced in that map
+        @SuppressWarnings("unchecked")
+        final java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>> bridge =
+                (java.util.Map<String, java.util.function.Function<java.util.Map<String, Object>, Object>>) manager.getContext()
+                        .getServletContext()
+                        .getAttribute(FessSessionManager.BRIDGE_ATTRIBUTE);
+        final java.util.function.Function<java.util.Map<String, Object>, Object> save = bridge.get(FessSessionManager.OP_SAVE);
+        bridge.put(FessSessionManager.OP_SAVE, args -> {
+            inSave.countDown();
+            try {
+                release.await(10, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return save.apply(args);
+        });
+        session.setAttribute("k", "v2");
+
+        final Thread writer = new Thread(() -> manager.persist(session));
+        writer.start();
+        assertTrue(inSave.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        final java.util.concurrent.atomic.AtomicReference<String> rotated = new java.util.concurrent.atomic.AtomicReference<>();
+        final Thread rotation = new Thread(() -> rotated.set(manager.rotateSessionId(session)));
+        rotation.start();
+        rotation.join(500L);
+        assertTrue(rotation.isAlive(), "the id was changed while a write under the old id was in progress");
+
+        release.countDown();
+        writer.join(10_000L);
+        rotation.join(10_000L);
+        final String newId = rotated.get();
+        assertNotEquals(oldId, newId);
+        assertFalse(store.docs.containsKey(oldId), "the old document is gone and is not written again");
+        manager.persist(session);
+        assertTrue(store.docs.containsKey(newId));
+        assertTrue(session.isValid(), "the renamed session is not expired as gone");
+        assertEquals(0, store.gones);
+    }
+
+    @Test
     public void test_changeSessionId_resetsPersistedAt() throws Exception {
         final FakeSessionStore store = new FakeSessionStore();
         final FessSessionManager manager = newManager(store);
@@ -724,7 +773,7 @@ public class FessSessionManagerTest {
         store.copier = v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
                 && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser u
                         ? new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.ldap.LdapUser(u.getName(),
-                                u.isNameFromProvider(), u.getResolvedPermissions(), u.getPermissionState()))
+                                u.isNameFromProvider(), u.getResolvedPermissions().clone(), u.getPermissionState()))
                         : v;
         store.describer = v -> v instanceof final org.codelibs.fess.mylasta.action.FessUserBean bean
                 && bean.getFessUser() instanceof final org.codelibs.fess.ldap.LdapUser u

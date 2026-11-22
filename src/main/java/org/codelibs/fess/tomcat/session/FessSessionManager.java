@@ -346,10 +346,20 @@ public class FessSessionManager extends ManagerBase {
     @Override
     protected void changeSessionId(final Session session, final String newId, final boolean notifySessionListeners,
             final boolean notifyContainerListeners) {
-        final String oldId = session.getIdInternal();
-        super.changeSessionId(session, newId, notifySessionListeners, notifyContainerListeners);
-        if (oldId != null && session instanceof FessSession) {
-            deleteFromStore(oldId);
+        if (!(session instanceof final FessSession fessSession)) {
+            super.changeSessionId(session, newId, notifySessionListeners, notifyContainerListeners);
+            return;
+        }
+        // Under the lock of the writes of the session: a write (persistHolding runs on another thread) reads the id inside
+        // that lock, so it happens wholly before this change, under the old id that is deleted below, or wholly after it,
+        // under the new one. Otherwise it could create the old document again, or hand the result of the old id (digest,
+        // persistedAt) to the renamed session, whose next write would then find no document and expire it.
+        synchronized (fessSession.getPersistLock()) {
+            final String oldId = session.getIdInternal();
+            super.changeSessionId(session, newId, notifySessionListeners, notifyContainerListeners);
+            if (oldId != null) {
+                deleteFromStore(oldId);
+            }
         }
     }
 
