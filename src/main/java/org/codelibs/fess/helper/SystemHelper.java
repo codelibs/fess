@@ -543,7 +543,8 @@ public class SystemHelper {
             return null;
         }
 
-        final String localeName = value.trim().toLowerCase(Locale.ENGLISH).replace("-", "_");
+        String localeName = value.trim().toLowerCase(Locale.ENGLISH).replace("-", "_");
+        localeName = toChineseRegionTag(localeName);
 
         for (final String supportedLang : supportedLanguages) {
             if (localeName.startsWith(supportedLang.toLowerCase(Locale.ENGLISH))) {
@@ -551,6 +552,27 @@ public class SystemHelper {
             }
         }
         return null;
+    }
+
+    /**
+     * Rewrites a Chinese tag that names a script or a region by its script into the tag of the language
+     * list: a simplified script (zh-Hans) is zh_CN, and a traditional one (zh-Hant, or zh-HK) is zh_TW.
+     * A tag that is already of the form of the list, and any other language, is returned as it is.
+     *
+     * @param localeName The lower-cased locale name with underscores.
+     * @return The locale name to look up in the supported languages.
+     */
+    private static String toChineseRegionTag(final String localeName) {
+        if (localeName.startsWith("zh_hans")) {
+            return "zh_cn" + localeName.substring("zh_hans".length());
+        }
+        if (localeName.startsWith("zh_hant")) {
+            return "zh_tw" + localeName.substring("zh_hant".length());
+        }
+        if (localeName.startsWith("zh_hk")) {
+            return "zh_tw" + localeName.substring("zh_hk".length());
+        }
+        return localeName;
     }
 
     /**

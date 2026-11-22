@@ -1326,6 +1326,22 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("test+space", result);
     }
 
+    // the tags that name a script (Safari sends zh-Hans-CN) or Hong Kong are not in the language list
+    @Test
+    public void test_normalizeLang_chineseScriptsAndHongKong() {
+        assertEquals("zh_CN", systemHelper.normalizeLang("zh-Hans"));
+        assertEquals("zh_CN", systemHelper.normalizeLang("zh-Hans-CN"));
+        assertEquals("zh_CN", systemHelper.normalizeLang("zh_hans_sg"));
+        assertEquals("zh_TW", systemHelper.normalizeLang("zh-Hant"));
+        assertEquals("zh_TW", systemHelper.normalizeLang("zh-Hant-TW"));
+        assertEquals("zh_TW", systemHelper.normalizeLang("zh-HK"));
+        assertEquals("zh_TW", systemHelper.normalizeLang("ZH_hk"));
+        // a Chinese tag of any other kind is still the plain language
+        assertEquals("zh", systemHelper.normalizeLang("zh-SG"));
+        assertEquals("zh_CN", systemHelper.normalizeLang("zh-CN"));
+        assertEquals("zh_TW", systemHelper.normalizeLang("zh-TW"));
+    }
+
     @Test
     public void test_normalizeLang_caseVariations() {
         assertEquals("ja", systemHelper.normalizeLang("JA"));
