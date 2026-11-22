@@ -157,6 +157,11 @@ public class DictionaryActionEngineGuardTest extends UnitFessTestCase {
             public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
                 // not audited here
             }
+
+            @Override
+            public void access(final String user, final String path, final String execute) {
+                // not audited here
+            }
         };
         action.viewHelper = new ViewHelper();
         action.fessConfig = new FessConfig.SimpleImpl() {

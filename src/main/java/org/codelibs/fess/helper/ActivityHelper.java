@@ -197,9 +197,19 @@ public class ActivityHelper {
      * @param execute The execute.
      */
     public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
+        access(user.map(FessUserBean::getUserId).orElse("-"), path, execute);
+    }
+
+    /**
+     * Log the access activity of a caller that is not a logged-in user, such as a request that carries an access token.
+     * @param user The name to record as the user.
+     * @param path The path.
+     * @param execute The execute.
+     */
+    public void access(final String user, final String path, final String execute) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.ACCESS.name());
-        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("user", user);
         valueMap.put("path", path);
         valueMap.put("execute", execute);
         putRequestDetails(valueMap);
@@ -339,9 +349,18 @@ public class ActivityHelper {
      * @param path The path.
      */
     public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+        accessDenied(user.map(FessUserBean::getUserId).orElse("-"), path);
+    }
+
+    /**
+     * Log the access denied activity of a caller that is not a logged-in user, such as a request that carries an access token.
+     * @param user The name to record as the user.
+     * @param path The path.
+     */
+    public void accessDenied(final String user, final String path) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.ACCESS_DENIED.name());
-        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("user", user);
         valueMap.put("path", path);
         log(valueMap);
     }
