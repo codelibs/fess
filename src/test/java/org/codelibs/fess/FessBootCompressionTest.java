@@ -84,6 +84,16 @@ public class FessBootCompressionTest {
         props.setProperty("tomcat.compression", " off ");
         FessBoot.setupCompression(connector, props);
         assertEquals("off", protocol(connector).getCompression());
+        // nothing to compress, so the files keep going out with sendfile
+        assertTrue(protocol(connector).getUseSendfile());
+    }
+
+    @Test
+    public void test_sendfileIsOffWhileCompressionIsOn() {
+        final Connector connector = new Connector("HTTP/1.1");
+        FessBoot.setupCompression(connector, null);
+        // a response sent with sendfile (files above 48 KB) is not compressed
+        assertFalse(protocol(connector).getUseSendfile());
     }
 
     @Test

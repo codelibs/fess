@@ -377,14 +377,21 @@ public class FessBoot extends TomcatBoot {
      * {@code tomcat.compression.mime} in the tomcat configuration file adds their types. Binary content
      * (images, downloads) and event streams are not in the list either.
      * {@code tomcat.compression=off} turns the compression off, for a deployment whose reverse proxy compresses already.
+     * While the compression is on, sendfile is turned off: a response sent with sendfile is not compressed.
      *
      * @param connector the HTTP connector
      * @param props the tomcat configuration, or {@code null} when there is none
      */
     protected static void setupCompression(final Connector connector, final Properties props) {
         final String compression = props == null ? null : props.getProperty(COMPRESSION_KEY);
-        connector.setProperty("compression", compression == null || compression.isBlank() ? "on" : compression.trim());
+        final String mode = compression == null || compression.isBlank() ? "on" : compression.trim();
+        connector.setProperty("compression", mode);
         connector.setProperty("compressionMinSize", "1024");
+        if (!"off".equalsIgnoreCase(mode)) {
+            // Tomcat hands a file above the sendfile threshold (48 KB) to the operating system and never compresses it,
+            // which would leave the largest scripts and styles (for example the admin icon font CSS) as they are
+            connector.setProperty("useSendfile", "false");
+        }
         final String extra = props == null ? null : props.getProperty(COMPRESSION_MIME_KEY);
         connector.setProperty("compressibleMimeType",
                 extra == null || extra.isBlank() ? COMPRESSIBLE_MIME_TYPES : COMPRESSIBLE_MIME_TYPES + "," + extra.trim());
