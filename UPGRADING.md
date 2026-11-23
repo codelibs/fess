@@ -236,6 +236,19 @@ well as the one of the password; its name mentions only the password. The audit 
 `reason=permissions_changed`. A session of a user that is not a local user (LDAP, SAML, SPNEGO, OpenID Connect,
 Microsoft Entra ID) takes its roles from the directory or the identity provider at login and is not ended.
 
+**A crawl configuration created through the admin API without a permission gets `{role}guest`.** The create screens
+of the web, file and data store configurations prefill the permission field with
+`role.search.default.display.permissions` (`{role}guest`), but `POST /api/admin/webconfig/setting`,
+`/api/admin/fileconfig/setting` and `/api/admin/dataconfig/setting` took a missing or empty `permissions` as no
+permission, so the crawled documents were visible to nobody, administrators included. Now a `POST` whose
+`permissions` is missing or blank (only blank lines) stores `{role}guest`, and a permission in the request is kept as
+is. `PUT` is unchanged in what it stores, like the edit screens: a `PUT` that omits `permissions` keeps the permission of
+the stored setting, and any other value is stored as sent, so the body of a `GET` (whose `permissions` is empty for a
+setting without one) can be sent back unchanged. A data store setting whose ACL-synchronizing connector must not
+carry the guest role (the permission of the setting is added to the roles the connector computes, so `{role}guest` would
+make the documents visible to anonymous users) is saved without a permission by a `PUT` that sends `permissions` empty
+(a `POST` always gets the default). Settings already saved with no permission are not changed.
+
 **BCrypt hashes written by other systems verify.** A stored `{bcrypt}` hash with the `$2b$` prefix (Python's bcrypt and many other systems) or the `$2y$` prefix (PHP, `htpasswd -B`) now verifies like a `$2a$` one; before, the login of such a user always failed. New hashes are still written as `$2a$`, and an imported hash is re-hashed at login only when its cost is below `app.password.bcrypt.cost`, as before.
 
 **New setting `authentication.local.username.policy` (default `preserved`) to refuse local user names that differ
