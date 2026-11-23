@@ -255,18 +255,19 @@ public class WebFsIndexHelper {
             }
 
             // failure url
+            final List<String> failureExcludePatterns = new ArrayList<>();
             final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(webConfig.getConfigId());
             if (excludedUrlList != null) {
                 excludedUrlList.stream().filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(u -> {
                     final String urlValue = Pattern.quote(u);
                     crawler.addExcludeFilter(urlValue);
-                    excludePatterns.add(urlValue);
+                    failureExcludePatterns.add(urlValue);
                     if (logger.isInfoEnabled()) {
                         logger.info("Excluded URL from failures: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                     }
                 });
             }
-            startUrls.forEach(u -> warnExcludedStartUrl(webConfig.getName(), "URL", u, excludePatterns));
+            startUrls.forEach(u -> warnExcludedStartUrl(webConfig.getName(), "URL", u, excludePatterns, failureExcludePatterns));
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Crawling {}", CredentialUrlUtil.removeUserInfoInText(urlsStr));
@@ -385,18 +386,19 @@ public class WebFsIndexHelper {
             }
 
             // failure url
+            final List<String> failureExcludePatterns = new ArrayList<>();
             final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(fileConfig.getConfigId());
             if (excludedUrlList != null) {
                 excludedUrlList.stream().filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(u -> {
                     final String urlValue = Pattern.quote(u);
                     crawler.addExcludeFilter(urlValue);
-                    excludePatterns.add(urlValue);
+                    failureExcludePatterns.add(urlValue);
                     if (logger.isInfoEnabled()) {
                         logger.info("Excluded Path from failures: {}", CredentialUrlUtil.removeUserInfoInText(urlValue));
                     }
                 });
             }
-            startPaths.forEach(u -> warnExcludedStartUrl(fileConfig.getName(), "path", u, excludePatterns));
+            startPaths.forEach(u -> warnExcludedStartUrl(fileConfig.getName(), "path", u, excludePatterns, failureExcludePatterns));
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Crawling {}", CredentialUrlUtil.removeUserInfoInText(pathsStr));
@@ -748,37 +750,53 @@ public class WebFsIndexHelper {
     }
 
     /**
-     * Warns that a start URL (or path) of a crawl configuration is itself rejected by one of its excluded
-     * patterns. The crawler applies the exclusion to the URLs it takes from the queue, the start URLs
-     * included, so such a start URL is not fetched and nothing else is logged: the crawl ends without
-     * a request. The usual cause is a pattern that was meant for the files a site links to, such as the
-     * default {@code (?i).*(css|js|jpeg|jpg|gif|png|bmp|wmv|xml|ico|exe)}, with a start URL like
-     * {@code sitemap.xml}.
+     * Warns that a start URL (or path) of a crawl configuration is itself rejected, either by one of its
+     * excluded patterns or because it is among the failure URLs that the crawl skips. The crawler applies
+     * the exclusion to the URLs it takes from the queue, the start URLs included, so such a start URL is
+     * not fetched and nothing else is logged: the crawl ends without a request.
+     *
+     * <p>A pattern of the configuration that matches is usually one that was meant for the files a site
+     * links to, such as the default {@code (?i).*(css|js|jpeg|jpg|gif|png|bmp|wmv|xml|ico|exe)}, with a start URL
+     * like {@code sitemap.xml}; the cure is to change the pattern. A failure URL is a record of a URL that failed
+     * as often as the failure count threshold, and it stays until it is deleted, so the cure is to delete the
+     * record once the cause is fixed.</p>
      *
      * @param configName the name of the crawl configuration
      * @param kind {@code URL} or {@code path}, as the configuration calls its targets
      * @param startUrl the start URL as it is queued
-     * @param excludePatterns the excluded patterns that are registered with the crawler
+     * @param excludePatterns the excluded patterns of the configuration that are registered with the crawler
+     * @param failureExcludePatterns the patterns (one quoted URL each) of the failure URLs that are registered with the crawler
      */
     protected void warnExcludedStartUrl(final String configName, final String kind, final String startUrl,
-            final Collection<String> excludePatterns) {
-        for (final String pattern : excludePatterns) {
-            final boolean excluded;
+            final Collection<String> excludePatterns, final Collection<String> failureExcludePatterns) {
+        final String pattern = firstMatch(excludePatterns, startUrl);
+        if (pattern != null) {
+            logger.warn(
+                    "[{}] The start {} {} matches the excluded {} pattern {}. Nothing is crawled from it."
+                            + " Change the excluded {}s of the crawl configuration so that they do not match it.",
+                    configName, kind, CredentialUrlUtil.removeUserInfo(startUrl), kind, CredentialUrlUtil.removeUserInfoInText(pattern),
+                    kind);
+            return;
+        }
+        if (firstMatch(failureExcludePatterns, startUrl) != null) {
+            logger.warn(
+                    "[{}] The start {} {} is in the failure URLs of the crawl configuration, which the crawl skips, so nothing is crawled"
+                            + " from it. Fix the cause, then delete it in System Info > Failure URL.",
+                    configName, kind, CredentialUrlUtil.removeUserInfo(startUrl));
+        }
+    }
+
+    private String firstMatch(final Collection<String> patterns, final String url) {
+        for (final String pattern : patterns) {
             try {
-                excluded = Pattern.compile(pattern).matcher(startUrl).matches();
+                if (Pattern.compile(pattern).matcher(url).matches()) {
+                    return pattern;
+                }
             } catch (final PatternSyntaxException e) {
                 // the crawler skips a pattern that does not compile
-                continue;
-            }
-            if (excluded) {
-                logger.warn(
-                        "[{}] The start {} {} matches the excluded {} pattern {}. Nothing is crawled from it."
-                                + " Change the excluded {}s of the crawl configuration so that they do not match it.",
-                        configName, kind, CredentialUrlUtil.removeUserInfo(startUrl), kind, CredentialUrlUtil.removeUserInfoInText(pattern),
-                        kind);
-                return;
             }
         }
+        return null;
     }
 
     /**

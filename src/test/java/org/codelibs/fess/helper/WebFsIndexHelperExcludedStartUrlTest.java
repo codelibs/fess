@@ -29,7 +29,7 @@ public class WebFsIndexHelperExcludedStartUrlTest extends UnitFessTestCase {
     private List<String> warn(final String kind, final String url, final String... patterns) {
         final LogCapturingAppender appender = LogCapturingAppender.attach(WebFsIndexHelper.class);
         try {
-            new WebFsIndexHelper().warnExcludedStartUrl("site1", kind, url, List.of(patterns));
+            new WebFsIndexHelper().warnExcludedStartUrl("site1", kind, url, List.of(patterns), List.of());
             return appender.warnings();
         } finally {
             appender.detach();
@@ -86,5 +86,39 @@ public class WebFsIndexHelperExcludedStartUrlTest extends UnitFessTestCase {
         assertEquals(1, warnings.size());
         assertTrue(warnings.get(0).contains("http://example.com/a.xml"));
         assertFalse(warnings.get(0).contains("s3cret"));
+    }
+
+    private List<String> warnWithFailureUrls(final String url, final List<String> patterns, final List<String> failurePatterns) {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(WebFsIndexHelper.class);
+        try {
+            new WebFsIndexHelper().warnExcludedStartUrl("site1", "URL", url, patterns, failurePatterns);
+            return appender.warnings();
+        } finally {
+            appender.detach();
+        }
+    }
+
+    /**
+     * A start URL in the failure URLs is skipped as well, but deleting the record is the cure, not changing
+     * the excluded URLs, so the warning says that.
+     */
+    @Test
+    public void test_warnExcludedStartUrl_aStartUrlThatIsAFailureUrlGetsItsOwnAdvice() {
+        final String url = "https://example.com/start.html";
+        final List<String> warnings = warnWithFailureUrls(url, List.of(DEFAULT_EXCLUDE), List.of(java.util.regex.Pattern.quote(url)));
+        assertEquals(1, warnings.size());
+        assertTrue(warnings.get(0).contains("[site1]"));
+        assertTrue(warnings.get(0).contains(url));
+        assertTrue(warnings.get(0).contains("failure URLs"));
+        assertTrue(warnings.get(0).contains("Failure URL"));
+        assertFalse(warnings.get(0).contains("Change the excluded"));
+    }
+
+    @Test
+    public void test_warnExcludedStartUrl_aConfiguredPatternIsReportedBeforeAFailureUrl() {
+        final String url = "https://example.com/sitemap.xml";
+        final List<String> warnings = warnWithFailureUrls(url, List.of(DEFAULT_EXCLUDE), List.of(java.util.regex.Pattern.quote(url)));
+        assertEquals(1, warnings.size());
+        assertTrue(warnings.get(0).contains("Change the excluded"));
     }
 }
