@@ -590,4 +590,36 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("js:http://example.com/b.html", helper.replaceUrl(list, "http://example.com/b.html"));
         assertEquals(1, lookupCount.get());
     }
+
+    @Test
+    public void test_replaceUrl_invalidRegexIsSkippedAndWarnedOnce() {
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping broken = new PathMapping();
+        broken.setRegex("(");
+        broken.setReplacement("x");
+        final PathMapping valid = new PathMapping();
+        valid.setRegex("^http://example.com/");
+        valid.setReplacement("http://mirror.example.com/");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(broken);
+        list.add(valid);
+
+        final LogCapturingAppender log = LogCapturingAppender.attach(PathMapping.class);
+        try {
+            // a stored mapping that is not a valid regular expression must not break the other mappings or the caller
+            assertEquals("http://mirror.example.com/a.html", helper.replaceUrl(list, "http://example.com/a.html"));
+            assertEquals("http://mirror.example.com/b.html", helper.replaceUrl(list, "http://example.com/b.html"));
+            assertEquals(1, log.warnings().size(), log.warnings().toString());
+        } finally {
+            log.detach();
+        }
+    }
+
+    @Test
+    public void test_getUAMatcher_invalidRegexGivesNoMatcher() {
+        final PathMapping broken = new PathMapping();
+        broken.setUserAgent("(");
+        assertNull(broken.getUAMatcher("Mozilla/5.0"));
+        assertNull(broken.getUAMatcher("Mozilla/5.0"));
+    }
 }

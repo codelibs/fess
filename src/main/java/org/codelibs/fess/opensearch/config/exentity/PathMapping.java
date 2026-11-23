@@ -18,6 +18,7 @@ package org.codelibs.fess.opensearch.config.exentity;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +39,12 @@ public class PathMapping extends BsPathMapping {
 
     protected Pattern regexPattern;
 
+    /** Set when the stored regex does not compile, so that the failure is reported once and the mapping is skipped afterwards. */
+    protected boolean invalidRegex;
+
+    /** Set when the stored user agent regex does not compile. */
+    protected boolean invalidUserAgent;
+
     protected BiFunction<String, Matcher, String> pathMapperFunc;
 
     public String getId() {
@@ -57,8 +64,18 @@ public class PathMapping extends BsPathMapping {
     }
 
     public String process(final PathMappingHelper pathMappingHelper, final String input) {
+        if (invalidRegex) {
+            return input;
+        }
         if (regexPattern == null) {
-            regexPattern = Pattern.compile(getRegex());
+            try {
+                regexPattern = Pattern.compile(getRegex());
+            } catch (final PatternSyntaxException e) {
+                // a mapping saved before invalid regular expressions were refused must not break every caller of replaceUrl
+                invalidRegex = true;
+                logger.warn("The regex of the path mapping \"{}\" is not valid, so the mapping is skipped: {}", getRegex(), e.getMessage());
+                return input;
+            }
         }
         final Matcher matcher = regexPattern.matcher(input);
         if (matcher.find()) {
@@ -84,8 +101,18 @@ public class PathMapping extends BsPathMapping {
             return null;
         }
 
+        if (invalidUserAgent) {
+            return null;
+        }
         if (userAgentPattern == null) {
-            userAgentPattern = Pattern.compile(getUserAgent());
+            try {
+                userAgentPattern = Pattern.compile(getUserAgent());
+            } catch (final PatternSyntaxException e) {
+                invalidUserAgent = true;
+                logger.warn("The user agent regex of the path mapping \"{}\" is not valid, so it never matches: {}", getUserAgent(),
+                        e.getMessage());
+                return null;
+            }
         }
         return userAgentPattern.matcher(input);
     }
