@@ -20,6 +20,27 @@ libraries, change it:
 * The search log screen takes its time range from two native date-time inputs; the value sent to the
   server (`yyyy-MM-dd HH:mm - yyyy-MM-dd HH:mm`) is unchanged.
 
+**A secret can be given by an environment variable, and Fess warns about one that is a JVM option.** A
+`-Dfess.config.<key>` or `-Dfess.system.<key>` option is part of the command line that `ps` and `docker top` show, and
+Fess repeats those options on the command line of every crawler, suggest, thumbnail and chunk process it starts, so
+a password or an API key given that way is readable by every user of the machine. Fess now also reads a setting from
+the environment variable made from its key: `FESS_CONFIG_` (for a `fess_config.properties` key) or `FESS_SYSTEM_`
+(for a `system.properties` key), then the key in upper case with each character other than a letter or a digit
+replaced by `_`. For example `search_engine.password` is `FESS_CONFIG_SEARCH_ENGINE_PASSWORD`,
+`rag.llm.gemini.api.key` is `FESS_CONFIG_RAG_LLM_GEMINI_API_KEY` and `storage.secretkey` is
+`FESS_SYSTEM_STORAGE_SECRETKEY`. The order is the `-D` option, then the variable, then the file (for a `fess.system.`
+setting, a value stored in `system.properties` still wins, as it does over the option); an empty variable counts as
+not set, and an empty option does not hide a variable that is set. The child processes inherit the variable. A setting that
+the code reads from `system.properties` directly (for example `oic.client.secret` of the SSO plugins) honours neither the option
+nor the variable; the rule applies wherever the `-D` option of the key is honoured. The values of these variables are masked in System Info.
+The web application writes a WARN at start for each `-Dfess.config.*` or `-Dfess.system.*` option that carries
+a secret (it names the key and the variable, never the value; an empty option is not reported). A package
+installation (deb, rpm) that starts Fess with systemd reads the environment file (`/etc/default/fess`, `/etc/sysconfig/fess`
+for rpm) as `EnvironmentFile`, so add a plain `FESS_CONFIG_<KEY>=value` line; with the System V init script, which passes only the
+variables it exports itself, write `export FESS_CONFIG_<KEY>=value` instead. Make the file readable by `root` only.
+In a container, pass it with `-e` or
+`environment:`; `docker inspect` shows it to whoever can use the Docker socket, as it did for `SEARCH_ENGINE_PASSWORD`.
+
 **A search theme no longer gets Bootstrap, Popper or Font Awesome from the web application root.**
 `css/bootstrap.min.css`, `css/font-awesome.min.css`, `css/fonts/`, `js/bootstrap.min.js` and `js/popper.min.js`
 are removed, so a change to one of them can no longer change every theme. The bundled `bootstrap` theme

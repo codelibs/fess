@@ -59,6 +59,7 @@ import org.codelibs.fess.ldap.LdapUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ConfigEnvUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.ThemeSettingsUtil;
 import org.codelibs.fess.util.JvmUtil;
@@ -188,11 +189,16 @@ public interface FessProp {
     }
 
     default String getSystemProperty(final String key) {
-        return ComponentUtil.getSystemProperties().getProperty(key, System.getProperty(Constants.SYSTEM_PROP_PREFIX + key));
+        return ComponentUtil.getSystemProperties().getProperty(key, ConfigEnvUtil.getOverride(Constants.SYSTEM_PROP_PREFIX, key));
     }
 
     default String getSystemProperty(final String key, final String defaultValue) {
-        return ComponentUtil.getSystemProperties().getProperty(key, System.getProperty(Constants.SYSTEM_PROP_PREFIX + key, defaultValue));
+        return ComponentUtil.getSystemProperties().getProperty(key, getOverrideOrDefault(key, defaultValue));
+    }
+
+    private static String getOverrideOrDefault(final String key, final String defaultValue) {
+        final String value = ConfigEnvUtil.getOverride(Constants.SYSTEM_PROP_PREFIX, key);
+        return value != null ? value : defaultValue;
     }
 
     default void setSystemProperty(final String key, final String value) {
