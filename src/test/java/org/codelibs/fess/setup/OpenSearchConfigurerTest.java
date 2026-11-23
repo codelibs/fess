@@ -150,9 +150,19 @@ public class OpenSearchConfigurerTest {
     }
 
     @Test
-    public void test_dictionaryPath_isWhatFessMustBeToldAbout() throws Exception {
+    public void test_dictionaryPath_isTheDirectoryConfigsyncWritesTo() throws Exception {
         final Path home = prepareHome();
         assertEquals(home.resolve("config").resolve("dictionary"), OpenSearchConfigurer.dictionaryPath(home));
+    }
+
+    @Test
+    public void test_relativeDictionaryPath_namesTheDictionaryDirectoryUnderConfig() throws Exception {
+        final Path home = prepareHome();
+        // OpenSearch resolves a relative *_path against its config directory
+        assertEquals(OpenSearchConfigurer.dictionaryPath(home),
+                home.resolve("config").resolve(OpenSearchConfigurer.RELATIVE_DICTIONARY_PATH).normalize());
+        assertTrue(OpenSearchConfigurer.RELATIVE_DICTIONARY_PATH.endsWith("/"));
+        assertFalse(Path.of(OpenSearchConfigurer.RELATIVE_DICTIONARY_PATH).isAbsolute());
     }
 
     @Test

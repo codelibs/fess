@@ -119,20 +119,23 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.level=warn
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlasta.env=web
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dtomcat.config.path=tomcat_config.properties
 
-REM The config directory of the OpenSearch server Fess talks to, where configsync keeps the
-REM dictionaries Fess pushes. It has to match configsync.config_path in that server's opensearch.yml.
-REM Left unset, it is taken from the OpenSearch bin\fess-setup install opensearch put under
-REM %FESS_HOME%\opensearch, provided there is only one. A -Dfess.dictionary.path line below wins.
+REM Where the OpenSearch server Fess talks to keeps the dictionaries Fess pushes, which the analyzers
+REM in the index settings point to. It has to match configsync.config_path in that server's
+REM opensearch.yml. A relative value is resolved by OpenSearch against its config directory, so
+REM "dictionary/" names <config>\dictionary of whichever installation Fess talks to and an index
+REM created with it keeps working when that installation moves. Left unset, it becomes "dictionary/"
+REM when there is exactly one OpenSearch under %FESS_HOME%\opensearch that bin\fess-setup install
+REM opensearch set up. An absolute value is used as it is. A -Dfess.dictionary.path line below wins.
 SET FESS_DICTIONARY_AMBIGUOUS=
 IF NOT DEFINED FESS_DICTIONARY_PATH (
   FOR /D %%D IN ("%FESS_HOME%\opensearch\*") DO (
     IF EXIST "%%D\config\dictionary\" (
       IF DEFINED FESS_DICTIONARY_PATH SET FESS_DICTIONARY_AMBIGUOUS=true
-      SET FESS_DICTIONARY_PATH=%%D\config\dictionary
+      SET FESS_DICTIONARY_PATH=dictionary/
     )
   )
 )
-IF DEFINED FESS_DICTIONARY_AMBIGUOUS ECHO warning: more than one OpenSearch under %FESS_HOME%\opensearch; set FESS_DICTIONARY_PATH to the config\dictionary directory of the one Fess uses 1>&2
+IF DEFINED FESS_DICTIONARY_AMBIGUOUS ECHO warning: more than one OpenSearch under %FESS_HOME%\opensearch; set FESS_DICTIONARY_PATH to dictionary/, or to the absolute config\dictionary directory of the one Fess uses 1>&2
 IF DEFINED FESS_DICTIONARY_AMBIGUOUS SET FESS_DICTIONARY_PATH=
 SET FESS_DICTIONARY_AMBIGUOUS=
 REM Forward slashes: Fess substitutes the value into the index settings, where a backslash is lost.

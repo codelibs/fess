@@ -34,7 +34,9 @@ import java.util.stream.Stream;
  * Fess pushes over {@code /_configsync/file}. It has to agree with the
  * {@code FESS_DICTIONARY_PATH} Fess is started with: the analyzers in the index settings carry
  * that prefix in their {@code *_path} values, so a mismatch means the analyzer looks for a file
- * configsync wrote somewhere else, and index creation fails.</li>
+ * configsync wrote somewhere else, and index creation fails. The setting is the absolute
+ * {@code <config>/dictionary} directory, which is what {@link #RELATIVE_DICTIONARY_PATH} names
+ * relative to the config directory.</li>
  * <li>{@code plugins.security.disabled: true}, because the OpenSearch bundle ships the security
  * plugin enabled and a node without the TLS material it expects refuses to start
  * ({@code No SSL configuration found}). Fess talks plain HTTP to {@code localhost:9200} by
@@ -49,6 +51,16 @@ import java.util.stream.Stream;
  */
 public final class OpenSearchConfigurer {
 
+    /**
+     * The {@code FESS_DICTIONARY_PATH} for an OpenSearch installation set up by fess-setup. OpenSearch
+     * resolves a relative {@code *_path} analyzer setting against its own config directory, so this
+     * names {@code <config>/dictionary}, where {@code configsync.config_path} points, wherever the
+     * installation lives. An absolute path would be stored in every index created with it and
+     * would break the index when the installation moves, for example to a sibling directory
+     * of a newer version.
+     */
+    public static final String RELATIVE_DICTIONARY_PATH = "dictionary/";
+
     private static final String CONFIGSYNC_KEY = "configsync.config_path";
 
     private static final String SECURITY_PREFIX = "plugins.security.";
@@ -59,8 +71,8 @@ public final class OpenSearchConfigurer {
     }
 
     /**
-     * Returns the dictionary directory of an OpenSearch installation. This is the value Fess
-     * must be given as {@code FESS_DICTIONARY_PATH}.
+     * Returns the dictionary directory of an OpenSearch installation, where configsync keeps the
+     * dictionaries.
      *
      * @param opensearchHome the OpenSearch home directory
      * @return the dictionary directory
@@ -71,9 +83,8 @@ public final class OpenSearchConfigurer {
 
     /**
      * Returns the dictionary directory as it is written to {@code configsync.config_path}:
-     * absolute, with forward slashes. {@code FESS_DICTIONARY_PATH} needs the same spelling, since
-     * Fess substitutes it into the index settings with {@code String#replaceAll}, which drops a
-     * backslash.
+     * absolute, with forward slashes. This is for {@code opensearch.yml} only; Fess is given
+     * {@link #RELATIVE_DICTIONARY_PATH}.
      *
      * @param opensearchHome the OpenSearch home directory
      * @return the dictionary directory as a setting value
@@ -125,7 +136,8 @@ public final class OpenSearchConfigurer {
 
     /**
      * Tells whether {@code bin/fess.in.sh} ({@code bin\fess.in.bat} on Windows) derives
-     * {@code FESS_DICTIONARY_PATH} for this installation without being told. The launcher looks
+     * {@code FESS_DICTIONARY_PATH} (as {@link #RELATIVE_DICTIONARY_PATH}) for this installation
+     * without being told. The launcher looks
      * for {@code <fess home>/opensearch/<dir>/config/dictionary} and uses it only when exactly
      * one directory there has one: with two, it cannot know which of them Fess talks to.
      *
