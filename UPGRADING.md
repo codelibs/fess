@@ -225,6 +225,17 @@ fields of the crawl authentication screens and the SPNEGO pre-authentication pas
 A password that was saved from a screen with such spaces is stored without them, so its owner now has to type it
 without them at login; before, the form removed them.
 
+**A login session of a local user ends when the roles or the groups of the user are changed.** Until 15.9 a session
+kept the roles and the groups it was opened with, so removing a role from a user (or deleting the role) did not take
+the permission away until the user logged in again. Now the session checks the stored user the way it checks a
+password change (see the passkey note above): when the roles or the groups of the user document differ from the
+ones the session was opened with, whoever changed them (the user edit screen, `PUT /api/admin/user/setting`, or
+the deletion of a role or a group that the user had), the session ends within `password.changed.check.interval`
+seconds (default 60) and the user logs in again. The same setting paces the check of the roles and the groups as
+well as the one of the password; its name mentions only the password. The audit log records it as `SESSION_END` with
+`reason=permissions_changed`. A session of a user that is not a local user (LDAP, SAML, SPNEGO, OpenID Connect,
+Microsoft Entra ID) takes its roles from the directory or the identity provider at login and is not ended.
+
 **BCrypt hashes written by other systems verify.** A stored `{bcrypt}` hash with the `$2b$` prefix (Python's bcrypt and many other systems) or the `$2y$` prefix (PHP, `htpasswd -B`) now verifies like a `$2a$` one; before, the login of such a user always failed. New hashes are still written as `$2a$`, and an imported hash is re-hashed at login only when its cost is below `app.password.bcrypt.cost`, as before.
 
 **New setting `authentication.local.username.policy` (default `preserved`) to refuse local user names that differ

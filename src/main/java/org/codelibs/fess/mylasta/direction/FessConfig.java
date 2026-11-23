@@ -10721,7 +10721,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'password.changed.check.interval'. <br>
      * The value is, e.g. 60 <br>
-     * comment: Seconds between two looks of a login session of a local user at the time the password was last changed, as stored in the user index.
+     * comment: Seconds between two looks of a login session of a local user at its user document in the user index, for a password change, a change of the roles or the groups, or a deletion (the name of the key mentions only the password).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPasswordChangedCheckInterval();
@@ -10729,7 +10729,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'password.changed.check.interval' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
-     * comment: Seconds between two looks of a login session of a local user at the time the password was last changed, as stored in the user index.
+     * comment: Seconds between two looks of a login session of a local user at its user document in the user index, for a password change, a change of the roles or the groups, or a deletion (the name of the key mentions only the password).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */

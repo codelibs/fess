@@ -232,7 +232,7 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
         final FessUserBean bean = new FessUserBean(newUser());
         bean.setPasswordChangedAt(1234L);
         bean.setLoginTime(5678L);
-        bean.setPasswordCheckTime(9999L);
+        bean.setUserCheckTime(9999L);
         final LocalDateTime syncCheck = LocalDateTime.of(2026, 11, 10, 12, 34, 56, 789000000);
         bean.manageLastestSyncCheckTime(syncCheck);
         bean.manageUserLocale(Locale.GERMANY);
@@ -246,7 +246,7 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
         assertEquals("alice", restored.getUserId());
         assertEquals(Long.valueOf(1234L), restored.getPasswordChangedAt());
         assertEquals(Long.valueOf(5678L), restored.getLoginTime());
-        assertEquals(Long.valueOf(9999L), restored.getPasswordCheckTime());
+        assertEquals(Long.valueOf(9999L), restored.getUserCheckTime());
         assertEquals(syncCheck, restored.getLastestSyncCheckTime().get());
         assertEquals(Locale.GERMANY, restored.getUserLocale().get());
         assertEquals("Asia/Tokyo", restored.getUserTimeZone().get().getID());
