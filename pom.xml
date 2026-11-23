@@ -319,7 +319,9 @@
 				</executions>
 				<configuration>
 					<target>
-						<ant antfile="${basedir}/dbflute.xml" target="download.dbflute" />
+						<ant antfile="${basedir}/dbflute.xml" target="dbflute.templates">
+							<property name="dbflute.version" value="${dbflute.version}" />
+						</ant>
 						<ant antfile="deps.xml" target="install.jars" />
 						<echo message="fess.version=${project.version}" file="${basedir}/src/main/webapp/WEB-INF/project.properties" />
 					</target>

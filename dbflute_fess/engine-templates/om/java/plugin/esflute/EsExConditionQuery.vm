@@ -1,0 +1,9 @@
+${manager.allClassCopyright}package ${request.package}.cbean.cq;
+
+import ${request.package}.cbean.cq.bs.Bs${table.camelizedName}CQ;
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public class ${table.camelizedName}CQ extends Bs${table.camelizedName}CQ {
+}

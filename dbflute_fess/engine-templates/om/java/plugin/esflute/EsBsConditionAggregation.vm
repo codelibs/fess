@@ -1,0 +1,442 @@
+${manager.allClassCopyright}package ${request.package}.cbean.ca.bs;
+
+import java.util.List;
+
+import ${request.package}.allcommon.EsAbstractConditionAggregation;
+import ${request.package}.allcommon.EsAbstractConditionQuery;
+import ${request.package}.cbean.ca.${table.camelizedName}CA;
+import ${request.package}.cbean.cq.${table.camelizedName}CQ;
+import ${request.package}.cbean.cq.bs.Bs${table.camelizedName}CQ;
+
+import org.codelibs.fesen.opensearch.search.aggregations.AbstractAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.*;
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public abstract class Bs${table.camelizedName}CA extends EsAbstractConditionAggregation {
+
+    // ===================================================================================
+    //                                                                     Aggregation Set
+    //                                                                           =========
+
+    public void filter(String name, EsAbstractConditionQuery.OperatorCall<Bs${table.camelizedName}CQ> queryLambda,
+            ConditionOptionCall<FilterAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        ${table.camelizedName}CQ cq = new ${table.camelizedName}CQ();
+        if (queryLambda != null) {
+            queryLambda.callback(cq);
+        }
+        FilterAggregationBuilder builder = regFilterA(name, cq.getQuery());
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        SamplerAggregationBuilder builder = regSamplerA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+#foreach ($column in $table.columnList)
+#if ($column.isNormalColumn)
+#if (${column.type} == "keyword" || ${column.type} == "text")#set ($javaNative = "String")#else#set ($javaNative = ${column.type})#end
+#if ($javaNative != "String" && $javaNative != "Date" && $javaNative != "Timestamp" && $javaNative != "LocalDateTime")
+    public void set${column.capCamelName}_Avg() {
+        set${column.capCamelName}_Avg(null);
+    }
+
+    public void set${column.capCamelName}_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Avg("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Max() {
+        set${column.capCamelName}_Max(null);
+    }
+
+    public void set${column.capCamelName}_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Max("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+    public void set${column.capCamelName}_Min() {
+        set${column.capCamelName}_Min(null);
+    }
+
+    public void set${column.capCamelName}_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Min("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Sum() {
+        set${column.capCamelName}_Sum(null);
+    }
+
+    public void set${column.capCamelName}_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Sum("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_ExtendedStats() {
+        set${column.capCamelName}_ExtendedStats(null);
+    }
+
+    public void set${column.capCamelName}_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        set${column.capCamelName}_ExtendedStats("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Stats() {
+        set${column.capCamelName}_Stats(null);
+    }
+
+    public void set${column.capCamelName}_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Stats("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Percentiles() {
+        set${column.capCamelName}_Percentiles(null);
+    }
+
+    public void set${column.capCamelName}_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Percentiles("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_PercentileRanks(double[] values) {
+        set${column.capCamelName}_PercentileRanks(values, null);
+    }
+
+    public void set${column.capCamelName}_PercentileRanks(double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        set${column.capCamelName}_PercentileRanks("${column.name}", values, opLambda);
+    }
+
+    public void set${column.capCamelName}_PercentileRanks(String name, double[] values, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "${column.name}", values);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Histogram() {
+        set${column.capCamelName}_Histogram(null);
+    }
+
+    public void set${column.capCamelName}_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Histogram("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_Histogram("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void set${column.capCamelName}_Range() {
+        set${column.capCamelName}_Range(null);
+    }
+
+    public void set${column.capCamelName}_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Range("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_Range("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+#end
+
+#if ($javaNative == "String" && ($column.type == "keyword" || $column.fielddata))
+    public void set${column.capCamelName}_Terms() {
+        set${column.capCamelName}_Terms(null);
+    }
+
+    public void set${column.capCamelName}_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Terms("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_Terms("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void set${column.capCamelName}_SignificantTerms() {
+        set${column.capCamelName}_SignificantTerms(null);
+    }
+
+    public void set${column.capCamelName}_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        set${column.capCamelName}_SignificantTerms("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_SignificantTerms("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void set${column.capCamelName}_IpRange() {
+        set${column.capCamelName}_IpRange(null);
+    }
+
+    public void set${column.capCamelName}_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        set${column.capCamelName}_IpRange("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_IpRange("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+#end
+
+#if ($javaNative == "Date" || $javaNative == "Timestamp" || $javaNative == "LocalDateTime")
+    public void set${column.capCamelName}_DateRange() {
+        set${column.capCamelName}_DateRange(null);
+    }
+
+    public void set${column.capCamelName}_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda) {
+        set${column.capCamelName}_DateRange("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_DateRange("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_DateRange(String name, ConditionOptionCall<DateRangeAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        DateRangeAggregationBuilder builder = regDateRangeA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void set${column.capCamelName}_DateHistogram() {
+        set${column.capCamelName}_DateHistogram(null);
+    }
+
+    public void set${column.capCamelName}_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda) {
+        set${column.capCamelName}_DateHistogram("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_DateHistogram("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_DateHistogram(String name, ConditionOptionCall<DateHistogramAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        DateHistogramAggregationBuilder builder = regDateHistogramA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+#end
+
+    public void set${column.capCamelName}_Count() {
+        set${column.capCamelName}_Count(null);
+    }
+
+    public void set${column.capCamelName}_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Count("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Cardinality() {
+        set${column.capCamelName}_Cardinality(null);
+    }
+
+    public void set${column.capCamelName}_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Cardinality("${column.name}", opLambda);
+    }
+
+    public void set${column.capCamelName}_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void set${column.capCamelName}_Missing() {
+        set${column.capCamelName}_Missing(null);
+    }
+
+    public void set${column.capCamelName}_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        set${column.capCamelName}_Missing("${column.name}", opLambda, null);
+    }
+
+    public void set${column.capCamelName}_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        set${column.capCamelName}_Missing("${column.name}", opLambda, aggsLambda);
+    }
+
+    public void set${column.capCamelName}_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<Bs${table.camelizedName}CA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "${column.name}");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            ${table.camelizedName}CA ca = new ${table.camelizedName}CA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+#end
+#end
+}

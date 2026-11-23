@@ -1,0 +1,26 @@
+DBFlute
+Copyright 2014-2016 the original author or authors.
+
+This product, DBFlute Engine, includes software developed at
+The Apache Software Foundation (http://www.apache.org/) and others:
+
+<Source Code>
+Apache Torque     : Apache License 2.0 (modified codes included)
+S2Dao             : Apache License 2.0 (modified codes included)
+Seasar2           : Apache License 2.0 (modified codes included)
+
+<JAR file>
+Apache Velocity   : Apache License 2.0 (also modified codes included)
+Apache Commons    : Apache License 2.0
+Apache POI        : Apache License 2.0
+MySQL Connector/J : GNU General Public License with MySQL FOSS License Exception
+PostgreSQL        : BSD 2-clause "Simplified" License
+H2 Database       : MPL 1.1
+Apache Log4j      : Apache License 2.0 (compile-time only, not included in module)
+Apache Xerces     : Apache License 2.0 (compile-time only, not included in module)
+JUnit             : Common Public License - v 1.0 (compile-time only, not included in module)
+
+<Binary>
+Apache Ant        : Apache License 2.0 (package plainly redistributed)
+
+You can see their licenses at the '[DBFlute Engine]/etc/license' directory.

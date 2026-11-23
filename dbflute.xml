@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="dbflute" basedir=".">
 	<property name="mydbflute.dir" value="${basedir}/mydbflute" />
+	<property name="engine.dir" value="${mydbflute.dir}/dbflute-1.x" />
 	<property name="target.dir" value="${basedir}/target" />
-	<property name="branch.name" value="fess-15.9" />
-	<property name="mydbflute.url" value="https://github.com/lastaflute/lastaflute-example-waterfront/archive/${branch.name}.zip" />
+	<!-- the esflute templates are kept in this repository, so that the generated code can be changed here -->
+	<property name="templates.dir" value="${basedir}/dbflute_fess/engine-templates" />
 
-	<target name="mydbflute.check">
-		<condition property="mydbflute.exists">
-			<available file="${mydbflute.dir}" type="dir" />
-		</condition>
+	<!-- dbflute.version is given by pom.xml (the version of dbflute-runtime), so that the engine is of the same version -->
+	<target name="dbflute.check">
+		<fail unless="dbflute.version" message="dbflute.version is not set; run this target through mvn antrun:run" />
+		<available file="${engine.dir}/product-is-dbflute-${dbflute.version}" property="engine.exists" />
 	</target>
 
-	<target name="download.dbflute" depends="mydbflute.check" unless="mydbflute.exists">
-		<mkdir dir="${mydbflute.dir}" />
-		<get dest="${target.dir}/mydbflute.zip">
-			<url url="${mydbflute.url}" />
-		</get>
-		<unzip dest="${mydbflute.dir}" src="${target.dir}/mydbflute.zip">
-			<patternset>
-				<include name="lastaflute-example-waterfront-${branch.name}/mydbflute/dbflute-1.x/**" />
-			</patternset>
-			<cutdirsmapper dirs="2" />
-		</unzip>
+	<!-- the release distribution of DBFlute; an engine of another version (or one that is not a release) is replaced -->
+	<target name="download.dbflute" depends="dbflute.check" unless="engine.exists">
+		<delete dir="${engine.dir}" />
+		<mkdir dir="${engine.dir}" />
+		<mkdir dir="${target.dir}" />
+		<get src="https://github.com/dbflute/dbflute-core/releases/download/dbflute-${dbflute.version}/dbflute-${dbflute.version}.zip"
+			dest="${target.dir}/dbflute-${dbflute.version}.zip" />
+		<unzip src="${target.dir}/dbflute-${dbflute.version}.zip" dest="${engine.dir}" />
+	</target>
+
+	<!-- the esflute templates of this repository (the ones that generate the classes under org.codelibs.fess.opensearch)
+	     replace those of the engine; the other templates are those of the release -->
+	<target name="dbflute.templates" depends="download.dbflute">
+		<delete dir="${engine.dir}/templates/om/java/plugin/esflute" />
+		<copy todir="${engine.dir}/templates" overwrite="true">
+			<fileset dir="${templates.dir}" excludes="README.md LICENSE NOTICE" />
+		</copy>
 	</target>
 
 </project>
