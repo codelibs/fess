@@ -23,7 +23,7 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
-		<!-- the wire and header loggers of the HTTP client write the Authorization header and the
+		<!-- the wire and header loggers of the HTTP client write the Authorization and cookie headers and the
 		     user:password@ of a URL (a Location header or a link in a page) as they are on the wire -->
 		<Rewrite name="MaskedFile">
 			<AppenderRef ref="AppRollingFile" />

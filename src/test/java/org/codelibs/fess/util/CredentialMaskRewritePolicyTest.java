@@ -51,6 +51,24 @@ public class CredentialMaskRewritePolicyTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_mask_authorizationWithoutAScheme() {
+        assertEquals("http-outgoing-0 >> \"Authorization: ****[\\r][\\n]\"",
+                CredentialMaskRewritePolicy.mask("http-outgoing-0 >> \"Authorization: sometoken[\\r][\\n]\""));
+        assertEquals("http-outgoing-0 >> Authorization: ****",
+                CredentialMaskRewritePolicy.mask("http-outgoing-0 >> Authorization: sometoken"));
+    }
+
+    @Test
+    public void test_mask_cookies() {
+        assertEquals("http-outgoing-0 >> \"Cookie: ****[\\r][\\n]\"",
+                CredentialMaskRewritePolicy.mask("http-outgoing-0 >> \"Cookie: JSESSIONID=ABC123; theme=dark[\\r][\\n]\""));
+        assertEquals("http-outgoing-0 << \"Set-Cookie: ****[\\r][\\n]\"",
+                CredentialMaskRewritePolicy.mask("http-outgoing-0 << \"Set-Cookie: JSESSIONID=ABC123; Path=/; HttpOnly[\\r][\\n]\""));
+        assertEquals("http-outgoing-0 >> cookie: ****", CredentialMaskRewritePolicy.mask("http-outgoing-0 >> cookie: a=b"));
+        assertEquals("http-outgoing-0 >> Accept: text/html", CredentialMaskRewritePolicy.mask("http-outgoing-0 >> Accept: text/html"));
+    }
+
+    @Test
     public void test_mask_authorization() {
         assertEquals("http-outgoing-0 >> Authorization: Basic ****",
                 CredentialMaskRewritePolicy.mask("http-outgoing-0 >> Authorization: Basic dXNlcjpwYXNzd29yZA=="));

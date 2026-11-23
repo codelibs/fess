@@ -31,21 +31,29 @@ import org.apache.logging.log4j.message.SimpleMessage;
 /**
  * Log4j rewrite policy that removes credentials from the log events of the specified loggers.
  * It is meant for the wire and header loggers of the HTTP client, which write every request and
- * response as it is on the wire: the {@code Authorization} header of a request, and the
- * {@code user:password@} of a URL that the server sends back in a {@code Location} header or in a page.
+ * response as it is on the wire: the {@code Authorization} header of a request, the {@code Cookie} and
+ * {@code Set-Cookie} headers, and the {@code user:password@} of a URL that the server sends back in a
+ * {@code Location} header or in a page. The body of a request, such as the login form that the form
+ * authentication posts, is not masked.
  */
 @Plugin(name = "CredentialMaskRewritePolicy", category = Core.CATEGORY_NAME, elementType = "rewritePolicy", printObject = true)
 public class CredentialMaskRewritePolicy implements RewritePolicy {
 
-    /** The text that replaces the value of an Authorization header. */
+    /** The text that replaces the value of an Authorization or Cookie header. */
     protected static final String MASK = "****";
 
     /** The userinfo (user:password@) in the authority of a URL, as it appears in a text. */
     private static final Pattern USER_INFO = Pattern.compile("(?i)(\\b[a-z][a-z0-9+.-]*://)[^/?#\\s@\"'<>\\[\\]]+@");
 
-    /** The value of an Authorization or Proxy-Authorization header, up to the end of the line (or the wire log's CR LF mark). */
+    /**
+     * The value of an Authorization or Proxy-Authorization header, up to the end of the line (or the wire log's CR LF mark).
+     * A scheme such as {@code Basic} or {@code Bearer} is kept; a value without one is masked as a whole.
+     */
     private static final Pattern AUTHORIZATION =
-            Pattern.compile("(?i)\\b((?:proxy-)?authorization:\\s*[a-z0-9_-]+\\s+)(?:(?!\\[\\\\r\\]).)+");
+            Pattern.compile("(?i)\\b((?:proxy-)?authorization:\\s*)([a-z0-9_-]+\\s+)?(?:(?!\\[\\\\r\\]).)+");
+
+    /** The value of a Cookie or Set-Cookie header, up to the end of the line (or the wire log's CR LF mark). */
+    private static final Pattern COOKIE = Pattern.compile("(?i)\\b((?:set-)?cookie:\\s*)(?:(?!\\[\\\\r\\]).)+");
 
     /** Array of logger name prefixes to apply the masking to */
     private final String[] loggerNames;
@@ -63,7 +71,7 @@ public class CredentialMaskRewritePolicy implements RewritePolicy {
      * Masks the credentials in a text.
      *
      * @param text the text (may be null)
-     * @return the text without the userinfo of URLs and with the value of Authorization headers replaced, or the text itself when there is none
+     * @return the text without the userinfo of URLs and with the value of Authorization and Cookie headers replaced, or the text itself when there is none
      */
     public static String mask(final String text) {
         if (text == null) {
@@ -74,7 +82,10 @@ public class CredentialMaskRewritePolicy implements RewritePolicy {
             result = USER_INFO.matcher(result).replaceAll("$1");
         }
         if (containsIgnoreCase(result, "authorization:")) {
-            result = AUTHORIZATION.matcher(result).replaceAll("$1" + MASK);
+            result = AUTHORIZATION.matcher(result).replaceAll("$1$2" + MASK);
+        }
+        if (containsIgnoreCase(result, "cookie:")) {
+            result = COOKIE.matcher(result).replaceAll("$1" + MASK);
         }
         return result;
     }
