@@ -263,9 +263,9 @@ of the web, file and data store configurations prefill the permission field with
 `/api/admin/fileconfig/setting` and `/api/admin/dataconfig/setting` took a missing or empty `permissions` as no
 permission, so the crawled documents were visible to nobody, administrators included. Now a `POST` whose
 `permissions` is missing or blank (only blank lines) stores `{role}guest`, and a permission in the request is kept as
-is. `PUT` is unchanged in what it stores, like the edit screens: a `PUT` that omits `permissions` keeps the permission of
-the stored setting, and any other value is stored as sent, so the body of a `GET` (whose `permissions` is empty for a
-setting without one) can be sent back unchanged. A data store setting whose ACL-synchronizing connector must not
+is. A `PUT` stores what it carries, like the edit screens: a `PUT` that omits `permissions` keeps the permission of
+the stored setting (until 15.9 it cleared it), and any other value is stored as sent, so the body of a `GET` (whose
+`permissions` is empty for a setting without one) can be sent back unchanged. A data store setting whose ACL-synchronizing connector must not
 carry the guest role (the permission of the setting is added to the roles the connector computes, so `{role}guest` would
 make the documents visible to anonymous users) is saved without a permission by a `PUT` that sends `permissions` empty
 (a `POST` always gets the default). Settings already saved with no permission are not changed.
