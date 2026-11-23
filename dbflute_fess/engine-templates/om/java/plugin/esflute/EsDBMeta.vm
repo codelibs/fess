@@ -1,0 +1,200 @@
+${manager.allClassCopyright}package ${request.package}.bsentity.dbmeta;
+
+import java.time.*;
+import java.util.List;
+import java.util.Map;
+
+import ${request.package}.exentity.${table.camelizedName};
+
+import org.dbflute.Entity;
+import org.dbflute.dbmeta.AbstractDBMeta;
+import org.dbflute.dbmeta.info.ColumnInfo;
+import org.dbflute.dbmeta.info.UniqueInfo;
+import org.dbflute.dbmeta.name.TableSqlName;
+import org.dbflute.dbmeta.property.PropertyGateway;
+import org.dbflute.dbway.DBDef;
+import org.dbflute.util.DfTypeUtil;
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public class ${table.camelizedName}Dbm extends AbstractDBMeta {
+
+    protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
+
+    // ===================================================================================
+    //                                                                           Singleton
+    //                                                                           =========
+    private static final ${table.camelizedName}Dbm _instance = new ${table.camelizedName}Dbm();
+
+    private ${table.camelizedName}Dbm() {
+    }
+
+    public static ${table.camelizedName}Dbm getInstance() {
+        return _instance;
+    }
+
+    // ===================================================================================
+    //                                                                       Current DBDef
+    //                                                                       =============
+    @Override
+    public String getProjectName() {
+        return null;
+    }
+
+    @Override
+    public String getProjectPrefix() {
+        return null;
+    }
+
+    @Override
+    public String getGenerationGapBasePrefix() {
+        return null;
+    }
+
+    @Override
+    public DBDef getCurrentDBDef() {
+        return null;
+    }
+
+    // ===================================================================================
+    //                                                                    Property Gateway
+    //                                                                    ================
+    // -----------------------------------------------------
+    //                                       Column Property
+    //                                       ---------------
+    protected final Map<String, PropertyGateway> _epgMap = newHashMap();
+    {
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
+#foreach ($col in $table.columnList)
+#if ($col.isNormalColumn)
+#if (${col.type} == "keyword" || ${col.type} == "text")#set ($javaNative = "String")#else#set ($javaNative = ${col.type})#end
+#elseif ($col.isRefColumn)
+#set ($javaNative = ${col.camelizedName})
+#end
+#if ($tableMetaSettings.properties.get($col.name).array)
+        setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}((${javaNative}[])vl), "${col.uncapCamelName}");
+#else
+        setupEpg(_epgMap, et-> ((${table.camelizedName})et).get${col.camelizedName}(),(et,vl)->((${table.camelizedName}) et).set${col.camelizedName}(DfTypeUtil.to${javaNative}(vl)), "${col.uncapCamelName}");
+#end
+#end
+    }
+
+    @Override
+    public PropertyGateway findPropertyGateway(final String prop) {
+        return doFindEpg(_epgMap, prop);
+    }
+
+    // ===================================================================================
+    //                                                                          Table Info
+    //                                                                          ==========
+    protected final String _tableDbName = "${table.name}";
+    protected final String _tableDispName = "${table.name}";
+    protected final String _tablePropertyName = "${table.camelizedName}";
+    public String getTableDbName() { return _tableDbName; }
+    @Override
+    public String getTableDispName() { return _tableDispName; }
+    @Override
+    public String getTablePropertyName() { return _tablePropertyName; }
+    @Override
+    public TableSqlName getTableSqlName() { return null; }
+
+    // ===================================================================================
+    //                                                                         Column Info
+    //                                                                         ===========
+#foreach ($col in $table.columnList)
+#if ($col.isNormalColumn)
+#if (${col.type} == "keyword" || ${col.type} == "text")#set ($javaNative = "String")#else#set ($javaNative = ${col.type})#end
+#elseif ($col.isRefColumn)
+#set ($javaNative = ${col.camelizedName})
+#end
+#if ($tableMetaSettings.properties.get($col.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
+    protected final ColumnInfo _column${col.camelizedName} = cci("${col.name}", "${col.name}", null, null, ${javaNative}${arrayType}.class, "${col.uncapCamelName}", null, false, false, false, "${col.type}", 0, 0, null, null, false, null, null, null, null, null, false);
+#end
+
+#foreach ($col in $table.columnList)
+    public ColumnInfo column${col.camelizedName}() { return _column${col.camelizedName}; }
+#end
+
+    protected List<ColumnInfo> ccil() {
+        List<ColumnInfo> ls = newArrayList();
+#foreach ($col in $table.columnList)
+        ls.add(column${col.camelizedName}());
+#end
+        return ls;
+    }
+
+    // ===================================================================================
+    //                                                                         Unique Info
+    //                                                                         ===========
+    @Override
+    public boolean hasPrimaryKey() {
+        return false;
+    }
+
+    @Override
+    public boolean hasCompoundPrimaryKey() {
+        return false;
+    }
+
+    @Override
+    protected UniqueInfo cpui() {
+        return null;
+    }
+
+    // ===================================================================================
+    //                                                                           Type Name
+    //                                                                           =========
+    @Override
+    public String getEntityTypeName() {
+        return "${request.package}.exentity.${table.camelizedName}";
+    }
+
+    @Override
+    public String getConditionBeanTypeName() {
+        return "${request.package}.cbean.${table.camelizedName}CB";
+    }
+
+    @Override
+    public String getBehaviorTypeName() {
+        return "${request.package}.exbhv.${table.camelizedName}Bhv";
+    }
+
+    // ===================================================================================
+    //                                                                         Object Type
+    //                                                                         ===========
+    @Override
+    public Class<? extends Entity> getEntityType() {
+        return ${table.camelizedName}.class;
+    }
+
+    // ===================================================================================
+    //                                                                     Object Instance
+    //                                                                     ===============
+    @Override
+    public Entity newEntity() {
+        return new ${table.camelizedName}();
+    }
+
+    // ===================================================================================
+    //                                                                   Map Communication
+    //                                                                   =================
+    @Override
+    public void acceptPrimaryKeyMap(Entity entity, Map<String, ? extends Object> primaryKeyMap) {
+    }
+
+    @Override
+    public void acceptAllColumnMap(Entity entity, Map<String, ? extends Object> allColumnMap) {
+    }
+
+    @Override
+    public Map<String, Object> extractPrimaryKeyMap(Entity entity) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> extractAllColumnMap(Entity entity) {
+        return null;
+    }
+}
+

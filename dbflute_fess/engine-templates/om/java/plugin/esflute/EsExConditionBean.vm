@@ -1,0 +1,9 @@
+${manager.allClassCopyright}package ${request.package}.cbean;
+
+import ${request.package}.cbean.bs.Bs${table.camelizedName}CB;
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public class ${table.camelizedName}CB extends Bs${table.camelizedName}CB {
+}

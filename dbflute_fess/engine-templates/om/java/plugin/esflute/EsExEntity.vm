@@ -1,0 +1,11 @@
+${manager.allClassCopyright}package ${request.package}.exentity;
+
+import ${request.package}.bsentity.Bs${table.camelizedName};
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public class ${table.camelizedName} extends Bs${table.camelizedName} {
+
+    private static final long serialVersionUID = 1L;
+}

@@ -1,0 +1,139 @@
+##
+## Copyright 2014-2016 the original author or authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+## either express or implied. See the License for the specific language
+## governing permissions and limitations under the License.
+##
+$manager.info("requestList: ${requestList.size()}")
+#set ($existsESFlute = false)
+#foreach ($request in $requestList)
+#set ($tableMap = $request.tableMap)
+#if ($tableMap.isESFlute)
+#set ($existsESFlute = true)
+#set ($esVersion = $tableMap.esVersion)
+$request.info("Elasticsearch version: ${esVersion.versionExp}")
+$request.enableOutputDirectory()
+$manager.makeDirectory($request.generateDirPath)
+
+#set ($path = "${request.generateDirPath}allcommon/EsAbstractConditionBean.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsAbstractConditionBean.vm", $path, "", "")
+
+#set ($path = "${request.generateDirPath}allcommon/EsAbstractConditionQuery.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsAbstractConditionQuery.vm", $path, "", "")
+
+#set ($path = "${request.generateDirPath}allcommon/EsAbstractConditionAggregation.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsAbstractConditionAggregation.vm", $path, "", "")
+
+#set ($path = "${request.generateDirPath}allcommon/EsAbstractEntity.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsAbstractEntity.vm", $path, "", "")
+
+#set ($path = "${request.generateDirPath}allcommon/EsAbstractBehavior.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsAbstractBehavior.vm", $path, "", "")
+
+#set ($path = "${request.generateDirPath}allcommon/EsPagingResultBean.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsPagingResultBean.vm", $path, "", "")
+
+#set ($path = "${request.generateDirPath}allcommon/EsSqlClause.java")
+$manager.makeDirectory($path)
+$request.info("parse('${path}')")
+$generator.parse("om/java/plugin/esflute/allcommon/EsSqlClause.vm", $path, "", "")
+
+#if ($tableMap.isUseLastaDi)
+  #set ($path = "${tableMap.resourcesDir}/${tableMap.esfluteDiFile}")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/allcommon/container/lasta/ESFluteDiXml.vm", $path, "", "")
+#end
+
+##
+## <<<  ESFlute Gen  >>>
+##
+#foreach ($table in $request.tableList)
+  #set ($path = "${request.generateDirPath}bsentity/dbmeta/${table.camelizedName}Dbm.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/EsDBMeta.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}bsentity/Bs${table.camelizedName}.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/EsBsEntity.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}exentity/${table.camelizedName}.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  #if (!$files.file(${generator.outputPath},$path).exists())
+    $generator.parse("om/java/plugin/esflute/EsExEntity.vm", $path, "", "")
+  #end
+
+  #set ($path = "${request.generateDirPath}cbean/bs/Bs${table.camelizedName}CB.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/EsBsConditionBean.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}cbean/${table.camelizedName}CB.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  #if (!$files.file(${generator.outputPath},$path).exists())
+    $generator.parse("om/java/plugin/esflute/EsExConditionBean.vm", $path, "", "")
+  #end
+
+  #set ($path = "${request.generateDirPath}cbean/cq/bs/Bs${table.camelizedName}CQ.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/EsBsConditionQuery.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}cbean/cq/${table.camelizedName}CQ.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  #if (!$files.file(${generator.outputPath},$path).exists())
+    $generator.parse("om/java/plugin/esflute/EsExConditionQuery.vm", $path, "", "")
+  #end
+
+  #set ($path = "${request.generateDirPath}cbean/ca/bs/Bs${table.camelizedName}CA.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/EsBsConditionAggregation.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}cbean/ca/${table.camelizedName}CA.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  #if (!$files.file(${generator.outputPath},$path).exists())
+    $generator.parse("om/java/plugin/esflute/EsExConditionAggregation.vm", $path, "", "")
+  #end
+
+  #set ($path = "${request.generateDirPath}bsbhv/Bs${table.camelizedName}Bhv.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  $generator.parse("om/java/plugin/esflute/EsBsBehavior.vm", $path, "", "")
+
+  #set ($path = "${request.generateDirPath}exbhv/${table.camelizedName}Bhv.java")
+  $manager.makeDirectory($path)
+  $request.info("parse('${path}')")
+  #if (!$files.file(${generator.outputPath},$path).exists())
+    $generator.parse("om/java/plugin/esflute/EsExBehavior.vm", $path, "", "")
+  #end
+#end
+#end
+#end

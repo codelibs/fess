@@ -1,0 +1,158 @@
+${manager.allClassCopyright}package ${request.package}.bsentity;
+#if ($table.get("_id") && $table.get("_id").get("path"))
+#set ($idColumn = $table.get("_id").get("path"))
+#end
+
+import java.time.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import ${request.package}.allcommon.EsAbstractEntity;
+import ${request.package}.bsentity.dbmeta.${table.camelizedName}Dbm;
+#if ($table.hasRefColumn)
+import ${request.package}.exentity.*;
+#end
+
+/**
+ * ${table.comment}
+ * @author ESFlute (using FreeGen)
+ */
+public class Bs${table.camelizedName} extends EsAbstractEntity {
+
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
+    private static final long serialVersionUID = 1L;
+    protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
+#foreach ($column in $table.columnList)
+#if ($column.isNormalColumn)
+#if (${column.type} == "keyword" || ${column.type} == "text")#set ($javaNative = "String")#else#set ($javaNative = ${column.type})#end
+#elseif ($column.isRefColumn)
+#set ($javaNative = ${column.camelizedName})
+#end
+#if ($tableMetaSettings.properties.get($column.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
+#if ($column.name != $idColumn)
+    /** ${column.name} */
+    protected ${javaNative}${arrayType} ${column.uncapCamelName};
+
+#end
+#end
+    // [Referrers] *comment only
+#foreach ($referrer in $table.referrerList)
+    // o ${referrer.name}
+#end
+
+    // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public ${table.camelizedName}Dbm asDBMeta() {
+        return ${table.camelizedName}Dbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "${table.name}";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+#foreach ($column in $table.columnList)
+#if ($column.isNormalColumn)
+#if ($column.name != $idColumn)
+        if (${column.uncapCamelName} != null) {
+            addFieldToSource(sourceMap, "${column.name}", ${column.uncapCamelName});
+        }
+#else
+        if (asDocMeta().id() != null) {
+            sourceMap.put("${column.name}", asDocMeta().id());
+        }
+#end
+#end
+#end
+        return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+#foreach ($column in $table.columnList)
+#if ($column.name != $idColumn)
+        sb.append(dm).append(${column.uncapCamelName});
+#else
+        sb.append(dm).append(asDocMeta().id());
+#end
+#end
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+#set ($propertyLoopIndex = 0)
+#foreach ($column in $table.columnList)
+#if ($propertyLoopIndex == 0)
+    // ===================================================================================
+    //                                                                            Accessor
+    //                                                                            ========
+#else
+
+#end
+#if ($column.isNormalColumn)
+#if (${column.type} == "keyword" || ${column.type} == "text")#set ($javaNative = "String")#else#set ($javaNative = ${column.type})#end
+#elseif ($column.isRefColumn)
+#set ($javaNative = ${column.camelizedName})
+#end
+#if ($tableMetaSettings.properties.get($column.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
+#if ($column.name != $idColumn)
+#if ($javaNative == "boolean")
+    public ${javaNative} is${column.capCamelName}() {
+        checkSpecifiedProperty("${column.uncapCamelName}");
+        return ${column.uncapCamelName};
+    }
+#else
+    public ${javaNative}${arrayType} get${column.capCamelName}() {
+        checkSpecifiedProperty("${column.uncapCamelName}");
+#if ($javaNative == "String" && $arrayType.length() == 0)
+        return convertEmptyToNull(${column.uncapCamelName});
+#else
+        return ${column.uncapCamelName};
+#end
+    }
+#end
+
+    public void set${column.capCamelName}(${javaNative}${arrayType} value) {
+        registerModifiedProperty("${column.uncapCamelName}");
+        this.${column.uncapCamelName} = value;
+    }
+#else
+    public ${javaNative} get${column.capCamelName}() {
+        checkSpecifiedProperty("${column.uncapCamelName}");
+        return convertEmptyToNull(asDocMeta().id());
+    }
+
+    public void set${column.capCamelName}(${javaNative} value) {
+        registerModifiedProperty("${column.uncapCamelName}");
+        asDocMeta().id(value);
+    }
+#end
+#set ($propertyLoopIndex = $propertyLoopIndex + 1)
+#end
+}
