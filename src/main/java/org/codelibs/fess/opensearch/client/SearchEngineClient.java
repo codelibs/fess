@@ -41,10 +41,12 @@ import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -217,6 +219,12 @@ public class SearchEngineClient implements Client {
     private static final String INDEX_CLOSED_BLOCK_ID = "4";
 
     private static final String LOG_INDEX_PREFIX = "fess_log";
+
+    /** The prefix of the indices where the suggest settings are kept. */
+    private static final String SUGGEST_SETTINGS_INDEX_PREFIX = "fess_suggest";
+
+    /** The index of the configsync plugin. */
+    private static final String CONFIGSYNC_INDEX = "configsync";
 
     private static final String USER_INDEX_PREFIX = "fess_user";
 
@@ -2776,14 +2784,15 @@ public class SearchEngineClient implements Client {
      * Tells whether the search engine refuses writes: an index (or the whole cluster) carries a block at the
      * write level, as the read-only block that OpenSearch puts on every index when the disk passes the
      * flood-stage watermark. Such a cluster still answers searches, and its health is green.
-     * A closed index is not counted, and neither is a cluster state that could not be read.
+     * Only the indices of Fess count: another application that shares the cluster may keep an index
+     * read-only on purpose. A closed index is not counted, and neither is a cluster state that could not be read.
      *
      * @return true if a write is refused by a block
      */
     public boolean isWriteBlocked() {
         try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_cluster/state/blocks").execute()) {
             if (response.getHttpStatusCode() == 200) {
-                return hasWriteBlock(response.getContent(SearchEngineCurl.jsonParser()));
+                return hasWriteBlock(response.getContent(SearchEngineCurl.jsonParser()), this::isFessIndex);
             }
         } catch (final Exception e) {
             logger.debug("Failed to read the blocks of the cluster state.", e);
@@ -2792,12 +2801,37 @@ public class SearchEngineClient implements Client {
     }
 
     /**
+     * Tells whether an index is one of the indices of Fess: the name of the document, crawler, configuration,
+     * user or log index that is configured, or the same name followed by a dot (the index behind an alias,
+     * {@code fess.20260101}, or one of the configuration indices, {@code fess_config.web_config}), the indices
+     * of the suggest settings ({@code fess_suggest}, {@code fess_suggest_analyzer}, {@code fess_suggest_array.fess})
+     * and the index of the configsync plugin that stores the dictionaries.
+     *
+     * @param indexName the name of an index
+     * @return true if it belongs to Fess
+     */
+    protected boolean isFessIndex(final String indexName) {
+        final FessConfig config = ComponentUtil.getFessConfig();
+        // The document index is always created as fess.<timestamp> (see generateNewIndexName), whatever the aliases
+        // of the configuration are called, so the name of the document index counts as well as the configured names.
+        return Stream
+                .of(DOC_INDEX, config.getIndexDocumentSearchIndex(), config.getIndexDocumentUpdateIndex(),
+                        config.getIndexDocumentSuggestIndex(), config.getIndexDocumentCrawlerIndex(), config.getIndexConfigIndex(),
+                        config.getIndexUserIndex(), config.getIndexLogIndex())
+                .filter(StringUtil::isNotBlank)
+                .map(name -> name.contains(".") ? name.substring(0, name.indexOf('.')) : name)
+                .anyMatch(base -> indexName.equals(base) || indexName.startsWith(base + "."))
+                || indexName.startsWith(SUGGEST_SETTINGS_INDEX_PREFIX) || CONFIGSYNC_INDEX.equals(indexName);
+    }
+
+    /**
      * Looks for a write-level block in the {@code blocks} of a cluster state response.
      *
      * @param state the response of {@code GET /_cluster/state/blocks}
-     * @return true if the cluster or an index that is not closed has a block at the write level
+     * @param isFessIndex tells whether an index of the cluster is an index of Fess
+     * @return true if the cluster or an index of Fess that is not closed has a block at the write level
      */
-    protected static boolean hasWriteBlock(final Map<String, Object> state) {
+    protected static boolean hasWriteBlock(final Map<String, Object> state, final Predicate<String> isFessIndex) {
         if (!(state.get("blocks") instanceof final Map<?, ?> blocks)) {
             return false;
         }
@@ -2805,8 +2839,9 @@ public class SearchEngineClient implements Client {
             return true;
         }
         if (blocks.get("indices") instanceof final Map<?, ?> indices) {
-            for (final Object index : indices.values()) {
-                if (index instanceof final Map<?, ?> indexBlocks && hasWriteLevel(indexBlocks, INDEX_CLOSED_BLOCK_ID)) {
+            for (final Map.Entry<?, ?> index : indices.entrySet()) {
+                if (index.getValue() instanceof final Map<?, ?> indexBlocks && isFessIndex.test(String.valueOf(index.getKey()))
+                        && hasWriteLevel(indexBlocks, INDEX_CLOSED_BLOCK_ID)) {
                     return true;
                 }
             }
