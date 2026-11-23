@@ -24,8 +24,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -1388,10 +1390,20 @@ public final class FessSetup {
         final String repository = definition.get("plugin.repository");
         final String version = options.getOrDefault("version", definition.get("plugin.version"));
         final List<String> artifacts = definition.list("plugin.artifacts");
+        // Report every plugin that cannot be installed, not just the first: an old installation
+        // has all four at the wrong version, and fixing them one run at a time would take four runs.
+        final Set<String> failures = new LinkedHashSet<>();
         for (final String coordinate : artifacts) {
             final String url = OpenSearchPluginInstaller.zipUrl(repository, coordinate, version);
             out.println("Installing " + coordinate + ":" + version);
-            OpenSearchPluginInstaller.install(home, url);
+            try {
+                OpenSearchPluginInstaller.install(home, url, version);
+            } catch (final SetupException e) {
+                failures.add(e.getMessage());
+            }
+        }
+        if (!failures.isEmpty()) {
+            throw new SetupException(String.join(System.lineSeparator(), failures));
         }
     }
 

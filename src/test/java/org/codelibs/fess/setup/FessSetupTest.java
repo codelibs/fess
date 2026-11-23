@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 public class FessSetupTest {
@@ -77,6 +79,34 @@ public class FessSetupTest {
     public void test_installOpensearchPlugins_requiresOpensearchHome() {
         assertEquals(2, run("install", "opensearch-plugins"));
         assertTrue(err().contains("--opensearch-home"), err());
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_installOpensearchPlugins_failsWhenPluginsAreInstalledAtAnotherVersion() throws Exception {
+        final Path tool = tempDir.resolve("bin").resolve("opensearch-plugin");
+        Files.createDirectories(tool.getParent());
+        Files.writeString(tool,
+                """
+                        #!/bin/sh
+                        name=${3##*/}
+                        name=${name#opensearch-}
+                        name=${name%-*}
+                        echo "ERROR: plugin directory [$(dirname "$0")/../plugins/$name] already exists; if you need to update the plugin, uninstall it first using command 'remove $name'"
+                        exit 74
+                        """,
+                StandardCharsets.UTF_8);
+        assertTrue(tool.toFile().setExecutable(true));
+        for (final String name : List.of("analysis-fess", "analysis-extension", "minhash", "configsync")) {
+            final Path directory = Files.createDirectories(tempDir.resolve("plugins").resolve(name));
+            Files.writeString(directory.resolve("plugin-descriptor.properties"), "name=" + name + "\nversion=3.9.0\n",
+                    StandardCharsets.UTF_8);
+        }
+
+        assertEquals(1, run("install", "opensearch-plugins", "--opensearch-home", tempDir.toString(), "--version", "3.10.0"));
+        for (final String name : List.of("analysis-fess", "analysis-extension", "minhash", "configsync")) {
+            assertTrue(err().contains("opensearch-plugin remove " + name), err());
+        }
     }
 
     @Test

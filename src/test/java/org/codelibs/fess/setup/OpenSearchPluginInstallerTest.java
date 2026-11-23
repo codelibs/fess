@@ -72,9 +72,55 @@ public class OpenSearchPluginInstallerTest {
     @Test
     public void test_install_reportsMissingPluginTool() {
         final SetupException e =
-                assertThrows(SetupException.class, () -> OpenSearchPluginInstaller.install(tempDir, "https://example.org/a.zip"));
+                assertThrows(SetupException.class, () -> OpenSearchPluginInstaller.install(tempDir, "https://example.org/a.zip", "3.10.0"));
         assertTrue(e.getMessage().contains("opensearch-plugin"), e.getMessage());
         assertTrue(e.getMessage().contains("--opensearch-home"), e.getMessage());
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_install_acceptsAPluginAlreadyInstalledAtTheRequestedVersion() throws Exception {
+        existingPluginTool();
+        installedPlugin("minhash", "3.10.0");
+
+        OpenSearchPluginInstaller.install(tempDir, "https://example.org/opensearch-minhash-3.10.0.zip", "3.10.0");
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_install_rejectsAPluginAlreadyInstalledAtAnotherVersion() throws Exception {
+        existingPluginTool();
+        installedPlugin("minhash", "3.9.0");
+
+        final SetupException e = assertThrows(SetupException.class,
+                () -> OpenSearchPluginInstaller.install(tempDir, "https://example.org/opensearch-minhash-3.10.0.zip", "3.10.0"));
+        assertTrue(e.getMessage().contains("minhash"), e.getMessage());
+        assertTrue(e.getMessage().contains("3.9.0"), e.getMessage());
+        assertTrue(e.getMessage().contains("3.10.0"), e.getMessage());
+        assertTrue(e.getMessage().contains("opensearch-plugin remove minhash"), e.getMessage());
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_install_acceptsAnExistingPluginWithoutADescriptor() throws Exception {
+        existingPluginTool();
+        Files.createDirectories(tempDir.resolve("plugins").resolve("minhash"));
+
+        OpenSearchPluginInstaller.install(tempDir, "https://example.org/opensearch-minhash-3.10.0.zip", "3.10.0");
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_install_reportsAFailingPluginTool() throws Exception {
+        fakePluginTool("""
+                echo 'ERROR: boom'
+                exit 64
+                """);
+
+        final SetupException e = assertThrows(SetupException.class,
+                () -> OpenSearchPluginInstaller.install(tempDir, "https://example.org/opensearch-minhash-3.10.0.zip", "3.10.0"));
+        assertTrue(e.getMessage().contains("64"), e.getMessage());
+        assertTrue(e.getMessage().contains("boom"), e.getMessage());
     }
 
     @Test
@@ -111,6 +157,24 @@ public class OpenSearchPluginInstallerTest {
         assertTrue(e.getMessage().contains("opensearch-security-analytics"), e.getMessage());
         assertTrue(e.getMessage().contains("74"), e.getMessage());
         assertTrue(e.getMessage().contains("boom"), e.getMessage());
+    }
+
+    /** A plugin tool that refuses every install the way opensearch-plugin does for an installed plugin. */
+    private void existingPluginTool() throws Exception {
+        fakePluginTool(
+                """
+                        name=${3##*/}
+                        name=${name#opensearch-}
+                        name=${name%-*}
+                        echo "ERROR: plugin directory [$(dirname "$0")/../plugins/$name] already exists; if you need to update the plugin, uninstall it first using command 'remove $name'"
+                        exit 74
+                        """);
+    }
+
+    private void installedPlugin(final String name, final String version) throws Exception {
+        final Path directory = Files.createDirectories(tempDir.resolve("plugins").resolve(name));
+        Files.writeString(directory.resolve("plugin-descriptor.properties"),
+                "name=" + name + "\nversion=" + version + "\nopensearch.version=" + version + "\n", StandardCharsets.UTF_8);
     }
 
     private Path fakePluginTool(final String body) throws Exception {
