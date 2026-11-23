@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ConfigEnvUtil;
 import org.dbflute.helper.jprop.ObjectiveProperties;
 import org.lastaflute.core.direction.PropertyFilter;
 
@@ -97,7 +98,11 @@ public class FessConfigImpl extends FessConfig.SimpleImpl {
             private String getFromCache(final String propertyKey) {
                 try {
                     return cache.get(propertyKey, () -> {
-                        final String value = System.getProperty(Constants.FESS_CONFIG_PREFIX + propertyKey, super.get(propertyKey));
+                        // -Dfess.config.<key>, then the environment variable of the key, then the file
+                        String value = ConfigEnvUtil.getOverride(Constants.FESS_CONFIG_PREFIX, propertyKey);
+                        if (value == null) {
+                            value = super.get(propertyKey);
+                        }
                         if (value != null) {
                             return value;
                         }

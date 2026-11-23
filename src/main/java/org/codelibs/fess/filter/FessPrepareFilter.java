@@ -32,6 +32,7 @@ import java.util.zip.ZipFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
+import org.codelibs.fess.util.ConfigEnvUtil;
 import org.codelibs.fess.mylasta.direction.sponsor.FessMessageResources;
 import org.lastaflute.web.ruts.message.MessageResources;
 import org.lastaflute.web.servlet.filter.LastaPrepareFilter;
@@ -71,6 +72,8 @@ public class FessPrepareFilter extends LastaPrepareFilter {
             duplicatedPlugins(Path.of(pluginDir)).forEach(logger::error);
             unreadablePlugins(Path.of(pluginDir)).forEach(logger::warn);
         }
+        // the web application starts once; the crawler and the other processes it starts get the same options
+        ConfigEnvUtil.secretsOnCommandLine().forEach(logger::warn);
         super.initializeContainer(servletContext);
     }
 

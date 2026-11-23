@@ -94,7 +94,7 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
         if (key == null || value == null) {
             return value;
         }
-        if (getSensitivePattern().matcher(key).matches()) {
+        if (ConfigEnvUtil.isConfigEnvName(key) || getSensitivePattern().matcher(key).matches()) {
             return "********";
         }
         return value;
