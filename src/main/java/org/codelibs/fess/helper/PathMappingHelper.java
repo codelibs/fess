@@ -353,7 +353,8 @@ public class PathMappingHelper extends AbstractConfigHelper {
                     return false;
                 }
 
-                return pathMapping.getUAMatcher(userAgent).find();
+                final Matcher uaMatcher = pathMapping.getUAMatcher(userAgent);
+                return uaMatcher != null && uaMatcher.find();
             }).orElse(false);
         }
         return false;
