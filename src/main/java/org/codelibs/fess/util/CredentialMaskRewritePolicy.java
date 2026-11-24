@@ -32,8 +32,9 @@ import org.apache.logging.log4j.message.SimpleMessage;
  * Log4j rewrite policy that removes credentials from the log events of the specified loggers.
  * It is meant for the wire and header loggers of the HTTP client, which write every request and
  * response as it is on the wire: the {@code Authorization} header of a request, the {@code Cookie} and
- * {@code Set-Cookie} headers, and the {@code user:password@} of a URL that the server sends back in a
- * {@code Location} header or in a page. The body of a request, such as the login form that the form
+ * {@code Set-Cookie} headers, the cookie values that the cookie handlers of the client log
+ * ({@code Cookie accepted [name="value", ...]} and {@code Cookie [name: n; value: v; ...] match}), and the
+ * {@code user:password@} of a URL that the server sends back in a {@code Location} header or in a page. The body of a request, such as the login form that the form
  * authentication posts, is not masked.
  */
 @Plugin(name = "CredentialMaskRewritePolicy", category = Core.CATEGORY_NAME, elementType = "rewritePolicy", printObject = true)
@@ -54,6 +55,12 @@ public class CredentialMaskRewritePolicy implements RewritePolicy {
 
     /** The value of a Cookie or Set-Cookie header, up to the end of the line (or the wire log's CR LF mark). */
     private static final Pattern COOKIE = Pattern.compile("(?i)\\b((?:set-)?cookie:\\s*)(?:(?!\\[\\\\r\\]).)+");
+
+    /** The value in the {@code Cookie accepted [name="value", ...]} and {@code Cookie rejected [...]} lines of the cookie handler. */
+    private static final Pattern COOKIE_ACCEPTED = Pattern.compile("(?i)(\\bcookie (?:accepted|rejected) \\[[^=\\]\"]*=)\"[^\"]*\"");
+
+    /** The value in the {@code Cookie [name: n; value: v; ...] match [...]} line of the cookie handler. */
+    private static final Pattern COOKIE_MATCH = Pattern.compile("(?i)(\\bcookie \\[name: [^;\\]]*; value: )[^;\\]]*");
 
     /** Array of logger name prefixes to apply the masking to */
     private final String[] loggerNames;
@@ -86,6 +93,10 @@ public class CredentialMaskRewritePolicy implements RewritePolicy {
         }
         if (containsIgnoreCase(result, "cookie:")) {
             result = COOKIE.matcher(result).replaceAll("$1" + MASK);
+        }
+        if (containsIgnoreCase(result, "cookie ")) {
+            result = COOKIE_ACCEPTED.matcher(result).replaceAll("$1\"" + MASK + "\"");
+            result = COOKIE_MATCH.matcher(result).replaceAll("$1" + MASK);
         }
         return result;
     }

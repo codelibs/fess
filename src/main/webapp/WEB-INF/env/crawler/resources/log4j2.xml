@@ -24,10 +24,10 @@
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
 		<!-- the wire and header loggers of the HTTP client write the Authorization and cookie headers and the
-		     user:password@ of a URL (a Location header or a link in a page) as they are on the wire -->
+		     user:password@ of a URL; its cookie handlers write the cookie values (a Location header or a link in a page) as they are on the wire -->
 		<Rewrite name="MaskedFile">
 			<AppenderRef ref="AppRollingFile" />
-			<CredentialMaskRewritePolicy loggers="org.apache.hc.client5.http.wire,org.apache.hc.client5.http.headers" />
+			<CredentialMaskRewritePolicy loggers="org.apache.hc.client5.http.wire,org.apache.hc.client5.http.headers,org.apache.hc.client5.http.protocol.ResponseProcessCookies,org.apache.hc.client5.http.protocol.RequestAddCookies" />
 		</Rewrite>
 		<Rewrite name="AppFile">
 			<AppenderRef ref="MaskedFile" />
