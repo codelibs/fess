@@ -69,6 +69,18 @@ public class CredentialMaskRewritePolicyTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_mask_cookieHandlerLines() {
+        assertEquals("ex-0000000002 Cookie accepted [sessid=\"****\", domain:localhost, path:/, expiry:null]", CredentialMaskRewritePolicy
+                .mask("ex-0000000002 Cookie accepted [sessid=\"abc123\", domain:localhost, path:/, expiry:null]"));
+        assertEquals("ex-0000000002 Cookie rejected [sessid=\"****\", Illegal 'domain' attribute]",
+                CredentialMaskRewritePolicy.mask("ex-0000000002 Cookie rejected [sessid=\"abc123\", Illegal 'domain' attribute]"));
+        assertEquals("ex-0000000003 Cookie [name: sessid; value: ****; domain: localhost; path: /; expiry: null] match [localhost:8080/a]",
+                CredentialMaskRewritePolicy.mask(
+                        "ex-0000000003 Cookie [name: sessid; value: abc123; domain: localhost; path: /; expiry: null] match [localhost:8080/a]"));
+        assertEquals("Cookie spec selected: strict", CredentialMaskRewritePolicy.mask("Cookie spec selected: strict"));
+    }
+
+    @Test
     public void test_mask_authorization() {
         assertEquals("http-outgoing-0 >> Authorization: Basic ****",
                 CredentialMaskRewritePolicy.mask("http-outgoing-0 >> Authorization: Basic dXNlcjpwYXNzd29yZA=="));
