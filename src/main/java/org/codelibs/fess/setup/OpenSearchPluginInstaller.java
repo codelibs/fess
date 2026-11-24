@@ -16,10 +16,14 @@
 package org.codelibs.fess.setup;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Installs and removes OpenSearch plugins through the distribution's own {@code opensearch-plugin} tool.
@@ -30,6 +34,8 @@ import java.util.List;
  * maven.codelibs.org at the time of writing -- so the URL has to stay overridable.</p>
  */
 public final class OpenSearchPluginInstaller {
+
+    private static final Pattern EXISTING_DIRECTORY = Pattern.compile("plugin directory \\[(.+?)\\] already exists");
 
     private OpenSearchPluginInstaller() {
     }
@@ -79,19 +85,49 @@ public final class OpenSearchPluginInstaller {
     /**
      * Installs one plugin from a zip URL.
      *
-     * <p>A plugin that is already installed is treated as success rather than a failure, so
-     * running setup again on a working installation is harmless.</p>
+     * <p>A plugin that is already installed at the requested version is treated as success rather
+     * than a failure, so running setup again on a working installation is harmless. One installed at
+     * another version is a failure: {@code opensearch-plugin install} refuses to replace it, and an
+     * engine refuses to start with a plugin built for a different release, so reporting success
+     * would leave an installation that cannot start.</p>
      *
      * @param opensearchHome the OpenSearch home directory
      * @param url the plugin zip URL
-     * @throws SetupException if the plugin tool is missing or reports an error
+     * @param version the plugin version the URL points at
+     * @throws SetupException if the plugin tool is missing or reports an error, or the plugin is installed at another version
      */
-    public static void install(final Path opensearchHome, final String url) throws SetupException {
+    public static void install(final Path opensearchHome, final String url, final String version) throws SetupException {
         final Result result = run(opensearchHome, "install", "--batch", url);
-        if (result.exit() != 0 && !result.output().contains("already exists")) {
+        if (result.exit() == 0) {
+            return;
+        }
+        if (!result.output().contains("already exists")) {
             throw new SetupException(
                     "Failed to install " + url + ", opensearch-plugin exited with code " + result.exit() + ": " + result.output());
         }
+        final Matcher matcher = EXISTING_DIRECTORY.matcher(result.output());
+        if (!matcher.find()) {
+            return;
+        }
+        final String name = Path.of(matcher.group(1)).getFileName().toString();
+        final String installed = installedVersion(opensearchHome, name);
+        if (installed != null && !installed.equals(version)) {
+            throw new SetupException("Plugin " + name + " is already installed at version " + installed + ", not the requested " + version
+                    + ". Remove it with: " + pluginCommand(opensearchHome).toAbsolutePath() + " remove " + name + ", then run this again.");
+        }
+    }
+
+    private static String installedVersion(final Path opensearchHome, final String name) {
+        final Path descriptor = opensearchHome.resolve("plugins").resolve(name).resolve("plugin-descriptor.properties");
+        final Properties properties = new Properties();
+        try (InputStream in = Files.newInputStream(descriptor)) {
+            properties.load(in);
+        } catch (final IOException e) {
+            // Without a readable descriptor the version cannot be told apart from the requested one.
+            return null;
+        }
+        final String version = properties.getProperty("version");
+        return version == null ? null : version.trim();
     }
 
     /**
