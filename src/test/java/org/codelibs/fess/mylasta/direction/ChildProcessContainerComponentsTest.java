@@ -111,13 +111,35 @@ public class ChildProcessContainerComponentsTest extends UnitFessTestCase {
     }
 
     /**
+     * {@code SearchEngineClient#open} runs in every child process and creates a missing index, and
+     * {@code substitutePlaceholders} then looks up {@code ChunkVectorHelper} for the k-NN placeholders.
+     * A child process whose container does not register it fails to create the index with a
+     * ComponentNotFoundException, for example when the webapp of the previous release starts a
+     * crawler that is the first process to see an index added by this release.
+     */
+    @Test
+    public void test_childProcessThatOpensTheSearchEngineClientRegistersChunkVectorHelper() throws Exception {
+        for (final String root : ROOT_XML_PATHS) {
+            final Set<String> classNames = collectComponentClassNames(List.of(root));
+            assertTrue(classNames.contains("org.codelibs.fess.opensearch.client.SearchEngineClient"),
+                    root + " is expected to register SearchEngineClient");
+            assertTrue(classNames.contains("org.codelibs.fess.helper.ChunkVectorHelper"),
+                    root + " registers SearchEngineClient, which needs ChunkVectorHelper to create an index");
+        }
+    }
+
+    /**
      * Follows the {@code <include>} graph from every root, plus the "+"-suffix convention, and
      * collects the {@code class} attribute of every {@code component} element found.
      */
     private Set<String> collectComponentClassNames() throws Exception {
+        return collectComponentClassNames(ROOT_XML_PATHS);
+    }
+
+    private Set<String> collectComponentClassNames(final List<String> roots) throws Exception {
         final Set<String> visitedFiles = new LinkedHashSet<>();
         final Deque<File> queue = new ArrayDeque<>();
-        for (final String root : ROOT_XML_PATHS) {
+        for (final String root : roots) {
             final File file = new File(root);
             assertTrue(file.isFile(), root + " should exist");
             queue.add(file);

@@ -5,6 +5,7 @@
 	<include path="convention.xml" />
 	<include path="lastaflute_core.xml"/>
 	<include path="fess.xml" />
+	<include path="fess_content_chunk.xml"/>
 
 	<component name="fessSuggest" class="org.codelibs.fess.exec.SuggestCreator"
 			   instance="prototype">
