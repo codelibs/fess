@@ -1329,7 +1329,7 @@ public final class FessSetup {
                 out.println("or in the environment Fess starts with:");
             }
             out.println("  SEARCH_ENGINE_HTTP_URL=http://localhost:9200");
-            out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.dictionaryPathValue(home));
+            out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.RELATIVE_DICTIONARY_PATH);
             if (!foundByLauncher) {
                 // bin\fess.in.bat reads FESS_DICTIONARY_PATH but never SEARCH_ENGINE_HTTP_URL.
                 out.println("On Windows, bin\\fess.in.bat reads FESS_DICTIONARY_PATH but not SEARCH_ENGINE_HTTP_URL: set the URL");

@@ -24,22 +24,26 @@ fi
 # An exported SEARCH_ENGINE_HTTP_URL wins, so the init scripts and container images can point
 # Fess elsewhere without editing this file.
 SEARCH_ENGINE_HTTP_URL=${SEARCH_ENGINE_HTTP_URL:-http://localhost:9200}
-# The config directory of that server, where configsync keeps the dictionaries Fess pushes. It has
-# to match configsync.config_path in that server's opensearch.yml. Left unset here and in the
-# environment, it is taken from the OpenSearch bin/fess-setup install opensearch put under
-# $FESS_HOME/opensearch, provided there is only one.
+# Where that server keeps the dictionaries Fess pushes, which the analyzers in the index settings
+# point to. It has to match configsync.config_path in that server's opensearch.yml. A relative
+# value is resolved by OpenSearch against its config directory, so "dictionary/" names
+# <config>/dictionary of whichever installation Fess talks to and an index created with it keeps
+# working when that installation moves. Left unset here and in the environment, it becomes
+# "dictionary/" when there is exactly one OpenSearch under $FESS_HOME/opensearch that
+# bin/fess-setup install opensearch set up. An absolute value is used as it is.
 #FESS_DICTIONARY_PATH=/var/lib/opensearch/config/
 if [ "x$FESS_DICTIONARY_PATH" = "x" ]; then
+  fess_dictionary_count=0
   for fess_dictionary_candidate in "$FESS_HOME"/opensearch/*/config/dictionary ; do
     if [ -d "$fess_dictionary_candidate" ]; then
-      if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
-        echo "warning: more than one OpenSearch under $FESS_HOME/opensearch; set FESS_DICTIONARY_PATH to the config/dictionary directory of the one Fess uses" >&2
-        FESS_DICTIONARY_PATH=
-        break
-      fi
-      FESS_DICTIONARY_PATH="$fess_dictionary_candidate"
+      fess_dictionary_count=$((fess_dictionary_count + 1))
     fi
   done
+  if [ "$fess_dictionary_count" -eq 1 ]; then
+    FESS_DICTIONARY_PATH=dictionary/
+  elif [ "$fess_dictionary_count" -gt 1 ]; then
+    echo "warning: more than one OpenSearch under $FESS_HOME/opensearch; set FESS_DICTIONARY_PATH to dictionary/, or to the absolute config/dictionary directory of the one Fess uses" >&2
+  fi
 fi
 
 # SSL truststore for certificate validation over https
