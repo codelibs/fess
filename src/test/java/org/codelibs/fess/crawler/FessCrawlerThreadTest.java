@@ -850,7 +850,9 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         env.client.headResponse = headResponse(200, new Date(java.time.Instant.parse("2026-10-02T00:00:00Z").toEpochMilli()));
 
         assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
-        assertNull(crawlerThread.conditionalGetState);
+        // the GET carries no validators, but it is kept so that a 404 or 410 response deletes the document
+        assertNotNull(crawlerThread.conditionalGetState);
+        assertNull(crawlerThread.conditionalGetState.headers());
         assertEquals(0, crawlerThread.unchangedCalls.size());
         assertTrue(crawlerThread.createRequestData(urlQueue(PAGE_URL)).getHeaders().isEmpty());
     }
@@ -937,7 +939,134 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
 
         assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
         assertEquals(0, env.client.requests.size());
+        assertNotNull(crawlerThread.conditionalGetState);
+        assertNull(crawlerThread.conditionalGetState.headers());
+        assertTrue(crawlerThread.createRequestData(urlQueue(PAGE_URL)).getHeaders().isEmpty());
+    }
+
+    // a page of a site that sends no Last-Modified and no ETag has neither validator in the index
+    @Test
+    public void test_processResponse_get404DeletesTheDocumentWithoutLastModified() {
+        assertGoneGetDeletesTheDocumentWithoutLastModified(404);
+    }
+
+    @Test
+    public void test_processResponse_get410DeletesTheDocumentWithoutLastModified() {
+        assertGoneGetDeletesTheDocumentWithoutLastModified(410);
+    }
+
+    private void assertGoneGetDeletesTheDocumentWithoutLastModified(final int status) {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, null));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        final List<Throwable> failures = new ArrayList<>();
+        registerFailureUrlServiceRecording(failures);
+
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+        assertEquals(0, env.client.requests.size());
+        crawlerThread.processResponse(urlQueue, headResponse(status, null));
+
+        assertEquals(List.of(env.indexingHelper.id), env.indexingHelper.deletedIds);
+        // like the HEAD check: the anchors of the deleted document are queued, and no failure URL is stored
+        assertEquals(1, crawlerThread.storedChildUrls.size());
+        assertEquals("https://example.com/child.html", crawlerThread.storedChildUrls.get(0).iterator().next().getUrl());
+        assertEquals(0, failures.size());
+        assertEquals(0, env.ruleManager.responses.size());
         assertNull(crawlerThread.conditionalGetState);
+    }
+
+    @Test
+    public void test_processResponse_getGoneDeletesTheDocumentThatHasAnEtagOnly() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, "\"v1\""));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+        crawlerThread.processResponse(urlQueue, headResponse(404, null));
+
+        assertEquals(List.of(env.indexingHelper.id), env.indexingHelper.deletedIds);
+    }
+
+    @Test
+    public void test_processResponse_getGoneDeletesTheDocumentWhenHeadIsNotSupported() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, null));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(405, null);
+
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+        crawlerThread.processResponse(urlQueue, headResponse(410, null));
+
+        assertEquals(List.of(env.indexingHelper.id), env.indexingHelper.deletedIds);
+    }
+
+    @Test
+    public void test_processResponse_getOtherStatusKeepsTheDocumentWithoutLastModified() {
+        registerFailureUrlServiceRecording(new ArrayList<>());
+        for (final int status : new int[] { 200, 401, 403, 500, 503 }) {
+            final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, null));
+            final RecordingCrawlerThread crawlerThread = env.thread;
+            final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+            assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+
+            crawlerThread.processResponse(urlQueue, headResponse(status, null));
+
+            assertEquals(0, env.indexingHelper.deletedIds.size(), "status " + status);
+            assertEquals(0, crawlerThread.storedChildUrls.size(), "status " + status);
+            assertEquals(1, env.ruleManager.responses.size(), "status " + status);
+            assertNull(crawlerThread.conditionalGetState);
+        }
+    }
+
+    @Test
+    public void test_processResponse_get404WithoutAnIndexedDocumentDeletesNothing() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        final List<Throwable> failures = new ArrayList<>();
+        registerFailureUrlServiceRecording(failures);
+
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+        assertNull(crawlerThread.conditionalGetState);
+        crawlerThread.processResponse(urlQueue, headResponse(404, null));
+
+        assertEquals(0, env.indexingHelper.deletedIds.size());
+        // the failure URL is still stored
+        assertEquals(1, failures.size());
+    }
+
+    @Test
+    public void test_processResponse_get404OfAnotherUrlDoesNotDeleteThePendingDocument() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, null));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        registerFailureUrlServiceRecording(new ArrayList<>());
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+
+        crawlerThread.processResponse(urlQueue("https://example.com/other.html"), headResponse(404, null));
+
+        assertEquals(0, env.indexingHelper.deletedIds.size());
+    }
+
+    @Test
+    public void test_processResponse_get404WithIncrementalCrawlingOffDeletesNothing() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, null));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        final List<Throwable> failures = new ArrayList<>();
+        registerFailureUrlServiceRecording(failures);
+
+        ComponentUtil.getFessConfig().setIncrementalCrawling(false);
+        try {
+            final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+            assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+            assertNull(crawlerThread.conditionalGetState);
+            assertNull(env.indexingHelper.id);
+            crawlerThread.processResponse(urlQueue, headResponse(404, null));
+        } finally {
+            ComponentUtil.getFessConfig().setIncrementalCrawling(true);
+        }
+
+        assertEquals(0, env.indexingHelper.deletedIds.size());
+        assertEquals(1, failures.size());
     }
 
     @Test
