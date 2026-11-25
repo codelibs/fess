@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.FileAuthPager;
@@ -31,12 +32,14 @@ import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.config.exentity.FileAuthentication;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.security.exception.CipherFailureException;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -216,11 +219,11 @@ public class AdminFileauthAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
-        fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
-            copyToForm(entity, form, false);
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
-        });
+        final boolean passwordDecrypted =
+                fileAuthenticationService.getFileAuthentication(id).map(entity -> copyToForm(entity, form, false)).orElseGet(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+                    return false;
+                });
         saveToken();
         if (Integer.valueOf(CrudMode.EDIT).equals(form.crudMode)) {
             // back
@@ -228,6 +231,12 @@ public class AdminFileauthAction extends FessAdminAction {
             return asDetailsHtml();
         }
         form.crudMode = CrudMode.EDIT;
+        if (!passwordDecrypted) {
+            // shown next to the password field of the page rendered now, so the request scope, not the session
+            final FessMessages messages = createMessages();
+            messages.addErrorsCouldNotDecryptPassword("password");
+            requestManager.errors().saveMessages(messages);
+        }
         return asEditHtml();
     }
 
@@ -298,6 +307,9 @@ public class AdminFileauthAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
+        if (isUndecryptablePasswordBlanked(form)) {
+            throwValidationError(messages -> messages.addErrorsCouldNotDecryptPassword("password"), this::asEditHtml);
+        }
         verifyToken(this::asEditHtml);
         getFileAuthentication(form).ifPresent(entity -> {
             try {
@@ -348,19 +360,51 @@ public class AdminFileauthAction extends FessAdminAction {
     /**
      * Copies a stored FileAuthentication to a form. The password is stored encrypted, but the screens work with
      * the plain text, as they did before it was encrypted, so the form gets the decrypted password.
-     * It is encrypted again when the setting is saved.
+     * It is encrypted again when the setting is saved. A password that cannot be decrypted, such as one saved
+     * with another app.cipher.key, is left blank, so that the admin can enter it again.
      *
      * @param entity the stored entity
      * @param form the form to fill
      * @param excludeNull whether to leave the form properties that the entity has no value for as they are
+     * @return false if the stored password cannot be decrypted
      */
-    protected static void copyToForm(final FileAuthentication entity, final CreateForm form, final boolean excludeNull) {
+    protected static boolean copyToForm(final FileAuthentication entity, final CreateForm form, final boolean excludeNull) {
         copyBeanToBean(entity, form, op -> {
             if (excludeNull) {
                 op.excludeNull();
             }
         });
-        form.password = entity.decryptPassword();
+        try {
+            form.password = entity.decryptPassword();
+            return true;
+        } catch (final CipherFailureException e) {
+            logger.warn("{} The password is shown blank on the admin screen.", e.getMessage());
+            form.password = StringUtil.EMPTY;
+            return false;
+        }
+    }
+
+    /**
+     * Returns true when the form carries no password and the stored password cannot be decrypted. The edit page
+     * could not show the stored password, so a blank one is not the admin's choice: saving it would replace the
+     * stored password. The admin has to enter the password again.
+     *
+     * @param form the submitted form
+     * @return true if the update has to be refused
+     */
+    protected static boolean isUndecryptablePasswordBlanked(final EditForm form) {
+        if (StringUtil.isNotBlank(form.password)) {
+            return false;
+        }
+        return ComponentUtil.getComponent(FileAuthenticationService.class).getFileAuthentication(form.id).map(stored -> {
+            try {
+                stored.decryptPassword();
+                return false;
+            } catch (final CipherFailureException e) {
+                logger.warn("{} The update is refused until the password is entered again.", e.getMessage());
+                return true;
+            }
+        }).orElse(false);
     }
 
     /**
