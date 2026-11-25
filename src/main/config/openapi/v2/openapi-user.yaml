@@ -76,7 +76,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 15.9.0
+  version: 15.10.0
 externalDocs:
   description: API Documentation
   url: https://fess.codelibs.org/15.9/api/
