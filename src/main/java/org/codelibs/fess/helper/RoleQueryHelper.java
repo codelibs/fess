@@ -299,7 +299,7 @@ public class RoleQueryHelper {
     protected void processParameter(final HttpServletRequest request, final Set<String> roleSet) {
         final String parameter = request.getParameter(parameterKey);
         if (logger.isDebugEnabled()) {
-            logger.debug("{}:{}", parameterKey, parameter);
+            logger.debug("{}:{}", parameterKey, LogUtil.sanitize(parameter));
         }
         if (StringUtil.isNotEmpty(parameter)) {
             parseRoleSet(parameter, encryptedParameterValue, roleSet);
@@ -316,7 +316,7 @@ public class RoleQueryHelper {
 
         final String parameter = request.getHeader(headerKey);
         if (logger.isDebugEnabled()) {
-            logger.debug("{}:{}", headerKey, parameter);
+            logger.debug("{}:{}", headerKey, LogUtil.sanitize(parameter));
         }
         if (StringUtil.isNotEmpty(parameter)) {
             parseRoleSet(parameter, encryptedHeaderValue, roleSet);
@@ -337,7 +337,7 @@ public class RoleQueryHelper {
                 if (cookieKey.equals(cookie.getName())) {
                     final String value = cookie.getValue();
                     if (logger.isDebugEnabled()) {
-                        logger.debug("{}:{}", cookieKey, value);
+                        logger.debug("{}:{}", cookieKey, LogUtil.sanitize(value));
                     }
                     if (StringUtil.isNotEmpty(value)) {
                         parseRoleSet(value, encryptedCookieValue, roleSet);
@@ -395,14 +395,14 @@ public class RoleQueryHelper {
                 rolesStr = cipher.decryptoText(rolesStr);
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to decrypt {}", rolesStr, e);
+                    logger.debug("Failed to decrypt {}", LogUtil.sanitize(rolesStr), e);
                 }
                 return;
             }
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("role: original: {}, decrypto: {}", value, rolesStr);
+            logger.debug("role: original: {}, decrypto: {}", LogUtil.sanitize(value), LogUtil.sanitize(rolesStr));
         }
 
         if (valueSeparator.length() > 0) {
