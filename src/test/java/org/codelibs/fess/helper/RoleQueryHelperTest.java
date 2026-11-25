@@ -1270,4 +1270,94 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
             appender.detach();
         }
     }
+
+    private static final String FORGED_LINE = "2026-01-01 00:00:00,000 [main] ERROR  FORGED";
+
+    private RoleQueryHelper newDebugLogRoleQueryHelper() {
+        return new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+                return false;
+            }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                return org.dbflute.optional.OptionalThing.empty();
+            }
+        };
+    }
+
+    /** Builds the roles of the current request at DEBUG and returns the log lines it wrote. */
+    private String buildAndRenderDebugLog(final RoleQueryHelper roleQueryHelper) {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RoleQueryHelper.class);
+        try {
+            roleQueryHelper.build(SearchRequestType.JSON);
+            return String.join("\n", appender.renderedEvents());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    private void assertOnOneLine(final String rendered, final String expectedPrefix) {
+        assertTrue(rendered, rendered.contains(expectedPrefix));
+        assertFalse(rendered, rendered.contains("\r") || rendered.contains("\n" + FORGED_LINE));
+    }
+
+    @Test
+    public void test_build_debugLogKeepsARoleParameterOnOneLine() {
+        final RoleQueryHelper roleQueryHelper = newDebugLogRoleQueryHelper();
+        roleQueryHelper.parameterKey = "fessRoles";
+        roleQueryHelper.encryptedParameterValue = false;
+        // The value of the role parameter is whatever the client sends.
+        getMockRequest().setParameter("fessRoles", System.currentTimeMillis() / 1000 + "\nrole1\r\n" + FORGED_LINE);
+        final String rendered = buildAndRenderDebugLog(roleQueryHelper);
+        assertOnOneLine(rendered, "fessRoles:");
+        assertTrue(rendered, rendered.contains("role: original:"));
+    }
+
+    @Test
+    public void test_build_debugLogKeepsARoleHeaderOnOneLine() {
+        final RoleQueryHelper roleQueryHelper = newDebugLogRoleQueryHelper();
+        roleQueryHelper.headerKey = "fessRolesHeader";
+        roleQueryHelper.encryptedHeaderValue = false;
+        getMockRequest().addHeader("fessRolesHeader", System.currentTimeMillis() / 1000 + "\nrole1\r\n" + FORGED_LINE);
+        assertOnOneLine(buildAndRenderDebugLog(roleQueryHelper), "fessRolesHeader:");
+    }
+
+    @Test
+    public void test_build_debugLogKeepsARoleCookieOnOneLine() {
+        final RoleQueryHelper roleQueryHelper = newDebugLogRoleQueryHelper();
+        roleQueryHelper.cookieKey = "fessRolesCookie";
+        roleQueryHelper.encryptedCookieValue = false;
+        getMockRequest().addCookie(new Cookie("fessRolesCookie", System.currentTimeMillis() / 1000 + "\nrole1\r\n" + FORGED_LINE));
+        assertOnOneLine(buildAndRenderDebugLog(roleQueryHelper), "fessRolesCookie:");
+    }
+
+    @Test
+    public void test_build_debugLogKeepsAnUndecryptableRoleValueOnOneLine() {
+        final RoleQueryHelper roleQueryHelper = newDebugLogRoleQueryHelper();
+        roleQueryHelper.cipher = cipher;
+        roleQueryHelper.parameterKey = "fessRoles";
+        roleQueryHelper.encryptedParameterValue = true;
+        getMockRequest().setParameter("fessRoles", "not-encrypted\r\n" + FORGED_LINE);
+        assertOnOneLine(buildAndRenderDebugLog(roleQueryHelper), "Failed to decrypt");
+    }
+
+    @Test
+    public void test_build_debugLogWithoutAnyRoleValue() {
+        final RoleQueryHelper roleQueryHelper = newDebugLogRoleQueryHelper();
+        roleQueryHelper.parameterKey = "fessRoles";
+        roleQueryHelper.headerKey = "fessRolesHeader";
+        roleQueryHelper.cookieKey = "fessRolesCookie";
+        // No parameter, header or cookie: the values are null and are logged as they are.
+        final String rendered = buildAndRenderDebugLog(roleQueryHelper);
+        assertTrue(rendered, rendered.contains("fessRoles:null"));
+        assertTrue(rendered, rendered.contains("fessRolesHeader:null"));
+    }
 }
