@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,6 +120,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     /** Robots tag value indicating no following of links */
     private static final String ROBOTS_TAG_NOFOLLOW = "nofollow";
+
+    /** Matches a leading "botname:" of a robots directive value. */
+    private static final Pattern ROBOTS_BOT_PREFIX_PATTERN = Pattern.compile("^\\s*([a-z0-9_-]+)\\s*:");
+
+    /** Robots directives that take a value after a colon; the text before the colon is not a bot name. */
+    private static final Set<String> ROBOTS_VALUE_DIRECTIVES =
+            Set.of("max-snippet", "max-image-preview", "max-video-preview", "unavailable_after");
 
     /** Size of UTF-8 BOM (Byte Order Mark) in bytes */
     private static final int UTF8_BOM_SIZE = 3;
@@ -373,15 +381,22 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final String content = rawValue.toLowerCase(Locale.ROOT);
         boolean noindex = false;
         boolean nofollow = false;
-        if (content.contains(ROBOTS_TAG_NONE)) {
-            noindex = true;
-            nofollow = true;
-        } else {
-            if (content.contains(ROBOTS_TAG_NOINDEX)) {
-                noindex = true;
-            }
-            if (content.contains(ROBOTS_TAG_NOFOLLOW)) {
-                nofollow = true;
+        final Matcher botPrefix = ROBOTS_BOT_PREFIX_PATTERN.matcher(content);
+        // "googlebot: noindex" is a rule for another crawler
+        if (!botPrefix.find() || ROBOTS_VALUE_DIRECTIVES.contains(botPrefix.group(1))) {
+            for (final String entry : content.split(",")) {
+                final String directive = entry.trim();
+                // "max-image-preview:none" is one directive; "noindex nofollow" is accepted as two
+                for (final String name : directive.contains(":") ? new String[] { directive } : directive.split("\\s+")) {
+                    if (ROBOTS_TAG_NONE.equals(name)) {
+                        noindex = true;
+                        nofollow = true;
+                    } else if (ROBOTS_TAG_NOINDEX.equals(name)) {
+                        noindex = true;
+                    } else if (ROBOTS_TAG_NOFOLLOW.equals(name)) {
+                        nofollow = true;
+                    }
+                }
             }
         }
         if (noindex) {
