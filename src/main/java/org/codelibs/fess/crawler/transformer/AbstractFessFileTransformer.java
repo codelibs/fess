@@ -24,8 +24,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -90,6 +92,13 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     /** The extracted metadata name holding the last author of a document (Tika's Office.LAST_AUTHOR). */
     protected static final String LAST_AUTHOR_METADATA_NAME = "meta:last-author";
+
+    /** Matches a leading "botname:" of an X-Robots-Tag value. */
+    private static final Pattern ROBOTS_BOT_PREFIX_PATTERN = Pattern.compile("^\\s*([a-z0-9_-]+)\\s*:");
+
+    /** X-Robots-Tag directives that take a value after a colon; the text before the colon is not a bot name. */
+    private static final Set<String> ROBOTS_VALUE_DIRECTIVES =
+            Set.of("max-snippet", "max-image-preview", "max-video-preview", "unavailable_after");
 
     private static final Pattern SMB_SCHEME_PREFIX_PATTERN = Pattern.compile("^smb.?:/+");
 
@@ -234,7 +243,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
         String url = responseData.getUrl();
-        final String indexingTarget = crawlingConfig.getIndexingTarget(url);
+        final String indexingTarget =
+                isRobotsNoIndex(responseData, crawlingConfig.getConfigParameterMap(ConfigName.CONFIG)) ? Constants.FALSE
+                        : crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
 
         final FieldConfigs fieldConfigs = new FieldConfigs(crawlingConfig.getConfigParameterMap(ConfigName.FIELD));
@@ -469,6 +480,41 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             }
         }
         return defaultValue;
+    }
+
+    /**
+     * Check whether the response carries an X-Robots-Tag HTTP header with a noindex (or none) directive.
+     * The value is a comma-separated list of directives and each one is compared as a whole, so
+     * {@code max-image-preview:none} is not a noindex. A value that starts with the name of a crawler
+     * ({@code googlebot: noindex}) is a rule for that crawler and is ignored.
+     * A document that is not HTML has no meta tag, so the header is its only way to ask not to be indexed.
+     * The document is still stored as an access result, with indexing disabled.
+     * @param responseData The response data.
+     * @param configParamMap The config.* parameters of the crawl config (may be null).
+     * @return true if the document must not be indexed.
+     */
+    protected boolean isRobotsNoIndex(final ResponseData responseData, final Map<String, String> configParamMap) {
+        if (isConfigEnabled(configParamMap, Config.IGNORE_ROBOTS_TAGS, fessConfig.isCrawlerIgnoreRobotsTags())) {
+            return false;
+        }
+        final String value = DocumentUtil.getHeaderValue(responseData, "X-Robots-Tag");
+        if (value == null) {
+            return false;
+        }
+        final String directives = value.toLowerCase(Locale.ROOT);
+        final Matcher botPrefix = ROBOTS_BOT_PREFIX_PATTERN.matcher(directives);
+        if (botPrefix.find() && !ROBOTS_VALUE_DIRECTIVES.contains(botPrefix.group(1))) {
+            // "googlebot: noindex" is a rule for another crawler
+            return false;
+        }
+        for (final String directive : directives.split(",")) {
+            final String name = directive.trim();
+            if ("noindex".equals(name) || "none".equals(name)) {
+                logger.info("HEADER(robots=noindex): {}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
