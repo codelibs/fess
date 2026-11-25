@@ -1698,83 +1698,50 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         return transformer.getAnchorList(document, responseData);
     }
 
+    // The stored anchors are what FessCrawlerThread queues again when a page is not modified, and the URL of an
+    // indexed child (HC4, -Dfess.crawler.http.client=hc4, sends the userinfo as credentials) keeps its userinfo.
+    // An anchor that differs from the child URL it stands for is not the indexed document and is not visited.
     @Test
-    public void test_getAnchorList_removesUserInfo() throws Exception {
+    public void test_getAnchorList_keepsUserInfoOfTheLinks() throws Exception {
         final List<String> result = anchorsFor("http://example.com/dir/", "<a href=\"http://user:dummy-pw@example.com/a.html?x=1\">a</a>" //
                 + "<a href=\"http://onlyuser@example.com/b.html\">b</a>" //
                 + "<a href=\"https://u:p@example.com:8443/c/d.html\">c</a>");
-        assertEquals(List.of("http://example.com/a.html?x=1", "http://example.com/b.html", "https://example.com:8443/c/d.html"), result);
+        assertEquals(List.of("http://user:dummy-pw@example.com/a.html?x=1", "http://onlyuser@example.com/b.html",
+                "https://u:p@example.com:8443/c/d.html"), result);
     }
 
     @Test
-    public void test_getAnchorList_withoutUserInfoIsUnchanged() throws Exception {
-        final List<String> result = anchorsFor("http://example.com/dir/", "<a href=\"http://example.com/a.html\">a</a>" //
-                + "<a href=\"http://example.com/p/user:dummy-pw@x.html\">b</a>" //
-                + "<a href=\"http://example.com/q?mail=user@example.org\">c</a>" //
-                + "<a href=\"http://example.com:8080/d.html\">d</a>");
-        assertEquals(List.of("http://example.com/a.html", "http://example.com/p/user:dummy-pw@x.html",
-                "http://example.com/q?mail=user@example.org", "http://example.com:8080/d.html"), result);
+    public void test_getAnchorList_relativeLinkOfPageWithUserInfoKeepsIt() throws Exception {
+        final List<String> result = anchorsFor("http://user:dummy-pw@example.com/dir/index.html", "<a href=\"page.html\">a</a>");
+        assertEquals(List.of("http://user:dummy-pw@example.com/dir/page.html"), result);
     }
 
     @Test
-    public void test_getAnchorList_userInfoVariantsOfOneUrlAreStoredOnce() throws Exception {
+    public void test_getAnchorList_userInfoVariantsOfOneUrlAreDifferentUrls() throws Exception {
         final List<String> result = anchorsFor("http://example.com/dir/", "<a href=\"http://u1:p1@example.com/a.html\">a</a>" //
                 + "<a href=\"http://u2:p2@example.com/a.html\">b</a>" //
                 + "<a href=\"http://example.com/a.html\">c</a>");
-        assertEquals(List.of("http://example.com/a.html"), result);
+        assertEquals(List.of("http://u1:p1@example.com/a.html", "http://u2:p2@example.com/a.html", "http://example.com/a.html"), result);
     }
 
     @Test
-    public void test_getAnchorList_relativeLinkOfPageWithUserInfoHasNone() throws Exception {
-        final List<String> result = anchorsFor("http://user:dummy-pw@example.com/dir/index.html", "<a href=\"page.html\">a</a>");
-        assertEquals(List.of("http://example.com/dir/page.html"), result);
-    }
-
-    @Test
-    public void test_getAnchorList_relativeLinksUnchanged() throws Exception {
-        final List<String> result = anchorsFor("http://example.com/dir/index.html",
-                "<a href=\"page.html\">a</a><a href=\"/root.html\">b</a><a href=\"../up.html\">c</a>");
-        assertEquals(List.of("http://example.com/dir/page.html", "http://example.com/root.html", "http://example.com/up.html"), result);
-    }
-
-    @Test
-    public void test_getAnchorList_userInfoOfOtherSchemesIsKept() throws Exception {
-        // a client of another scheme (smb1) may take its credentials from the URL, so the link is stored as it is
-        final List<String> result = anchorsFor("http://example.com/dir/", "<a href=\"smb1://user:dummy-pw@fileserver/share/a.txt\">a</a>" //
-                + "<a href=\"ftp://user:dummy-pw@fileserver/b.txt\">b</a>" //
-                + "<a href=\"HTTP://user:dummy-pw@example.com/c.html\">c</a>");
-        assertEquals(
-                List.of("smb1://user:dummy-pw@fileserver/share/a.txt", "ftp://user:dummy-pw@fileserver/b.txt", "http://example.com/c.html"),
-                result);
-    }
-
-    @Test
-    public void test_getAnchorList_nonHttpLinksStillNotStored() throws Exception {
-        final List<String> result = anchorsFor("http://example.com/dir/", "<a href=\"mailto:user@example.com\">a</a>" //
-                + "<a href=\"javascript:void(0)\">b</a>" //
-                + "<a href=\"http://user:dummy-pw@example.com/c.html\">c</a>");
-        // mailto and javascript links are not child URLs (as before); the link next to them is still stored
-        assertEquals(List.of("http://example.com/c.html"), result);
-    }
-
-    @Test
-    public void test_transform_storesAnchorsWithoutUserInfo() throws Exception {
+    public void test_transform_storesTheAnchorsAsTheyAreQueued() throws Exception {
         final String sessionId = registerCrawlingHelpers();
         final FessXpathTransformer transformer = new FessXpathTransformer();
         transformer.init();
         final Map<String, String> rules = new LinkedHashMap<>();
         rules.put("//A", "href");
         transformer.setChildUrlRuleMap(rules);
-        final ResponseData responseData = createHtmlResponseData(sessionId, "http://example.com/",
+        final ResponseData responseData = createHtmlResponseData(sessionId, "http://user:dummy-pw@example.com/",
                 "<html><head><title>Test Page</title></head><body><p>Hello</p>" //
                         + "<a href=\"http://user:dummy-pw@example.com/linked.html\">Link1</a>" //
-                        + "<a href=\"http://example.com/page2.html\">Link2</a>" //
+                        + "<a href=\"page2.html\">Link2</a>" //
                         + "</body></html>");
         final ResultData resultData = transformer.transform(responseData);
 
-        assertEquals(List.of("http://example.com/linked.html", "http://example.com/page2.html"), anchorsOf(resultData));
-        // the crawl itself is not changed: the child URL queued for the crawler is the one in the page
-        assertEquals(Set.of("http://user:dummy-pw@example.com/linked.html", "http://example.com/page2.html"), childUrlsOf(resultData));
+        assertEquals(childUrlsOf(resultData), Set.copyOf(anchorsOf(resultData)));
+        assertEquals(Set.of("http://user:dummy-pw@example.com/linked.html", "http://user:dummy-pw@example.com/page2.html"),
+                childUrlsOf(resultData));
     }
 
     private FessXpathTransformer createAnchorListTransformer() {

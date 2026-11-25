@@ -734,8 +734,9 @@ public class WebFsIndexHelper {
     }
 
     /**
-     * Warns that a crawling URL carries a user name and password in front of the host. The crawl of such
-     * a URL fails (the HTTP clients refuse it before a request is sent), and the Target URL line above
+     * Warns that a crawling URL carries a user name and password in front of the host. The default HTTP
+     * client (HC5) refuses such a URL before a request is sent, so the crawl of the URL fails; the HC4 client
+     * ({@code -Dfess.crawler.http.client=hc4}) sends the userinfo as credentials. The Target URL line above
      * does not show the userinfo, so the cause would otherwise not be visible. The credentials of a site
      * belong in the Web Authentication of the crawl configuration.
      *
@@ -744,7 +745,7 @@ public class WebFsIndexHelper {
     protected void warnUserInfo(final String url) {
         if (CredentialUrlUtil.hasUserInfo(url)) {
             logger.warn(
-                    "The crawling URL {} has a user name and password. They are not supported in a crawling URL and the crawl of this URL fails. Register them in Web Authentication of the crawl configuration instead.",
+                    "The crawling URL {} has a user name and password. The default HTTP client (HC5) refuses such a URL, and the URL is kept as it is in the index when the crawl succeeds with another client. Register them in Web Authentication of the crawl configuration instead.",
                     CredentialUrlUtil.removeUserInfo(url));
         }
     }
