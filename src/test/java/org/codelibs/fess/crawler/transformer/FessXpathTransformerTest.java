@@ -547,6 +547,46 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals(2, childUrlsOf(resultData).size(), String.valueOf(childUrlsOf(resultData)));
     }
 
+    private void assertIndexedAndFollowed(final String metaTag, final Map<String, Object> headers) throws Exception {
+        final ResultData resultData = transformPageWithLinks(metaTag, headers);
+        final String label = metaTag + " " + headers;
+        assertFalse("false".equals(((Map<?, ?>) resultData.getRawData()).get(Constants.INDEXING_TARGET)), label);
+        assertEquals(2, childUrlsOf(resultData).size(), label + ": " + childUrlsOf(resultData));
+    }
+
+    @Test
+    public void test_transform_robotsValueDirectives_areNotNoneOrNoindex() throws Exception {
+        for (final String content : new String[] { "max-image-preview:none", "max-snippet:-1, max-video-preview: none",
+                "noarchive, nosnippet", "unavailable_after: 25 Jun 2030 15:00:00 PST" }) {
+            assertIndexedAndFollowed("<meta name=\"robots\" content=\"" + content + "\">", Collections.emptyMap());
+            assertIndexedAndFollowed("", Map.of("X-Robots-Tag", content));
+        }
+    }
+
+    @Test
+    public void test_transform_robotsRuleForAnotherBot_isIgnored() throws Exception {
+        for (final String content : new String[] { "googlebot: noindex", "otherbot: noindex, nofollow", "googlebot: none" }) {
+            assertIndexedAndFollowed("<meta name=\"robots\" content=\"" + content + "\">", Collections.emptyMap());
+            assertIndexedAndFollowed("", Map.of("X-Robots-Tag", content));
+        }
+    }
+
+    @Test
+    public void test_transform_robotsDirectiveAmongValueDirectives_stillApplies() throws Exception {
+        final ResultData resultData = transformPageWithLinks("", Map.of("X-Robots-Tag", " Max-Image-Preview:none , NOINDEX "));
+
+        assertEquals("false", ((Map<?, ?>) resultData.getRawData()).get(Constants.INDEXING_TARGET));
+        assertEquals(2, childUrlsOf(resultData).size(), String.valueOf(childUrlsOf(resultData)));
+    }
+
+    @Test
+    public void test_transform_robotsDirectivesSeparatedBySpace_stillApply() throws Exception {
+        final ResultData resultData = transformPageWithLinks("<meta name=\"robots\" content=\"noindex nofollow\">", Collections.emptyMap());
+
+        assertEquals("false", ((Map<?, ?>) resultData.getRawData()).get(Constants.INDEXING_TARGET));
+        assertTrue(childUrlsOf(resultData).isEmpty(), String.valueOf(childUrlsOf(resultData)));
+    }
+
     @Test
     public void test_pruneNode() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
