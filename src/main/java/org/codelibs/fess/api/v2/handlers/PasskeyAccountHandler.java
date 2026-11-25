@@ -333,6 +333,13 @@ public class PasskeyAccountHandler {
             writeLoginRequired(res);
             return;
         }
+        if (isOpenedBeforePasswordChange(ComponentUtil.getFessLoginAssist(), user.get())) {
+            // The challenge may have been issued with the old password. An administrator's new password has removed the passkeys
+            // of the user, so one that completes after it would outlive the reset until this session is ended by its next check.
+            logPasswordChangedAfterLogin(userName);
+            writeLoginRequired(res);
+            return;
+        }
 
         final Passkey passkey;
         try {
@@ -350,6 +357,14 @@ public class PasskeyAccountHandler {
         } catch (final Exception e) {
             logger.warn("[v2/passkey] registration failed unexpectedly: userId={}, error={}", userName, e.getClass().getSimpleName());
             writeRegistrationFailed(res);
+            return;
+        }
+        if (isPasswordChangedWhileRegistering(userName)) {
+            // The check above and the store are not one step: a reset that ran in between has already removed the passkeys
+            // of the user, so the one just stored is removed here.
+            passkeyService.delete(userName, passkey.getId());
+            logPasswordChangedAfterLogin(userName);
+            writeLoginRequired(res);
             return;
         }
         if (logger.isInfoEnabled()) {
@@ -489,6 +504,47 @@ public class PasskeyAccountHandler {
             return null;
         }
         return userBean.get();
+    }
+
+    /**
+     * Tests whether the password of the stored user was changed after the session was opened (or after its last own
+     * password change). The session check of {@link FessLoginAssist#getSavedUserBean()} runs only every
+     * {@code password.changed.check.interval} seconds; this one is made on the request, so the passkey is not stored in between.
+     * A session that remembers no time (one opened before the time was recorded) is taken as opened at 0, as
+     * {@link FessLoginAssist} does when the stored user has none.
+     */
+    private boolean isOpenedBeforePasswordChange(final FessLoginAssist assist, final User stored) {
+        final Long changedAt = stored.getPasswordChangedAt();
+        if (changedAt == null) {
+            return false;
+        }
+        final OptionalThing<FessUserBean> userBean = assist.getSavedUserBean();
+        if (userBean == null || !userBean.isPresent()) {
+            return false;
+        }
+        final Long openedAt = userBean.get().getPasswordChangedAt();
+        return changedAt.longValue() > (openedAt != null ? openedAt.longValue() : 0L);
+    }
+
+    /**
+     * Reads the user again after a passkey was stored and tells whether its password was changed since the session was
+     * opened. A user that cannot be read is not taken as changed: the passkey stays and the session check handles it.
+     */
+    private boolean isPasswordChangedWhileRegistering(final String userName) {
+        try {
+            final OptionalEntity<User> user = findLocalUser(userName);
+            return user != null && user.isPresent() && isOpenedBeforePasswordChange(ComponentUtil.getFessLoginAssist(), user.get());
+        } catch (final RuntimeException e) {
+            logger.warn("[v2/passkey] could not re-read the user after a registration: userId={}, error={}", userName,
+                    e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    private void logPasswordChangedAfterLogin(final String userName) {
+        if (logger.isInfoEnabled()) {
+            logger.info("[v2/passkey] registration refused: userId={}, reason=password_changed_after_login", userName);
+        }
     }
 
     /**
