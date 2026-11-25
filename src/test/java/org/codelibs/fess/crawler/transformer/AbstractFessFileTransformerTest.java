@@ -520,6 +520,43 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
                 });
     }
 
+    private Object indexingTargetOf(final Map<String, Object> headers, final String configParameter) {
+        return generateDataWith(headers, configParameter, Map.of(), null).get(Constants.INDEXING_TARGET);
+    }
+
+    @Test
+    public void test_generateData_xRobotsTagNoindex_isNotIndexed() {
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "noindex"), null));
+        assertEquals("false", indexingTargetOf(Map.of("x-robots-tag", "NoIndex, nofollow"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "none"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", " NONE "), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "noarchive, noindex"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "max-image-preview:none, noindex"), null));
+    }
+
+    @Test
+    public void test_generateData_xRobotsTagWithoutNoindex_isIndexed() {
+        assertEquals("true", indexingTargetOf(Map.of(), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "nofollow"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "noarchive"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "noarchive, nosnippet"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "max-image-preview:none"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "max-snippet:-1, max-video-preview: none"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "unavailable_after: 25 Jun 2030 15:00:00 PST"), null));
+    }
+
+    @Test
+    public void test_generateData_xRobotsTagForAnotherBot_isIndexed() {
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "googlebot: noindex"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "otherbot: noindex, none"), null));
+    }
+
+    @Test
+    public void test_generateData_xRobotsTagNoindex_ignoredByConfigParameter() {
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "noindex"), "config.ignore.robots.tags=true"));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "noindex"), "config.ignore.robots.tags=false"));
+    }
+
     @Test
     public void test_normalizeOwner() {
         final TestableAbstractFessFileTransformer transformer = new TestableAbstractFessFileTransformer();
