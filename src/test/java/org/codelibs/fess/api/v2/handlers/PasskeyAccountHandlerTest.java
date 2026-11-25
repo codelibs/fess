@@ -450,6 +450,102 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_registerVerify_passwordChangedAfterTheSessionWasOpened_rejected() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
+        assist.sessionPasswordChangedAt = 100L;
+        final PasskeyAccountHandler handler = new PasskeyAccountHandler(new LoginRateLimiter(), service) {
+            @Override
+            protected OptionalEntity<User> findLocalUser(final String userName) {
+                final User u = localUser(userName);
+                u.setPasswordChangedAt(200L);
+                return OptionalEntity.of(u);
+            }
+        };
+        final Response res = new Response();
+        handler.registerVerify(new Request("POST").withSession().withBody(VERIFY_BODY).proxy(), res.proxy());
+        assertAuthRequired(res);
+        assertEquals(0, service.verifyCalls);
+    }
+
+    @Test
+    public void test_registerVerify_passwordUnchangedSinceTheSessionWasOpened_isAccepted() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
+        assist.sessionPasswordChangedAt = 200L;
+        final PasskeyAccountHandler handler = new PasskeyAccountHandler(new LoginRateLimiter(), service) {
+            @Override
+            protected OptionalEntity<User> findLocalUser(final String userName) {
+                final User u = localUser(userName);
+                u.setPasswordChangedAt(200L);
+                return OptionalEntity.of(u);
+            }
+        };
+        final Response res = new Response();
+        handler.registerVerify(new Request("POST").withSession().withBody(VERIFY_BODY).proxy(), res.proxy());
+        assertEquals(200, res.status, res.body());
+        assertEquals(1, service.verifyCalls);
+    }
+
+    @Test
+    public void test_registerVerify_sessionWithoutRememberedTime_isTakenAsOpenedAtZero() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
+        assist.sessionPasswordChangedAt = null;
+        final PasskeyAccountHandler handler = new PasskeyAccountHandler(new LoginRateLimiter(), service) {
+            @Override
+            protected OptionalEntity<User> findLocalUser(final String userName) {
+                final User u = localUser(userName);
+                u.setPasswordChangedAt(200L);
+                return OptionalEntity.of(u);
+            }
+        };
+        final Response res = new Response();
+        handler.registerVerify(new Request("POST").withSession().withBody(VERIFY_BODY).proxy(), res.proxy());
+        assertAuthRequired(res);
+        assertEquals(0, service.verifyCalls);
+    }
+
+    @Test
+    public void test_registerVerify_userWithoutPasswordChangeTime_isAccepted() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
+        assist.sessionPasswordChangedAt = null;
+        final PasskeyAccountHandler handler = new PasskeyAccountHandler(new LoginRateLimiter(), service) {
+            @Override
+            protected OptionalEntity<User> findLocalUser(final String userName) {
+                return OptionalEntity.of(localUser(userName));
+            }
+        };
+        final Response res = new Response();
+        handler.registerVerify(new Request("POST").withSession().withBody(VERIFY_BODY).proxy(), res.proxy());
+        assertEquals(200, res.status, res.body());
+        assertEquals(1, service.verifyCalls);
+    }
+
+    @Test
+    public void test_registerVerify_passwordChangedWhileTheCredentialWasVerified_removesThePasskey() throws Exception {
+        final StubPasskeyService service = new StubPasskeyService(true);
+        final StubLoginAssist assist = register(new StubLoginAssist(localUser("alice")));
+        assist.sessionPasswordChangedAt = 150L;
+        final int[] reads = new int[1];
+        final PasskeyAccountHandler handler = new PasskeyAccountHandler(new LoginRateLimiter(), service) {
+            @Override
+            protected OptionalEntity<User> findLocalUser(final String userName) {
+                final User u = localUser(userName);
+                // The first read is before the reset, the second one after it.
+                u.setPasswordChangedAt(reads[0]++ == 0 ? 100L : 200L);
+                return OptionalEntity.of(u);
+            }
+        };
+        final Response res = new Response();
+        handler.registerVerify(new Request("POST").withSession().withBody(VERIFY_BODY).proxy(), res.proxy());
+        assertAuthRequired(res);
+        assertEquals(1, service.verifyCalls);
+        assertEquals(1, service.deleteCalls);
+    }
+
+    @Test
     public void test_registerVerify_localUserGone_rejected() throws Exception {
         final StubPasskeyService service = new StubPasskeyService(true);
         register(new StubLoginAssist(localUser("alice")));
@@ -824,6 +920,7 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
 
     /** A login assist whose session holds {@code sessionUser} and whose password check accepts {@link #PASSWORD}. */
     private static class StubLoginAssist extends FessLoginAssist {
+        Long sessionPasswordChangedAt;
         private final FessUser sessionUser;
         FessUser verifiedUser;
         LoginCredential lastCredential;
@@ -836,7 +933,12 @@ public class PasskeyAccountHandlerTest extends UnitFessTestCase {
 
         @Override
         public OptionalThing<FessUserBean> getSavedUserBean() {
-            return sessionUser == null ? OptionalThing.empty() : OptionalThing.of(new FessUserBean(sessionUser));
+            if (sessionUser == null) {
+                return OptionalThing.empty();
+            }
+            final FessUserBean bean = new FessUserBean(sessionUser);
+            bean.setPasswordChangedAt(sessionPasswordChangedAt);
+            return OptionalThing.of(bean);
         }
 
         @Override
