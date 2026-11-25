@@ -1056,12 +1056,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     /**
-     * Extracts anchor URLs from the HTML document. The user name and password of an http or https
-     * URL (scheme://user:password@host/) are removed, because the anchors are stored in the index and
-     * shown to every user who can read the document; the HTTP clients refuse such a URL before a
-     * request is sent, so nothing is lost. A URL of another scheme is kept as it is, because a client
-     * of that scheme may take its credentials from the URL. The URLs the crawler queues for the page
-     * are not changed.
+     * Extracts anchor URLs from the HTML document.
      *
      * @param document the parsed HTML document
      * @param responseData the response data from crawling
@@ -1084,16 +1079,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
         final Set<String> urlSet = new LinkedHashSet<>(anchorList.size());
         for (final RequestData requestData : anchorList) {
-            urlSet.add(removeHttpUserInfo(requestData.getUrl()));
+            urlSet.add(requestData.getUrl());
         }
         return new ArrayList<>(urlSet);
-    }
-
-    private static String removeHttpUserInfo(final String url) {
-        if (url != null && (url.regionMatches(true, 0, "http://", 0, 7) || url.regionMatches(true, 0, "https://", 0, 8))) {
-            return CredentialUrlUtil.removeUserInfo(url);
-        }
-        return url;
     }
 
     /**
