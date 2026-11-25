@@ -120,18 +120,20 @@ public class FessCrawlerThread extends CrawlerThread {
     }
 
     /**
-     * The conditional GET that {@link #isContentUpdated(CrawlerClient, UrlQueue)} prepared for a URL.
+     * The GET that {@link #isContentUpdated(CrawlerClient, UrlQueue)} left pending for a URL whose
+     * document is indexed. It is conditional when it carries validators, and a 404 or 410 response to it
+     * deletes the indexed document.
      *
-     * @param url the URL the conditional GET is for
+     * @param url the URL the GET is for
      * @param document the indexed document of the URL
      * @param id the id of the indexed document
-     * @param headers the validators to send
+     * @param headers the validators to send, or null for a plain GET
      */
     protected record ConditionalGetState(String url, Map<String, Object> document, String id, ConditionalHeaders headers) {
     }
 
     /**
-     * The conditional GET pending for the URL this thread is crawling, or null. It is cleared at the
+     * The GET pending for the URL this thread is crawling, or null. It is cleared at the
      * start of each {@link #isContentUpdated(CrawlerClient, UrlQueue)} call, when the response of the
      * URL is processed, and when the crawl of the URL ends ({@link #finishCrawling()}), and it applies
      * only to the URL it was prepared for.
@@ -160,8 +162,8 @@ public class FessCrawlerThread extends CrawlerThread {
      * <p>For an http or https URL whose indexed document cannot be judged by a HEAD request and its
      * Last-Modified (no indexed last_modified, no Last-Modified in the HEAD response, or a HEAD status
      * other than 200, 404 and 410), the GET is sent as a conditional request with the indexed ETag and
-     * last_modified; see {@link #createRequestData(UrlQueue)} and
-     * {@link #processResponse(UrlQueue, ResponseData)}.</p>
+     * last_modified, if it has any, and a 404 or 410 response to the GET deletes the indexed document;
+     * see {@link #createRequestData(UrlQueue)} and {@link #processResponse(UrlQueue, ResponseData)}.</p>
      *
      * @param client the crawler client to use for accessing the URL
      * @param urlQueue the URL queue item containing the URL to check
@@ -331,7 +333,8 @@ public class FessCrawlerThread extends CrawlerThread {
     }
 
     /**
-     * Keeps a conditional GET for an http or https URL when the indexed document has a validator.
+     * Keeps the GET of an http or https URL whose document is indexed, with the validators of the
+     * document if it has any, so that the response can delete the document when the page is gone.
      *
      * @param url the URL to fetch
      * @param document the indexed document
@@ -344,12 +347,10 @@ public class FessCrawlerThread extends CrawlerThread {
             return;
         }
         final ConditionalHeaders headers = resolveConditionalHeaders(document, headResponse);
-        if (headers != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Sending a conditional GET: url={}, headers={}", CredentialUrlUtil.removeUserInfo(url), headers);
-            }
-            conditionalGetState = new ConditionalGetState(url, document, id, headers);
+        if (headers != null && logger.isDebugEnabled()) {
+            logger.debug("Sending a conditional GET: url={}, headers={}", CredentialUrlUtil.removeUserInfo(url), headers);
         }
+        conditionalGetState = new ConditionalGetState(url, document, id, headers);
     }
 
     /**
@@ -393,11 +394,13 @@ public class FessCrawlerThread extends CrawlerThread {
         final ConditionalGetState state = conditionalGetState;
         if (state != null && state.url().equals(urlQueue.getUrl())) {
             final ConditionalHeaders headers = state.headers();
-            if (headers.ifNoneMatch() != null) {
-                requestData.addHeader("If-None-Match", headers.ifNoneMatch());
-            }
-            if (headers.ifModifiedSince() != null) {
-                requestData.addHeader("If-Modified-Since", headers.ifModifiedSince());
+            if (headers != null) {
+                if (headers.ifNoneMatch() != null) {
+                    requestData.addHeader("If-None-Match", headers.ifNoneMatch());
+                }
+                if (headers.ifModifiedSince() != null) {
+                    requestData.addHeader("If-Modified-Since", headers.ifModifiedSince());
+                }
             }
         }
         return requestData;
@@ -500,7 +503,8 @@ public class FessCrawlerThread extends CrawlerThread {
      * Processes the response data from a crawled URL, including failure handling.
      * This method extends the base response processing to handle Fess-specific failure
      * URL tracking when certain HTTP status codes are encountered. A 304 response to the conditional
-     * GET prepared for the URL is handled by {@link #handleUnchangedDocument}.
+     * GET prepared for the URL is handled by {@link #handleUnchangedDocument}, and a 404 or 410 response
+     * deletes the indexed document of the URL, like a 404 or 410 response to the HEAD request.
      *
      * @param urlQueue the URL queue item that was processed
      * @param responseData the response data from the crawl operation
@@ -510,8 +514,19 @@ public class FessCrawlerThread extends CrawlerThread {
         final ConditionalGetState state = conditionalGetState;
         if (state != null && state.url().equals(urlQueue.getUrl())) {
             conditionalGetState = null;
-            if (responseData.getHttpStatusCode() == Constants.NOT_MODIFIED_STATUS_CODE) {
+            final int httpStatusCode = responseData.getHttpStatusCode();
+            if (state.headers() != null && httpStatusCode == Constants.NOT_MODIFIED_STATUS_CODE) {
                 handleUnchangedDocument(urlQueue, state.document(), state.id(), responseData);
+                return;
+            }
+            if (isGone(httpStatusCode)) {
+                // the page is gone and its document is indexed: delete it as the HEAD check does
+                final FessConfig fessConfig = ComponentUtil.getFessConfig();
+                storeChildUrlsToQueue(urlQueue, getAnchorSet(state.document().get(fessConfig.getIndexFieldAnchor())));
+                if (!ComponentUtil.getIndexingHelper().deleteDocument(ComponentUtil.getSearchEngineClient(), state.id())
+                        && logger.isDebugEnabled()) {
+                    logger.debug("Failed to delete document: status={}, url={}", httpStatusCode, urlQueue.getLogUrl());
+                }
                 return;
             }
         }
