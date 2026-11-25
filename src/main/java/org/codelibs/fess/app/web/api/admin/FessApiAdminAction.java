@@ -177,8 +177,10 @@ public abstract class FessApiAdminAction extends FessApiAction {
      *
      * @param stored the version of the stored document, or null if it is not known
      * @param requested the {@code version_no} the request carries
-     * @return true if both are known and differ. A version that was not read (null or negative) cannot be
-     *         compared, and the request is not judged stale.
+     * @return true if both are known and differ. A stored version that is not known (null or negative) cannot be
+     *         compared, and the request is not judged stale. A negative {@code version_no} in the request, such as the
+     *         constant {@code -1} the API returned until 15.9, is compared like any other and is stale when the stored
+     *         version is known.
      */
     public static boolean isStaleVersion(final Long stored, final Number requested) {
         return stored != null && stored.longValue() >= 0L && requested != null && stored.longValue() != requested.longValue();
