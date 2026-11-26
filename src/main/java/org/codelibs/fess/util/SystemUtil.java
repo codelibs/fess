@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.util;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -31,6 +32,9 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
     private static final String DEFAULT_SENSITIVE_PATTERN = ".*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.*";
 
     private static volatile Pattern sensitivePattern;
+
+    /** A {@code -D<name>=<value>} JVM option inside a JVM argument or a value such as {@code FESS_JAVA_OPTS}. */
+    private static final Pattern JVM_PROPERTY_OPTION = Pattern.compile("-D([^=\\s]+)=(\\S*)");
 
     /**
      * Private constructor to prevent instantiation.
@@ -97,6 +101,56 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
         if (ConfigEnvUtil.isConfigEnvName(key) || getSensitivePattern().matcher(key).matches()) {
             return "********";
         }
-        return value;
+        return maskSensitiveJvmOptions(value);
+    }
+
+    /**
+     * Masks the value of one JVM argument when it is a sensitive {@code -D<name>=<value>} option: everything
+     * after the first {@code =} is replaced, so a value that holds spaces is masked whole. An option is
+     * sensitive when its name matches the same pattern as {@link #maskSensitiveValue(String, String)}.
+     *
+     * @param arg one JVM argument, as {@code RuntimeMXBean#getInputArguments()} returns it, may be {@code null}
+     * @return the argument with the value replaced with "********" when the option is sensitive and not empty
+     */
+    public static String maskSensitiveJvmArgument(final String arg) {
+        if (arg == null || !arg.startsWith("-D")) {
+            return arg;
+        }
+        final int pos = arg.indexOf('=');
+        if (pos < 0 || pos == arg.length() - 1) {
+            return arg;
+        }
+        final String name = arg.substring(2, pos);
+        if (!getSensitivePattern().matcher(name).matches()) {
+            return arg;
+        }
+        return "-D" + name + "=********";
+    }
+
+    /**
+     * Masks the values of the sensitive {@code -D<name>=<value>} options in a value that carries JVM options,
+     * such as the environment variable {@code FESS_JAVA_OPTS}; the options are taken as separated by white
+     * space, as the start script splits the variable. An option is
+     * sensitive when its name matches the same pattern as {@link #maskSensitiveValue(String, String)}.
+     * The DEBUG dump of a child process prints its environment; without this a secret given as
+     * {@code -Dfess.config.<key>} is printed there although its property line is masked.
+     *
+     * @param text a value holding JVM options, may be {@code null}
+     * @return the text with the value of every sensitive option replaced with "********"
+     */
+    public static String maskSensitiveJvmOptions(final String text) {
+        if (text == null || !text.contains("-D")) {
+            return text;
+        }
+        final Matcher matcher = JVM_PROPERTY_OPTION.matcher(text);
+        final StringBuilder buf = new StringBuilder(text.length());
+        while (matcher.find()) {
+            final String name = matcher.group(1);
+            final String value = matcher.group(2);
+            final String masked = value.isEmpty() || !getSensitivePattern().matcher(name).matches() ? value : "********";
+            matcher.appendReplacement(buf, Matcher.quoteReplacement("-D" + name + "=" + masked));
+        }
+        matcher.appendTail(buf);
+        return buf.toString();
     }
 }
