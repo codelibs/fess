@@ -1522,12 +1522,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String PAGE_USER_MAX_FETCH_SIZE = "page.user.max.fetch.size";
 
-    /** The key of the configuration. e.g. 1000 */
-    String PAGE_ROLE_MAX_FETCH_SIZE = "page.role.max.fetch.size";
-
-    /** The key of the configuration. e.g. 1000 */
-    String PAGE_GROUP_MAX_FETCH_SIZE = "page.group.max.fetch.size";
-
     /** The key of the configuration. e.g. 100 */
     String PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE = "page.crawling.info.param.max.fetch.size";
 
@@ -8014,40 +8008,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageUserMaxFetchSizeAsInteger();
 
     /**
-     * Get the value for the key 'page.role.max.fetch.size'. <br>
-     * The value is, e.g. 1000 <br>
-     * comment: Maximum number of role records to fetch per page.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getPageRoleMaxFetchSize();
-
-    /**
-     * Get the value for the key 'page.role.max.fetch.size' as {@link Integer}. <br>
-     * The value is, e.g. 1000 <br>
-     * comment: Maximum number of role records to fetch per page.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getPageRoleMaxFetchSizeAsInteger();
-
-    /**
-     * Get the value for the key 'page.group.max.fetch.size'. <br>
-     * The value is, e.g. 1000 <br>
-     * comment: Maximum number of group records to fetch per page.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getPageGroupMaxFetchSize();
-
-    /**
-     * Get the value for the key 'page.group.max.fetch.size' as {@link Integer}. <br>
-     * The value is, e.g. 1000 <br>
-     * comment: Maximum number of group records to fetch per page.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getPageGroupMaxFetchSizeAsInteger();
-
-    /**
      * Get the value for the key 'page.crawling.info.param.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
      * comment: Maximum number of crawling info parameters to fetch per page.
@@ -14107,22 +14067,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_USER_MAX_FETCH_SIZE);
         }
 
-        public String getPageRoleMaxFetchSize() {
-            return get(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE);
-        }
-
-        public Integer getPageRoleMaxFetchSizeAsInteger() {
-            return getAsInteger(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE);
-        }
-
-        public String getPageGroupMaxFetchSize() {
-            return get(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE);
-        }
-
-        public Integer getPageGroupMaxFetchSizeAsInteger() {
-            return getAsInteger(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE);
-        }
-
         public String getPageCrawlingInfoParamMaxFetchSize() {
             return get(FessConfig.PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE);
         }
@@ -16204,8 +16148,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_TAGTYPE_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_ROLETYPE_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_USER_MAX_FETCH_SIZE, "1000");
-            defaultMap.put(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE, "1000");
-            defaultMap.put(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE, "100");
             defaultMap.put(FessConfig.PAGE_CRAWLING_INFO_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_DATA_CONFIG_MAX_FETCH_SIZE, "100");

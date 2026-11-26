@@ -17,6 +17,7 @@ package org.codelibs.fess.app.service;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.core.beans.util.BeanUtil;
@@ -142,15 +143,21 @@ public class RoleService {
     }
 
     /**
-     * Gets a list of available roles.
-     * @return A list of available roles.
+     * Gets every role, ordered by name, for the choices of the admin user form.
+     *
+     * <p>Every role is returned, however many there are. A cut at the size of a page would silently drop the
+     * roles past it from the form, so a user could not be given one of them on the screen. The cursor keeps the
+     * order by name.</p>
+     *
+     * @return A list of all roles.
      */
     public List<Role> getAvailableRoleList() {
-        return roleBhv.selectList(cb -> {
+        final List<Role> list = new ArrayList<>();
+        roleBhv.selectCursor(cb -> {
             cb.query().matchAll();
             cb.query().addOrderBy_Name_Asc();
-            cb.paging(fessConfig.getPageRoleMaxFetchSizeAsInteger(), 1);
-        });
+        }, list::add);
+        return list;
     }
 
 }
