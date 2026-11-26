@@ -112,7 +112,10 @@ public class ChunkVectorIndexer {
 
         if (logger.isDebugEnabled()) {
             try {
-                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
+                ManagementFactory.getRuntimeMXBean()
+                        .getInputArguments()
+                        .stream()
+                        .forEach(s -> logger.debug("Parameter: {}", SystemUtil.maskSensitiveJvmArgument(s)));
                 System.getProperties()
                         .entrySet()
                         .stream()

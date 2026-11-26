@@ -413,4 +413,33 @@ public class SystemUtilTest extends UnitFessTestCase {
         assertEquals("********", SystemUtil.maskSensitiveValue("PASSWORD", ""));
         assertEquals("", SystemUtil.maskSensitiveValue("HOST", ""));
     }
+
+    @Test
+    public void test_maskSensitiveJvmArgument() {
+        assertEquals("-Dfess.config.rag.llm.gemini.api.key=********",
+                SystemUtil.maskSensitiveJvmArgument("-Dfess.config.rag.llm.gemini.api.key=AIzaSyExample"));
+        assertEquals("-Dfess.system.storage.secretkey=********",
+                SystemUtil.maskSensitiveJvmArgument("-Dfess.system.storage.secretkey=abc"));
+        assertEquals("-Dfess.config.search_engine.password=********",
+                SystemUtil.maskSensitiveJvmArgument("-Dfess.config.search_engine.password=a b=c"));
+        assertEquals("-Dfess.system.oic.client.id=client-1", SystemUtil.maskSensitiveJvmArgument("-Dfess.system.oic.client.id=client-1"));
+        assertEquals("-Xmx2g", SystemUtil.maskSensitiveJvmArgument("-Xmx2g"));
+        assertEquals("-Dfess.secret.flag", SystemUtil.maskSensitiveJvmArgument("-Dfess.secret.flag"));
+        assertEquals("-Dfess.config.rag.llm.ollama.api.key=", SystemUtil.maskSensitiveJvmArgument("-Dfess.config.rag.llm.ollama.api.key="));
+        assertNull(SystemUtil.maskSensitiveJvmArgument(null));
+    }
+
+    @Test
+    public void test_maskSensitiveJvmOptions_optionsVariable() {
+        assertEquals("-Dfess.config.search_engine.password=******** -Xms512m -Dfess.port=8080 -Dfess.system.storage.secretkey=********",
+                SystemUtil.maskSensitiveJvmOptions(
+                        "-Dfess.config.search_engine.password=p@ss -Xms512m -Dfess.port=8080 -Dfess.system.storage.secretkey=$ecret\\x"));
+    }
+
+    @Test
+    public void test_maskSensitiveValue_masksOptionsInsideAValue() {
+        assertEquals("-Dfess.config.rag.llm.gemini.api.key=******** -Xmx2g",
+                SystemUtil.maskSensitiveValue("FESS_JAVA_OPTS", "-Dfess.config.rag.llm.gemini.api.key=AIzaSyExample -Xmx2g"));
+        assertEquals("/usr/bin:/bin", SystemUtil.maskSensitiveValue("PATH", "/usr/bin:/bin"));
+    }
 }
