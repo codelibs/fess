@@ -3,7 +3,8 @@
  *
  * The page markup keeps the attribute hooks the admin screens have always used:
  * data-toggle="modal|collapse|tab", data-target, data-dismiss="modal" and
- * data-widget="pushmenu|treeview". Event handlers are delegated from the document, so they
+ * data-widget="pushmenu|treeview", and data-toggle="secret|copy-secret" for a masked value.
+ * Event handlers are delegated from the document, so they
  * are registered once; init() prepares the elements that exist when the page loads.
  */
 (function() {
@@ -162,6 +163,114 @@
     link.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
+  // ---- secret values: masked until shown, copied without being shown ----------------------------
+  // The page writes the value into data-secret of a .secret-value box and a fixed mask into its
+  // .secret-text, so neither the value nor its length is on the screen until somebody asks for it.
+
+  function setButtonLabel(button, label, icon) {
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+    var glyph = button.querySelector(".fa");
+    if (glyph) {
+      glyph.className = "fa " + icon;
+    }
+  }
+
+  function toggleSecret(trigger) {
+    var box = trigger.closest(".secret-value");
+    var text = box && box.querySelector(".secret-text");
+    if (!text) {
+      return;
+    }
+    var show = text.getAttribute("aria-hidden") === "true";
+    // the mask the page wrote comes back when the value is hidden again
+    if (show && !box.hasAttribute("data-mask")) {
+      box.setAttribute("data-mask", text.textContent);
+    }
+    text.textContent = show ? box.getAttribute("data-secret") || "" : box.getAttribute("data-mask") || "";
+    if (show) {
+      text.removeAttribute("aria-hidden");
+    } else {
+      text.setAttribute("aria-hidden", "true");
+    }
+    setButtonLabel(trigger, trigger.getAttribute(show ? "data-label-hide" : "data-label-show") || "", show ? "fa-eye-slash" : "fa-eye");
+  }
+
+  // navigator.clipboard exists only in a secure context, and the admin console is often served over
+  // plain HTTP on an intranet: there a hidden text area and the copy command do the work.
+  function copyWithCommand(value) {
+    var focused = document.activeElement;
+    var area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "0";
+    area.style.left = "0";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    var copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch (e) {
+      copied = false;
+    }
+    document.body.removeChild(area);
+    // the text area took the focus; give it back to the button that was pressed
+    if (focused && focused !== area && document.contains(focused)) {
+      focused.focus();
+    }
+    return copied;
+  }
+
+  function copySecret(trigger) {
+    var box = trigger.closest(".secret-value");
+    if (!box) {
+      return;
+    }
+    var value = box.getAttribute("data-secret") || "";
+    // the label to come back to: read before the first copy turns it into "copied"
+    if (!trigger.hasAttribute("data-label-copy")) {
+      trigger.setAttribute("data-label-copy", trigger.getAttribute("aria-label") || "");
+    }
+    var status = box.querySelector('[role="status"]');
+    function done(copied) {
+      if (!copied) {
+        // the reader copies it by hand: show the value and select it
+        var text = box.querySelector(".secret-text");
+        var toggle = box.querySelector('[data-toggle="secret"]');
+        if (text && toggle && text.getAttribute("aria-hidden") === "true") {
+          toggleSecret(toggle);
+        }
+        if (text && window.getSelection) {
+          window.getSelection().selectAllChildren(text);
+        }
+        return;
+      }
+      var copiedLabel = trigger.getAttribute("data-label-copied") || "";
+      setButtonLabel(trigger, copiedLabel, "fa-check");
+      if (status) {
+        status.textContent = copiedLabel;
+      }
+      clearTimeout(trigger.copiedTimer);
+      trigger.copiedTimer = setTimeout(function() {
+        setButtonLabel(trigger, trigger.getAttribute("data-label-copy"), "fa-copy");
+        if (status) {
+          status.textContent = "";
+        }
+      }, 2000);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(value).then(function() {
+        done(true);
+      }, function() {
+        done(copyWithCommand(value));
+      });
+    } else {
+      done(copyWithCommand(value));
+    }
+  }
+
   // ---- delegated handlers --------------------------------------------------------------------
   document.addEventListener("click", function(event) {
     var target = event.target;
@@ -179,6 +288,18 @@
     }
     if (openModal && (target.closest('[data-dismiss="modal"]') || target === openModal)) {
       hideModal();
+      return;
+    }
+    trigger = target.closest('[data-toggle="secret"]');
+    if (trigger) {
+      event.preventDefault();
+      toggleSecret(trigger);
+      return;
+    }
+    trigger = target.closest('[data-toggle="copy-secret"]');
+    if (trigger) {
+      event.preventDefault();
+      copySecret(trigger);
       return;
     }
     trigger = target.closest('[data-toggle="collapse"]');
