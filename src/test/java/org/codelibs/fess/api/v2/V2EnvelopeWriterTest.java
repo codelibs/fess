@@ -345,6 +345,11 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
                         new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"))),
                 new org.codelibs.curl.CurlException("Failed to access", new java.net.UnknownHostException("search-host")),
                 new org.codelibs.curl.CurlException("Failed to access", new java.net.NoRouteToHostException("No route to host")),
+                // the engine restarts behind a port that stays open: the connection is accepted, then reset or closed
+                new org.codelibs.curl.CurlException("Failed to access to http://10.0.0.1:9200/fess_user.user/_search",
+                        new org.codelibs.curl.CurlException("Failed to access the response.",
+                                new java.net.SocketException("Connection reset"))),
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketException("Unexpected end of file from server")),
                 // the client has marked every node unavailable
                 new org.codelibs.fesen.client.node.NodeUnavailableException("All nodes are unavailable: [10.0.0.1:9200]"),
                 // the engine answered that it has no capacity
@@ -378,6 +383,9 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
                 // a refused connection of another client says nothing about the search engine
                 new java.net.ConnectException("Connection refused"),
                 new RuntimeException("llm", new java.net.ConnectException("Connection refused")),
+                new RuntimeException("llm", new java.net.SocketException("Connection reset")),
+                // a read timeout is not a reset connection: a slow engine stays a 500
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketTimeoutException("Read timed out")),
                 // the engine answered, and the answer is about the request
                 new org.codelibs.fesen.opensearch.OpenSearchStatusException("bad",
                         org.codelibs.fesen.opensearch.core.rest.RestStatus.BAD_REQUEST, null),
