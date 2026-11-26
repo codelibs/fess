@@ -1469,6 +1469,34 @@ describe("runSearch — facet and pagination click handlers", () => {
     expect(_state.start).toBe(20);
   });
 
+  it("keeps a disabled Previous or Next out of the Tab order and tells a screen reader it is disabled", async () => {
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }], { prev_page: false, next_page: true }) });
+    _state.start = 0;
+    await runSearch();
+    await settle();
+    const prev = document.querySelector("#pagination li:first-child a");
+    const next = document.querySelector("#pagination li:last-child a");
+    expect(prev.hasAttribute("href")).toBe(false);
+    expect(prev.getAttribute("aria-disabled")).toBe("true");
+    expect(prev.getAttribute("role")).toBe("link");
+    expect(next.getAttribute("href")).toBe("#");
+    expect(next.hasAttribute("aria-disabled")).toBe(false);
+    expect(next.hasAttribute("role")).toBe(false);
+  });
+
+  it("disables Next the same way on the last page", async () => {
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }], { prev_page: true, next_page: false, page_number: 2 }) });
+    _state.start = 10;
+    await runSearch();
+    await settle();
+    const prev = document.querySelector("#pagination li:first-child a");
+    const next = document.querySelector("#pagination li:last-child a");
+    expect(prev.getAttribute("href")).toBe("#");
+    expect(next.hasAttribute("href")).toBe(false);
+    expect(next.getAttribute("aria-disabled")).toBe("true");
+    expect(next.getAttribute("role")).toBe("link");
+  });
+
   it("does nothing when the disabled prev link is clicked", async () => {
     installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }], { prev_page: false, next_page: true }) });
     _state.start = 0;

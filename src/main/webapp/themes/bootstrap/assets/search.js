@@ -2848,6 +2848,10 @@ function renderPagination(env) {
 
   const makeLi = (cls) => el("li", { className: cls });
   const makeLink = () => el("a", { className: "page-link", attrs: { href: "#" } });
+  // A Previous or Next that leads nowhere (the first or the last page) has no href, so it is not a stop of the Tab
+  // key. Without an href an <a> is no longer a link to assistive technology, so role="link" keeps it one and
+  // aria-disabled says that it is there but cannot be used.
+  const makeEdgeLink = (enabled) => (enabled ? makeLink() : el("a", { className: "page-link", attrs: { role: "link", "aria-disabled": "true" } }));
 
   // Navigate to a page and scroll back to the top so the new results start in view.
   const goToPage = (start) => {
@@ -2862,7 +2866,7 @@ function renderPagination(env) {
   {
     const li = makeLi("page-item" + (env.prev_page ? "" : " disabled"));
     li.setAttribute("aria-label", t("pagination.prev"));
-    const a = makeLink();
+    const a = makeEdgeLink(env.prev_page);
     const s1 = el("span", { attrs: { "aria-hidden": "true" } });
     s1.appendChild(document.createTextNode("«"));
     a.appendChild(s1);
@@ -2895,7 +2899,7 @@ function renderPagination(env) {
   {
     const li = makeLi("page-item" + (env.next_page ? "" : " disabled"));
     li.setAttribute("aria-label", t("pagination.next"));
-    const a = makeLink();
+    const a = makeEdgeLink(env.next_page);
     a.appendChild(el("span", { className: "visually-hidden", text: t("pagination.next") }));
     a.appendChild(document.createTextNode(" "));
     const s2 = el("span", { attrs: { "aria-hidden": "true" } });
