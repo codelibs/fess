@@ -17,6 +17,7 @@ package org.codelibs.fess.app.service;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.core.beans.util.BeanUtil;
@@ -153,17 +154,20 @@ public class GroupService {
     }
 
     /**
-     * Retrieves all available groups ordered by name in ascending order.
-     * Limited by the configured maximum fetch size for groups.
+     * Gets every group, ordered by name, for the choices of the admin user form.
      *
-     * @return a list of all available groups
+     * <p>Every group is returned. A cut at the size of a page (page.group.max.fetch.size) would silently drop the
+     * groups past it from the form, so a user could not be given one of them on the screen.</p>
+     *
+     * @return A list of all groups.
      */
     public List<Group> getAvailableGroupList() {
-        return groupBhv.selectList(cb -> {
+        final List<Group> list = new ArrayList<>();
+        groupBhv.selectCursor(cb -> {
             cb.query().matchAll();
             cb.query().addOrderBy_Name_Asc();
-            cb.paging(fessConfig.getPageGroupMaxFetchSizeAsInteger(), 1);
-        });
+        }, list::add);
+        return list;
     }
 
 }
