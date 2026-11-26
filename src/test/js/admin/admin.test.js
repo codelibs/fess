@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { describe, it, expect, beforeAll, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import adminSource from "../../../main/webapp/js/admin/admin.js?raw";
 
 // The shipped file is a plain script that uses the globals of the page; run it as the page does.
@@ -703,5 +703,149 @@ describe("the message of a refused field", () => {
       <input type="text" id="ok"></div></form></section>`);
     expect(document.querySelector("ul.has-error").id).toBe("");
     expect(document.getElementById("ok").hasAttribute("aria-invalid")).toBe(false);
+  });
+});
+
+describe("A secret value (access token)", () => {
+  const secret = `
+<section class="content"><form>
+  <span class="secret-value" data-secret="abc&amp;123">
+    <code class="secret-text" aria-hidden="true">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code>
+    <button type="button" id="show" data-toggle="secret" data-label-show="Show" data-label-hide="Hide"
+      title="Show" aria-label="Show"><i class="fa fa-eye" aria-hidden="true"></i></button>
+    <button type="button" id="copy" data-toggle="copy-secret" data-label-copied="Copied"
+      title="Copy" aria-label="Copy"><i class="fa fa-copy" aria-hidden="true"></i></button>
+    <span class="sr-only" role="status"></span>
+  </span>
+</form></section>`;
+  const text = () => document.querySelector(".secret-text");
+  const mask = "•".repeat(16);
+  let execCommand;
+
+  beforeEach(() => {
+    execCommand = document.execCommand;
+  });
+
+  afterEach(() => {
+    document.execCommand = execCommand;
+    vi.useRealTimers();
+  });
+
+  it("is masked with a fixed length until it is shown, and masked again when it is hidden", () => {
+    mount(secret);
+    const show = document.getElementById("show");
+    expect(text().textContent).toBe(mask);
+    expect(text().getAttribute("aria-hidden")).toBe("true");
+
+    show.click();
+    expect(text().textContent).toBe("abc&123");
+    expect(text().hasAttribute("aria-hidden")).toBe(false);
+    expect(show.getAttribute("aria-label")).toBe("Hide");
+    expect(show.getAttribute("title")).toBe("Hide");
+    expect(show.querySelector(".fa").classList.contains("fa-eye-slash")).toBe(true);
+
+    show.click();
+    expect(text().textContent).toBe(mask);
+    expect(text().getAttribute("aria-hidden")).toBe("true");
+    expect(show.getAttribute("aria-label")).toBe("Show");
+    expect(show.querySelector(".fa").classList.contains("fa-eye")).toBe(true);
+  });
+
+  it("is copied without being shown, says so, and the button comes back after a while", () => {
+    vi.useFakeTimers();
+    mount(secret);
+    let copied = null;
+    document.execCommand = (command) => {
+      copied = command === "copy" ? document.querySelector("textarea").value : null;
+      return true;
+    };
+    const copy = document.getElementById("copy");
+    copy.focus(); // a pressed button has the focus in a browser; the text area must give it back
+    copy.click();
+    expect(copied).toBe("abc&123");
+    expect(text().textContent).toBe(mask);
+    expect(document.querySelector("textarea")).toBeNull();
+    expect(document.activeElement).toBe(copy);
+    expect(copy.getAttribute("aria-label")).toBe("Copied");
+    expect(document.querySelector('[role="status"]').textContent).toBe("Copied");
+
+    copy.click(); // a second copy before the button came back
+    vi.advanceTimersByTime(2000);
+    expect(copy.getAttribute("aria-label")).toBe("Copy");
+    expect(copy.getAttribute("title")).toBe("Copy");
+    expect(copy.querySelector(".fa").classList.contains("fa-copy")).toBe(true);
+    expect(document.querySelector('[role="status"]').textContent).toBe("");
+  });
+
+  describe("in a secure context", () => {
+    const own = (name, target) => Object.getOwnPropertyDescriptor(target, name);
+    let clipboard;
+    let secure;
+
+    beforeEach(() => {
+      clipboard = own("clipboard", navigator);
+      secure = own("isSecureContext", window);
+      Object.defineProperty(window, "isSecureContext", { configurable: true, value: true });
+    });
+
+    afterEach(() => {
+      if (clipboard) {
+        Object.defineProperty(navigator, "clipboard", clipboard);
+      } else {
+        delete navigator.clipboard;
+      }
+      if (secure) {
+        Object.defineProperty(window, "isSecureContext", secure);
+      } else {
+        delete window.isSecureContext;
+      }
+    });
+
+    const useClipboard = (writeText) =>
+      Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+
+    it("is copied with the Clipboard API, without the copy command", async () => {
+      mount(secret);
+      const written = [];
+      useClipboard((value) => {
+        written.push(value);
+        return Promise.resolve();
+      });
+      document.execCommand = () => {
+        throw new Error("the copy command must not be used");
+      };
+      const copy = document.getElementById("copy");
+      copy.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(written).toEqual(["abc&123"]);
+      expect(text().textContent).toBe(mask);
+      expect(copy.getAttribute("aria-label")).toBe("Copied");
+    });
+
+    it("falls back to the copy command when the Clipboard API refuses", async () => {
+      mount(secret);
+      useClipboard(() => Promise.reject(new Error("denied")));
+      let copied = null;
+      document.execCommand = (command) => {
+        copied = command === "copy" ? document.querySelector("textarea").value : null;
+        return true;
+      };
+      const copy = document.getElementById("copy");
+      copy.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(copied).toBe("abc&123");
+      expect(copy.getAttribute("aria-label")).toBe("Copied");
+    });
+  });
+
+  it("is shown and selected for a copy by hand when the browser refuses to copy", () => {
+    mount(secret);
+    document.execCommand = () => false;
+    document.getElementById("copy").click();
+    expect(text().textContent).toBe("abc&123");
+    expect(window.getSelection().toString()).toBe("abc&123");
+    expect(document.getElementById("copy").getAttribute("aria-label")).toBe("Copy");
   });
 });

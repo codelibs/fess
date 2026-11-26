@@ -59,12 +59,28 @@ ${fe:html(true)}
                                         <la:text styleId="name" property="name" styleClass="form-control"/>
                                     </div>
                                 </div>
-                                <c:if test="${crudMode==2}">
+                                <c:if test="${crudMode==2 && not empty token}">
                                     <div class="form-group row">
                                         <label class="col-sm-3 text-sm-right col-form-label"><la:message
                                                 key="labels.access_token_token"/></label>
                                         <div class="col-sm-9">
-                                                ${f:h(token)}
+                                            <span class="secret-value" data-secret="${f:h(token)}">
+                                                <code class="secret-text" aria-hidden="true">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code>
+                                                <button type="button" class="btn btn-default btn-xs" data-toggle="secret"
+                                                        data-label-show="<la:message key="labels.access_token_show"/>"
+                                                        data-label-hide="<la:message key="labels.access_token_hide"/>"
+                                                        title="<la:message key="labels.access_token_show"/>"
+                                                        aria-label="<la:message key="labels.access_token_show"/>">
+                                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-xs" data-toggle="copy-secret"
+                                                        data-label-copied="<la:message key="labels.access_token_copied"/>"
+                                                        title="<la:message key="labels.access_token_copy"/>"
+                                                        aria-label="<la:message key="labels.access_token_copy"/>">
+                                                    <i class="fa fa-copy" aria-hidden="true"></i>
+                                                </button>
+                                                <span class="sr-only" role="status"></span>
+                                            </span>
                                         </div>
                                     </div>
                                 </c:if>

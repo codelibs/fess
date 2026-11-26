@@ -742,6 +742,10 @@ a[data-toggle="collapse"][href="#listSearchForm"][aria-expanded="true"] { color:
 .ml-auto { margin-left: auto; }
 .mx-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
 
+/* ---- masked secret value (access token) -------------------------------- */
+.secret-value { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; max-width: 100%; }
+.secret-text { min-width: 0; overflow-wrap: anywhere; }
+
 /* ---- 15 login page --------------------------------------------------- */
 .login-page { display: grid; place-items: center; min-height: 100vh; padding: 1.5rem 1rem; }
 .login-box { width: min(380px, 100%); }

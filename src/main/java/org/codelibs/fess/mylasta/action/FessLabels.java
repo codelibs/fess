@@ -2325,6 +2325,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Created Date */
     public static final String LABELS_access_token_updated_time = "{labels.access_token_updated_time}";
 
+    /** The key of the message: Show */
+    public static final String LABELS_access_token_show = "{labels.access_token_show}";
+
+    /** The key of the message: Hide */
+    public static final String LABELS_access_token_hide = "{labels.access_token_hide}";
+
+    /** The key of the message: Copy */
+    public static final String LABELS_access_token_copy = "{labels.access_token_copy}";
+
+    /** The key of the message: Copied */
+    public static final String LABELS_access_token_copied = "{labels.access_token_copied}";
+
     /** The key of the message: Suggest Word */
     public static final String LABELS_suggest_word_configuration = "{labels.suggest_word_configuration}";
 
