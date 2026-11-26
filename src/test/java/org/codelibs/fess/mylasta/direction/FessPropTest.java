@@ -718,6 +718,52 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("TestAgent", fessConfig.getUserAgentName());
     }
 
+    @Test
+    public void test_setDefaultTheme_valueOfJvmOptionIsNotStored() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final String key = Constants.DEFAULT_THEME_PROPERTY;
+        try {
+            System.setProperty(Constants.SYSTEM_PROP_PREFIX + key, "option-theme");
+            fessConfig.setDefaultTheme("option-theme");
+            assertNull(systemProperties.getProperty(key));
+            assertEquals("option-theme", fessConfig.getDefaultTheme());
+
+            // a different value is stored and wins over the option
+            fessConfig.setDefaultTheme("admin-theme");
+            assertEquals("admin-theme", systemProperties.getProperty(key));
+
+            // a stored value is written as before, even when it is the value of the option
+            fessConfig.setDefaultTheme("option-theme");
+            assertEquals("option-theme", systemProperties.getProperty(key));
+        } finally {
+            System.clearProperty(Constants.SYSTEM_PROP_PREFIX + key);
+            systemProperties.remove(key);
+        }
+    }
+
+    @Test
+    public void test_setSystemProperty_storesValueOfJvmOption() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final String key = "test.override.key";
+        try {
+            // the generic setter also serves keys that their reader takes from system.properties directly
+            System.setProperty(Constants.SYSTEM_PROP_PREFIX + key, "from-option");
+            fessConfig.setSystemProperty(key, "from-option");
+            assertEquals("from-option", systemProperties.getProperty(key));
+            fessConfig.setSystemPropertyAsBoolean(key, true);
+            assertEquals(Constants.TRUE, systemProperties.getProperty(key));
+            fessConfig.setSystemProperty(key, null);
+            assertNull(systemProperties.getProperty(key));
+        } finally {
+            System.clearProperty(Constants.SYSTEM_PROP_PREFIX + key);
+            systemProperties.remove(key);
+        }
+    }
+
     private void assertArrays(final String[] expected, final String[] actual) {
         Arrays.sort(expected);
         Arrays.sort(actual);

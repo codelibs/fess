@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -209,6 +210,57 @@ public interface FessProp {
         }
     }
 
+    /**
+     * Sets a setting that this class reads with {@link #getSystemProperty(String)}, which honours
+     * {@code -Dfess.system.<key>} and {@code FESS_SYSTEM_<KEY>}, unless the key is not stored in system.properties and
+     * the value is the one it already gets from the option or the variable. The admin screens show that value and send
+     * it back on every save, and a stored value wins over the option and the variable, so writing it would make a later
+     * change of the option or the variable ignored. A key that some code reads from system.properties directly must go
+     * through {@link #setSystemProperty(String, String)}, which always stores the value.
+     *
+     * @param key the key of the setting
+     * @param value the value, or null to remove the key
+     */
+    private void setOverridableSystemProperty(final String key, final String value) {
+        if (value == null || !isOverrideValue(key, value::equals)) {
+            setSystemProperty(key, value);
+        }
+    }
+
+    private void setOverridableSystemPropertyAsBoolean(final String key, final boolean value) {
+        if (!isOverrideValue(key, v -> Constants.TRUE.equalsIgnoreCase(v) == value)) {
+            setSystemPropertyAsBoolean(key, value);
+        }
+    }
+
+    private void setOverridableSystemPropertyAsInt(final String key, final int value) {
+        if (!isOverrideValue(key, v -> {
+            try {
+                return Integer.parseInt(v) == value;
+            } catch (final NumberFormatException e) {
+                return false;
+            }
+        })) {
+            setSystemPropertyAsInt(key, value);
+        }
+    }
+
+    /**
+     * Tells whether a value to be set is the one that a key not stored in system.properties already gets from
+     * {@code -Dfess.system.<key>} or {@code FESS_SYSTEM_<KEY>}.
+     *
+     * @param key the key of the setting
+     * @param sameValue tells whether the value of the option or the variable is the value to be set
+     * @return true if the value must not be stored
+     */
+    private static boolean isOverrideValue(final String key, final Predicate<String> sameValue) {
+        if (ComponentUtil.getSystemProperties().getProperty(key) != null) {
+            return false;
+        }
+        final String value = ConfigEnvUtil.getOverride(Constants.SYSTEM_PROP_PREFIX, key);
+        return value != null && sameValue.test(value);
+    }
+
     default boolean getSystemPropertyAsBoolean(final String key, final boolean defaultValue) {
         return Constants.TRUE.equalsIgnoreCase(getSystemProperty(key, defaultValue ? Constants.TRUE : Constants.FALSE));
     }
@@ -257,7 +309,7 @@ public interface FessProp {
     }
 
     default void setSearchFileProxy(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, value);
     }
 
     default boolean isSearchFileProxyEnabled() {
@@ -265,7 +317,7 @@ public interface FessProp {
     }
 
     default void setUseBrowserLocaleForSearch(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, value);
     }
 
     default boolean isBrowserLocaleForSearchUsed() {
@@ -334,7 +386,7 @@ public interface FessProp {
     }
 
     default void setDefaultSortValue(final String value) {
-        setSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, value);
+        setOverridableSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, value);
     }
 
     default String getDefaultSortValue() {
@@ -374,7 +426,7 @@ public interface FessProp {
     }
 
     default void setAppValue(final String value) {
-        setSystemProperty(Constants.APP_VALUE_PROPERTY, value);
+        setOverridableSystemProperty(Constants.APP_VALUE_PROPERTY, value);
         propMap.remove(APP_VALUES);
     }
 
@@ -383,7 +435,7 @@ public interface FessProp {
     }
 
     default void setDefaultLabelValue(final String value) {
-        setSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, value);
+        setOverridableSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, value);
     }
 
     default String getDefaultLabelValue() {
@@ -391,7 +443,7 @@ public interface FessProp {
     }
 
     default void setVirtualHostValue(final String value) {
-        setSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, value);
+        setOverridableSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, value);
     }
 
     default String getVirtualHostValue() {
@@ -399,7 +451,7 @@ public interface FessProp {
     }
 
     default void setDefaultTheme(final String value) {
-        setSystemProperty(Constants.DEFAULT_THEME_PROPERTY, value);
+        setOverridableSystemProperty(Constants.DEFAULT_THEME_PROPERTY, value);
     }
 
     default String getDefaultTheme() {
@@ -407,7 +459,7 @@ public interface FessProp {
     }
 
     default void setLoginRequired(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, value);
     }
 
     default boolean isLoginRequired() {
@@ -415,7 +467,7 @@ public interface FessProp {
     }
 
     default void setResultCollapsed(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, value);
     }
 
     default boolean isResultCollapsed() {
@@ -426,7 +478,7 @@ public interface FessProp {
     }
 
     default void setLoginLinkEnabled(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.LOGIN_LINK_ENALBED_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.LOGIN_LINK_ENALBED_PROPERTY, value);
     }
 
     default boolean isLoginLinkEnabled() {
@@ -434,7 +486,7 @@ public interface FessProp {
     }
 
     default void setThumbnailEnabled(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.THUMBNAIL_ENALBED_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.THUMBNAIL_ENALBED_PROPERTY, value);
     }
 
     default boolean isThumbnailEnabled() {
@@ -442,7 +494,7 @@ public interface FessProp {
     }
 
     default void setIncrementalCrawling(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, value);
     }
 
     default boolean isIncrementalCrawling() {
@@ -450,7 +502,7 @@ public interface FessProp {
     }
 
     default void setDayForCleanup(final int value) {
-        setSystemPropertyAsInt(Constants.DAY_FOR_CLEANUP_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.DAY_FOR_CLEANUP_PROPERTY, value);
     }
 
     default int getDayForCleanup() {
@@ -458,7 +510,7 @@ public interface FessProp {
     }
 
     default void setCrawlingThreadCount(final int value) {
-        setSystemPropertyAsInt(Constants.CRAWLING_THREAD_COUNT_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.CRAWLING_THREAD_COUNT_PROPERTY, value);
     }
 
     default int getCrawlingThreadCount() {
@@ -466,7 +518,7 @@ public interface FessProp {
     }
 
     default void setSearchLog(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.SEARCH_LOG_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.SEARCH_LOG_PROPERTY, value);
     }
 
     default boolean isSearchLog() {
@@ -474,7 +526,7 @@ public interface FessProp {
     }
 
     default void setUserInfo(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.USER_INFO_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.USER_INFO_PROPERTY, value);
     }
 
     default boolean isUserInfo() {
@@ -482,7 +534,7 @@ public interface FessProp {
     }
 
     default void setUserFavorite(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.USER_FAVORITE_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.USER_FAVORITE_PROPERTY, value);
     }
 
     default boolean isUserFavorite() {
@@ -490,7 +542,7 @@ public interface FessProp {
     }
 
     default void setWebApiJson(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, value);
     }
 
     default boolean isWebApiJson() {
@@ -502,7 +554,7 @@ public interface FessProp {
     }
 
     default void setAppendQueryParameter(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.APPEND_QUERY_PARAMETER_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.APPEND_QUERY_PARAMETER_PROPERTY, value);
     }
 
     default boolean isAppendQueryParameter() {
@@ -510,7 +562,7 @@ public interface FessProp {
     }
 
     default void setIgnoreFailureType(final String value) {
-        setSystemProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, value);
+        setOverridableSystemProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, value);
     }
 
     default String getIgnoreFailureType() {
@@ -518,7 +570,7 @@ public interface FessProp {
     }
 
     default void setFailureCountThreshold(final int value) {
-        setSystemPropertyAsInt(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, value);
     }
 
     default int getFailureCountThreshold() {
@@ -526,7 +578,7 @@ public interface FessProp {
     }
 
     default void setWebApiPopularWord(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.WEB_API_POPULAR_WORD_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.WEB_API_POPULAR_WORD_PROPERTY, value);
     }
 
     default boolean isWebApiPopularWord() {
@@ -534,7 +586,7 @@ public interface FessProp {
     }
 
     default void setCsvFileEncoding(final String value) {
-        setSystemProperty(Constants.CSV_FILE_ENCODING_PROPERTY, value);
+        setOverridableSystemProperty(Constants.CSV_FILE_ENCODING_PROPERTY, value);
     }
 
     default String getCsvFileEncoding() {
@@ -542,7 +594,7 @@ public interface FessProp {
     }
 
     default void setPurgeSearchLogDay(final int value) {
-        setSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, value);
     }
 
     default int getPurgeSearchLogDay() {
@@ -550,7 +602,7 @@ public interface FessProp {
     }
 
     default void setPurgeJobLogDay(final int value) {
-        setSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, value);
     }
 
     default int getPurgeJobLogDay() {
@@ -558,7 +610,7 @@ public interface FessProp {
     }
 
     default void setPurgeUserInfoDay(final int value) {
-        setSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, value);
     }
 
     default int getPurgeUserInfoDay() {
@@ -566,7 +618,7 @@ public interface FessProp {
     }
 
     default void setPurgeByBots(final String value) {
-        setSystemProperty(Constants.PURGE_BY_BOTS_PROPERTY, value);
+        setOverridableSystemProperty(Constants.PURGE_BY_BOTS_PROPERTY, value);
     }
 
     default String getPurgeByBots() {
@@ -579,7 +631,7 @@ public interface FessProp {
     }
 
     default void setSlackWebhookUrls(final String value) {
-        setSystemProperty(Constants.SLACK_WEBHOOK_URLS_PROPERTY, value);
+        setOverridableSystemProperty(Constants.SLACK_WEBHOOK_URLS_PROPERTY, value);
     }
 
     default String getSlackWebhookUrls() {
@@ -587,7 +639,7 @@ public interface FessProp {
     }
 
     default void setGoogleChatWebhookUrls(final String value) {
-        setSystemProperty(Constants.GOOGLE_CHAT_WEBHOOK_URLS_PROPERTY, value);
+        setOverridableSystemProperty(Constants.GOOGLE_CHAT_WEBHOOK_URLS_PROPERTY, value);
     }
 
     default String getGoogleChatWebhookUrls() {
@@ -595,7 +647,7 @@ public interface FessProp {
     }
 
     default void setNotificationTo(final String value) {
-        setSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, value);
+        setOverridableSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, value);
     }
 
     default String getNotificationTo() {
@@ -603,7 +655,7 @@ public interface FessProp {
     }
 
     default void setLogNotificationEnabled(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.LOG_NOTIFICATION_ENABLED_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.LOG_NOTIFICATION_ENABLED_PROPERTY, value);
     }
 
     default boolean isLogNotificationEnabled() {
@@ -619,7 +671,7 @@ public interface FessProp {
     }
 
     default void setSuggestSearchLog(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, value);
     }
 
     default boolean isSuggestSearchLog() {
@@ -627,7 +679,7 @@ public interface FessProp {
     }
 
     default void setSuggestDocuments(final boolean value) {
-        setSystemPropertyAsBoolean(Constants.SUGGEST_DOCUMENTS_PROPERTY, value);
+        setOverridableSystemPropertyAsBoolean(Constants.SUGGEST_DOCUMENTS_PROPERTY, value);
     }
 
     default boolean isSuggestDocuments() {
@@ -635,7 +687,7 @@ public interface FessProp {
     }
 
     default void setPurgeSuggestSearchLogDay(final int value) {
-        setSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, value);
     }
 
     default int getPurgeSuggestSearchLogDay() {
@@ -644,7 +696,7 @@ public interface FessProp {
     }
 
     default void setLdapInitialContextFactory(final String value) {
-        setSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, value);
+        setOverridableSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, value);
     }
 
     default String getLdapInitialContextFactory() {
@@ -652,7 +704,7 @@ public interface FessProp {
     }
 
     default void setLdapSecurityAuthentication(final String value) {
-        setSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, value);
+        setOverridableSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, value);
     }
 
     default String getLdapSecurityAuthentication() {
@@ -660,7 +712,7 @@ public interface FessProp {
     }
 
     default void setLdapProviderUrl(final String value) {
-        setSystemProperty(Constants.LDAP_PROVIDER_URL, value);
+        setOverridableSystemProperty(Constants.LDAP_PROVIDER_URL, value);
     }
 
     default String getLdapProviderUrl() {
@@ -668,7 +720,7 @@ public interface FessProp {
     }
 
     default void setLdapSecurityPrincipal(final String value) {
-        setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
+        setOverridableSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
     default String getLdapMemberofAttribute() {
@@ -676,11 +728,11 @@ public interface FessProp {
     }
 
     default void setLdapMemberofAttribute(final String value) {
-        setSystemProperty(Constants.LDAP_MEMBEROF_ATTRIBUTE, value);
+        setOverridableSystemProperty(Constants.LDAP_MEMBEROF_ATTRIBUTE, value);
     }
 
     default void setStorageEndpoint(final String value) {
-        setSystemProperty(Constants.STORAGE_ENDPOINT, value);
+        setOverridableSystemProperty(Constants.STORAGE_ENDPOINT, value);
     }
 
     default String getStorageEndpoint() {
@@ -688,7 +740,7 @@ public interface FessProp {
     }
 
     default void setStorageAccessKey(final String value) {
-        setSystemProperty(Constants.STORAGE_ACCESS_KEY, value);
+        setOverridableSystemProperty(Constants.STORAGE_ACCESS_KEY, value);
     }
 
     default String getStorageAccessKey() {
@@ -696,7 +748,7 @@ public interface FessProp {
     }
 
     default void setStorageSecretKey(final String value) {
-        setSystemProperty(Constants.STORAGE_SECRET_KEY, value);
+        setOverridableSystemProperty(Constants.STORAGE_SECRET_KEY, value);
     }
 
     default String getStorageSecretKey() {
@@ -704,7 +756,7 @@ public interface FessProp {
     }
 
     default void setStorageBucket(final String value) {
-        setSystemProperty(Constants.STORAGE_BUCKET, value);
+        setOverridableSystemProperty(Constants.STORAGE_BUCKET, value);
     }
 
     default String getStorageBucket() {
@@ -712,7 +764,7 @@ public interface FessProp {
     }
 
     default void setStorageType(final String value) {
-        setSystemProperty(Constants.STORAGE_TYPE, value);
+        setOverridableSystemProperty(Constants.STORAGE_TYPE, value);
     }
 
     default String getStorageType() {
@@ -720,7 +772,7 @@ public interface FessProp {
     }
 
     default void setStorageRegion(final String value) {
-        setSystemProperty(Constants.STORAGE_REGION, value);
+        setOverridableSystemProperty(Constants.STORAGE_REGION, value);
     }
 
     default String getStorageRegion() {
@@ -728,7 +780,7 @@ public interface FessProp {
     }
 
     default void setStorageProjectId(final String value) {
-        setSystemProperty(Constants.STORAGE_PROJECT_ID, value);
+        setOverridableSystemProperty(Constants.STORAGE_PROJECT_ID, value);
     }
 
     default String getStorageProjectId() {
@@ -736,7 +788,7 @@ public interface FessProp {
     }
 
     default void setStorageCredentialsPath(final String value) {
-        setSystemProperty(Constants.STORAGE_CREDENTIALS_PATH, value);
+        setOverridableSystemProperty(Constants.STORAGE_CREDENTIALS_PATH, value);
     }
 
     default String getStorageCredentialsPath() {
@@ -744,7 +796,7 @@ public interface FessProp {
     }
 
     default void setRagLlmName(final String value) {
-        setSystemProperty(Constants.RAG_LLM_NAME, value);
+        setOverridableSystemProperty(Constants.RAG_LLM_NAME, value);
     }
 
     default String getRagLlmName() {
@@ -759,7 +811,7 @@ public interface FessProp {
      * @param value the comma-separated permissions
      */
     default void setRagChatPermissions(final String value) {
-        setSystemProperty(Constants.RAG_CHAT_PERMISSIONS, value);
+        setOverridableSystemProperty(Constants.RAG_CHAT_PERMISSIONS, value);
     }
 
     /**
@@ -799,7 +851,7 @@ public interface FessProp {
      * @param value the comma-separated label values
      */
     default void setRagChatLabels(final String value) {
-        setSystemProperty(Constants.RAG_CHAT_LABELS, value);
+        setOverridableSystemProperty(Constants.RAG_CHAT_LABELS, value);
     }
 
     /**
@@ -845,7 +897,7 @@ public interface FessProp {
     }
 
     default void setLdapAdminSecurityPrincipal(final String value) {
-        setSystemProperty(Constants.LDAP_ADMIN_SECURITY_PRINCIPAL, value);
+        setOverridableSystemProperty(Constants.LDAP_ADMIN_SECURITY_PRINCIPAL, value);
     }
 
     default String getLdapAdminSecurityPrincipal() {
@@ -866,7 +918,7 @@ public interface FessProp {
     }
 
     default void setLdapBaseDn(final String value) {
-        setSystemProperty(Constants.LDAP_BASE_DN, value);
+        setOverridableSystemProperty(Constants.LDAP_BASE_DN, value);
     }
 
     default String getLdapBaseDn() {
@@ -874,7 +926,7 @@ public interface FessProp {
     }
 
     default void setLdapAccountFilter(final String value) {
-        setSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
+        setOverridableSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
     }
 
     default String getLdapAccountFilter() {
@@ -882,7 +934,7 @@ public interface FessProp {
     }
 
     default void setLdapGroupFilter(final String value) {
-        setSystemProperty(Constants.LDAP_GROUP_FILTER, value);
+        setOverridableSystemProperty(Constants.LDAP_GROUP_FILTER, value);
     }
 
     default String getLdapGroupFilter() {
@@ -890,7 +942,7 @@ public interface FessProp {
     }
 
     default void setNotificationLogin(final String value) {
-        setSystemProperty(Constants.NOTIFICATION_LOGIN, value);
+        setOverridableSystemProperty(Constants.NOTIFICATION_LOGIN, value);
     }
 
     default String getNotificationLogin() {
@@ -898,7 +950,7 @@ public interface FessProp {
     }
 
     default void setNotificationAdvanceSearch(final String value) {
-        setSystemProperty(Constants.NOTIFICATION_ADVANCE_SEARCH, value);
+        setOverridableSystemProperty(Constants.NOTIFICATION_ADVANCE_SEARCH, value);
     }
 
     default String getNotificationAdvanceSearch() {
@@ -906,7 +958,7 @@ public interface FessProp {
     }
 
     default void setNotificationSearchTop(final String value) {
-        setSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, value);
+        setOverridableSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, value);
     }
 
     default String getNotificationSearchTop() {
@@ -920,7 +972,7 @@ public interface FessProp {
      * @param value the settings, one key=value per line
      */
     default void setThemeSettings(final String value) {
-        setSystemProperty(Constants.THEME_SETTINGS_PROPERTY, value);
+        setOverridableSystemProperty(Constants.THEME_SETTINGS_PROPERTY, value);
     }
 
     /**
@@ -945,7 +997,7 @@ public interface FessProp {
     }
 
     default void setUserAgentName(final String value) {
-        setSystemProperty(Constants.CRAWLING_USER_AGENT_PROPERTY, value);
+        setOverridableSystemProperty(Constants.CRAWLING_USER_AGENT_PROPERTY, value);
     }
 
     default String getUserAgentName() {
@@ -954,7 +1006,7 @@ public interface FessProp {
     }
 
     default void setLtrModelName(final String value) {
-        setSystemProperty(Constants.LTR_MODEL_NAME_PROPERTY, value);
+        setOverridableSystemProperty(Constants.LTR_MODEL_NAME_PROPERTY, value);
     }
 
     default String getLtrModelName() {
@@ -962,7 +1014,7 @@ public interface FessProp {
     }
 
     default void setLtrWindowSize(final int value) {
-        setSystemPropertyAsInt(Constants.LTR_WINDOW_SIZE_PROPERTY, value);
+        setOverridableSystemPropertyAsInt(Constants.LTR_WINDOW_SIZE_PROPERTY, value);
     }
 
     default int getLtrWindowSize() {
@@ -1010,7 +1062,7 @@ public interface FessProp {
     }
 
     default void setSsoType(final String value) {
-        setSystemProperty(Constants.SSO_TYPE_PROPERTY, value);
+        setOverridableSystemProperty(Constants.SSO_TYPE_PROPERTY, value);
     }
 
     default String getSsoType() {
