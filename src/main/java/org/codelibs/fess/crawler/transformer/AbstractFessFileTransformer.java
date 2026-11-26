@@ -137,7 +137,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             resultData.setRawData(generateData(responseData));
             resultData.setSerializer(dataSerializer::fromObjectToBinary);
         } catch (final Exception e) {
-            throw new CrawlingAccessException("Could not serialize object", e);
+            // the message of a failed extraction says what failed (for example, reason=zipBombDetected): it is the first line of
+            // the error log of the failure url.  The exception is still wrapped, so the error name (the class of the cause) and
+            // the log level stay as they were.
+            throw new CrawlingAccessException(e instanceof CrawlingAccessException ? e.getMessage() : "Could not serialize object", e);
         }
         resultData.setEncoding(fessConfig.getCrawlerCrawlingDataEncoding());
 
@@ -226,7 +229,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
             });
         } catch (final Exception e) {
-            final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from " + responseData.getUrl(), e);
+            final CrawlingAccessException rcae = new CrawlingAccessException(
+                    CredentialUrlUtil.removeUserInfoInText(
+                            "Could not get a text from " + responseData.getUrl() + (e.getMessage() != null ? ": " + e.getMessage() : "")),
+                    e);
             rcae.setLogLevel(CrawlingAccessException.WARN);
             throw rcae;
         }

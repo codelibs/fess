@@ -287,6 +287,54 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * The message of the exception that transform throws for a document whose text could not be extracted is the first
+     * line of the error log of the failure url: it names the reason (a suspected zip bomb here), not a serialization
+     * failure, and it has no user name and password of the url.
+     */
+    @Test
+    public void test_transform_failureMessageNamesTheReasonOfAFailedExtraction() {
+        final ExtractException bomb =
+                new ExtractException("Failed to extract via Tika: reason=zipBombDetected", new IOException("Suspected zip bomb"));
+        try {
+            transformWith((in, p) -> {
+                throw bomb;
+            }, "http://user:secretpw@example.com/files/bomb.zip");
+            fail("Should throw CrawlingAccessException for a document whose text cannot be extracted");
+        } catch (final CrawlingAccessException e) {
+            assertTrue(e.getMessage().contains("reason=zipBombDetected"), e.getMessage());
+            assertTrue(e.getMessage().contains("http://example.com/files/bomb.zip"), e.getMessage());
+            assertFalse(e.getMessage().contains("secretpw"), "the message must not carry the password");
+            // still wrapped: the error name of the failure url is the class of the cause, as before
+            assertTrue(e.getCause() instanceof CrawlingAccessException);
+            assertSame(bomb, e.getCause().getCause());
+        }
+    }
+
+    private Object transformWith(final Extractor extractor, final String url) {
+        ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
+        ComponentUtil.register(new PathMappingHelper(), "pathMappingHelper");
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final FileConfig fileConfig = new FileConfig();
+        fileConfig.setId("1");
+        final String sessionId = ComponentUtil.getCrawlingConfigHelper().store("test", fileConfig);
+        final TestableAbstractFessFileTransformer failing = new TestableAbstractFessFileTransformer() {
+            @Override
+            protected Extractor getExtractor(final ResponseData responseData) {
+                return extractor;
+            }
+        };
+        failing.fessConfig = ComponentUtil.getFessConfig();
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl(url);
+        responseData.setMimeType("application/zip");
+        responseData.setContentLength(9L);
+        responseData.setSessionId(sessionId);
+        responseData.setResponseBody("body text".getBytes());
+        return failing.transform(responseData);
+    }
+
     private Map<String, Object> generateDataWithHeaders(final Map<String, Object> headers) {
         return generateDataWith(headers, null, Map.of(), null);
     }
