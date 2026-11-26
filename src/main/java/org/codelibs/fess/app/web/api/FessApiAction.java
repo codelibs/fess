@@ -23,6 +23,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.util.LocaleUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.web.login.LoginManager;
@@ -112,7 +113,9 @@ public abstract class FessApiAction extends FessBaseAction {
 
     /**
      * Converts validation messages to a localized string representation for API responses.
-     * Uses the request locale if available, otherwise defaults to English.
+     * Uses the request locale if available, otherwise defaults to English. A Chinese locale that names its
+     * script or only Hong Kong or Macao is read as simplified or traditional Chinese
+     * ({@link LocaleUtil#toChineseRegionLocale(Locale)}).
      *
      * @param validationMessagesLambda lambda function that adds validation messages
      * @return concatenated string of localized validation messages separated by spaces
@@ -120,7 +123,8 @@ public abstract class FessApiAction extends FessBaseAction {
     protected String getMessage(final VaMessenger<FessMessages> validationMessagesLambda) {
         final FessMessages messages = new FessMessages();
         validationMessagesLambda.message(messages);
-        return messageManager.toMessageList(request.getLocale() == null ? Locale.ENGLISH : request.getLocale(), messages)
+        final Locale locale = request.getLocale();
+        return messageManager.toMessageList(locale == null ? Locale.ENGLISH : LocaleUtil.toChineseRegionLocale(locale), messages)
                 .stream()
                 .collect(Collectors.joining(" "));
     }

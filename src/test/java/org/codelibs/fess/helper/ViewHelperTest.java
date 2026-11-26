@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -592,6 +593,23 @@ public class ViewHelperTest extends UnitFessTestCase {
         } catch (Exception e) {
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void test_getCacheMessageLocale_readsAChineseScriptOrHongKongLocale() {
+        // Tomcat's default Accept-Language parser hands zh-Hans over as the variant (zh__HANS)
+        assertEquals(Locale.SIMPLIFIED_CHINESE, viewHelper.getCacheMessageLocale(Locale.of("zh", "", "HANS")));
+        assertEquals(Locale.SIMPLIFIED_CHINESE, viewHelper.getCacheMessageLocale(Locale.forLanguageTag("zh-Hans")));
+        assertEquals(Locale.TRADITIONAL_CHINESE, viewHelper.getCacheMessageLocale(Locale.forLanguageTag("zh-Hant")));
+        assertEquals(Locale.TRADITIONAL_CHINESE, viewHelper.getCacheMessageLocale(Locale.forLanguageTag("zh-HK")));
+        assertEquals(Locale.JAPANESE, viewHelper.getCacheMessageLocale(Locale.JAPANESE));
+        assertEquals(Locale.ENGLISH, viewHelper.getCacheMessageLocale(null));
+        // looked up with the locale as it comes, the message of the cached page is the English one; read as
+        // above, it is the Chinese one
+        assertEquals("This is a cache of u. It is a snapshot of the page as it appeared on d.",
+                ComponentUtil.getMessageManager().getMessage(Locale.of("zh", "", "HANS"), "labels.search_cache_msg", "u", "d"));
+        assertEquals("此页面是 u 的缓存。它是 d 时页面的快照。", ComponentUtil.getMessageManager()
+                .getMessage(viewHelper.getCacheMessageLocale(Locale.of("zh", "", "HANS")), "labels.search_cache_msg", "u", "d"));
     }
 
     @Test

@@ -105,6 +105,27 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_matchLocale_chineseScriptOrHongKongRequest() {
+        // a label of zh_CN is shown to a request for simplified Chinese, in the forms Tomcat
+        // (zh__HANS) and Locale.forLanguageTag (zh__#Hans) give for zh-Hans
+        assertTrue(labelTypeHelper.matchLocale(Locale.of("zh", "", "HANS"), Locale.SIMPLIFIED_CHINESE));
+        assertTrue(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-Hans"), Locale.SIMPLIFIED_CHINESE));
+        assertFalse(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-Hans"), Locale.TRADITIONAL_CHINESE));
+        // a label of zh_TW is shown to a request for traditional Chinese, Hong Kong and Macao included
+        assertTrue(labelTypeHelper.matchLocale(Locale.of("zh", "", "HANT"), Locale.TRADITIONAL_CHINESE));
+        assertTrue(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-Hant"), Locale.TRADITIONAL_CHINESE));
+        assertTrue(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-HK"), Locale.TRADITIONAL_CHINESE));
+        assertTrue(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-MO"), Locale.TRADITIONAL_CHINESE));
+        assertFalse(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-HK"), Locale.SIMPLIFIED_CHINESE));
+        // what matched as the request came still matches: a label of zh_HK, or of zh
+        assertTrue(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-HK"), Locale.forLanguageTag("zh-HK")));
+        assertTrue(labelTypeHelper.matchLocale(Locale.forLanguageTag("zh-Hans"), Locale.CHINESE));
+        // a bare zh names no script and is not given one
+        assertFalse(labelTypeHelper.matchLocale(Locale.CHINESE, Locale.SIMPLIFIED_CHINESE));
+        assertFalse(labelTypeHelper.matchLocale(Locale.CHINESE, Locale.TRADITIONAL_CHINESE));
+    }
+
+    @Test
     public void test_getLabelTypeItemList_searchRequestType() {
         List<Map<String, String>> result = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
         assertNotNull(result);

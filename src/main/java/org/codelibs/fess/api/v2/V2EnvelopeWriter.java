@@ -35,6 +35,7 @@ import org.codelibs.fess.exception.EnvelopeException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LocaleUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
 import tools.jackson.databind.ObjectMapper;
@@ -187,7 +188,7 @@ public class V2EnvelopeWriter {
         messageCode.message(messages);
         writeError(res, code,
                 ComponentUtil.getMessageManager()
-                        .toMessageList(locale != null ? locale : Locale.ENGLISH, messages)
+                        .toMessageList(locale != null ? LocaleUtil.toChineseRegionLocale(locale) : Locale.ENGLISH, messages)
                         .stream()
                         .collect(Collectors.joining(" ")));
     }

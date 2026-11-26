@@ -838,6 +838,19 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_uiLocale_browserLangOfHongKongIsRememberedAsTraditionalChinese() throws Exception {
+        // remembered as findBusinessLocale reads it, so the JSP pages that read the session find the zh_TW bundle
+        final StubSession session = new StubSession();
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session)
+                .withParameter("browser_lang", "zh_HK")
+                .withLocale(java.util.Locale.ENGLISH), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"zh-TW\""), res.body());
+        assertEquals(java.util.Locale.TAIWAN, session.getAttribute(LastaWebKey.USER_LOCALE_KEY));
+    }
+
+    @Test
     public void test_uiLocale_sessionLocaleBeforeAcceptLanguage() throws Exception {
         final StubSession session = new StubSession();
         session.setAttribute(LastaWebKey.USER_LOCALE_KEY, java.util.Locale.JAPANESE);

@@ -36,6 +36,7 @@ import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LocaleUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -168,13 +169,24 @@ public class LabelTypeHelper extends AbstractConfigHelper {
     }
 
     /**
-     * Matches the request locale with the target locale.
+     * Matches the request locale with the target locale. A Chinese request locale that names its script or only
+     * Hong Kong or Macao also matches as simplified or traditional Chinese
+     * ({@link LocaleUtil#toChineseRegionLocale(Locale)}), so that a label of {@code zh_CN} or {@code zh_TW} is shown
+     * to it.
      *
      * @param requestLocale The request locale.
      * @param targetLocale The target locale.
      * @return True if the locales match, otherwise false.
      */
     protected boolean matchLocale(final Locale requestLocale, final Locale targetLocale) {
+        if (matchLocaleAsIs(requestLocale, targetLocale)) {
+            return true;
+        }
+        final Locale regionLocale = LocaleUtil.toChineseRegionLocale(requestLocale);
+        return regionLocale != null && !regionLocale.equals(requestLocale) && matchLocaleAsIs(regionLocale, targetLocale);
+    }
+
+    private boolean matchLocaleAsIs(final Locale requestLocale, final Locale targetLocale) {
         if (targetLocale.equals(requestLocale) || targetLocale.equals(Locale.ROOT)) {
             return true;
         }
