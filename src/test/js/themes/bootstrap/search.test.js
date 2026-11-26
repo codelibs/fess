@@ -1478,8 +1478,10 @@ describe("runSearch — facet and pagination click handlers", () => {
     const next = document.querySelector("#pagination li:last-child a");
     expect(prev.hasAttribute("href")).toBe(false);
     expect(prev.getAttribute("aria-disabled")).toBe("true");
+    expect(prev.getAttribute("role")).toBe("link");
     expect(next.getAttribute("href")).toBe("#");
     expect(next.hasAttribute("aria-disabled")).toBe(false);
+    expect(next.hasAttribute("role")).toBe(false);
   });
 
   it("disables Next the same way on the last page", async () => {
@@ -1492,6 +1494,7 @@ describe("runSearch — facet and pagination click handlers", () => {
     expect(prev.getAttribute("href")).toBe("#");
     expect(next.hasAttribute("href")).toBe(false);
     expect(next.getAttribute("aria-disabled")).toBe("true");
+    expect(next.getAttribute("role")).toBe("link");
   });
 
   it("does nothing when the disabled prev link is clicked", async () => {

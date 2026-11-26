@@ -2848,9 +2848,10 @@ function renderPagination(env) {
 
   const makeLi = (cls) => el("li", { className: cls });
   const makeLink = () => el("a", { className: "page-link", attrs: { href: "#" } });
-  // A Previous or Next that leads nowhere (the first or the last page) has no href: a link without one is not a
-  // stop of the Tab key, and aria-disabled tells a screen reader that it is there but cannot be used.
-  const makeEdgeLink = (enabled) => (enabled ? makeLink() : el("a", { className: "page-link", attrs: { "aria-disabled": "true" } }));
+  // A Previous or Next that leads nowhere (the first or the last page) has no href, so it is not a stop of the Tab
+  // key. Without an href an <a> is no longer a link to assistive technology, so role="link" keeps it one and
+  // aria-disabled says that it is there but cannot be used.
+  const makeEdgeLink = (enabled) => (enabled ? makeLink() : el("a", { className: "page-link", attrs: { role: "link", "aria-disabled": "true" } }));
 
   // Navigate to a page and scroll back to the top so the new results start in view.
   const goToPage = (start) => {
