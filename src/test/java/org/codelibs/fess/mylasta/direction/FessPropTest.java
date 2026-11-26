@@ -718,6 +718,31 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("TestAgent", fessConfig.getUserAgentName());
     }
 
+    @Test
+    public void test_setSystemProperty_valueOfJvmOptionIsNotStored() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final String key = "test.override.key";
+        try {
+            System.setProperty(Constants.SYSTEM_PROP_PREFIX + key, "from-option");
+            fessConfig.setSystemProperty(key, "from-option");
+            assertNull(systemProperties.getProperty(key));
+            assertEquals("from-option", fessConfig.getSystemProperty(key));
+
+            // a different value is stored and wins over the option
+            fessConfig.setSystemProperty(key, "from-admin");
+            assertEquals("from-admin", systemProperties.getProperty(key));
+
+            // a stored value is written as before, even when it is the value of the option
+            fessConfig.setSystemProperty(key, "from-option");
+            assertEquals("from-option", systemProperties.getProperty(key));
+        } finally {
+            System.clearProperty(Constants.SYSTEM_PROP_PREFIX + key);
+            systemProperties.remove(key);
+        }
+    }
+
     private void assertArrays(final String[] expected, final String[] actual) {
         Arrays.sort(expected);
         Arrays.sort(actual);
