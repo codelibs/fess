@@ -17,7 +17,7 @@ package org.codelibs.fess.api.v2;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -349,11 +349,14 @@ public class V2EnvelopeWriter {
 
     /**
      * Tells whether a failure is the search engine being out of reach or out of capacity: all its
-     * nodes are unavailable, a request to it could not connect, or it answered 429 or 503.
+     * nodes are unavailable, a request to it could not connect or its connection was reset or closed
+     * before an answer, or it answered 429 or 503.
      *
-     * <p>A refused connection counts only below a {@link CurlException}, the failure of a request
-     * through the engine client; the same {@link ConnectException} from another client, such as the
-     * one of an LLM provider, says nothing about the search engine.</p>
+     * <p>A refused, reset or closed connection counts only below a {@link CurlException}, the failure
+     * of a request through the engine client; the same {@link ConnectException} from another client,
+     * such as the one of an LLM provider, says nothing about the search engine. A connection that is
+     * accepted and then reset is what a client sees while the engine restarts behind a port that stays
+     * open, for example a port published by a container runtime or a load balancer without a backend.</p>
      *
      * @param cause the failure to classify, or {@code null}
      * @return {@code true} when the failure is the search engine being out of reach or out of capacity
@@ -370,8 +373,7 @@ public class V2EnvelopeWriter {
             }
             if (t instanceof CurlException) {
                 inEngineRequest = true;
-            } else if (inEngineRequest
-                    && (t instanceof ConnectException || t instanceof UnknownHostException || t instanceof NoRouteToHostException)) {
+            } else if (inEngineRequest && (t instanceof SocketException || t instanceof UnknownHostException)) {
                 return true;
             }
         }
