@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -202,11 +203,29 @@ public interface FessProp {
     }
 
     default void setSystemProperty(final String key, final String value) {
-        if (value != null) {
-            ComponentUtil.getSystemProperties().setProperty(key, value);
-        } else {
+        if (value == null) {
             ComponentUtil.getSystemProperties().remove(key);
+        } else if (!isOverrideValue(key, value::equals)) {
+            ComponentUtil.getSystemProperties().setProperty(key, value);
         }
+    }
+
+    /**
+     * Tells whether a value to be set is the one that a key not stored in system.properties already gets from
+     * {@code -Dfess.system.<key>} or {@code FESS_SYSTEM_<KEY>}. The admin screens show that value and send it back on
+     * every save, and a stored value wins over the option and the variable, so writing it would make a later change
+     * of the option or the variable ignored.
+     *
+     * @param key the key of the setting
+     * @param sameValue tells whether the value of the option or the variable is the value to be set
+     * @return true if the value must not be stored
+     */
+    private static boolean isOverrideValue(final String key, final Predicate<String> sameValue) {
+        if (ComponentUtil.getSystemProperties().getProperty(key) != null) {
+            return false;
+        }
+        final String value = ConfigEnvUtil.getOverride(Constants.SYSTEM_PROP_PREFIX, key);
+        return value != null && sameValue.test(value);
     }
 
     default boolean getSystemPropertyAsBoolean(final String key, final boolean defaultValue) {
@@ -214,7 +233,9 @@ public interface FessProp {
     }
 
     default void setSystemPropertyAsBoolean(final String key, final boolean value) {
-        setSystemProperty(key, value ? Constants.TRUE : Constants.FALSE);
+        if (!isOverrideValue(key, v -> Constants.TRUE.equalsIgnoreCase(v) == value)) {
+            setSystemProperty(key, value ? Constants.TRUE : Constants.FALSE);
+        }
     }
 
     default int getSystemPropertyAsInt(final String key, final int defaultValue) {
@@ -230,7 +251,15 @@ public interface FessProp {
     }
 
     default void setSystemPropertyAsInt(final String key, final int value) {
-        setSystemProperty(key, Integer.toString(value));
+        if (!isOverrideValue(key, v -> {
+            try {
+                return Integer.parseInt(v) == value;
+            } catch (final NumberFormatException e) {
+                return false;
+            }
+        })) {
+            setSystemProperty(key, Integer.toString(value));
+        }
     }
 
     /**

@@ -30,7 +30,10 @@ replaced by `_`. For example `search_engine.password` is `FESS_CONFIG_SEARCH_ENG
 `rag.llm.gemini.api.key` is `FESS_CONFIG_RAG_LLM_GEMINI_API_KEY` and `storage.secretkey` is
 `FESS_SYSTEM_STORAGE_SECRETKEY`. The order is the `-D` option, then the variable, then the file (for a `fess.system.`
 setting, a value stored in `system.properties` still wins, as it does over the option); an empty variable counts as
-not set, and an empty option does not hide a variable that is set. The child processes inherit the variable. A setting that
+not set, and an empty option does not hide a variable that is set. Saving the General settings (the screen or
+`PUT /api/admin/general`) does not store a value that a key gets from the option or the variable when the key is not
+already in `system.properties`, so a later change of the variable takes effect; a different value is stored and wins
+from then on. The child processes inherit the variable. A setting that
 the code reads from `system.properties` directly (for example `oic.client.secret` of the SSO plugins) honours neither the option
 nor the variable; the rule applies wherever the `-D` option of the key is honoured. The values of these variables are masked in System Info.
 The web application writes a WARN at start for each `-Dfess.config.*` or `-Dfess.system.*` option that carries

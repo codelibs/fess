@@ -15,13 +15,19 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.function.UnaryOperator;
+
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ConfigEnvUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -159,6 +165,51 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
             fessConfig.setRagChatPermissions("");
             fessConfig.setRagChatLabels("");
         }
+    }
+
+    @Test
+    public void test_updateConfig_valueFromEnvironmentIsNotStored() throws Exception {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setEnv(Map.of(ConfigEnvUtil.toEnvName(Constants.SYSTEM_PROP_PREFIX, Constants.CRAWLING_USER_AGENT_PROPERTY), "EnvAgent/1.0",
+                    ConfigEnvUtil.toEnvName(Constants.SYSTEM_PROP_PREFIX, Constants.LOGIN_REQUIRED_PROPERTY), "TRUE",
+                    ConfigEnvUtil.toEnvName(Constants.SYSTEM_PROP_PREFIX, Constants.DAY_FOR_CLEANUP_PROPERTY), "05"));
+            assertNull(systemProperties.getProperty(Constants.CRAWLING_USER_AGENT_PROPERTY));
+
+            // The screen and the API show the effective value and send it back unchanged.
+            final EditForm form = new EditForm();
+            AdminGeneralAction.updateForm(fessConfig, form);
+            assertEquals("EnvAgent/1.0", form.crawlingUserAgent);
+            assertEquals(Constants.TRUE, form.loginRequired);
+            assertEquals(Integer.valueOf(5), form.dayForCleanup);
+            AdminGeneralAction.updateConfig(fessConfig, form);
+            assertNull(systemProperties.getProperty(Constants.CRAWLING_USER_AGENT_PROPERTY));
+            assertNull(systemProperties.getProperty(Constants.LOGIN_REQUIRED_PROPERTY));
+            assertNull(systemProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY));
+
+            // So a later change of the variable takes effect.
+            setEnv(Map.of(ConfigEnvUtil.toEnvName(Constants.SYSTEM_PROP_PREFIX, Constants.CRAWLING_USER_AGENT_PROPERTY), "EnvAgent/2.0"));
+            assertEquals("EnvAgent/2.0", fessConfig.getUserAgentName());
+            assertFalse(fessConfig.isLoginRequired());
+
+            // A different value is stored, and a stored value wins over the variable.
+            form.crawlingUserAgent = "AdminAgent/1.0";
+            AdminGeneralAction.updateConfig(fessConfig, form);
+            assertEquals("AdminAgent/1.0", systemProperties.getProperty(Constants.CRAWLING_USER_AGENT_PROPERTY));
+            assertEquals("AdminAgent/1.0", fessConfig.getUserAgentName());
+        } finally {
+            setEnv(null);
+            systemProperties.remove(Constants.CRAWLING_USER_AGENT_PROPERTY);
+            systemProperties.remove(Constants.LOGIN_REQUIRED_PROPERTY);
+            systemProperties.remove(Constants.DAY_FOR_CLEANUP_PROPERTY);
+        }
+    }
+
+    private static void setEnv(final Map<String, String> env) throws Exception {
+        final Method method = ConfigEnvUtil.class.getDeclaredMethod("setEnvReader", UnaryOperator.class);
+        method.setAccessible(true);
+        method.invoke(null, env != null ? (UnaryOperator<String>) env::get : null);
     }
 
     @Test

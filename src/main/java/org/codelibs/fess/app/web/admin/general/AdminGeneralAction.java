@@ -159,7 +159,7 @@ public class AdminGeneralAction extends FessAdminAction {
                 BeanUtil.copyMapToBean(dataMap, postcard);
             });
             saveInfo(messages -> messages.addSuccessSendTestmail(GLOBAL));
-            updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
+            fessConfig.setNotificationTo(form.notificationTo);
             systemProperties.store();
         } catch (final Exception e) {
             logger.warn("Failed to send a test mail.", e);
@@ -548,10 +548,6 @@ public class AdminGeneralAction extends FessAdminAction {
             return legacyValue;
         }
         return defaultValue;
-    }
-
-    private void updateProperty(final String key, final String value) {
-        systemProperties.setProperty(key, value == null ? StringUtil.EMPTY : value);
     }
 
     private List<String> getDayItems() {
