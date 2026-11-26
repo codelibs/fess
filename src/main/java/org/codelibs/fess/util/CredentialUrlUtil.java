@@ -51,8 +51,12 @@ public final class CredentialUrlUtil {
      * containing a space, which is exactly the shape a mistyped one tends to have. That is why
      * masking must never be the thing a URL's safety rests on - use {@link #hasUserInfo(String)} to
      * refuse the value up front, and treat masking as a backstop.</p>
+     *
+     * <p>The user part excludes {@code :} and both parts are possessive, so a match is decided in a
+     * single pass; letting both parts take {@code :} backtracks quadratically on a long run of
+     * colons. What is matched is the same either way: from {@code ://} to the first {@code @}.</p>
      */
-    private static final Pattern CREDENTIAL_USER_INFO_PATTERN = Pattern.compile("(?i)(://)[^/@\\s]*:[^/@\\s]*@");
+    private static final Pattern CREDENTIAL_USER_INFO_PATTERN = Pattern.compile("(://)[^/@\\s:]*+:[^/@\\s]*+@");
 
     /** Separator between the scheme and the authority of an absolute URL. */
     private static final String SCHEME_SEPARATOR = "://";
@@ -186,7 +190,8 @@ public final class CredentialUrlUtil {
     /**
      * Removes the userinfo from every absolute URL in a free text, such as a stack trace, where a
      * URL that failed is quoted back in an exception message. Each {@code scheme://authority} found
-     * is handed to {@link #removeUserInfo(String)}.
+     * loses its userinfo by the same rule as {@link #removeUserInfo(String)}, applied in place: the
+     * text is copied only when a userinfo is removed, and is returned as it is otherwise.
      *
      * <p>The authority of a URL in a text ends at the first {@code /}, {@code ?}, {@code #} or line
      * break, so a password that holds a space (which no delimiter can bound) is still removed. A
@@ -207,33 +212,51 @@ public final class CredentialUrlUtil {
             return text;
         }
         final int length = text.length();
-        final StringBuilder sb = new StringBuilder(length);
+        StringBuilder sb = null;
         int copied = 0;
+        int scanned = 0;
         while (separator >= 0) {
             int schemeStart = separator;
-            while (schemeStart > copied && isSchemeChar(text.charAt(schemeStart - 1))) {
+            while (schemeStart > scanned && isSchemeChar(text.charAt(schemeStart - 1))) {
                 schemeStart--;
             }
             while (schemeStart < separator && !isAsciiLetter(text.charAt(schemeStart))) {
                 schemeStart++;
             }
-            int authorityEnd = separator + SCHEME_SEPARATOR.length();
-            while (authorityEnd < length && "/?#\r\n".indexOf(text.charAt(authorityEnd)) < 0) {
+            final int authorityStart = separator + SCHEME_SEPARATOR.length();
+            int authorityEnd = authorityStart;
+            int at = -1;
+            while (authorityEnd < length) {
+                final char c = text.charAt(authorityEnd);
+                if (c == '/' || c == '?' || c == '#' || c == '\r' || c == '\n') {
+                    break;
+                }
+                if (c == ':' && text.startsWith("//", authorityEnd + 1)) {
+                    // a URL without a path that is followed by another URL ("robots.txt of http://host is unavailable: http://user:pw@host/a"):
+                    // this authority ends before the scheme of the next one, which is then stripped in its turn
+                    while (authorityEnd > authorityStart && isSchemeChar(text.charAt(authorityEnd - 1))) {
+                        authorityEnd--;
+                    }
+                    break;
+                }
+                if (c == '@') {
+                    at = authorityEnd;
+                }
                 authorityEnd++;
             }
-            // a URL without a path that is followed by another URL ("robots.txt of http://host is unavailable: http://user:pw@host/a"):
-            // this authority ends before the scheme of the next one, which is then stripped in its turn
-            final int next = text.indexOf(SCHEME_SEPARATOR, separator + SCHEME_SEPARATOR.length());
-            if (next >= 0 && next < authorityEnd) {
-                int nextStart = next;
-                while (nextStart > separator + SCHEME_SEPARATOR.length() && isSchemeChar(text.charAt(nextStart - 1))) {
-                    nextStart--;
+            // the same rule as removeUserInfo: a scheme before "://" and an at sign in the authority
+            if (at >= 0 && schemeStart < separator) {
+                if (sb == null) {
+                    sb = new StringBuilder(length);
                 }
-                authorityEnd = nextStart;
+                sb.append(text, copied, authorityStart);
+                copied = at + 1;
             }
-            sb.append(text, copied, schemeStart).append(removeUserInfo(text.substring(schemeStart, authorityEnd)));
-            copied = authorityEnd;
+            scanned = authorityEnd;
             separator = text.indexOf(SCHEME_SEPARATOR, authorityEnd);
+        }
+        if (sb == null) {
+            return text;
         }
         return sb.append(text, copied, length).toString();
     }

@@ -129,6 +129,16 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
         assertEquals("https://host/v1?keyword=1", CredentialUrlUtil.maskCredentialInUrl("https://host/v1?keyword=1"));
     }
 
+    @Test
+    public void test_maskCredentialInUrl_isLinearOnLongInput() {
+        // a long run of colons with no at sign backtracks quadratically when both userinfo parts may take a colon
+        final String manyColons = "http://" + ":".repeat(200_000);
+        assertEquals(manyColons, CredentialUrlUtil.maskCredentialInUrl(manyColons));
+        assertEquals("http://***:***@host/a", CredentialUrlUtil.maskCredentialInUrl(manyColons + "@host/a"));
+        final String manySeparators = "://:".repeat(200_000);
+        assertEquals(manySeparators, CredentialUrlUtil.maskCredentialInUrl(manySeparators));
+    }
+
     // ========== invalidUrlException() ==========
 
     @Test
@@ -246,6 +256,10 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
         final String text = "mail me@example.com at http://host/a@b?c=d@e#f@g, then file:///srv/a@b and ://x@y and 1://x@y\nsmb://host";
         assertEquals(text, CredentialUrlUtil.removeUserInfoInText(text));
         assertEquals("no url, only a@b", CredentialUrlUtil.removeUserInfoInText("no url, only a@b"));
+        // nothing is copied when nothing is removed
+        assertSame(text, CredentialUrlUtil.removeUserInfoInText(text));
+        final String trace = "java.net.ConnectException: http://host:8080/a\n\tat a.B.c(B.java:1)\nCaused by: smb://host/share/";
+        assertSame(trace, CredentialUrlUtil.removeUserInfoInText(trace));
     }
 
     @Test
@@ -256,5 +270,8 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
         assertEquals("http://host/a", CredentialUrlUtil.removeUserInfoInText(manyAt));
         final String longScheme = "a".repeat(2_000_000);
         assertEquals(longScheme + "://host", CredentialUrlUtil.removeUserInfoInText(longScheme + "://u:p@host"));
+        // many URLs, each without a path, and a single userinfo at the end
+        final String manyHosts = "http://host ".repeat(500_000);
+        assertEquals(manyHosts + "http://host", CredentialUrlUtil.removeUserInfoInText(manyHosts + "http://u:p@host"));
     }
 }
