@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.api.admin.backup;
 import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.NDJSON_EXTENTION;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.assertBackupIndexReadable;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.encryptPassword;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getBackupItems;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getChatLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getClickLogNdjsonWriteCall;
@@ -135,7 +136,9 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                                 // screen does.
                                 writer.write("{\"index\":{\"_index\":\"" + hit.getIndex() + "\",\"_id\":\""
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
-                                writer.write(hit.getSourceAsString());
+                                // A web or file authentication password saved before it was encrypted is still plain
+                                // text in the index; the file carries it encrypted, as the admin screen writes it.
+                                writer.write(encryptPassword(hit.getIndex(), hit.getSourceAsString()));
                                 writer.write("\n");
                             } catch (final IOException e) {
                                 throw new IORuntimeException(e);

@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.codelibs.core.io.CopyUtil;
@@ -34,6 +35,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ParameterUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.StreamResponse;
@@ -45,6 +47,8 @@ import org.codelibs.fesen.opensearch.core.index.Index;
 import org.codelibs.fesen.opensearch.core.index.shard.ShardId;
 import org.codelibs.fesen.opensearch.search.SearchHit;
 import org.codelibs.fesen.opensearch.search.SearchShardTarget;
+
+import tools.jackson.databind.ObjectMapper;
 
 public class ApiAdminBackupActionTest extends UnitFessTestCase {
 
@@ -76,6 +80,27 @@ public class ApiAdminBackupActionTest extends UnitFessTestCase {
         actions.add(lines[0]);
         actions.add(lines[2]);
         assertEquals(2, actions.size(), "the two documents must not collapse onto one (index, id) pair: " + actions);
+    }
+
+    /**
+     * A web or file authentication password saved before passwords were encrypted is still plain text
+     * in the index. The bulk file of the API must carry it encrypted, as the admin screen writes it,
+     * and a password that is already encrypted is written as stored.
+     */
+    @Test
+    public void test_get$file_encryptsALegacyPlainTextPassword() throws Exception {
+        final String encrypted = ParameterUtil.encryptCredential("already");
+        registerWalkingClient(hit("fess_config.web_authentication", "w1", "{\"password\":\"legacy-pw\",\"username\":\"u\"}"),
+                hit("fess_config.file_authentication", "f1", "{\"password\":\"" + encrypted + "\",\"username\":\"u\"}"));
+
+        final String[] lines = drain(new ApiAdminBackupAction().get$file("fess_config.bulk")).split("\n");
+
+        assertEquals(4, lines.length);
+        assertFalse(lines[1], lines[1].contains("legacy-pw"));
+        final String password = (String) new ObjectMapper().readValue(lines[1], Map.class).get("password");
+        assertTrue(password, password.startsWith("{cipher}"));
+        assertEquals("legacy-pw", ParameterUtil.decryptCredential(password, null, "password"));
+        assertEquals(encrypted, new ObjectMapper().readValue(lines[3], Map.class).get("password"));
     }
 
     // ===================================================================================
