@@ -312,13 +312,15 @@ describe("attach — login form submit", () => {
     expect(err.classList.contains("d-none")).toBe(false);
   });
 
-  // The search engine is out of reach: POST /auth/login answers 503 with V2ErrorCode.SERVICE_UNAVAILABLE ("service_unavailable").
-  // The credentials were not checked, so the dialog must not say that they are wrong.
+  // POST /auth/login answers 503 with V2ErrorCode.SERVICE_UNAVAILABLE ("service_unavailable") when the search engine is
+  // out of reach, and when the LDAP directory fails after the bind (LoginHandler). The credentials were not checked,
+  // so the dialog must not say that they are wrong, nor name a service that may not be the one that failed.
   it.each([
-    [{ code: "service_unavailable", httpStatus: 503 }],
+    [{ code: "service_unavailable", httpStatus: 503, message: "search engine is temporarily unable to process the request" }],
+    [{ code: "service_unavailable", httpStatus: 503, message: "directory service is unable to process the request" }],
     [{ code: "service_unavailable" }],
     [{ httpStatus: 503 }],
-  ])("shows the search-engine-unavailable message for %o", async (rejection) => {
+  ])("shows the service-unavailable message for %o", async (rejection) => {
     document.body.innerHTML = LOGIN_FIXTURE;
     await attach();
     api.post.mockRejectedValue(rejection);
@@ -327,7 +329,7 @@ describe("attach — login form submit", () => {
     await flush();
 
     const err = document.getElementById("login-error");
-    expect(err.textContent).toBe("error.detail_search_engine_unavailable");
+    expect(err.textContent).toBe("error.body_503");
     expect(err.classList.contains("d-none")).toBe(false);
   });
 
