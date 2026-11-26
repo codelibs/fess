@@ -89,6 +89,31 @@ public class ServerErrorLoggingFilterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_serverError_ofAnUnavailableSearchEngineNamesTheSocketFault() throws Exception {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ServerErrorLoggingFilter.class);
+        try {
+            final HttpServletRequest request = getMockRequest();
+            final HttpServletResponse response = getMockResponse();
+            final ExposedLoggingFilter loggingFilter = new ExposedLoggingFilter();
+            final RuntimeException cause = new org.codelibs.curl.CurlException(
+                    "Failed to access to http://10.0.0.1:9200/fess_user.user/_search",
+                    new org.codelibs.curl.CurlException("Failed to access the response.", new java.net.SocketException("Socket closed")));
+
+            new ServerErrorLoggingFilter().doFilter(request, response,
+                    (req, res) -> loggingFilter.fireServerError(request, response, cause));
+
+            final List<String> warnings = appender.warnings();
+            assertEquals("expected exactly one WARN line, got " + warnings, 1, warnings.size());
+            final String line = warnings.get(0);
+            assertTrue(line + " must name the exception class", line.contains(org.codelibs.curl.CurlException.class.getName()));
+            assertTrue(line + " must name the socket failure below it", line.contains("java.net.SocketException: Socket closed"));
+            assertNull(appender.eventsAt(Level.WARN).get(0).getThrown(), "WARN line must not carry a stack trace");
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_serverError_keepsTheCauseInTheRequestForTheErrorPage() throws Exception {
         final HttpServletRequest request = getMockRequest();
         final HttpServletResponse response = getMockResponse();

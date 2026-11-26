@@ -345,6 +345,14 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
                         new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"))),
                 new org.codelibs.curl.CurlException("Failed to access", new java.net.UnknownHostException("search-host")),
                 new org.codelibs.curl.CurlException("Failed to access", new java.net.NoRouteToHostException("No route to host")),
+                // the engine restarts behind a port that stays open: the connection is accepted, then reset or closed
+                new org.codelibs.curl.CurlException("Failed to access to http://10.0.0.1:9200/fess_user.user/_search",
+                        new org.codelibs.curl.CurlException("Failed to access the response.",
+                                new java.net.SocketException("Connection reset"))),
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketException("Unexpected end of file from server")),
+                // a reset of a TLS connection: the socket failure is below the TLS one
+                new org.codelibs.curl.CurlException("Failed to access",
+                        new javax.net.ssl.SSLException("Connection reset", new java.net.SocketException("Connection reset"))),
                 // the client has marked every node unavailable
                 new org.codelibs.fesen.client.node.NodeUnavailableException("All nodes are unavailable: [10.0.0.1:9200]"),
                 // the engine answered that it has no capacity
@@ -372,12 +380,51 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_writeInternalError_searchEngineUnavailable_logsTheSocketFaultOnOneLine() throws Exception {
+        // A broken pipe or a closed socket can be a fault of this side; the WARN must name it, not only the
+        // outer "Failed to access to <url>" of the engine client.
+        final String loggerName = "test-v2-unavailable-" + System.nanoTime();
+        final org.codelibs.fess.unit.LogCapturingAppender appender = org.codelibs.fess.unit.LogCapturingAppender.attach(loggerName);
+        try {
+            final Throwable cause = new org.codelibs.curl.CurlException("Failed to access to http://10.0.0.1:9200/fess_user.user/_search",
+                    new org.codelibs.curl.CurlException("Failed to access the response.", new java.net.SocketException("Broken pipe")));
+            final CapturingResponse res = new CapturingResponse();
+            new V2EnvelopeWriter().writeInternalError(res, cause, org.apache.logging.log4j.LogManager.getLogger(loggerName),
+                    "/api/v2/auth/login");
+            assertEquals(503, res.status);
+            final java.util.List<String> warnings = appender.warnings();
+            assertEquals(warnings.toString(), 1, warnings.size());
+            assertTrue(warnings.get(0).contains("java.net.SocketException: Broken pipe"), warnings.get(0));
+            assertNull(appender.eventsAt(org.apache.logging.log4j.Level.WARN).get(0).getThrown(), "one line, no stack trace");
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_describeRootCause() {
+        assertEquals("java.net.SocketException: Socket closed",
+                V2EnvelopeWriter.describeRootCause(new IllegalStateException("Failed to select",
+                        new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketException("Socket closed")))));
+        assertEquals("java.lang.IllegalStateException: boom", V2EnvelopeWriter.describeRootCause(new IllegalStateException("boom")));
+        assertEquals("null", V2EnvelopeWriter.describeRootCause(null));
+    }
+
+    @Test
     public void test_writeInternalError_keepsOtherFailuresAs500() throws Exception {
         final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
         final Throwable[] causes = {
                 // a refused connection of another client says nothing about the search engine
                 new java.net.ConnectException("Connection refused"),
                 new RuntimeException("llm", new java.net.ConnectException("Connection refused")),
+                new RuntimeException("llm", new java.net.SocketException("Connection reset")),
+                // a read timeout is not a reset connection: a slow engine stays a 500
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketTimeoutException("Read timed out")),
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketTimeoutException("Connect timed out")),
+                // a TLS handshake the peer ended without a socket failure (an EOF) is not counted either
+                new org.codelibs.curl.CurlException("Failed to access",
+                        new javax.net.ssl.SSLHandshakeException("Remote host terminated the handshake",
+                                new java.io.EOFException("SSL peer shut down incorrectly"))),
                 // the engine answered, and the answer is about the request
                 new org.codelibs.fesen.opensearch.OpenSearchStatusException("bad",
                         org.codelibs.fesen.opensearch.core.rest.RestStatus.BAD_REQUEST, null),

@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 
 import jakarta.servlet.Filter;
@@ -99,8 +100,15 @@ public class ServerErrorLoggingFilter implements Filter {
         request.setAttribute(Constants.SERVER_ERROR_CAUSE, cause);
         // The throwable is passed as its class name and message, never as the trailing argument,
         // so that log4j2 does not append a stack trace to this WARN line.
-        logger.warn("Server error: {} {} [{}: {}]", request.getMethod(), request.getRequestURI(), cause.getClass().getName(),
-                cause.getMessage());
+        if (V2EnvelopeWriter.isSearchEngineUnavailable(cause)) {
+            // The outer message of the engine client only says that a request failed; the innermost cause tells
+            // a fault of this side (a broken pipe, a closed socket) from one of the search engine.
+            logger.warn("Server error: {} {} [{}: {}] (search engine unavailable, cause: {})", request.getMethod(), request.getRequestURI(),
+                    cause.getClass().getName(), cause.getMessage(), V2EnvelopeWriter.describeRootCause(cause));
+        } else {
+            logger.warn("Server error: {} {} [{}: {}]", request.getMethod(), request.getRequestURI(), cause.getClass().getName(),
+                    cause.getMessage());
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Server error: {} {}", request.getMethod(), request.getRequestURI(), cause);
         }

@@ -190,8 +190,8 @@ public class LoginAction extends FessLoginAction {
             }
             // The credentials were not checked, because the users cannot be read: that is not a failed login, and
             // not worth a stack trace either. Say so on the form and give back the address slot the attempt took.
-            logger.warn("[login] the search engine is unavailable: username={}, reason={}", LogUtil.sanitize(username),
-                    LogUtil.sanitize(e.getMessage()));
+            logger.warn("[login] the search engine is unavailable: username={}, reason={}, cause={}", LogUtil.sanitize(username),
+                    LogUtil.sanitize(e.getMessage()), LogUtil.sanitize(V2EnvelopeWriter.describeRootCause(e)));
             limiter.release(LoginRateLimiter.Scope.IP, clientIp);
             throwValidationError(messages -> messages.addErrorsSearchEngineUnavailable(GLOBAL), () -> asIndexPage(form));
         }
