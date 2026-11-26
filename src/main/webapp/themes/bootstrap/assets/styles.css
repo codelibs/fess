@@ -332,5 +332,12 @@ footer[role="contentinfo"] {
 [data-bs-theme="dark"] .help-section code { background: var(--bs-tertiary-bg); }
 [data-bs-theme="dark"] .chat-welcome { background: none; }
 [data-bs-theme="dark"] .chat-welcome-title { color: var(--bs-emphasis-color); }
+/* Bootstrap keeps the text of .btn-outline-secondary (#6c757d), .btn-outline-danger and .text-danger (#dc3545) the same
+   in dark mode: 3.29:1 and 3.41:1 on the dark page, below WCAG AA (the Options button of the home page, the Filters
+   button on a phone, the export menu, the passkey button; Delete of a passkey or a tag; the inline error texts).
+   The dark scheme's own secondary and danger text colours read at 6:1 or more; hover and active keep the filled colours. */
+[data-bs-theme="dark"] .btn-outline-secondary { --bs-btn-color: var(--bs-secondary-color); }
+[data-bs-theme="dark"] .btn-outline-danger { --bs-btn-color: var(--bs-danger-text-emphasis); }
+[data-bs-theme="dark"] .text-danger { color: var(--bs-danger-text-emphasis) !important; }
 /* The home logo is dark blue on a transparent background; on a dark page it is turned white. */
 [data-bs-theme="dark"] #home-view .mainLogo img { filter: brightness(0) invert(1); }
