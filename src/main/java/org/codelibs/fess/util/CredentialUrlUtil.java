@@ -221,6 +221,16 @@ public final class CredentialUrlUtil {
             while (authorityEnd < length && "/?#\r\n".indexOf(text.charAt(authorityEnd)) < 0) {
                 authorityEnd++;
             }
+            // a URL without a path that is followed by another URL ("robots.txt of http://host is unavailable: http://user:pw@host/a"):
+            // this authority ends before the scheme of the next one, which is then stripped in its turn
+            final int next = text.indexOf(SCHEME_SEPARATOR, separator + SCHEME_SEPARATOR.length());
+            if (next >= 0 && next < authorityEnd) {
+                int nextStart = next;
+                while (nextStart > separator + SCHEME_SEPARATOR.length() && isSchemeChar(text.charAt(nextStart - 1))) {
+                    nextStart--;
+                }
+                authorityEnd = nextStart;
+            }
             sb.append(text, copied, schemeStart).append(removeUserInfo(text.substring(schemeStart, authorityEnd)));
             copied = authorityEnd;
             separator = text.indexOf(SCHEME_SEPARATOR, authorityEnd);

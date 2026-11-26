@@ -228,6 +228,11 @@ public class CredentialUrlUtilTest extends UnitFessTestCase {
                 CredentialUrlUtil.removeUserInfoInText("a http://u:secret@host:8080?x=1 b smb://v@host/s c ftp://w:secret@host"));
         // the password holds an at sign, a colon, or a space
         assertEquals("[http://host/a]", CredentialUrlUtil.removeUserInfoInText("[http://user:p@ss:w rd@host/a]"));
+        // a URL without a path followed by another URL in the same text (the robots.txt failure of a crawl URL)
+        assertEquals("robots.txt of http://host is unavailable (UnknownHostException: host): http://host/x/start.html",
+                CredentialUrlUtil.removeUserInfoInText(
+                        "robots.txt of http://host is unavailable (UnknownHostException: host): http://user:secret@host/x/start.html"));
+        assertEquals("http://a b smb://c/d", CredentialUrlUtil.removeUserInfoInText("http://a b smb://u:secret@c/d"));
         // a line break ends the authority
         assertEquals("http://host\nuser:secret@x", CredentialUrlUtil.removeUserInfoInText("http://host\nuser:secret@x"));
         assertEquals("jdbc:mysql://host/db", CredentialUrlUtil.removeUserInfoInText("jdbc:mysql://user:secret@host/db"));
