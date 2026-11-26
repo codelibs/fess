@@ -312,6 +312,25 @@ describe("attach — login form submit", () => {
     expect(err.classList.contains("d-none")).toBe(false);
   });
 
+  // The search engine is out of reach: POST /auth/login answers 503 with V2ErrorCode.SERVICE_UNAVAILABLE ("service_unavailable").
+  // The credentials were not checked, so the dialog must not say that they are wrong.
+  it.each([
+    [{ code: "service_unavailable", httpStatus: 503 }],
+    [{ code: "service_unavailable" }],
+    [{ httpStatus: 503 }],
+  ])("shows the search-engine-unavailable message for %o", async (rejection) => {
+    document.body.innerHTML = LOGIN_FIXTURE;
+    await attach();
+    api.post.mockRejectedValue(rejection);
+
+    document.getElementById("login-form").dispatchEvent(new Event("submit"));
+    await flush();
+
+    const err = document.getElementById("login-error");
+    expect(err.textContent).toBe("error.detail_search_engine_unavailable");
+    expect(err.classList.contains("d-none")).toBe(false);
+  });
+
   it("shows the invalid-credentials message on a generic failure", async () => {
     document.body.innerHTML = LOGIN_FIXTURE;
     await attach();
