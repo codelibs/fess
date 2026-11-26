@@ -50,8 +50,12 @@ public class FessApiAdminActionTest extends UnitFessTestCase {
         assertTrue(FessApiAdminAction.isStaleVersion(4L, 3));
         assertTrue(FessApiAdminAction.isStaleVersion(4L, 5L));
         assertFalse(FessApiAdminAction.isStaleVersion(4L, 4));
-        // a version that was not read cannot be compared
+        // a negative version_no in the request (the constant -1 the API returned until 15.9) is compared like any other
+        assertTrue(FessApiAdminAction.isStaleVersion(4L, -1));
+        assertTrue(FessApiAdminAction.isStaleVersion(0L, -1L));
+        // a stored version that is not known cannot be compared
         assertFalse(FessApiAdminAction.isStaleVersion(-1L, 3));
+        assertFalse(FessApiAdminAction.isStaleVersion(-1L, -1));
         assertFalse(FessApiAdminAction.isStaleVersion(null, 3));
         assertFalse(FessApiAdminAction.isStaleVersion(4L, null));
     }
