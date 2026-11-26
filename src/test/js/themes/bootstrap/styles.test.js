@@ -30,3 +30,18 @@ describe("styles.css target size", () => {
     expect(rule[1]).toMatch(/min-width: 24px/);
   });
 });
+
+describe("styles.css dark colour scheme", () => {
+  it("gives the outline secondary buttons a text colour that reads on the dark page", () => {
+    // Bootstrap's own --bs-btn-color of .btn-outline-secondary is #6c757d in both schemes: 3.29:1 on #212529
+    const rule = css.match(/\[data-bs-theme="dark"\] \.btn-outline-secondary \{([^}]*)\}/);
+    expect(rule).not.toBeNull();
+    expect(rule[1]).toMatch(/--bs-btn-color: var\(--bs-secondary-color\)/);
+  });
+
+  it("gives the outline danger buttons and the danger text the danger text colour of the dark scheme", () => {
+    // Bootstrap's #dc3545 is 3.41:1 on #212529 (Delete of a passkey or a tag, the inline errors)
+    expect(css).toMatch(/\[data-bs-theme="dark"\] \.btn-outline-danger \{ --bs-btn-color: var\(--bs-danger-text-emphasis\); \}/);
+    expect(css).toMatch(/\[data-bs-theme="dark"\] \.text-danger \{ color: var\(--bs-danger-text-emphasis\) !important; \}/);
+  });
+});
