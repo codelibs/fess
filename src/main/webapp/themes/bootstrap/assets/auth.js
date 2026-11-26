@@ -401,6 +401,10 @@ async function finishLogin(env, typed) {
 function loginErrorMessage(e) {
   // V2ErrorCode emits lowercase snake_case wire codes ("rate_limited").
   if (e.code === "rate_limited" || e.code === "RATE_LIMITED" || e.httpStatus === 429) return t("auth.error_rate_limited");
+  // 503 service_unavailable: the search engine or the LDAP directory could not be reached (or a proxy in front
+  // answered 503), so the credentials were not checked and saying that they are wrong would send the user to
+  // retype a right password. The message names no service, since the 503 does not tell which one failed.
+  if (e.code === "service_unavailable" || e.code === "SERVICE_UNAVAILABLE" || e.httpStatus === 503) return t("error.body_503");
   return t("auth.error_invalid_credentials");
 }
 
