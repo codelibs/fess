@@ -91,4 +91,39 @@ public class FessApiActionTest extends UnitFessTestCase {
         assertTrue(result.response instanceof ApiErrorResponse);
         assertEquals(UNAUTHORIZED_MESSAGE, ((ApiErrorResponse) result.response).message);
     }
+
+    /**
+     * The message of a refused API call is looked up with the request locale. The bundles are named
+     * by language and country (zh_CN, zh_TW), so a Chinese locale that names its script or only Hong
+     * Kong is read as simplified or traditional Chinese instead of falling back to English.
+     */
+    @Test
+    public void test_getMessage_readsAChineseScriptOrHongKongLocaleAsSimplifiedOrTraditional() {
+        final FessApiAction action = new FessApiAction() {
+            @Override
+            protected boolean isAccessAllowed() {
+                return false;
+            }
+        };
+        action.messageManager = ComponentUtil.getMessageManager();
+        action.request = getMockRequest();
+        final VaMessenger<FessMessages> unauthorized =
+                messages -> messages.addErrorsUnauthorizedRequest(org.lastaflute.core.message.UserMessages.GLOBAL_PROPERTY_KEY);
+
+        // Tomcat's default Accept-Language parser gives zh-Hans as zh__HANS, Locale.forLanguageTag as zh__#Hans
+        for (final java.util.Locale locale : new java.util.Locale[] { java.util.Locale.of("zh", "", "HANS"),
+                java.util.Locale.forLanguageTag("zh-Hans"), java.util.Locale.SIMPLIFIED_CHINESE }) {
+            getMockRequest().setLocale(locale);
+            assertEquals(locale.toString(), "未经授权的请求。", action.getMessage(unauthorized));
+        }
+        for (final java.util.Locale locale : new java.util.Locale[] { java.util.Locale.of("zh", "", "HANT"),
+                java.util.Locale.forLanguageTag("zh-Hant"), java.util.Locale.forLanguageTag("zh-HK"),
+                java.util.Locale.forLanguageTag("zh-MO"), java.util.Locale.TRADITIONAL_CHINESE }) {
+            getMockRequest().setLocale(locale);
+            assertEquals(locale.toString(), "未經授權的請求。", action.getMessage(unauthorized));
+        }
+        // a bare zh names no script: there is no fess_message_zh bundle, so it stays English
+        getMockRequest().setLocale(java.util.Locale.CHINESE);
+        assertEquals(UNAUTHORIZED_MESSAGE, action.getMessage(unauthorized));
+    }
 }

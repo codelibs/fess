@@ -61,6 +61,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.LocaleUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.taglib.function.LaFunctions;
@@ -606,6 +607,20 @@ public class ViewHelper {
     }
 
     /**
+     * Gives the locale the message of a cached page is looked up with. It is read by
+     * {@link LocaleUtil#toChineseRegionLocale(Locale)}, so that a Chinese locale that names its script
+     * ({@code zh-Hans}, {@code zh-Hant}) or only Hong Kong or Macao finds the Chinese message instead of the
+     * English one. The user locale is already read so when it comes from the request, but a locale kept in the
+     * session (such as one given by the {@code browser_lang} parameter to {@code /api/v2/ui/config}) is not.
+     *
+     * @param userLocale the locale of the user, may be null
+     * @return the locale to look the messages up with; English when there is none
+     */
+    protected Locale getCacheMessageLocale(final Locale userLocale) {
+        return userLocale == null ? Locale.ENGLISH : LocaleUtil.toChineseRegionLocale(userLocale);
+    }
+
+    /**
      * Creates cached content with highlighting for a document.
      * Uses Handlebars templates to render the cached content.
      *
@@ -618,10 +633,7 @@ public class ViewHelper {
         final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getViewTemplatePath().toFile());
         final Handlebars handlebars = new Handlebars(loader);
 
-        Locale locale = ComponentUtil.getRequestManager().getUserLocale();
-        if (locale == null) {
-            locale = Locale.ENGLISH;
-        }
+        final Locale locale = getCacheMessageLocale(ComponentUtil.getRequestManager().getUserLocale());
         String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (url == null) {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");

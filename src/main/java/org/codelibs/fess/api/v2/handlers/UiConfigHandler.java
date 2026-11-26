@@ -47,6 +47,7 @@ import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LocaleUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.LastaWebKey;
 
@@ -255,7 +256,9 @@ public class UiConfigHandler {
      * the locale remembered in the session, then Accept-Language.
      *
      * <p>A valid {@code browser_lang} is remembered in the session under the key LastaFlute reads,
-     * so the JSP pages and this endpoint agree afterwards. This endpoint is not a LastaFlute
+     * so the JSP pages and this endpoint agree afterwards. It is read as {@code FessUserLocaleProcessProvider}
+     * reads it: a Chinese locale that names its script or only Hong Kong or Macao is simplified or
+     * traditional Chinese ({@link LocaleUtil#toChineseRegionLocale(Locale)}). This endpoint is not a LastaFlute
      * action, so the framework's own resolution ({@code FessUserLocaleProcessProvider}) does not
      * run for it.</p>
      *
@@ -270,7 +273,7 @@ public class UiConfigHandler {
             final String value = req.getParameter(paramName);
             if (StringUtil.isNotBlank(value)) {
                 try {
-                    final Locale locale = LocaleUtils.toLocale(value);
+                    final Locale locale = LocaleUtil.toChineseRegionLocale(LocaleUtils.toLocale(value));
                     if (session != null) {
                         session.setAttribute(LastaWebKey.USER_LOCALE_KEY, locale);
                     }

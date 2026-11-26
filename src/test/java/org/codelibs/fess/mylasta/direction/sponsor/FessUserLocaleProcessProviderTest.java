@@ -21,9 +21,12 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.servlet.request.RequestManager;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
 
@@ -304,6 +307,58 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
         assertEquals(Locale.GERMANY, result1.get());
         assertEquals(Locale.GERMANY, result2.get());
         assertEquals(Locale.GERMANY, result3.get());
+    }
+
+    @Test
+    public void test_getRequestedLocale_readsAChineseScriptOrHongKongLocaleAsSimplifiedOrTraditional() {
+        // Tomcat's default Accept-Language parser gives zh-Hans as zh__HANS, Locale.forLanguageTag as zh__#Hans
+        assertEquals(Locale.SIMPLIFIED_CHINESE,
+                provider.getRequestedLocale(createRequestManagerWithLocale(Locale.of("zh", "", "HANS"))).get());
+        assertEquals(Locale.SIMPLIFIED_CHINESE,
+                provider.getRequestedLocale(createRequestManagerWithLocale(Locale.forLanguageTag("zh-Hans"))).get());
+        assertEquals(Locale.TRADITIONAL_CHINESE,
+                provider.getRequestedLocale(createRequestManagerWithLocale(Locale.of("zh", "", "HANT"))).get());
+        assertEquals(Locale.TRADITIONAL_CHINESE,
+                provider.getRequestedLocale(createRequestManagerWithLocale(Locale.forLanguageTag("zh-Hant"))).get());
+        assertEquals(Locale.TRADITIONAL_CHINESE,
+                provider.getRequestedLocale(createRequestManagerWithLocale(Locale.forLanguageTag("zh-HK"))).get());
+        assertEquals(Locale.TRADITIONAL_CHINESE,
+                provider.getRequestedLocale(createRequestManagerWithLocale(Locale.forLanguageTag("zh-MO"))).get());
+    }
+
+    @Test
+    public void test_getRequestedLocale_leavesOtherLocalesToTheBrowser() {
+        // empty means "browser default": LastaFlute then uses the request locale as it is
+        for (final Locale locale : new Locale[] { Locale.SIMPLIFIED_CHINESE, Locale.TRADITIONAL_CHINESE, Locale.CHINESE, Locale.JAPANESE,
+                Locale.ENGLISH, Locale.forLanguageTag("zh-SG") }) {
+            assertFalse(locale.toString(), provider.getRequestedLocale(createRequestManagerWithLocale(locale)).isPresent());
+        }
+    }
+
+    @Test
+    public void test_findBusinessLocale_readsAHongKongLocaleAsTraditional() {
+        FessConfig mockConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getQueryBrowserLangParameterName() {
+                return "lang";
+            }
+        };
+        ComponentUtil.setFessConfig(mockConfig);
+
+        assertEquals(Locale.TRADITIONAL_CHINESE, provider.findBusinessLocale(null, createMockRequestManager("zh_HK")).get());
+        assertEquals(Locale.TRADITIONAL_CHINESE, provider.findBusinessLocale(null, createMockRequestManager("zh_TW")).get());
+        assertEquals(Locale.CHINESE, provider.findBusinessLocale(null, createMockRequestManager("zh")).get());
+    }
+
+    private RequestManager createRequestManagerWithLocale(final Locale locale) {
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setLocale(locale);
+        return new org.lastaflute.web.servlet.request.SimpleRequestManager() {
+            @Override
+            public HttpServletRequest getRequest() {
+                return request;
+            }
+        };
     }
 
     // Helper method to create mock RequestManager

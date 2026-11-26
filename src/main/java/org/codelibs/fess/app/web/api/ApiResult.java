@@ -25,6 +25,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
+import org.codelibs.fess.util.LocaleUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -790,7 +791,10 @@ public class ApiResult {
             final FessMessages messages = new FessMessages();
             validationMessagesLambda.message(messages);
             message = ComponentUtil.getMessageManager()
-                    .toMessageList(LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ENGLISH), messages)
+                    .toMessageList(LaRequestUtil.getOptionalRequest()
+                            .map(HttpServletRequest::getLocale)
+                            .map(LocaleUtil::toChineseRegionLocale)
+                            .orElse(Locale.ENGLISH), messages)
                     .stream()
                     .collect(Collectors.joining(" "));
             return this;

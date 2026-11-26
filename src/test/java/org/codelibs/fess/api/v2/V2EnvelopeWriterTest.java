@@ -89,6 +89,35 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_writeInvalidRequest_readsAChineseScriptOrHongKongLocaleAsSimplifiedOrTraditional() throws Exception {
+        final org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException cause =
+                new org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException(
+                        messages -> messages.addErrorsInvalidStartPosition(org.lastaflute.core.message.UserMessages.GLOBAL_PROPERTY_KEY),
+                        "start must be non-negative, got: -1");
+        for (final String tag : new String[] { "zh-Hans", "zh-Hans-CN", "zh-Hans-HK", "zh-CN" }) {
+            final CapturingResponse res = new CapturingResponse();
+            new V2EnvelopeWriter().writeInvalidRequest(res, cause, java.util.Locale.forLanguageTag(tag));
+            assertTrue(tag + " " + res.body(), res.body().contains("起始位置必须大于或等于 0。"));
+        }
+        for (final String tag : new String[] { "zh-Hant", "zh-HK", "zh-MO", "zh-Hant-HK", "zh-TW" }) {
+            final CapturingResponse res = new CapturingResponse();
+            new V2EnvelopeWriter().writeInvalidRequest(res, cause, java.util.Locale.forLanguageTag(tag));
+            assertTrue(tag + " " + res.body(), res.body().contains("起始位置必須大於或等於 0。"));
+        }
+        // Tomcat's default Accept-Language parser hands zh-Hans over as the variant (zh__HANS)
+        final CapturingResponse hans = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(hans, cause, java.util.Locale.of("zh", "", "HANS"));
+        assertTrue(hans.body(), hans.body().contains("起始位置必须大于或等于 0。"));
+        final CapturingResponse hant = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(hant, cause, java.util.Locale.of("zh", "", "HANT"));
+        assertTrue(hant.body(), hant.body().contains("起始位置必須大於或等於 0。"));
+        // a bare zh names no script: there is no fess_message_zh bundle, so it is answered from the default (English) one
+        final CapturingResponse zh = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(zh, cause, java.util.Locale.forLanguageTag("zh"));
+        assertTrue(zh.body(), zh.body().contains("The start position must be 0 or greater."));
+    }
+
+    @Test
     public void test_writeInvalidRequest_namesTheParameterAndTheLimit_inTheCallersLanguage() throws Exception {
         final org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException cause =
                 org.junit.jupiter.api.Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException.class,

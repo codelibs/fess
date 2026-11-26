@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LocaleUtil;
 import org.dbflute.optional.OptionalObject;
 import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
@@ -49,7 +50,10 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
         final String name = fessConfig.getQueryBrowserLangParameterName();
         if (StringUtil.isNotBlank(name)) {
             try {
-                return requestManager.getParameter(name).filter(StringUtil::isNotBlank).map(LocaleUtils::toLocale);
+                return requestManager.getParameter(name)
+                        .filter(StringUtil::isNotBlank)
+                        .map(LocaleUtils::toLocale)
+                        .map(LocaleUtil::toChineseRegionLocale);
             } catch (final Exception e) {
                 logger.debug("Failed to parse locale: name={}", name, e);
             }
@@ -57,8 +61,21 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
         return OptionalObject.empty();
     }
 
+    /**
+     * Gives the locale of the request when it is a Chinese locale that names its script or only Hong Kong or
+     * Macao: it is read as simplified or traditional Chinese ({@link LocaleUtil#toChineseRegionLocale(Locale)}),
+     * as the message bundles are named by language and country. Any other locale is left to the browser.
+     *
+     * @param requestManager the manager of the request
+     * @return the locale read as simplified or traditional Chinese, or empty for the browser default
+     */
     @Override
     public OptionalThing<Locale> getRequestedLocale(final RequestManager requestManager) {
+        final Locale locale = requestManager.getRequest().getLocale();
+        final Locale regionLocale = LocaleUtil.toChineseRegionLocale(locale);
+        if (locale != null && !locale.equals(regionLocale)) {
+            return OptionalObject.of(regionLocale);
+        }
         return OptionalObject.empty(); // means browser default
     }
 
