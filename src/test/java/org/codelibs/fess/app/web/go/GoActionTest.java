@@ -547,6 +547,44 @@ public class GoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_go_searchEngineUnreachable_isNotDocIdNotFound() throws Exception {
+        final RuntimeException down =
+                new org.codelibs.curl.CurlException("Failed to access the content.", new java.net.ConnectException("Connection refused"));
+        goAction.setSearchHelper(new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw down;
+            }
+        });
+        try {
+            goAction.index(newGoForm());
+            fail("expected the failure of the search engine");
+        } catch (final RuntimeException e) {
+            assertSame(down, e);
+        }
+        assertNull(getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
+    public void test_go_searcherFailureThatIsNotTheEngine_isStillDocIdNotFound() throws Exception {
+        goAction.setSearchHelper(new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new IllegalStateException("broken");
+            }
+        });
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 404");
+        } catch (final Exception e) {
+            assertClientError(404, e);
+        }
+        assertEquals("errors.docid_not_found", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
     public void test_go_documentUrlMissing_is404WithDetailKey() throws Exception {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("id", "doc1");

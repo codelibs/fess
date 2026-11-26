@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.helper.PathMappingHelper;
@@ -104,6 +105,11 @@ public class GoAction extends FessSearchAction {
                             getUserBean())
                     .orElse(null);
         } catch (final Exception e) {
+            if (e instanceof final RuntimeException re && V2EnvelopeWriter.isSearchEngineUnavailable(re)) {
+                // The search engine is out of reach: the document may well exist. Answering "Doc ID is
+                // not found" would send the user away; the error page answers 503, as the console does.
+                throw re;
+            }
             logger.warn("Failed to request: {}", form.docId, e);
         }
         if (doc == null) {
