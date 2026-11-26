@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
@@ -34,8 +35,14 @@ import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.token.TokenErrorHook;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 public class AdminFileauthActionTest extends UnitFessTestCase {
+
+    // An encrypted password that app.cipher.key cannot decrypt, such as one saved before the key was replaced
+    // or restored from the backup of another installation.
+    private static final String UNDECRYPTABLE_PASSWORD = "{cipher}00112233445566778899aabbccddeeff";
 
     private final List<String> storedPasswords = new ArrayList<>();
 
@@ -180,5 +187,145 @@ public class AdminFileauthActionTest extends UnitFessTestCase {
         final String saved = update("legacy");
         assertTrue(saved, saved.startsWith("{cipher}"));
         assertEquals("legacy", ParameterUtil.decryptCredential(saved, null, "password"));
+    }
+
+    // The edit and details pages open when the stored password cannot be decrypted. The password is blank,
+    // not the encrypted value, so that the admin can enter it again and the encrypted value is never encrypted
+    // a second time.
+    @Test
+    public void test_copyToForm_undecryptablePasswordIsShownBlank() {
+        storedValue = UNDECRYPTABLE_PASSWORD;
+        final EditForm form = new EditForm();
+        AdminFileauthAction.copyToForm(stored(), form, false);
+        assertEquals("", form.password);
+        assertEquals("user", form.username);
+
+        final EditForm detailsForm = new EditForm();
+        AdminFileauthAction.copyToForm(stored(), detailsForm, true);
+        assertEquals("", detailsForm.password);
+        assertEquals("user", detailsForm.username);
+    }
+
+    // A blank password submitted while the stored password can be decrypted clears the password, as it did before.
+    @Test
+    public void test_update_blankPasswordOverDecryptablePasswordIsSaved() {
+        storedValue = ParameterUtil.encryptCredential("s3cret");
+        final EditForm form = new EditForm();
+        form.id = "1";
+        form.password = "";
+        assertFalse(AdminFileauthAction.isUndecryptablePasswordBlanked(form));
+        assertNull(update(""));
+        storedPasswords.clear();
+        assertNull(update(null));
+    }
+
+    // Saving the edit page with the blank password while the stored password cannot be decrypted is refused, so
+    // the stored password is not replaced unless the admin enters a new one.
+    @Test
+    public void test_update_blankPasswordOverUndecryptablePasswordIsRefused() {
+        storedValue = UNDECRYPTABLE_PASSWORD;
+        for (final String password : new String[] { null, "", " " }) {
+            final EditForm form = new EditForm();
+            form.crudMode = CrudMode.EDIT;
+            form.id = "1";
+            form.password = password;
+            assertTrue(AdminFileauthAction.isUndecryptablePasswordBlanked(form));
+        }
+        assertTrue(storedPasswords.isEmpty());
+        assertEquals(UNDECRYPTABLE_PASSWORD, stored().getPassword());
+    }
+
+    // A password typed into the field replaces a stored password that cannot be decrypted, encrypted once.
+    @Test
+    public void test_update_newPasswordReplacesUndecryptablePassword() {
+        storedValue = UNDECRYPTABLE_PASSWORD;
+        final EditForm form = new EditForm();
+        form.id = "1";
+        form.password = "changed";
+        assertFalse(AdminFileauthAction.isUndecryptablePasswordBlanked(form));
+
+        final String saved = update("changed");
+
+        assertTrue(saved, saved.startsWith("{cipher}"));
+        assertEquals("changed", ParameterUtil.decryptCredential(saved, null, "password"));
+    }
+
+    @Test
+    public void test_copyToForm_returnsWhetherThePasswordWasDecrypted() {
+        storedValue = ParameterUtil.encryptCredential("s3cret");
+        assertTrue(AdminFileauthAction.copyToForm(stored(), new EditForm(), false));
+        storedValue = UNDECRYPTABLE_PASSWORD;
+        assertFalse(AdminFileauthAction.copyToForm(stored(), new EditForm(), false));
+    }
+
+    // update() itself: saving the edit page with the blank password while the stored password cannot be
+    // decrypted is refused with a validation error on the password field, and nothing is stored.
+    @Test
+    public void test_updateAction_blankPasswordOverUndecryptablePasswordIsRefused() throws Exception {
+        storedValue = UNDECRYPTABLE_PASSWORD;
+        final AdminFileauthAction action = createUpdateAction();
+        for (final String password : new String[] { null, "" }) {
+            final EditForm form = createEditForm(password);
+            try {
+                action.update(form);
+                fail("a blank password must not replace a stored password that cannot be decrypted");
+            } catch (final ValidationErrorException e) {
+                assertTrue(e.getMessages().hasMessageOf("password", "errors.could_not_decrypt_password"));
+            }
+        }
+        assertTrue(storedPasswords.isEmpty());
+    }
+
+    // update() itself: a password typed into the field replaces a stored password that cannot be decrypted.
+    @Test
+    public void test_updateAction_newPasswordReplacesUndecryptablePassword() throws Exception {
+        storedValue = UNDECRYPTABLE_PASSWORD;
+
+        createUpdateAction().update(createEditForm("changed"));
+
+        assertEquals(1, storedPasswords.size());
+        final String saved = storedPasswords.get(0);
+        assertTrue(saved, saved.startsWith("{cipher}"));
+        assertEquals("changed", ParameterUtil.decryptCredential(saved, null, "password"));
+    }
+
+    private EditForm createEditForm(final String password) {
+        final EditForm form = new EditForm();
+        form.crudMode = CrudMode.EDIT;
+        form.id = "1";
+        form.versionNo = 1;
+        form.username = "user";
+        form.password = password;
+        form.fileConfigId = "fileconfig";
+        return form;
+    }
+
+    /**
+     * Creates the action with the fields that update() needs. The token of the edit page is not under test, so
+     * verifyToken() accepts the request.
+     */
+    private AdminFileauthAction createUpdateAction() throws Exception {
+        final AdminFileauthAction action = new AdminFileauthAction() {
+            @Override
+            protected void verifyToken(final TokenErrorHook errorResponseLambda) {
+                // accepted
+            }
+        };
+        suppressBindingOf(org.codelibs.fess.app.web.base.login.FessLoginAssist.class);
+        suppressBindingOf(org.codelibs.fess.app.service.AccessTokenService.class);
+        suppressBindingOf(FileAuthenticationService.class);
+        suppressBindingOf(org.codelibs.fess.app.service.FileConfigService.class);
+        suppressBindingOf(org.codelibs.fess.app.pager.FileAuthPager.class);
+        inject(action);
+        final Field serviceField = AdminFileauthAction.class.getDeclaredField("fileAuthenticationService");
+        serviceField.setAccessible(true);
+        serviceField.set(action, ComponentUtil.getComponent(FileAuthenticationService.class));
+        final Field systemHelperField = FessBaseAction.class.getDeclaredField("systemHelper");
+        systemHelperField.setAccessible(true);
+        systemHelperField.set(action, ComponentUtil.getSystemHelper());
+        final Field fessConfigField = FessBaseAction.class.getDeclaredField("fessConfig");
+        fessConfigField.setAccessible(true);
+        fessConfigField.set(action, ComponentUtil.getFessConfig());
+        return action;
     }
 }

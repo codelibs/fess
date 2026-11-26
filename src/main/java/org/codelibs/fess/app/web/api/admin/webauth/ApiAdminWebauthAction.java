@@ -35,6 +35,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.opensearch.config.exentity.WebAuthentication;
+import org.lastaflute.core.security.exception.CipherFailureException;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
@@ -212,12 +213,21 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
      * Keeps the stored password when an update does not carry a new one. The API never returns
      * the password, so a client that reads a setting and sends it back has none to send. The stored
      * password is decrypted here, because the body carries plain text that the service encrypts on save.
+     * A stored password that cannot be decrypted, such as one saved with another app.cipher.key, cannot be kept,
+     * so the update is refused and the caller has to send the password again.
      *
      * @param body the update request body
      */
     protected void keepStoredPassword(final EditBody body) {
         if (StringUtil.isBlank(body.password)) {
-            webAuthService.getWebAuthentication(body.id).ifPresent(stored -> body.password = stored.decryptPassword());
+            webAuthService.getWebAuthentication(body.id).ifPresent(stored -> {
+                try {
+                    body.password = stored.decryptPassword();
+                } catch (final CipherFailureException e) {
+                    logger.warn("{} The update is refused until the password is sent again.", e.getMessage());
+                    throwValidationErrorApi(messages -> messages.addErrorsCouldNotDecryptPassword("password"));
+                }
+            });
         }
     }
 

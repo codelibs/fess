@@ -566,6 +566,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The regular expression after "regex:" is invalid: {0} */
     public static final String ERRORS_relatedcontent_invalid_regex = "{errors.relatedcontent_invalid_regex}";
 
+    /** The key of the message: The stored password could not be decrypted with the current app.cipher.key. Enter the password again. */
+    public static final String ERRORS_could_not_decrypt_password = "{errors.could_not_decrypt_password}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -3335,6 +3338,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsRelatedcontentInvalidRegex(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_relatedcontent_invalid_regex, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.could_not_decrypt_password' with parameters.
+     * <pre>
+     * message: The stored password could not be decrypted with the current app.cipher.key. Enter the password again.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCouldNotDecryptPassword(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_could_not_decrypt_password));
         return this;
     }
 
