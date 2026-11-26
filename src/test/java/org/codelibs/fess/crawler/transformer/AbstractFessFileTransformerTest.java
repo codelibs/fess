@@ -287,6 +287,102 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * The message of the exception that transform throws for a document whose text could not be extracted is the first
+     * line of the error log of the failure url: it names the reason (a suspected zip bomb here), not a serialization
+     * failure, and it has no user name and password of the url.
+     */
+    @Test
+    public void test_transform_failureMessageNamesTheReasonOfAFailedExtraction() {
+        final ExtractException bomb =
+                new ExtractException("Failed to extract via Tika: reason=zipBombDetected", new IOException("Suspected zip bomb"));
+        try {
+            transformWith((in, p) -> {
+                throw bomb;
+            }, "http://user:secretpw@example.com/files/bomb.zip");
+            fail("Should throw CrawlingAccessException for a document whose text cannot be extracted");
+        } catch (final CrawlingAccessException e) {
+            assertTrue(e.getMessage().contains("reason=zipBombDetected"), e.getMessage());
+            assertTrue(e.getMessage().contains("http://example.com/files/bomb.zip"), e.getMessage());
+            assertFalse(e.getMessage().contains("secretpw"), "the message must not carry the password");
+            // still wrapped: the error name of the failure url is the class of the cause, as before
+            assertTrue(e.getCause() instanceof CrawlingAccessException);
+            assertSame(bomb, e.getCause().getCause());
+        }
+    }
+
+    // a suspected zip bomb fails the document even when content exceptions are ignored (the default)
+    private static final ExtractException ZIP_BOMB = new ExtractException("Failed to extract via Tika: reason=zipBombDetected");
+
+    /**
+     * The message of the cause comes from the document (a zip entry name, a parser message): in the failure message it stays
+     * on one line, it is cut, and a url it quotes loses its user name and password.
+     */
+    @Test
+    public void test_transform_failureMessageKeepsTheCauseMessageOnOneLine() {
+        final String longTail = "x".repeat(500);
+        final ExtractException cause = new ExtractException(
+                "Bad entry: evil\r\n2026-11-26 00:00:00 ERROR forged line\u2028 from http://u:causepw@other.example.com/a " + longTail,
+                ZIP_BOMB);
+        try {
+            transformWith((in, p) -> {
+                throw cause;
+            }, "http://example.com/files/entry.zip");
+            fail("Should throw CrawlingAccessException for a document whose text cannot be extracted");
+        } catch (final CrawlingAccessException e) {
+            final String message = e.getMessage();
+            assertTrue(message.startsWith("Could not get a text from http://example.com/files/entry.zip: Bad entry: evil"), message);
+            assertFalse(message.contains("\r") || message.contains("\n") || message.contains(" "), message);
+            assertTrue(message.contains("evil??2026-11-26"), message);
+            assertTrue(message.contains("http://other.example.com/a"), message);
+            assertFalse(message.contains("causepw"), "the message must not carry the password of a url in the cause");
+            assertFalse(message.contains(longTail), message);
+            assertTrue(message.endsWith("..."), message);
+            assertEquals(message, e.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Only the url of the document loses its user info: the message of the cause is not eaten up to its at sign when the url
+     * has no path.
+     */
+    @Test
+    public void test_transform_failureMessageKeepsAnAtSignOfTheCause() {
+        final ExtractException cause = new ExtractException("Cannot read the entry mail@example.org.txt", ZIP_BOMB);
+        try {
+            transformWith((in, p) -> {
+                throw cause;
+            }, "http://user:secretpw@example.com");
+            fail("Should throw CrawlingAccessException for a document whose text cannot be extracted");
+        } catch (final CrawlingAccessException e) {
+            assertEquals("Could not get a text from http://example.com: Cannot read the entry mail@example.org.txt", e.getMessage());
+        }
+    }
+
+    private Object transformWith(final Extractor extractor, final String url) {
+        ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
+        ComponentUtil.register(new PathMappingHelper(), "pathMappingHelper");
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final FileConfig fileConfig = new FileConfig();
+        fileConfig.setId("1");
+        final String sessionId = ComponentUtil.getCrawlingConfigHelper().store("test", fileConfig);
+        final TestableAbstractFessFileTransformer failing = new TestableAbstractFessFileTransformer() {
+            @Override
+            protected Extractor getExtractor(final ResponseData responseData) {
+                return extractor;
+            }
+        };
+        failing.fessConfig = ComponentUtil.getFessConfig();
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl(url);
+        responseData.setMimeType("application/zip");
+        responseData.setContentLength(9L);
+        responseData.setSessionId(sessionId);
+        responseData.setResponseBody("body text".getBytes());
+        return failing.transform(responseData);
+    }
+
     private Map<String, Object> generateDataWithHeaders(final Map<String, Object> headers) {
         return generateDataWith(headers, null, Map.of(), null);
     }

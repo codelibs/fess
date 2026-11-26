@@ -69,6 +69,7 @@ import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.LogUtil;
 
 /**
  * The abstract transformer for Fess.
@@ -137,7 +138,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             resultData.setRawData(generateData(responseData));
             resultData.setSerializer(dataSerializer::fromObjectToBinary);
         } catch (final Exception e) {
-            throw new CrawlingAccessException("Could not serialize object", e);
+            // the message of a failed extraction says what failed (for example, reason=zipBombDetected): it is the first line of
+            // the error log of the failure url.  The exception is still wrapped, so the error name (the class of the cause) and
+            // the log level stay as they were.
+            throw new CrawlingAccessException(e instanceof CrawlingAccessException ? e.getMessage() : "Could not serialize object", e);
         }
         resultData.setEncoding(fessConfig.getCrawlerCrawlingDataEncoding());
 
@@ -226,7 +230,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
             });
         } catch (final Exception e) {
-            final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from " + responseData.getUrl(), e);
+            // the message of the cause comes from the document (a zip entry name, a parser message): it may quote a url with
+            // a password and hold line breaks, so its user info is removed first, then it is kept on one line and cut
+            final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from "
+                    + CredentialUrlUtil.removeUserInfo(responseData.getUrl())
+                    + (e.getMessage() != null ? ": " + LogUtil.sanitize(CredentialUrlUtil.removeUserInfoInText(e.getMessage())) : ""), e);
             rcae.setLogLevel(CrawlingAccessException.WARN);
             throw rcae;
         }
