@@ -248,7 +248,7 @@ public class GenerateThumbnailJob extends ExecJob {
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
             if (logger.isInfoEnabled()) {
-                logger.info("ThumbnailGenerator: \nDirectory={}\nOptions={}", baseDir, cmdList);
+                logger.info("ThumbnailGenerator: \nDirectory={}\nOptions={}", baseDir, maskCommandForLog(cmdList));
             }
 
             final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {

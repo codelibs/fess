@@ -413,4 +413,74 @@ public class SystemUtilTest extends UnitFessTestCase {
         assertEquals("********", SystemUtil.maskSensitiveValue("PASSWORD", ""));
         assertEquals("", SystemUtil.maskSensitiveValue("HOST", ""));
     }
+
+    @Test
+    public void test_maskSensitiveJvmArgument() {
+        assertEquals("-Dfess.config.rag.llm.gemini.api.key=********",
+                SystemUtil.maskSensitiveJvmArgument("-Dfess.config.rag.llm.gemini.api.key=AIzaSyExample"));
+        assertEquals("-Dfess.system.storage.secretkey=********",
+                SystemUtil.maskSensitiveJvmArgument("-Dfess.system.storage.secretkey=abc"));
+        assertEquals("-Dfess.config.search_engine.password=********",
+                SystemUtil.maskSensitiveJvmArgument("-Dfess.config.search_engine.password=a b=c"));
+        assertEquals("-Dfess.system.oic.client.id=client-1", SystemUtil.maskSensitiveJvmArgument("-Dfess.system.oic.client.id=client-1"));
+        assertEquals("-Xmx2g", SystemUtil.maskSensitiveJvmArgument("-Xmx2g"));
+        assertEquals("-Dfess.secret.flag", SystemUtil.maskSensitiveJvmArgument("-Dfess.secret.flag"));
+        assertEquals("-Dfess.config.rag.llm.ollama.api.key=", SystemUtil.maskSensitiveJvmArgument("-Dfess.config.rag.llm.ollama.api.key="));
+        assertNull(SystemUtil.maskSensitiveJvmArgument(null));
+    }
+
+    @Test
+    public void test_maskSensitiveJvmOptions_optionsVariable() {
+        assertEquals("-Dfess.config.search_engine.password=******** -Xms512m -Dfess.port=8080 -Dfess.system.storage.secretkey=********",
+                SystemUtil.maskSensitiveJvmOptions(
+                        "-Dfess.config.search_engine.password=p@ss -Xms512m -Dfess.port=8080 -Dfess.system.storage.secretkey=$ecret\\x"));
+    }
+
+    @Test
+    public void test_maskSensitiveJvmOptions_quotedValue() {
+        assertEquals("-Dfess.config.search_engine.password=******** -Xmx2g",
+                SystemUtil.maskSensitiveJvmOptions("-Dfess.config.search_engine.password=\"a b c\" -Xmx2g"));
+        assertEquals("-Dfess.config.search_engine.password=******** -Xmx2g",
+                SystemUtil.maskSensitiveJvmOptions("-Dfess.config.search_engine.password='a b c' -Xmx2g"));
+        assertEquals("-Dfess.config.search_engine.password=******** -Xmx2g",
+                SystemUtil.maskSensitiveJvmOptions("-Dfess.config.search_engine.password=pre\"a b\"post -Xmx2g"));
+        assertEquals("\"-Dfess.config.search_engine.password=********\" -Xmx2g",
+                SystemUtil.maskSensitiveJvmOptions("\"-Dfess.config.search_engine.password=a b c\" -Xmx2g"));
+        assertEquals("'-Dfess.config.search_engine.password=********' -Xmx2g",
+                SystemUtil.maskSensitiveJvmOptions("'-Dfess.config.search_engine.password=a b c' -Xmx2g"));
+    }
+
+    @Test
+    public void test_maskSensitiveJvmOptions_unterminatedQuoteMasksToTheEnd() {
+        assertEquals("-Xmx2g -Dfess.config.search_engine.password=********",
+                SystemUtil.maskSensitiveJvmOptions("-Xmx2g -Dfess.config.search_engine.password=\"a b -Dfess.port=8080"));
+        assertEquals("-Xmx2g \"-Dfess.config.search_engine.password=********",
+                SystemUtil.maskSensitiveJvmOptions("-Xmx2g \"-Dfess.config.search_engine.password=a b -Dfess.port=8080"));
+    }
+
+    @Test
+    public void test_maskSensitiveJvmOptions_quoteInANotSensitiveValueDoesNotHideALaterOption() {
+        assertEquals("-Dfess.title=it's -Dfess.config.search_engine.password=********",
+                SystemUtil.maskSensitiveJvmOptions("-Dfess.title=it's -Dfess.config.search_engine.password=secret"));
+        assertEquals("-Dfess.title=it's -Dfess.config.search_engine.password=******** -Dfess.name=bob's",
+                SystemUtil.maskSensitiveJvmOptions("-Dfess.title=it's -Dfess.config.search_engine.password=secret -Dfess.name=bob's"));
+        assertEquals("\"-Dfess.title=x -Dfess.config.search_engine.password=********",
+                SystemUtil.maskSensitiveJvmOptions("\"-Dfess.title=x -Dfess.config.search_engine.password=secret"));
+    }
+
+    @Test
+    public void test_maskSensitiveJvmOptions_quotedNotSensitiveUntouched() {
+        final String text = "-Dfess.config.search_engine.password=\"a b\" -Dfess.port=\"80 80\" '-Dfess.name=x y' -Dfess.title='a b'";
+        assertEquals("-Dfess.config.search_engine.password=******** -Dfess.port=\"80 80\" '-Dfess.name=x y' -Dfess.title='a b'",
+                SystemUtil.maskSensitiveJvmOptions(text));
+        final String plain = "-Dfess.port=\"80 80\" '-Dfess.name=x y' -Dfess.title='a b' -Xmx2g";
+        assertEquals(plain, SystemUtil.maskSensitiveJvmOptions(plain));
+    }
+
+    @Test
+    public void test_maskSensitiveValue_masksOptionsInsideAValue() {
+        assertEquals("-Dfess.config.rag.llm.gemini.api.key=******** -Xmx2g",
+                SystemUtil.maskSensitiveValue("FESS_JAVA_OPTS", "-Dfess.config.rag.llm.gemini.api.key=AIzaSyExample -Xmx2g"));
+        assertEquals("/usr/bin:/bin", SystemUtil.maskSensitiveValue("PATH", "/usr/bin:/bin"));
+    }
 }

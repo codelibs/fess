@@ -34,6 +34,7 @@ import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.SystemUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.job.LaJobRuntime;
 
@@ -392,6 +393,19 @@ public abstract class ExecJob {
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    /**
+     * Returns the command to write to the log: a copy of the command with the value of every sensitive
+     * {@code -D<name>=<value>} argument replaced, as {@link SystemUtil#maskSensitiveJvmArgument(String)} does.
+     * The command copies the {@code fess.config.*} and {@code fess.system.*} system properties of this JVM,
+     * so a secret given as a JVM option is one of its arguments.
+     *
+     * @param cmdList the command to start the process with
+     * @return the command to log
+     */
+    protected List<String> maskCommandForLog(final List<String> cmdList) {
+        return cmdList.stream().map(SystemUtil::maskSensitiveJvmArgument).toList();
     }
 
     /**

@@ -114,6 +114,10 @@ public class ExecJobTest extends UnitFessTestCase {
         public String testGetLogName(String logPrefix) {
             return super.getLogName(logPrefix);
         }
+
+        public List<String> testMaskCommandForLog(List<String> cmdList) {
+            return super.maskCommandForLog(cmdList);
+        }
     }
 
     @Override
@@ -752,5 +756,20 @@ public class ExecJobTest extends UnitFessTestCase {
             // Expected to throw pattern syntax exception
             assertTrue(e instanceof java.util.regex.PatternSyntaxException);
         }
+    }
+
+    @Test
+    public void test_maskCommandForLog() {
+        final List<String> cmdList =
+                new ArrayList<>(List.of("java", "-cp", "WEB-INF/classes", "-Dfess.config.rag.llm.gemini.api.key=AIzaSyExample",
+                        "-Dfess.system.storage.secretkey=a b c", "-Dfess.system.oic.client.id=client-1",
+                        "-Dfess.config.rag.llm.ollama.api.key=", "-Xmx2g", "org.codelibs.fess.exec.Crawler", "--sessionId", "abc"));
+        assertEquals(
+                "[java, -cp, WEB-INF/classes, -Dfess.config.rag.llm.gemini.api.key=********, -Dfess.system.storage.secretkey=********, "
+                        + "-Dfess.system.oic.client.id=client-1, -Dfess.config.rag.llm.ollama.api.key=, -Xmx2g, org.codelibs.fess.exec.Crawler, "
+                        + "--sessionId, abc]",
+                execJob.testMaskCommandForLog(cmdList).toString());
+        // the command itself is not changed
+        assertEquals("-Dfess.config.rag.llm.gemini.api.key=AIzaSyExample", cmdList.get(3));
     }
 }
