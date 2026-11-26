@@ -51,6 +51,9 @@ describe("pickLocale", () => {
     ["zh-Hant-HK", "zh-TW"],
     ["zh-MO", "zh-TW"],
     ["zh-Hans", "zh-CN"],  // Simplified script → zh-CN
+    ["zh-Hans-HK", "zh-CN"], // the script wins over the region, as on the server (LocaleUtil)
+    ["zh-Hans-TW", "zh-CN"],
+    ["zh-Hant-CN", "zh-TW"],
     ["zh-SG", "zh-CN"],
     ["zh", "zh-CN"],
     ["zh_TW", "zh-TW"],    // underscore variant

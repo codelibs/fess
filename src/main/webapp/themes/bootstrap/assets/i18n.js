@@ -19,9 +19,13 @@ function matchLocale(tag) {
   }
   const subtags = lower.split("-");
   const primary = subtags[0];
-  // Chinese: the script or region picks the bundle (zh-Hant, zh-HK, zh-MO → zh-TW; zh, zh-Hans, zh-SG → zh-CN).
+  // Chinese: the script picks the bundle when there is one (zh-Hans-HK → zh-CN, zh-Hant-CN → zh-TW), as the server
+  // reads it for its own messages (LocaleUtil#toChineseRegionLocale); without a script the region does
+  // (zh-HK, zh-MO, zh-TW → zh-TW; zh, zh-SG → zh-CN).
   if (primary === "zh") {
-    return subtags.some(s => s === "hant" || s === "tw" || s === "hk" || s === "mo") ? "zh-TW" : "zh-CN";
+    if (subtags.includes("hans")) return "zh-CN";
+    if (subtags.includes("hant")) return "zh-TW";
+    return subtags.some(s => s === "tw" || s === "hk" || s === "mo") ? "zh-TW" : "zh-CN";
   }
   // Primary-subtag match (e.g. "ja-JP" → "ja", "de-AT" → "de"). A bundle that carries a region
   // ("pt-BR") answers its bare language and the other regions ("pt", "pt-PT").
