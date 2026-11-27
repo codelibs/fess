@@ -23,6 +23,7 @@ import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.FessApiAction;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
@@ -89,11 +90,11 @@ public abstract class FessApiAdminAction extends FessApiAction {
      * omits {@code permissions} (null) keeps the permission of the stored setting, and an empty one stores none.
      * </p>
      *
-     * @param permissions the permissions of the request, one per line, may be null or blank
+     * @param permissions the permissions of the request, one per line, may be null or blank (no-break spaces included)
      * @return the permissions of the request, or the default one when it has none
      */
     protected String permissionsOrDefault(final String permissions) {
-        return StringUtil.isBlank(permissions) ? fessConfig.getSearchDefaultDisplayPermission() : permissions;
+        return ComponentUtil.getPermissionHelper().isBlank(permissions) ? fessConfig.getSearchDefaultDisplayPermission() : permissions;
     }
 
     /**

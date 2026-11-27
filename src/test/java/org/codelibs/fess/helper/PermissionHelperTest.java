@@ -913,4 +913,87 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.encode("(deny)\u3000"));
     }
 
+    // U+00A0, U+2007 and U+202F are space separators that Character.isWhitespace, and so String#strip, does not
+    // count as whitespace
+    private static final String[] NO_BREAK_SPACES = { "\u00a0", "\u2007", "\u202f" };
+
+    @Test
+    public void test_encode_ignoresNoBreakSpaceAroundEntries() {
+        for (final String sp : NO_BREAK_SPACES) {
+            assertEquals("guest", permissionHelper.encode(sp + "guest" + sp));
+            assertEquals("Rguest", permissionHelper.encode("{role}guest" + sp));
+            // a deny entry typed with it must not be dropped
+            assertEquals("D1bob", permissionHelper.encode(sp + "(deny){user}bob"));
+            assertEquals("D1bob", permissionHelper.encode("(deny)" + sp + "{user}bob"));
+            assertEquals("DRguest", permissionHelper.encode(sp + "(allow)" + sp + "(deny)" + sp + "{role}guest" + sp));
+            assertNull(permissionHelper.encode(sp));
+            assertNull(permissionHelper.encode("{user}" + sp));
+            assertNull(permissionHelper.encode("(deny)" + sp));
+        }
+    }
+
+    @Test
+    public void test_isSpacedEntry_noBreakSpace() {
+        for (final String sp : NO_BREAK_SPACES) {
+            assertTrue(permissionHelper.isSpacedEntry(sp + "{role}guest"));
+            assertTrue(permissionHelper.isSpacedEntry(sp + "{USER}bob"));
+            assertTrue(permissionHelper.isSpacedEntry("(deny)" + sp + "{user}bob"));
+            assertTrue(permissionHelper.isSpacedEntry("(allow)(deny)" + sp + "{user}bob"));
+            assertTrue(permissionHelper.isSpacedEntry(" " + sp + "{group}staff"));
+            // accepted like their ASCII counterparts
+            assertFalse(permissionHelper.isSpacedEntry(sp + "guest" + sp));
+            assertFalse(permissionHelper.isSpacedEntry(sp + "(deny){user}bob"));
+            assertFalse(permissionHelper.isSpacedEntry("{user}bob" + sp));
+            assertFalse(permissionHelper.isSpacedEntry("{user}" + sp + "bob"));
+            assertFalse(permissionHelper.isSpacedEntry(sp));
+        }
+    }
+
+    @Test
+    public void test_isInvisibleLeadEntry_behindNoBreakSpace() {
+        for (final String sp : NO_BREAK_SPACES) {
+            assertTrue(permissionHelper.isInvisibleLeadEntry(sp + "\u200b{user}bob"));
+            assertTrue(permissionHelper.isInvisibleLeadEntry(sp + "(deny)\ufeff{user}bob"));
+            // a space after the prefix is refused by isSpacedEntry, as an ASCII space is
+            assertTrue(permissionHelper.isSpacedEntry(sp + "(deny)" + sp + "\ufeff{user}bob"));
+            assertFalse(permissionHelper.isInvisibleLeadEntry(sp + "(deny){user}bob" + sp));
+        }
+    }
+
+    @Test
+    public void test_isFullWidthSyntaxEntry_noBreakSpaceAroundEntry() {
+        for (final String sp : NO_BREAK_SPACES) {
+            assertTrue(permissionHelper.isFullWidthSyntaxEntry(sp + "\uff08deny\uff09{user}bob"));
+            assertFalse(permissionHelper.isFullWidthSyntaxEntry(sp + "(deny){user}bob" + sp));
+        }
+    }
+
+    @Test
+    public void test_isBlank_noBreakSpace() {
+        assertTrue(permissionHelper.isBlank(null));
+        assertTrue(permissionHelper.isBlank(""));
+        assertTrue(permissionHelper.isBlank(" \r\n\t\u3000"));
+        assertTrue(permissionHelper.isBlank("\u00a0\n\u2007 \u202f"));
+        assertFalse(permissionHelper.isBlank("\u00a0guest"));
+        // an invisible character is not a space; validateEntries refuses it
+        assertFalse(permissionHelper.isBlank("\u200b"));
+    }
+
+    @Test
+    public void test_validateEntries_noBreakSpace() {
+        for (final String sp : NO_BREAK_SPACES) {
+            final FessMessages lead = new FessMessages();
+            permissionHelper.validateEntries("{user}alice\n" + sp + "{role}guest", lead);
+            assertTrue(lead.hasMessageOf("permissions"));
+
+            final FessMessages afterPrefix = new FessMessages();
+            permissionHelper.validateEntries("{user}alice\n(deny)" + sp + "{user}bob", afterPrefix);
+            assertTrue(afterPrefix.hasMessageOf("permissions"));
+
+            final FessMessages ok = new FessMessages();
+            permissionHelper.validateEntries(sp + "guest\n" + sp + "(deny){user}bob" + sp, ok);
+            assertTrue(ok.isEmpty());
+        }
+    }
+
 }
