@@ -128,8 +128,9 @@ public final class FessSetup {
                   Re-install every installed Fess plugin at the version that fits this Fess.
 
               check [--url <engine url>] [--playwright] [--dest <dir>]
-                  Report on the installation: the engine, its plugins, and the installed
-                  plugins. Exit 0 when everything is in order, 1 when something is wrong.
+                  Report on the installation: the engine, its plugins, the dictionary paths its
+                  indices record, and the installed plugins. Exit 0 when everything is in order,
+                  1 when something is wrong.
 
               init [--admin-password <password>] [--cipher-key <key>] [--config <file>] [--force]
                   Set the initial password of the admin user (index.user.initial_password) and the
@@ -894,6 +895,7 @@ public final class FessSetup {
             checks.add(Diagnostics.enginePlugins(required,
                     Diagnostics.distinctLines(Downloader.readString(URI.create(url + "/_cat/plugins?h=component")))));
             checks.add(configsync(url));
+            checks.addAll(dictionaryPaths(url));
         } catch (final SetupException e) {
             // Every later engine check would repeat this one failure, so stop after saying it.
             checks.add(new Diagnostics.Check(Diagnostics.Status.FAIL, "reachable",
@@ -928,6 +930,19 @@ public final class FessSetup {
         } catch (final SetupException e) {
             return new Diagnostics.Check(Diagnostics.Status.FAIL, "configsync",
                     "not responding; dictionaries will not reach the engine (" + e.getMessage() + ")");
+        }
+    }
+
+    private static List<Diagnostics.Check> dictionaryPaths(final String url) {
+        try {
+            final List<String> outsideConfig =
+                    Diagnostics.indicesOutsideConfig(Downloader.readString(URI.create(url + "/_cat/shards?h=index,unassigned.details")));
+            return Diagnostics.dictionaryPaths(
+                    Downloader.readString(URI.create(url + "/_settings/index.analysis.*?flat_settings=true&expand_wildcards=open,closed")),
+                    outsideConfig);
+        } catch (final SetupException e) {
+            return List
+                    .of(new Diagnostics.Check(Diagnostics.Status.WARN, "index dictionary paths", "not checked (" + e.getMessage() + ")"));
         }
     }
 

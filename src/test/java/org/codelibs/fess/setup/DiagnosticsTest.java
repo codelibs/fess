@@ -16,6 +16,8 @@
 package org.codelibs.fess.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -206,6 +209,146 @@ public class DiagnosticsTest {
         final Check found = Diagnostics.nodejs(tempDir, true);
         assertEquals(Status.OK, found.status());
         assertTrue(found.detail().contains("node-v24.20.0"), found.detail());
+    }
+
+    /**
+     * The answer of _settings/index.analysis.*?flat_settings=true, as OpenSearch writes it.
+     */
+    private static final String RELATIVE_SETTINGS = "{\"relative_ctl\":{\"settings\":{"
+            + "\"index.analysis.analyzer.a.char_filter\":[\"m\"],\"index.analysis.analyzer.a.tokenizer\":\"standard\","
+            + "\"index.analysis.char_filter.m.mappings_path\":\"dictionary/ja/mapping.txt\","
+            + "\"index.analysis.filter.s.synonyms_path\":\"dictionary/synonym.txt\",\"index.analysis.filter.s.type\":\"synonym\"}}}";
+
+    /**
+     * An index created by Fess 15.9 or earlier: every dictionary path names the config directory
+     * of the engine it was created on.
+     */
+    private static final String ABSOLUTE_SETTINGS = "{\"fess.20250101\":{\"settings\":{"
+            + "\"index.analysis.char_filter.m.mappings_path\":\"/opt/opensearch-3.9.0/config/dictionary/ja/mapping.txt\","
+            + "\"index.analysis.filter.s.synonyms_path\":\"/opt/opensearch-3.9.0/config/dictionary/synonym.txt\","
+            + "\"index.analysis.filter.st.stopwords\":[\"a\",\"the\"],\"index.analysis.filter.st.type\":\"stop\"}}}";
+
+    @Test
+    public void test_isAbsolutePath() {
+        assertTrue(Diagnostics.isAbsolutePath("/usr/share/opensearch/config/dictionary/synonym.txt"));
+        assertTrue(Diagnostics.isAbsolutePath("C:\\opensearch\\config\\dictionary\\synonym.txt"));
+        assertTrue(Diagnostics.isAbsolutePath("c:/opensearch/config/dictionary/synonym.txt"));
+        assertTrue(Diagnostics.isAbsolutePath("\\\\server\\share\\dictionary\\synonym.txt"));
+        assertFalse(Diagnostics.isAbsolutePath("dictionary/synonym.txt"));
+        assertFalse(Diagnostics.isAbsolutePath("dictionary\\ja\\mapping.txt"));
+        assertFalse(Diagnostics.isAbsolutePath("C:dictionary\\synonym.txt"));
+        assertFalse(Diagnostics.isAbsolutePath("1:\\dictionary"));
+        assertFalse(Diagnostics.isAbsolutePath(""));
+    }
+
+    @Test
+    public void test_isPathSetting() {
+        assertTrue(Diagnostics.isPathSetting("index.analysis.filter.s.synonyms_path"));
+        assertTrue(Diagnostics.isPathSetting("index.analysis.char_filter.m.mappings_path"));
+        assertTrue(Diagnostics.isPathSetting("index.analysis.tokenizer.ko.user_dict_path"));
+        assertTrue(Diagnostics.isPathSetting("index.analysis.tokenizer.ja.user_dictionary"));
+        assertFalse(Diagnostics.isPathSetting("index.analysis.tokenizer.ja.user_dictionary_rules"));
+        assertFalse(Diagnostics.isPathSetting("index.analysis.filter.s.type"));
+        assertFalse(Diagnostics.isPathSetting("index.analysis.filter.path_hierarchy.type"));
+    }
+
+    @Test
+    public void test_dictionaryPaths_relativeIsOk() throws Exception {
+        final List<Check> checks = Diagnostics.dictionaryPaths(RELATIVE_SETTINGS, List.of());
+        assertEquals(1, checks.size());
+        assertEquals(Status.OK, checks.get(0).status(), checks.get(0).detail());
+        assertEquals("2 path setting(s) in 1 index(es), all relative", checks.get(0).detail());
+    }
+
+    @Test
+    public void test_dictionaryPaths_noAnalysisSettings() throws Exception {
+        for (final String json : new String[] { "{}", "{\"configsync\":{\"settings\":{}}}" }) {
+            final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+            assertEquals(1, checks.size());
+            assertEquals(Status.OK, checks.get(0).status());
+            assertEquals("no index names a dictionary file", checks.get(0).detail());
+        }
+    }
+
+    /**
+     * The index still opens on the engine it was created on, so this is a warning about the
+     * next move, naming the index and how many settings are affected.
+     */
+    @Test
+    public void test_dictionaryPaths_absoluteWarns() throws Exception {
+        final List<Check> checks = Diagnostics.dictionaryPaths(ABSOLUTE_SETTINGS, List.of());
+        assertEquals(1, checks.size());
+        final Check check = checks.get(0);
+        assertEquals(Status.WARN, check.status(), check.detail());
+        assertTrue(check.detail().startsWith("fess.20250101: 2 analyzer setting(s)"), check.detail());
+        assertTrue(check.detail().contains("/opt/opensearch-3.9.0/config/dictionary/ja/mapping.txt"), check.detail());
+        assertTrue(check.detail().contains("re-create it"), check.detail());
+        assertTrue(check.detail().contains("keep the engine where it is"), check.detail());
+    }
+
+    @Test
+    public void test_dictionaryPaths_mixedReportsOnlyTheAbsoluteIndex() throws Exception {
+        final String json = RELATIVE_SETTINGS.substring(0, RELATIVE_SETTINGS.length() - 1) + "," + ABSOLUTE_SETTINGS.substring(1);
+        final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(1, checks.size());
+        assertEquals(Status.WARN, checks.get(0).status());
+        assertTrue(checks.get(0).detail().startsWith("fess.20250101:"), checks.get(0).detail());
+    }
+
+    /**
+     * A Windows path reaches the JSON with its backslashes escaped; reading it with anything
+     * less than a JSON reader leaves C:\\ in place and misses the drive letter.
+     */
+    @Test
+    public void test_dictionaryPaths_windowsPathsThroughJson() throws Exception {
+        final String json = "{\"fess_suggest_analyzer\":{\"settings\":{"
+                + "\"index.analysis.tokenizer.ja.user_dictionary\":\"C:\\\\Program Files\\\\opensearch\\\\config\\\\dictionary\\\\ja\\\\kuromoji.txt\","
+                + "\"index.analysis.filter.s.stopwords_path\":\"dictionary/stopwords.txt\"}}}";
+        final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(Status.WARN, checks.get(0).status(), checks.get(0).detail());
+        assertTrue(checks.get(0).detail().contains("1 analyzer setting(s)"), checks.get(0).detail());
+        assertTrue(checks.get(0).detail().contains("C:\\Program Files\\opensearch\\config\\dictionary\\ja\\kuromoji.txt"),
+                checks.get(0).detail());
+    }
+
+    /**
+     * Once the engine runs from another directory, the shards of such an index cannot be
+     * allocated and the cluster is red: that is a failure, not a warning.
+     */
+    @Test
+    public void test_dictionaryPaths_unallocatableFails() throws Exception {
+        final String catShards = "configsync    \n" + "fess.20250101 failed shard on node [n1]: failed to create index, failure "
+                + "IllegalArgumentException[Resource path must be inside config directory: "
+                + "/opt/opensearch-3.9.0/config/dictionary/ja/mapping.txt]\n" + "relative_ctl  \n";
+        final List<String> outside = Diagnostics.indicesOutsideConfig(catShards);
+        assertEquals(List.of("fess.20250101"), outside);
+
+        final List<Check> checks = Diagnostics.dictionaryPaths(ABSOLUTE_SETTINGS, outside);
+        assertEquals(1, checks.size());
+        assertEquals(Status.FAIL, checks.get(0).status(), checks.get(0).detail());
+        assertTrue(checks.get(0).detail().startsWith("fess.20250101 cannot be allocated"), checks.get(0).detail());
+    }
+
+    @Test
+    public void test_indicesOutsideConfig_ignoresOtherFailures() {
+        assertEquals(List.of(), Diagnostics.indicesOutsideConfig(""));
+        assertEquals(List.of(), Diagnostics.indicesOutsideConfig("relative_ctl failed shard on node [n1]: failed to create index, failure "
+                + "IllegalArgumentException[IOException while reading mappings_path: file not readable]\n"));
+    }
+
+    @Test
+    public void test_dictionaryPaths_rejectsWhatIsNotJson() {
+        assertThrows(SetupException.class, () -> Diagnostics.dictionaryPaths("<html>", List.of()));
+        assertThrows(SetupException.class, () -> Diagnostics.dictionaryPaths("{\"a\":\"unterminated}", List.of()));
+        assertThrows(SetupException.class, () -> Diagnostics.dictionaryPaths("[]", List.of()));
+        assertThrows(SetupException.class, () -> Diagnostics.dictionaryPaths("{} trailing", List.of()));
+    }
+
+    @Test
+    public void test_jsonReader() throws Exception {
+        assertEquals(List.of("a\"b", "c\\d", "e/f", "\u00e9", "1", "true"),
+                JsonReader.parse(" [\"a\\\"b\", \"c\\\\d\", \"e\\/f\", \"\\u00e9\", 1, true] "));
+        assertEquals(Map.of("k", List.of()), JsonReader.parse("{\"k\":[]}"));
     }
 
     @Test
