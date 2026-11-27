@@ -587,6 +587,12 @@ public class AdminTagtypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        tagTypePager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminTagtype_AdminTagtypeJsp).renderWith(data -> {
             RenderDataUtil.register(data, "tagTypeItems", tagTypeService.getTagTypeList(tagTypePager)); // page navi

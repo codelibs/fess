@@ -402,6 +402,12 @@ public class AdminKeymatchAction extends FessAdminAction {
      *
      * @return HTML response for the list page
      */
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        keyMatchPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
             RenderDataUtil.register(data, "keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi

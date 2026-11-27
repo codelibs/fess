@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.InvalidFilePathException;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -38,7 +40,10 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.message.UserMessage;
+import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.TypicalAction;
+import org.lastaflute.web.hook.ApplicationExceptionHandler;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -665,6 +670,61 @@ public class FessAdminActionTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                     handleApplicationException Tests
+    //                                                     ================================
+
+    @Test
+    public void test_handleApplicationException_showsTheListWithoutTheFilterForAnInvalidFilter() {
+        final List<String> cleared = new ArrayList<>();
+        final HtmlResponse list = HtmlResponse.fromForwardPath("/admin/test/admin_test.jsp");
+        final FessAdminAction action = createListAction(cleared, OptionalThing.of(list));
+        final List<UserMessages> saved = new ArrayList<>();
+        final ApplicationExceptionHandler handler = new ApplicationExceptionHandler(createInvalidFilterException(), saved::add);
+
+        action.handleApplicationException(new TestActionRuntime("/admin/test/search/"), handler);
+
+        assertSame(list, handler.getResponse());
+        assertEquals(List.of("cleared"), cleared);
+        assertEquals(1, saved.size());
+        assertEquals(List.of("errors.invalid_query_parse_error"), globalMessageKeys(saved.get(0)));
+    }
+
+    @Test
+    public void test_handleApplicationException_leavesAnActionWithoutAListAlone() {
+        final List<UserMessages> saved = new ArrayList<>();
+        final ApplicationExceptionHandler handler = new ApplicationExceptionHandler(createInvalidFilterException(), saved::add);
+
+        createAction().handleApplicationException(new TestActionRuntime("/admin/test/"), handler);
+
+        // no messages either: they would be shown on the next page of the session
+        assertTrue(handler.getResponse().isUndefined());
+        assertTrue(saved.isEmpty());
+    }
+
+    @Test
+    public void test_handleApplicationException_leavesAnotherFailureAlone() {
+        final List<String> cleared = new ArrayList<>();
+        final FessAdminAction action =
+                createListAction(cleared, OptionalThing.of(HtmlResponse.fromForwardPath("/admin/test/admin_test.jsp")));
+        for (final RuntimeException cause : new RuntimeException[] { new IllegalStateException("failure"),
+                new InvalidQueryException(null, "no message") }) {
+            final List<UserMessages> saved = new ArrayList<>();
+            final ApplicationExceptionHandler handler = new ApplicationExceptionHandler(cause, saved::add);
+
+            action.handleApplicationException(new TestActionRuntime("/admin/test/search/"), handler);
+
+            assertTrue(cause.getMessage(), handler.getResponse().isUndefined());
+            assertTrue(cause.getMessage(), saved.isEmpty());
+        }
+        assertTrue(cleared.isEmpty());
+    }
+
+    @Test
+    public void test_asListHtmlWithoutFilter_isEmptyByDefault() {
+        assertFalse(createAction().asListHtmlWithoutFilter().isPresent());
+    }
+
+    // ===================================================================================
     //                                                                      Helper Methods
     //                                                                      ==============
 
@@ -722,6 +782,34 @@ public class FessAdminActionTest extends UnitFessTestCase {
         inject(action);
         action.systemHelper = new SystemHelper();
         return action;
+    }
+
+    private static InvalidQueryException createInvalidFilterException() {
+        return new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
+                "too complex");
+    }
+
+    private static List<String> globalMessageKeys(final UserMessages messages) {
+        final List<String> keys = new ArrayList<>();
+        for (final Iterator<UserMessage> ite = messages.silentAccessByIteratorOf(UserMessages.GLOBAL_PROPERTY_KEY); ite.hasNext();) {
+            keys.add(ite.next().getMessageKey());
+        }
+        return keys;
+    }
+
+    private FessAdminAction createListAction(final List<String> cleared, final OptionalThing<HtmlResponse> list) {
+        return new FessAdminAction() {
+            @Override
+            protected String getActionRole() {
+                return "admin-test";
+            }
+
+            @Override
+            protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+                cleared.add("cleared");
+                return list;
+            }
+        };
     }
 
     private FessAdminAction createAction() {

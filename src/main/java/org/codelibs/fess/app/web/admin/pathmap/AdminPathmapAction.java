@@ -363,6 +363,12 @@ public class AdminPathmapAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        pathMapPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminPathmap_AdminPathmapJsp).renderWith(data -> {
             RenderDataUtil.register(data, "pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
