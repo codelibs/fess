@@ -182,6 +182,7 @@ screen that reads the engine ends with the theme's 503 page (a client that does 
 `Service Unavailable.`), as the v2 API already did with `503 service_unavailable`. A login attempt shows the
 form again with a message instead of a system error, and it is not counted as a failed login or against the
 rate limit. A monitor that treated `500` from these pages as "engine down" has to accept `503`.
+Like the v2 API's, the 503 of these pages carries `Retry-After: 5`.
 
 **Fess creates a new index, `fess_user.passkey`, when it starts.** Passkey (WebAuthn) login for local
 users is new in 15.10 (fess#3795) and is off by default, but the index is created and used whether or not it is

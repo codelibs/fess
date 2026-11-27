@@ -71,8 +71,11 @@ public class V2EnvelopeWriter {
     private final ObjectMapper mapper = new ObjectMapper();
     private static final String CONTENT_TYPE = "application/json; charset=UTF-8";
 
-    /** Seconds after which a request the search engine could not take is worth repeating. */
-    private static final String RETRY_AFTER_SECONDS = "5";
+    /**
+     * Seconds after which a request the search engine could not take is worth repeating; the
+     * {@code Retry-After} of a {@code 503}, which the error page sends as well.
+     */
+    public static final String RETRY_AFTER_SECONDS = "5";
 
     /** How many levels of a cause chain are searched for the failure of the search engine. */
     private static final int MAX_CAUSE_DEPTH = 10;

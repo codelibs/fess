@@ -233,8 +233,10 @@ public class ErrorPageServletTest extends UnitFessTestCase {
         req.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/admin/webconfig/");
         req.setAttribute(Constants.SERVER_ERROR_CAUSE, unreachable);
         req.header = "text/html";
-        servlet.service(req, new StubResponse());
+        final StubResponse page = new StubResponse();
+        servlet.service(req, page);
         assertTrue(responder.called);
+        assertEquals("5", page.getHeader("Retry-After"));
         assertEquals(503, responder.lastHttpStatus);
         assertEquals(503, responder.lastDisplayCode);
         assertEquals("errors.search_engine_unavailable", responder.lastDetailKey);
@@ -247,6 +249,7 @@ public class ErrorPageServletTest extends UnitFessTestCase {
         final StubResponse res = new StubResponse();
         servlet.service(plain, res);
         assertEquals(503, res.status);
+        assertEquals("5", res.getHeader("Retry-After"));
         assertEquals("Service Unavailable.", res.bodyAsString());
 
         // any other failure stays a 500
@@ -370,8 +373,28 @@ public class ErrorPageServletTest extends UnitFessTestCase {
         servlet.service(req, res);
         assertFalse(responder.called, "the responder must not be reached when the registry itself throws");
         assertEquals(503, res.status);
+        assertEquals("5", res.getHeader("Retry-After"));
         assertEquals("text/html; charset=UTF-8", res.contentType);
         assertTrue(res.bodyAsString().contains("Service Unavailable."));
+    }
+
+    /**
+     * Only a 503 tells the client when to try again, and a Retry-After that the failing request set is kept.
+     */
+    @Test
+    public void test_setRetryAfter_onlyFor503_andKeepsAnExistingOne() {
+        final StubResponse other = new StubResponse();
+        ErrorPageServlet.setRetryAfter(other, 500);
+        assertFalse(other.containsHeader("Retry-After"));
+
+        final StubResponse unavailable = new StubResponse();
+        ErrorPageServlet.setRetryAfter(unavailable, 503);
+        assertEquals("5", unavailable.getHeader("Retry-After"));
+
+        final StubResponse alreadySet = new StubResponse();
+        alreadySet.setHeader("Retry-After", "60");
+        ErrorPageServlet.setRetryAfter(alreadySet, 503);
+        assertEquals("60", alreadySet.getHeader("Retry-After"));
     }
 
     @Test
