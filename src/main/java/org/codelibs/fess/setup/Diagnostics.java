@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
@@ -36,8 +38,9 @@ import java.util.zip.ZipFile;
  *
  * <p>The parts that read the engine take text rather than making the request, so the reasoning
  * is testable without a cluster. The {@code _cat} APIs answer in plain text, which is why they
- * are used here in preference to the JSON endpoints: this jar carries no JSON parser, and
- * picking fields out of JSON with a regular expression is how a health check starts lying.</p>
+ * are used here in preference to the JSON endpoints. The index settings have no {@code _cat}
+ * form, so those are read with {@link JsonReader}; picking fields out of JSON with a regular
+ * expression is how a health check starts lying.</p>
  */
 public final class Diagnostics {
 
@@ -137,6 +140,191 @@ public final class Diagnostics {
         }
         final String prefix = "opensearch-";
         return artifactId.startsWith(prefix) && installed.contains(artifactId.substring(prefix.length()));
+    }
+
+    /** The reason OpenSearch gives when an analyzer names a file outside its config directory. */
+    static final String OUTSIDE_CONFIG = "Resource path must be inside config directory";
+
+    private static final String DICTIONARY_PATHS = "index dictionary paths";
+
+    /**
+     * Returns how to replace an index whose dictionary paths are absolute. A new index only gets
+     * relative paths when Fess runs with {@code FESS_DICTIONARY_PATH=dictionary/}; with an
+     * absolute value it records that value again. The document index has a re-index in the admin
+     * screen. The suggest analyzer index has none, but Fess creates it at startup when it is
+     * missing, from the dictionary path it runs with.
+     *
+     * @param index the index name
+     * @return the remedy
+     */
+    static String recreate(final String index) {
+        if (index.endsWith("_suggest_analyzer")) {
+            return "set FESS_DICTIONARY_PATH=dictionary/, stop Fess, delete " + index + " and start Fess, which re-creates it";
+        }
+        return "set FESS_DICTIONARY_PATH=dictionary/ and re-create the index"
+                + " (the document index: re-index from Admin > Maintenance, then delete the old index)";
+    }
+
+    /**
+     * Returns the indices with a shard that cannot be allocated because an analyzer names a file
+     * outside the engine's config directory.
+     *
+     * @param catShards the answer of {@code _cat/shards?h=index,unassigned.details}
+     * @return the index names, in first-seen order
+     */
+    public static List<String> indicesOutsideConfig(final String catShards) {
+        final Set<String> indices = new LinkedHashSet<>();
+        for (final String line : distinctLines(catShards)) {
+            final String[] columns = line.split("\\s+", 2);
+            if (columns.length == 2 && columns[1].contains(OUTSIDE_CONFIG)) {
+                indices.add(columns[0]);
+            }
+        }
+        return new ArrayList<>(indices);
+    }
+
+    /**
+     * Reports the indices whose analyzers name a dictionary file by a path that stops working
+     * when the engine moves.
+     *
+     * <p>OpenSearch resolves a relative {@code *_path} against its config directory when it opens
+     * the index, and refuses an absolute one that is not inside that directory. Fess 15.9 and
+     * earlier created their indices with an absolute {@code FESS_DICTIONARY_PATH}, so those
+     * indices name the config directory of the engine they were created on. Once the engine runs
+     * from another directory -- {@code fess-setup install opensearch} puts a newer version beside
+     * the old one -- the shards of such an index cannot be allocated and the cluster turns red.
+     * The setting cannot be changed on an existing index, which is why the remedy is a new index,
+     * created while the engine is still where the old paths point.</p>
+     *
+     * <p>Only an absolute path into a versioned engine directory is a warning (see
+     * {@link #isVersionedEnginePath(String)}). The Docker image and the RPM/DEB packages keep
+     * their dictionaries at a fixed absolute path ({@code /usr/share/opensearch/config/dictionary},
+     * {@code /etc/opensearch/dictionary}) that an upgrade does not change, so warning about those
+     * would report something nobody needs to act on. An index that already cannot be allocated
+     * fails whatever its paths look like.</p>
+     *
+     * @param settingsJson the answer of {@code _settings/index.analysis.*?flat_settings=true}
+     * @param outsideConfig the indices that already cannot be allocated for that reason, from
+     *            {@link #indicesOutsideConfig(String)}
+     * @return one OK check when no index is at fault, otherwise one check per index at fault:
+     *         FAIL when it cannot be allocated, WARN when it can but would not after the engine moves
+     * @throws SetupException if the settings are not JSON
+     */
+    public static List<Check> dictionaryPaths(final String settingsJson, final List<String> outsideConfig) throws SetupException {
+        final Map<String, List<String>> absolute = new LinkedHashMap<>();
+        int pathSettings = 0;
+        int fixedSettings = 0;
+        int indicesWithPaths = 0;
+        if (!(JsonReader.parse(settingsJson) instanceof final Map<?, ?> indices)) {
+            throw new SetupException("The index settings are not a JSON object");
+        }
+        for (final Map.Entry<?, ?> index : indices.entrySet()) {
+            if (!(index.getValue() instanceof final Map<?, ?> body) || !(body.get("settings") instanceof final Map<?, ?> settings)) {
+                continue;
+            }
+            final List<String> paths = new ArrayList<>();
+            int count = 0;
+            for (final Map.Entry<?, ?> setting : settings.entrySet()) {
+                if (setting.getValue() instanceof final String value && isPathSetting(setting.getKey().toString())) {
+                    count++;
+                    if (isAbsolutePath(value)) {
+                        paths.add(value);
+                    }
+                }
+            }
+            pathSettings += count;
+            indicesWithPaths += count > 0 ? 1 : 0;
+            if (!paths.isEmpty()) {
+                absolute.put(index.getKey().toString(), paths);
+            }
+        }
+
+        final List<Check> checks = new ArrayList<>();
+        for (final String index : outsideConfig) {
+            final List<String> paths = absolute.getOrDefault(index, List.of());
+            final String found = paths.isEmpty() ? "an analyzer names a file outside the engine's config directory"
+                    : paths.size() + " analyzer setting(s) name an absolute path, such as " + paths.get(0);
+            checks.add(new Check(Status.FAIL, DICTIONARY_PATHS, index + " cannot be allocated: " + found
+                    + " (start the engine from the directory those paths name, then " + recreate(index) + ")"));
+        }
+        for (final Map.Entry<String, List<String>> entry : absolute.entrySet()) {
+            if (outsideConfig.contains(entry.getKey())) {
+                continue;
+            }
+            final List<String> versioned = entry.getValue().stream().filter(Diagnostics::isVersionedEnginePath).toList();
+            fixedSettings += entry.getValue().size() - versioned.size();
+            if (!versioned.isEmpty()) {
+                checks.add(new Check(Status.WARN, DICTIONARY_PATHS, entry.getKey() + ": " + versioned.size()
+                        + " analyzer setting(s) name an absolute path into a versioned engine directory, such as " + versioned.get(0)
+                        + "; the index will not open once the engine runs from another directory (before moving it, "
+                        + recreate(entry.getKey()) + "; or keep the engine where it is)"));
+            }
+        }
+        if (checks.isEmpty()) {
+            final String detail;
+            if (pathSettings == 0) {
+                detail = "no index names a dictionary file";
+            } else if (fixedSettings == 0) {
+                detail = pathSettings + " path setting(s) in " + indicesWithPaths + " index(es), all relative";
+            } else {
+                detail = pathSettings + " path setting(s) in " + indicesWithPaths + " index(es), " + fixedSettings
+                        + " of them absolute into a directory that does not change with the engine version";
+            }
+            checks.add(new Check(Status.OK, DICTIONARY_PATHS, detail));
+        }
+        return checks;
+    }
+
+    /**
+     * Returns whether an absolute path runs through a directory named after an engine version,
+     * such as {@code opensearch-3.9.0}: the name an OpenSearch archive unpacks to, and the
+     * directory {@code fess-setup install opensearch} creates. The next version goes into a new
+     * directory beside it, so a path into this one stops resolving after an upgrade.
+     *
+     * @param path an absolute path, with {@code /} or {@code \} separators
+     * @return true if one of its directories is {@code opensearch-} followed by a digit
+     */
+    static boolean isVersionedEnginePath(final String path) {
+        final String prefix = "opensearch-";
+        for (final String segment : path.split("[/\\\\]")) {
+            if (segment.length() > prefix.length() && segment.regionMatches(true, 0, prefix, 0, prefix.length())
+                    && Character.isDigit(segment.charAt(prefix.length()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether a flat analysis setting names a file: every {@code *_path} setting, and
+     * kuromoji's {@code user_dictionary}, which is a path without saying so.
+     *
+     * @param key the flat setting name
+     * @return true if its value is a path
+     */
+    static boolean isPathSetting(final String key) {
+        final String name = key.substring(key.lastIndexOf('.') + 1);
+        return name.endsWith("_path") || "user_dictionary".equals(name);
+    }
+
+    /**
+     * Returns whether a path is absolute on any platform the engine may run on.
+     *
+     * <p>{@link Path#isAbsolute()} answers for the machine running fess-setup, which is not
+     * necessarily the engine's: {@code C:\opensearch\...} is relative on Linux.</p>
+     *
+     * @param path the path
+     * @return true for {@code /...}, {@code \...} (including UNC) and {@code C:\...} or {@code C:/...}
+     */
+    static boolean isAbsolutePath(final String path) {
+        if (path.startsWith("/") || path.startsWith("\\")) {
+            return true;
+        }
+        if (path.length() < 3 || path.charAt(1) != ':' || path.charAt(2) != '\\' && path.charAt(2) != '/') {
+            return false;
+        }
+        final char drive = Character.toUpperCase(path.charAt(0));
+        return drive >= 'A' && drive <= 'Z';
     }
 
     /**
