@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlException;
 import org.codelibs.fesen.client.node.NodeUnavailableException;
 import org.codelibs.fesen.opensearch.OpenSearchException;
@@ -40,6 +41,7 @@ import org.lastaflute.web.validation.VaMessenger;
 
 import tools.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -191,6 +193,21 @@ public class V2EnvelopeWriter {
                         .toMessageList(locale != null ? LocaleUtil.toChineseRegionLocale(locale) : Locale.ENGLISH, messages)
                         .stream()
                         .collect(Collectors.joining(" ")));
+    }
+
+    /**
+     * Gets the locale to write the message of a refusal in: the locale of the request when it names one in
+     * {@code Accept-Language}, and English otherwise. Without the header the servlet container answers its own
+     * default locale, which would make the message depend on the server it runs on.
+     *
+     * @param request the request that is answered
+     * @return the locale of the request, or {@link Locale#ENGLISH} when the request has no {@code Accept-Language}
+     */
+    public static Locale messageLocale(final HttpServletRequest request) {
+        if (StringUtil.isBlank(request.getHeader("Accept-Language"))) {
+            return Locale.ENGLISH;
+        }
+        return request.getLocale();
     }
 
     /**

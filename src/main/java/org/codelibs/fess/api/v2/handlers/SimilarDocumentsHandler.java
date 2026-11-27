@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.SearchEngineUnavailableException;
@@ -137,7 +138,7 @@ public class SimilarDocumentsHandler {
             payload.put("data", searchHandler.filterDocuments(documents, searchHandler.getVisibleTagTypes(data, userId), userId));
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, V2EnvelopeWriter.messageLocale(request));
         } catch (final SearchEngineUnavailableException e) {
             // Already logged where the search engine refused the search; the request may succeed shortly.
             ComponentUtil.getV2EnvelopeWriter().writeSearchEngineUnavailable(response);

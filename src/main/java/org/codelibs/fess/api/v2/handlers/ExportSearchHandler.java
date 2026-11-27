@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
@@ -170,7 +171,7 @@ public class ExportSearchHandler {
                 logger.debug("Exported {} documents", count);
             }
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, V2EnvelopeWriter.messageLocale(request));
         } catch (final InvalidQueryException e) {
             // The scroll reports a failure on a later page as an invalid query too.
             if (started[0] != null) {
@@ -181,7 +182,8 @@ public class ExportSearchHandler {
                 logger.debug("invalid /api/v2/documents/export request", e);
             }
             ComponentUtil.getV2EnvelopeWriter()
-                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(), e.getMessageCode());
+                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, V2EnvelopeWriter.messageLocale(request),
+                            e.getMessageCode());
         } catch (final ResultOffsetExceededException e) {
             if (started[0] != null) {
                 logger.warn("/api/v2/documents/export failed after partial write", e);
@@ -191,7 +193,7 @@ public class ExportSearchHandler {
                 logger.debug("invalid /api/v2/documents/export request", e);
             }
             ComponentUtil.getV2EnvelopeWriter()
-                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(),
+                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, V2EnvelopeWriter.messageLocale(request),
                             messages -> messages.addErrorsResultSizeExceeded(UserMessages.GLOBAL_PROPERTY_KEY));
         } catch (final Exception e) {
             if (started[0] != null) {

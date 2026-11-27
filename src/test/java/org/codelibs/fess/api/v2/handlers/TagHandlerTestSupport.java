@@ -501,8 +501,10 @@ final class TagHandlerTestSupport {
             return this;
         }
 
+        /** A request whose locale comes from its {@code Accept-Language}, as the container reads it. */
         StubRequest locale(final java.util.Locale locale) {
             this.locale = locale;
+            headers.put("Accept-Language", locale.toLanguageTag());
             return this;
         }
 

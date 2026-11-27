@@ -180,6 +180,14 @@ for it), so a script that sent a constant has to send the `version_no` it has ju
 of these settings do not compare it. The APIs that have no `version_no` (for example `general`, `theme`, `dict`)
 and `tagtype` (which has its own `seq_no` check) are unchanged.
 
+**The `message` of a v2 API refusal is written in the language of the request.** A `400 invalid_request` for a
+search parameter (`start`, `num`, a facet size, a parameter that is too long or has too many values), a start
+beyond the result window and a refusal of the tag API now carry a `message` in the language that `Accept-Language`
+names. These and the other refusals that were already translated (an invalid sort, for one) are written in English
+for a request without `Accept-Language`, whatever the default locale of the server. `error.code` and the HTTP
+status do not depend on the language; a client that compared the text of `message` has to branch on `error.code`
+instead.
+
 **A user who is already signed in no longer gets the login form.** `GET /login/` now redirects the user to the
 page a login would lead to: the dashboard for an administrator, the first admin screen the roles allow for a user
 with some admin role, the search page for anyone else. An anonymous visitor still gets the form. To sign in as
