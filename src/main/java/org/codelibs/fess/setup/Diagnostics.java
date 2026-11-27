@@ -148,12 +148,22 @@ public final class Diagnostics {
     private static final String DICTIONARY_PATHS = "index dictionary paths";
 
     /**
-     * How to replace an index whose dictionary paths are absolute. A new index only gets relative
-     * paths when Fess runs with {@code FESS_DICTIONARY_PATH=dictionary/}; with an absolute value it
-     * records that value again. Only the document index has a re-index in the admin screen.
+     * Returns how to replace an index whose dictionary paths are absolute. A new index only gets
+     * relative paths when Fess runs with {@code FESS_DICTIONARY_PATH=dictionary/}; with an
+     * absolute value it records that value again. The document index has a re-index in the admin
+     * screen. The suggest analyzer index has none, but Fess creates it at startup when it is
+     * missing, from the dictionary path it runs with.
+     *
+     * @param index the index name
+     * @return the remedy
      */
-    private static final String RECREATE = "set FESS_DICTIONARY_PATH=dictionary/ and re-create the index"
-            + " (the document index: re-index from Admin > Maintenance, then delete the old index)";
+    static String recreate(final String index) {
+        if (index.endsWith("_suggest_analyzer")) {
+            return "set FESS_DICTIONARY_PATH=dictionary/, stop Fess, delete " + index + " and start Fess, which re-creates it";
+        }
+        return "set FESS_DICTIONARY_PATH=dictionary/ and re-create the index"
+                + " (the document index: re-index from Admin > Maintenance, then delete the old index)";
+    }
 
     /**
      * Returns the indices with a shard that cannot be allocated because an analyzer names a file
@@ -235,7 +245,7 @@ public final class Diagnostics {
             final String found = paths.isEmpty() ? "an analyzer names a file outside the engine's config directory"
                     : paths.size() + " analyzer setting(s) name an absolute path, such as " + paths.get(0);
             checks.add(new Check(Status.FAIL, DICTIONARY_PATHS, index + " cannot be allocated: " + found
-                    + " (start the engine from the directory those paths name, then " + RECREATE + ")"));
+                    + " (start the engine from the directory those paths name, then " + recreate(index) + ")"));
         }
         for (final Map.Entry<String, List<String>> entry : absolute.entrySet()) {
             if (outsideConfig.contains(entry.getKey())) {
@@ -246,8 +256,8 @@ public final class Diagnostics {
             if (!versioned.isEmpty()) {
                 checks.add(new Check(Status.WARN, DICTIONARY_PATHS, entry.getKey() + ": " + versioned.size()
                         + " analyzer setting(s) name an absolute path into a versioned engine directory, such as " + versioned.get(0)
-                        + "; the index will not open once the engine runs from another directory (before moving it, " + RECREATE
-                        + "; or keep the engine where it is)"));
+                        + "; the index will not open once the engine runs from another directory (before moving it, "
+                        + recreate(entry.getKey()) + "; or keep the engine where it is)"));
             }
         }
         if (checks.isEmpty()) {

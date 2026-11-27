@@ -314,6 +314,35 @@ public class DiagnosticsTest {
     }
 
     /**
+     * The document index is re-indexed from the admin screen; the suggest analyzer index has no
+     * such screen and is re-created by Fess at startup once it has been deleted.
+     */
+    @Test
+    public void test_dictionaryPaths_remedyDependsOnTheIndex() throws Exception {
+        final String path = "/opt/fess-15.9.0/opensearch/opensearch-3.9.0/config/dictionary/synonym.txt";
+        final String json = "{\"fess.20250101\":{\"settings\":{\"index.analysis.filter.s.synonyms_path\":\"" + path + "\"}},"
+                + "\"fess_suggest_analyzer\":{\"settings\":{\"index.analysis.filter.s.synonyms_path\":\"" + path + "\"}}}";
+        final List<Check> warnings = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(2, warnings.size());
+        final String document = warnings.get(0).detail();
+        assertTrue(document.startsWith("fess.20250101:"), document);
+        assertTrue(document.contains("set FESS_DICTIONARY_PATH=dictionary/ and re-create the index"), document);
+        assertTrue(document.contains("re-index from Admin > Maintenance"), document);
+        assertFalse(document.contains("stop Fess"), document);
+        final String suggest = warnings.get(1).detail();
+        assertTrue(suggest.startsWith("fess_suggest_analyzer:"), suggest);
+        assertTrue(suggest.contains(
+                "set FESS_DICTIONARY_PATH=dictionary/, stop Fess, delete fess_suggest_analyzer and start Fess, which re-creates it"),
+                suggest);
+        assertFalse(suggest.contains("Admin > Maintenance"), suggest);
+        assertTrue(suggest.contains("keep the engine where it is"), suggest);
+
+        final List<Check> failures = Diagnostics.dictionaryPaths(json, List.of("fess_suggest_analyzer"));
+        final Check failure = failures.stream().filter(c -> c.status() == Status.FAIL).findFirst().orElseThrow();
+        assertTrue(failure.detail().contains("delete fess_suggest_analyzer and start Fess"), failure.detail());
+    }
+
+    /**
      * The escaped form of a Windows path without a version in it is still read as an absolute
      * path -- it is counted as one -- but it does not move with an upgrade.
      */
