@@ -114,7 +114,7 @@ and the document stayed searchable until it expired (fess#3907, fess#3930). Now,
 the General settings (the default), a 404 or 410 to the HEAD request or to the GET of an http or https URL deletes
 its indexed document and adds no failure URL; a 404 for a URL that is not indexed still adds one, and 401, 403 and
 5xx answers delete nothing. The first crawl after the upgrade therefore removes such pages from the results. No
-setting keeps them other than turning "Check Last Modified" off, which also turns off incremental crawling.
+setting keeps them other than turning "Check Last Modified" off, which also makes every crawl fetch every page again.
 
 **The robots meta tag and the `X-Robots-Tag` header are read directive by directive, and the header now also
 applies to documents that are not HTML.** Until 15.9 an HTML page was taken as `noindex`/`nofollow` when the value
@@ -125,9 +125,10 @@ value is split on commas, each directive is compared as a whole without regard t
 starts with a crawler name and a colon is ignored, so such pages are indexed and followed on the next crawl. A PDF,
 Office file or other non-HTML document whose `X-Robots-Tag` asks for `noindex` or `none`, read the same way, is no
 longer indexed (fess#3929); a copy indexed before the header appeared is not deleted by the crawl, so remove it
-from Admin > Search if needed. To index such documents anyway, set `crawler.ignore.robots.tags=true` in
-`fess_config.properties` (every crawl configuration; it also ignores the robots meta tag and the header of HTML
-pages) or `config.ignore.robots.tags=true` in the "Config Parameters" of one crawl configuration.
+on the System Info > Search page of the admin console if needed. To index such documents anyway, set
+`crawler.ignore.robots.tags=true` in `fess_config.properties` (every crawl configuration; it also ignores the
+robots meta tag and the header of HTML pages) or `config.ignore.robots.tags=true` in the "Config Parameters" of
+one crawl configuration.
 
 **The static files of a theme are revalidated instead of being cached for a day.** Until 15.9 the files under
 `/themes/<name>/` were sent with `Cache-Control: public, max-age=86400`, so a browser kept the scripts and
