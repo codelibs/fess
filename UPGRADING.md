@@ -147,6 +147,14 @@ Until now such an entry was saved without a word, as a plain value that matches 
 that was meant to hide a document had no effect. A character of this kind inside a name, or at its end, is not
 refused.
 
+**A no-break space in a permission entry counts as a space.** On the permission field of the admin screens and
+the admin API, a no-break space (U+00A0, U+2007 or U+202F) is now treated like an ordinary space: it is removed
+at the start and the end of an entry, and `<U+00A0>{role}name` or `(deny)<U+00A0>{user}name` is rejected with the
+same message as ` {role}name` or `(deny) {user}name`. Until now an entry that started or ended with a no-break
+space was saved with it and matched nobody, so `<U+00A0>(deny){user}name` had no effect. A
+configuration that was saved with an entry such as `<U+00A0>{role}name` is not changed, but cannot be saved again
+until the space is deleted.
+
 **An admin user edit form that is out of date is refused.** The edit form of a user now carries the version of
 the stored user. If the user was changed after the form was shown (by another administrator, by the user, or
 by the deletion of a role or group the user had), saving the form shows "The user was changed by someone else.

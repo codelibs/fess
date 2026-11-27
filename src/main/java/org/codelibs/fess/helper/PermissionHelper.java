@@ -102,15 +102,15 @@ public class PermissionHelper {
             return null;
         }
 
-        String permission = value.strip();
+        String permission = stripSpaces(value);
         boolean denied = false;
         // stacked prefixes collapse to one effect: a single (deny) among them denies the entry
         for (String prefix = aclPrefixOf(permission); prefix != null; prefix = aclPrefixOf(permission)) {
             denied |= prefix.equals(denyPrefix);
-            permission = permission.substring(prefix.length()).strip();
+            permission = stripSpaces(permission.substring(prefix.length()));
         }
         final String aclPrefix = denied ? ComponentUtil.getFessConfig().getRoleSearchDeniedPrefix() : StringUtil.EMPTY;
-        if (StringUtil.isBlank(permission)) {
+        if (permission.isEmpty()) {
             return null;
         }
         final String lower = permission.toLowerCase(Locale.ROOT);
@@ -214,7 +214,7 @@ public class PermissionHelper {
         if (StringUtil.isBlank(entry)) {
             return false;
         }
-        String rest = entry.strip();
+        String rest = stripSpaces(entry);
         if (startsWithInvisible(rest)) {
             return true;
         }
@@ -223,7 +223,7 @@ public class PermissionHelper {
             if (startsWithInvisible(rest)) {
                 return true;
             }
-            rest = rest.strip();
+            rest = stripSpaces(rest);
         }
         final String lower = rest.toLowerCase(Locale.ROOT);
         for (final String marker : new String[] { userPrefix, groupPrefix, rolePrefix }) {
@@ -273,7 +273,7 @@ public class PermissionHelper {
         if (StringUtil.isBlank(entry)) {
             return false;
         }
-        final String stripped = entry.strip();
+        final String stripped = stripSpaces(entry);
         final String normalized = Normalizer.normalize(stripped, Normalizer.Form.NFKC);
         if (normalized.equals(stripped)) {
             return false;
@@ -345,7 +345,7 @@ public class PermissionHelper {
         if (StringUtil.isBlank(entry)) {
             return false;
         }
-        final String stripped = entry.strip();
+        final String stripped = stripSpaces(entry);
         final String lower = stripped.toLowerCase(Locale.ROOT);
         String rest = stripped;
         for (String prefix = aclPrefixOf(rest); prefix != null; prefix = aclPrefixOf(rest)) {
@@ -362,7 +362,32 @@ public class PermissionHelper {
     }
 
     private boolean startsWithWhitespace(final String value) {
-        return !value.isEmpty() && Character.isWhitespace(value.charAt(0));
+        return !value.isEmpty() && isSpace(value.codePointAt(0));
+    }
+
+    /**
+     * Returns whether a character is a space in a permission entry: whitespace to Java, or a space separator that
+     * {@link Character#isWhitespace(int)} leaves out because it does not break a line (U+00A0, U+2007, U+202F).
+     * Such a no-break space is typically pasted in with the text, and has to be treated like the space it looks like.
+     */
+    private static boolean isSpace(final int codePoint) {
+        return Character.isWhitespace(codePoint) || Character.isSpaceChar(codePoint);
+    }
+
+    /**
+     * Removes the spaces (see {@link #isSpace(int)}) at the start and the end of a value, as {@link String#strip()}
+     * does for whitespace.
+     */
+    private static String stripSpaces(final String value) {
+        int start = 0;
+        int end = value.length();
+        while (start < end && isSpace(value.codePointAt(start))) {
+            start += Character.charCount(value.codePointAt(start));
+        }
+        while (end > start && isSpace(value.codePointBefore(end))) {
+            end -= Character.charCount(value.codePointBefore(end));
+        }
+        return value.substring(start, end);
     }
 
     /**
