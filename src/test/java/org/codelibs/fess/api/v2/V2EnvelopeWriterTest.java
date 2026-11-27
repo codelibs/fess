@@ -89,6 +89,38 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_messageLocale_isEnglish_whenTheRequestHasNoAcceptLanguage() {
+        // Without Accept-Language the container answers its own default locale, here Japanese.
+        final org.dbflute.utflute.mocklet.MockletHttpServletRequest request = getMockRequest();
+        request.setLocale(java.util.Locale.JAPANESE);
+        assertEquals(java.util.Locale.ENGLISH, V2EnvelopeWriter.messageLocale(request));
+
+        request.addHeader("Accept-Language", " ");
+        assertEquals(java.util.Locale.ENGLISH, V2EnvelopeWriter.messageLocale(request));
+    }
+
+    @Test
+    public void test_messageLocale_isTheLocaleOfTheRequest_whenTheRequestNamesOne() {
+        final org.dbflute.utflute.mocklet.MockletHttpServletRequest request = getMockRequest();
+        request.addHeader("Accept-Language", "ja");
+        request.setLocale(java.util.Locale.JAPANESE);
+        assertEquals(java.util.Locale.JAPANESE, V2EnvelopeWriter.messageLocale(request));
+    }
+
+    @Test
+    public void test_writeInvalidRequest_writesEnglish_whenTheRequestHasNoAcceptLanguage() throws Exception {
+        final org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException cause =
+                new org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException(
+                        messages -> messages.addErrorsInvalidStartPosition(org.lastaflute.core.message.UserMessages.GLOBAL_PROPERTY_KEY),
+                        "start must be non-negative, got: -1");
+        final org.dbflute.utflute.mocklet.MockletHttpServletRequest request = getMockRequest();
+        request.setLocale(java.util.Locale.JAPANESE);
+        final CapturingResponse res = new CapturingResponse();
+        new V2EnvelopeWriter().writeInvalidRequest(res, cause, V2EnvelopeWriter.messageLocale(request));
+        assertTrue(res.body(), res.body().contains("The start position must be 0 or greater."));
+    }
+
+    @Test
     public void test_writeInvalidRequest_readsAChineseScriptOrHongKongLocaleAsSimplifiedOrTraditional() throws Exception {
         final org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException cause =
                 new org.codelibs.fess.api.v2.handlers.InvalidRequestParameterException(

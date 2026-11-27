@@ -143,19 +143,20 @@ public class SearchHandler {
                     ComponentUtil.getV2UserPayloads().permissionState(userBean.isPresent() ? userBean.get() : null));
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
         } catch (final InvalidRequestParameterException e) {
-            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, request.getLocale());
+            ComponentUtil.getV2EnvelopeWriter().writeInvalidRequest(response, e, V2EnvelopeWriter.messageLocale(request));
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/search request", e);
             }
             ComponentUtil.getV2EnvelopeWriter()
-                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(), e.getMessageCode());
+                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, V2EnvelopeWriter.messageLocale(request),
+                            e.getMessageCode());
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/search request", e);
             }
             ComponentUtil.getV2EnvelopeWriter()
-                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(),
+                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, V2EnvelopeWriter.messageLocale(request),
                             messages -> messages.addErrorsResultSizeExceeded(UserMessages.GLOBAL_PROPERTY_KEY));
         } catch (final SearchEngineUnavailableException e) {
             // Already logged where the search engine refused the search. The request is fine and
