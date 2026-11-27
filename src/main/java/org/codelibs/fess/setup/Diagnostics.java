@@ -148,6 +148,14 @@ public final class Diagnostics {
     private static final String DICTIONARY_PATHS = "index dictionary paths";
 
     /**
+     * How to replace an index whose dictionary paths are absolute. A new index only gets relative
+     * paths when Fess runs with {@code FESS_DICTIONARY_PATH=dictionary/}; with an absolute value it
+     * records that value again. Only the document index has a re-index in the admin screen.
+     */
+    private static final String RECREATE = "set FESS_DICTIONARY_PATH=dictionary/ and re-create the index"
+            + " (the document index: re-index from Admin > Maintenance, then delete the old index)";
+
+    /**
      * Returns the indices with a shard that cannot be allocated because an analyzer names a file
      * outside the engine's config directory.
      *
@@ -166,7 +174,8 @@ public final class Diagnostics {
     }
 
     /**
-     * Reports the indices whose analyzers name a dictionary file by an absolute path.
+     * Reports the indices whose analyzers name a dictionary file by a path that stops working
+     * when the engine moves.
      *
      * <p>OpenSearch resolves a relative {@code *_path} against its config directory when it opens
      * the index, and refuses an absolute one that is not inside that directory. Fess 15.9 and
@@ -177,16 +186,24 @@ public final class Diagnostics {
      * The setting cannot be changed on an existing index, which is why the remedy is a new index,
      * created while the engine is still where the old paths point.</p>
      *
+     * <p>Only an absolute path into a versioned engine directory is a warning (see
+     * {@link #isVersionedEnginePath(String)}). The Docker image and the RPM/DEB packages keep
+     * their dictionaries at a fixed absolute path ({@code /usr/share/opensearch/config/dictionary},
+     * {@code /etc/opensearch/dictionary}) that an upgrade does not change, so warning about those
+     * would report something nobody needs to act on. An index that already cannot be allocated
+     * fails whatever its paths look like.</p>
+     *
      * @param settingsJson the answer of {@code _settings/index.analysis.*?flat_settings=true}
      * @param outsideConfig the indices that already cannot be allocated for that reason, from
      *            {@link #indicesOutsideConfig(String)}
-     * @return one OK check when every dictionary path is relative, otherwise one check per index
-     *         at fault: FAIL when it cannot be allocated, WARN when it can but would not after a move
+     * @return one OK check when no index is at fault, otherwise one check per index at fault:
+     *         FAIL when it cannot be allocated, WARN when it can but would not after the engine moves
      * @throws SetupException if the settings are not JSON
      */
     public static List<Check> dictionaryPaths(final String settingsJson, final List<String> outsideConfig) throws SetupException {
         final Map<String, List<String>> absolute = new LinkedHashMap<>();
         int pathSettings = 0;
+        int fixedSettings = 0;
         int indicesWithPaths = 0;
         if (!(JsonReader.parse(settingsJson) instanceof final Map<?, ?> indices)) {
             throw new SetupException("The index settings are not a JSON object");
@@ -212,31 +229,60 @@ public final class Diagnostics {
             }
         }
 
-        final Set<String> atFault = new LinkedHashSet<>(outsideConfig);
-        atFault.addAll(absolute.keySet());
         final List<Check> checks = new ArrayList<>();
-        for (final String index : atFault) {
+        for (final String index : outsideConfig) {
             final List<String> paths = absolute.getOrDefault(index, List.of());
             final String found = paths.isEmpty() ? "an analyzer names a file outside the engine's config directory"
                     : paths.size() + " analyzer setting(s) name an absolute path, such as " + paths.get(0);
-            // Only the document index has a re-index in the admin screen; the remedy for any other
-            // index is the same in substance, a new index created while the old paths still resolve.
-            final String recreate = "re-create it, so the new index uses dictionary/"
-                    + " (the document index: re-index from Admin > Maintenance, then delete the old index)";
-            if (outsideConfig.contains(index)) {
-                checks.add(new Check(Status.FAIL, DICTIONARY_PATHS, index + " cannot be allocated: " + found
-                        + " (start the engine from the directory those paths name, then " + recreate + ")"));
-            } else {
-                checks.add(new Check(Status.WARN, DICTIONARY_PATHS,
-                        index + ": " + found + "; the index will not open if the engine moves to another directory (before moving it, "
-                                + recreate + "; or keep the engine where it is)"));
+            checks.add(new Check(Status.FAIL, DICTIONARY_PATHS, index + " cannot be allocated: " + found
+                    + " (start the engine from the directory those paths name, then " + RECREATE + ")"));
+        }
+        for (final Map.Entry<String, List<String>> entry : absolute.entrySet()) {
+            if (outsideConfig.contains(entry.getKey())) {
+                continue;
+            }
+            final List<String> versioned = entry.getValue().stream().filter(Diagnostics::isVersionedEnginePath).toList();
+            fixedSettings += entry.getValue().size() - versioned.size();
+            if (!versioned.isEmpty()) {
+                checks.add(new Check(Status.WARN, DICTIONARY_PATHS, entry.getKey() + ": " + versioned.size()
+                        + " analyzer setting(s) name an absolute path into a versioned engine directory, such as " + versioned.get(0)
+                        + "; the index will not open once the engine runs from another directory (before moving it, " + RECREATE
+                        + "; or keep the engine where it is)"));
             }
         }
         if (checks.isEmpty()) {
-            checks.add(new Check(Status.OK, DICTIONARY_PATHS, pathSettings == 0 ? "no index names a dictionary file"
-                    : pathSettings + " path setting(s) in " + indicesWithPaths + " index(es), all relative"));
+            final String detail;
+            if (pathSettings == 0) {
+                detail = "no index names a dictionary file";
+            } else if (fixedSettings == 0) {
+                detail = pathSettings + " path setting(s) in " + indicesWithPaths + " index(es), all relative";
+            } else {
+                detail = pathSettings + " path setting(s) in " + indicesWithPaths + " index(es), " + fixedSettings
+                        + " of them absolute into a directory that does not change with the engine version";
+            }
+            checks.add(new Check(Status.OK, DICTIONARY_PATHS, detail));
         }
         return checks;
+    }
+
+    /**
+     * Returns whether an absolute path runs through a directory named after an engine version,
+     * such as {@code opensearch-3.9.0}: the name an OpenSearch archive unpacks to, and the
+     * directory {@code fess-setup install opensearch} creates. The next version goes into a new
+     * directory beside it, so a path into this one stops resolving after an upgrade.
+     *
+     * @param path an absolute path, with {@code /} or {@code \} separators
+     * @return true if one of its directories is {@code opensearch-} followed by a digit
+     */
+    static boolean isVersionedEnginePath(final String path) {
+        final String prefix = "opensearch-";
+        for (final String segment : path.split("[/\\\\]")) {
+            if (segment.length() > prefix.length() && segment.regionMatches(true, 0, prefix, 0, prefix.length())
+                    && Character.isDigit(segment.charAt(prefix.length()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

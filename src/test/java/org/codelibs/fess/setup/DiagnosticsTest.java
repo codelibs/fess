@@ -282,7 +282,7 @@ public class DiagnosticsTest {
         assertEquals(Status.WARN, check.status(), check.detail());
         assertTrue(check.detail().startsWith("fess.20250101: 2 analyzer setting(s)"), check.detail());
         assertTrue(check.detail().contains("/opt/opensearch-3.9.0/config/dictionary/ja/mapping.txt"), check.detail());
-        assertTrue(check.detail().contains("re-create it"), check.detail());
+        assertTrue(check.detail().contains("set FESS_DICTIONARY_PATH=dictionary/ and re-create the index"), check.detail());
         assertTrue(check.detail().contains("keep the engine where it is"), check.detail());
     }
 
@@ -297,18 +297,89 @@ public class DiagnosticsTest {
 
     /**
      * A Windows path reaches the JSON with its backslashes escaped; reading it with anything
-     * less than a JSON reader leaves C:\\ in place and misses the drive letter.
+     * less than a JSON reader leaves C:\\ in place and misses the drive letter. This is the
+     * layout of a Windows ZIP install, whose engine directory carries the version.
      */
     @Test
     public void test_dictionaryPaths_windowsPathsThroughJson() throws Exception {
-        final String json = "{\"fess_suggest_analyzer\":{\"settings\":{"
-                + "\"index.analysis.tokenizer.ja.user_dictionary\":\"C:\\\\Program Files\\\\opensearch\\\\config\\\\dictionary\\\\ja\\\\kuromoji.txt\","
+        final String json = "{\"fess_suggest_analyzer\":{\"settings\":{" + "\"index.analysis.tokenizer.ja.user_dictionary\":"
+                + "\"C:\\\\fess-15.9.0\\\\opensearch\\\\opensearch-3.9.0\\\\config\\\\dictionary\\\\ja\\\\kuromoji.txt\","
                 + "\"index.analysis.filter.s.stopwords_path\":\"dictionary/stopwords.txt\"}}}";
         final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(1, checks.size());
         assertEquals(Status.WARN, checks.get(0).status(), checks.get(0).detail());
         assertTrue(checks.get(0).detail().contains("1 analyzer setting(s)"), checks.get(0).detail());
-        assertTrue(checks.get(0).detail().contains("C:\\Program Files\\opensearch\\config\\dictionary\\ja\\kuromoji.txt"),
+        assertTrue(checks.get(0).detail().contains("C:\\fess-15.9.0\\opensearch\\opensearch-3.9.0\\config\\dictionary\\ja\\kuromoji.txt"),
                 checks.get(0).detail());
+    }
+
+    /**
+     * The escaped form of a Windows path without a version in it is still read as an absolute
+     * path -- it is counted as one -- but it does not move with an upgrade.
+     */
+    @Test
+    public void test_dictionaryPaths_windowsFixedPathThroughJson() throws Exception {
+        final String json = "{\"fess.20250101\":{\"settings\":{"
+                + "\"index.analysis.filter.s.synonyms_path\":\"C:\\\\opensearch\\\\config\\\\dictionary\\\\x.txt\"}}}";
+        final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(1, checks.size());
+        assertEquals(Status.OK, checks.get(0).status(), checks.get(0).detail());
+        assertEquals("1 path setting(s) in 1 index(es), 1 of them absolute into a directory that does not change with the engine version",
+                checks.get(0).detail());
+    }
+
+    /**
+     * The fess-opensearch image and the Compose files use /usr/share/opensearch/config/dictionary,
+     * which every version of the image keeps, so an index created there is not a warning.
+     */
+    @Test
+    public void test_dictionaryPaths_dockerPathIsOk() throws Exception {
+        final String json = "{\"fess.20250101\":{\"settings\":{"
+                + "\"index.analysis.char_filter.m.mappings_path\":\"/usr/share/opensearch/config/dictionary/ja/mapping.txt\","
+                + "\"index.analysis.filter.s.synonyms_path\":\"/usr/share/opensearch/config/dictionary/synonym.txt\"}}}";
+        final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(1, checks.size());
+        assertEquals(Status.OK, checks.get(0).status(), checks.get(0).detail());
+        assertTrue(checks.get(0).detail().contains("2 of them absolute"), checks.get(0).detail());
+    }
+
+    /**
+     * The RPM/DEB packages keep the dictionaries under /etc/opensearch/dictionary (and
+     * /var/lib/opensearch/config before that), which a package upgrade does not change.
+     */
+    @Test
+    public void test_dictionaryPaths_packagePathIsOk() throws Exception {
+        final String json = "{\"fess.20250101\":{\"settings\":{"
+                + "\"index.analysis.char_filter.m.mappings_path\":\"/etc/opensearch/dictionary/ja/mapping.txt\"}},"
+                + "\"fess_suggest_analyzer\":{\"settings\":{"
+                + "\"index.analysis.filter.s.stopwords_path\":\"/var/lib/opensearch/config/stopwords.txt\"}}}";
+        final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of());
+        assertEquals(1, checks.size());
+        assertEquals(Status.OK, checks.get(0).status(), checks.get(0).detail());
+    }
+
+    /**
+     * Even a path that is not expected to move fails once the engine refuses it.
+     */
+    @Test
+    public void test_dictionaryPaths_unallocatableFixedPathStillFails() throws Exception {
+        final String json = "{\"fess.20250101\":{\"settings\":{"
+                + "\"index.analysis.filter.s.synonyms_path\":\"/usr/share/opensearch/config/dictionary/synonym.txt\"}}}";
+        final List<Check> checks = Diagnostics.dictionaryPaths(json, List.of("fess.20250101"));
+        assertEquals(1, checks.size());
+        assertEquals(Status.FAIL, checks.get(0).status(), checks.get(0).detail());
+    }
+
+    @Test
+    public void test_isVersionedEnginePath() {
+        assertTrue(Diagnostics.isVersionedEnginePath("/opt/fess-15.9.0/opensearch/opensearch-3.9.0/config/dictionary/synonym.txt"));
+        assertTrue(Diagnostics.isVersionedEnginePath("/opt/opensearch-2.19.1/config/dictionary/synonym.txt"));
+        assertTrue(Diagnostics.isVersionedEnginePath("C:\\fess\\opensearch\\OpenSearch-3.9.0\\config\\dictionary\\synonym.txt"));
+        assertFalse(Diagnostics.isVersionedEnginePath("/usr/share/opensearch/config/dictionary/synonym.txt"));
+        assertFalse(Diagnostics.isVersionedEnginePath("/etc/opensearch/dictionary/synonym.txt"));
+        assertFalse(Diagnostics.isVersionedEnginePath("/var/lib/opensearch/config/synonym.txt"));
+        assertFalse(Diagnostics.isVersionedEnginePath("/opt/opensearch-data/config/dictionary/synonym.txt"));
+        assertFalse(Diagnostics.isVersionedEnginePath("/opt/opensearch-/config/dictionary/synonym.txt"));
     }
 
     /**
