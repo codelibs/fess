@@ -178,14 +178,14 @@ public class DataConfigService extends FessAppService {
      */
     protected void setupListCondition(final DataConfigCB cb, final DataConfigPager dataConfigPager) {
         if (StringUtil.isNotBlank(dataConfigPager.name)) {
-            cb.query().setName_Wildcard(dataConfigPager.name);
+            cb.query().setName_Wildcard(checkWildcard(dataConfigPager.name));
         }
         if (StringUtil.isNotBlank(dataConfigPager.handlerName)) {
             cb.query().setHandlerName_Wildcard(wrapQuery(dataConfigPager.handlerName));
         }
         if (StringUtil.isNotBlank(dataConfigPager.description)) {
             if (dataConfigPager.description.startsWith("*")) {
-                cb.query().setDescription_Wildcard(dataConfigPager.description);
+                cb.query().setDescription_Wildcard(checkWildcard(dataConfigPager.description));
             } else if (dataConfigPager.description.endsWith("*")) {
                 cb.query().setDescription_Prefix(dataConfigPager.description.replaceAll("\\*$", StringUtil.EMPTY));
             } else {

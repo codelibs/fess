@@ -29,6 +29,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.api.ApiFailureHook;
@@ -78,6 +79,14 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
 
     @Override
     public OptionalThing<ApiResponse> handleServerException(final ApiFailureResource resource, final Throwable cause) {
+        if (cause instanceof final InvalidQueryException e && e.getMessageCode() != null) {
+            // a filter or query that the search engine cannot run is an invalid request, not a failure of the server
+            if (logger.isDebugEnabled()) {
+                logger.debug("Invalid query: {}", e.getMessage(), e);
+            }
+            return OptionalThing.of(asJson(new ApiErrorResponse().message(e.getMessageCode()).status(Status.BAD_REQUEST).result())
+                    .httpStatus(HTTP_BAD_REQUEST));
+        }
         return OptionalThing.of(asJson(createFailureBean(Status.SYSTEM_ERROR, createMessage(resource, cause))));
     }
 

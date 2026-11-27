@@ -218,7 +218,7 @@ public class FailureUrlService {
     private void buildSearchCondition(final FailureUrlPager failureUrlPager, final FailureUrlCB cb) {
         // search
         if (StringUtil.isNotBlank(failureUrlPager.url)) {
-            cb.query().setUrl_Wildcard(failureUrlPager.url);
+            cb.query().setUrl_Wildcard(FessAppService.checkWildcard(failureUrlPager.url));
         }
 
         if (StringUtil.isNotBlank(failureUrlPager.errorCountMax)) {
@@ -229,7 +229,7 @@ public class FailureUrlService {
         }
 
         if (StringUtil.isNotBlank(failureUrlPager.errorName)) {
-            cb.query().setErrorName_Wildcard(failureUrlPager.errorName);
+            cb.query().setErrorName_Wildcard(FessAppService.checkWildcard(failureUrlPager.errorName));
         }
 
     }
