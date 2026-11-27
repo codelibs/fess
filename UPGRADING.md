@@ -107,6 +107,28 @@ indexed whatever its size, and only a document that expands by more than that is
 Failure URL for `Suspected zip bomb`. Raise `maxCompressionRatio` in that file if you have to index a more
 compressible document, or lower it to be stricter.
 
+**A re-crawl now removes the document of a page that answers 404 or 410.** Until 15.9 only a 404 answer to the
+HEAD request, sent for a document that has a `last_modified`, deleted the indexed document. A 410 (Gone), and a 404
+or 410 for a document without `last_modified` (the site sends no `Last-Modified` header), only added a failure URL,
+and the document stayed searchable until it expired (fess#3907, fess#3930). Now, with "Check Last Modified" on in
+the General settings (the default), a 404 or 410 to the HEAD request or to the GET of an http or https URL deletes
+its indexed document and adds no failure URL; a 404 for a URL that is not indexed still adds one, and 401, 403 and
+5xx answers delete nothing. The first crawl after the upgrade therefore removes such pages from the results. No
+setting keeps them other than turning "Check Last Modified" off, which also turns off incremental crawling.
+
+**The robots meta tag and the `X-Robots-Tag` header are read directive by directive, and the header now also
+applies to documents that are not HTML.** Until 15.9 an HTML page was taken as `noindex`/`nofollow` when the value
+merely contained `none`, `noindex` or `nofollow`, so `max-image-preview:none` kept it out of the index and its links
+unfollowed, and a rule for another crawler such as `googlebot: noindex` applied to Fess as well (fess#3931). Now the
+value is split on commas, each directive is compared as a whole without regard to case (`none` still means
+`noindex, nofollow`; `noindex nofollow` without a comma still counts as both on an HTML page), and a value that
+starts with a crawler name and a colon is ignored, so such pages are indexed and followed on the next crawl. A PDF,
+Office file or other non-HTML document whose `X-Robots-Tag` asks for `noindex` or `none`, read the same way, is no
+longer indexed (fess#3929); a copy indexed before the header appeared is not deleted by the crawl, so remove it
+from Admin > Search if needed. To index such documents anyway, set `crawler.ignore.robots.tags=true` in
+`fess_config.properties` (every crawl configuration; it also ignores the robots meta tag and the header of HTML
+pages) or `config.ignore.robots.tags=true` in the "Config Parameters" of one crawl configuration.
+
 **The static files of a theme are revalidated instead of being cached for a day.** Until 15.9 the files under
 `/themes/<name>/` were sent with `Cache-Control: public, max-age=86400`, so a browser kept the scripts and
 stylesheets of the version it had loaded for up to 24 hours after an upgrade. They are now sent with
