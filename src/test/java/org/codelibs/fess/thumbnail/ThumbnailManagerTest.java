@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -255,6 +257,28 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
 
         boolean result = thumbnailManager.offer(docMap);
         assertFalse(result);
+    }
+
+    @Test
+    public void test_offer_noMatchingGenerator_logWithoutUserInfo() {
+        TestThumbnailGenerator generator = new TestThumbnailGenerator();
+        generator.available = true;
+        generator.target = false;
+        thumbnailManager.add(generator);
+
+        Map<String, Object> docMap = new HashMap<>();
+        docMap.put("_id", "docid1");
+        docMap.put("url", "http://user:secret@example.com/page.html");
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ThumbnailManager.class);
+        try {
+            assertFalse(thumbnailManager.offer(docMap));
+            final List<String> messages = appender.messagesAt(Level.DEBUG);
+            assertTrue(messages.toString(), messages.contains("Thumbnail generator is not found: http://example.com/page.html"));
+            messages.forEach(m -> assertFalse(m, m.contains("secret")));
+        } finally {
+            appender.detach();
+        }
     }
 
     // Test offer with null task
