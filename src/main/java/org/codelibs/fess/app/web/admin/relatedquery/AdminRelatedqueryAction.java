@@ -423,6 +423,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        relatedQueryPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         saveToken();
         return asHtml(path_AdminRelatedquery_AdminRelatedqueryJsp).renderWith(data -> {

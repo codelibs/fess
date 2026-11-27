@@ -431,6 +431,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
      *
      * @return HTML response for the list page
      */
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        labelTypePager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
             RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi

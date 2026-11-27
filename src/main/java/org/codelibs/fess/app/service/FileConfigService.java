@@ -173,7 +173,7 @@ public class FileConfigService extends FessAppService {
         }
         if (StringUtil.isNotBlank(fileConfigPager.description)) {
             if (fileConfigPager.description.startsWith("*")) {
-                cb.query().setDescription_Wildcard(fileConfigPager.description);
+                cb.query().setDescription_Wildcard(checkWildcard(fileConfigPager.description));
             } else if (fileConfigPager.description.endsWith("*")) {
                 cb.query().setDescription_Prefix(fileConfigPager.description.replaceAll("\\*$", StringUtil.EMPTY));
             } else {

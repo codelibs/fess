@@ -477,6 +477,12 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        webConfigPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
             RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi

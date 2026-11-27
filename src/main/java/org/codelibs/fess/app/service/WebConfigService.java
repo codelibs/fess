@@ -173,7 +173,7 @@ public class WebConfigService extends FessAppService {
         }
         if (StringUtil.isNotBlank(webConfigPager.description)) {
             if (webConfigPager.description.startsWith("*")) {
-                cb.query().setDescription_Wildcard(webConfigPager.description);
+                cb.query().setDescription_Wildcard(checkWildcard(webConfigPager.description));
             } else if (webConfigPager.description.endsWith("*")) {
                 cb.query().setDescription_Prefix(webConfigPager.description.replaceAll("\\*$", StringUtil.EMPTY));
             } else {

@@ -33,15 +33,19 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.admin.AdminAction;
 import org.codelibs.fess.exception.InvalidFilePathException;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
+import org.lastaflute.web.hook.ApplicationExceptionHandler;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -352,6 +356,48 @@ public abstract class FessAdminAction extends FessBaseAction {
     protected int limitPageNumber(final int pageNumber, final int pageSize) {
         final int maxPage = Math.max(1, fessConfig.getIndexerMaxResultWindowSizeAsInteger() / Math.max(1, pageSize));
         return Math.min(pageNumber, maxPage);
+    }
+
+    /**
+     * Shows the list screen with the error when the search engine cannot run a filter of the list.
+     * <p>
+     * A list screen runs its list query in the {@code renderWith} callback of its response, which
+     * LastaFlute calls after the action method has returned, so the action method cannot catch the
+     * {@link InvalidQueryException} of a filter that the search engine cannot run (for example
+     * {@code *xxx...*} of hundreds of characters). The exception reaches this handler instead. The
+     * filter is kept in the pager of the session, so it is dropped by
+     * {@link #asListHtmlWithoutFilter()} before the list is shown again with the message of the
+     * exception; otherwise every later visit to the list would fail the same way.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     * @param handler the handler of the exception thrown by the action
+     */
+    @Override
+    protected void handleApplicationException(final ActionRuntime runtime, final ApplicationExceptionHandler handler) {
+        super.handleApplicationException(runtime, handler);
+        if (handler.getCause() instanceof final InvalidQueryException cause && cause.getMessageCode() != null) {
+            // the messages are saved by handle(), so it is called only when the list can be shown
+            asListHtmlWithoutFilter().ifPresent(response -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid filter of the list: {}", cause.getMessage(), cause);
+                }
+                final FessMessages messages = createMessages();
+                cause.getMessageCode().message(messages);
+                handler.handle(InvalidQueryException.class, messages, e -> response);
+            });
+        }
+    }
+
+    /**
+     * Clears the filter of the list screen and returns the list screen, for a filter that the search
+     * engine cannot run. An action whose list filter can be refused with an
+     * {@link InvalidQueryException} overrides this, clearing its pager the way its {@code reset} does.
+     *
+     * @return the list screen without the filter, or empty if this action has no such list
+     */
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        return OptionalThing.empty();
     }
 
     /**

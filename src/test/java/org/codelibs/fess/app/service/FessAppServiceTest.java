@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.service;
 
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -72,6 +73,42 @@ public class FessAppServiceTest extends UnitFessTestCase {
     @Test
     public void test_wrapQuery_multipleInternalWildcards() {
         assertEquals("*test*query*search*", service.callWrapQuery("test*query*search"));
+    }
+
+    @Test
+    public void test_wrapQuery_longRandomTextIsKept() {
+        final StringBuilder sb = new StringBuilder();
+        final java.util.Random random = new java.util.Random(1);
+        for (int i = 0; i < 5000; i++) {
+            sb.append((char) ('a' + random.nextInt(26)));
+        }
+        assertEquals("*" + sb + "*", service.callWrapQuery(sb.toString()));
+    }
+
+    @Test
+    public void test_wrapQuery_repeatedTextUpToTheLimit() {
+        final String text = "x".repeat(314);
+        assertEquals("*" + text + "*", service.callWrapQuery(text));
+    }
+
+    @Test
+    public void test_wrapQuery_tooComplexIsInvalidQuery() {
+        // the search engine refuses these with "Determinizing automaton ... would require more than 10000 effort" (HTTP 500 "all shards failed" before)
+        for (final String text : new String[] { "x".repeat(315), "x".repeat(5000), "a?".repeat(50), "abcdefghij".repeat(100) }) {
+            try {
+                service.callWrapQuery(text);
+                fail("expected InvalidQueryException for a pattern of " + text.length() + " characters");
+            } catch (final InvalidQueryException e) {
+                assertNotNull(e.getMessageCode());
+            }
+        }
+    }
+
+    @Test
+    public void test_checkWildcard_prefixPatternIsKept() {
+        // a pattern without a leading wildcard is a prefix: it stays cheap at any length
+        final String pattern = "x".repeat(5000) + "*";
+        assertEquals(pattern, FessAppService.checkWildcard(pattern));
     }
 
     // Test subclass to access protected method

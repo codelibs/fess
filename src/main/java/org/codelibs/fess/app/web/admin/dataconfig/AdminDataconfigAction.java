@@ -472,6 +472,12 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        dataConfigPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
             RenderDataUtil.register(data, "dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager));

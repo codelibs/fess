@@ -368,6 +368,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        duplicateHostPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminDuplicatehost_AdminDuplicatehostJsp).renderWith(data -> {
             RenderDataUtil.register(data, "duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi

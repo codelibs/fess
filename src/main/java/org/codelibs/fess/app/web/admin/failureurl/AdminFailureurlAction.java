@@ -25,6 +25,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -258,6 +259,12 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                                                        ============
     //                                                                              JSP
     //                                                                           =========
+
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        failureUrlPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {

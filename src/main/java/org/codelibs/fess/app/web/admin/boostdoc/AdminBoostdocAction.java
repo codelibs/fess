@@ -348,6 +348,12 @@ public class AdminBoostdocAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        boostDocPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
             RenderDataUtil.register(data, "boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager));

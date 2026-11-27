@@ -377,6 +377,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        relatedContentPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminRelatedcontent_AdminRelatedcontentJsp).renderWith(data -> {
             RenderDataUtil.register(data, "relatedContentItems", relatedContentService.getRelatedContentList(relatedContentPager));

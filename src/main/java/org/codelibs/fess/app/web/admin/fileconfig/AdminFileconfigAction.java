@@ -490,6 +490,12 @@ public class AdminFileconfigAction extends FessAdminAction {
      *
      * @return HTML response for the list page
      */
+    @Override
+    protected OptionalThing<HtmlResponse> asListHtmlWithoutFilter() {
+        fileConfigPager.clear();
+        return OptionalThing.of(asListHtml());
+    }
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
             RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
