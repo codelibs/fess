@@ -44,6 +44,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.thumbnail.ThumbnailGenerator;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
 /**
@@ -106,7 +107,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     public boolean isTarget(final Map<String, Object> docMap) {
         final String thumbnailFieldName = ComponentUtil.getFessConfig().getIndexFieldThumbnail();
         if (logger.isDebugEnabled()) {
-            logger.debug("[{}] thumbnail: {}", name, docMap.get(thumbnailFieldName));
+            final Object thumbnail = docMap.get(thumbnailFieldName);
+            logger.debug("[{}] thumbnail: {}", name, thumbnail instanceof final String s ? CredentialUrlUtil.removeUserInfo(s) : thumbnail);
         }
         if (!docMap.containsKey(thumbnailFieldName)) {
             return false;
@@ -322,14 +324,14 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             }
 
             if (logger.isInfoEnabled()) {
-                logger.info("Generating Thumbnail: {}", url);
+                logger.info("Generating Thumbnail: {}", CredentialUrlUtil.removeUserInfo(url));
             }
 
             final CrawlerClientFactory crawlerClientFactory =
                     config.initializeClientFactory(() -> ComponentUtil.getComponent(CrawlerClientFactory.class));
             final CrawlerClient client = crawlerClientFactory.getClient(url);
             if (client == null) {
-                throw new ThumbnailGenerationException("No CrawlerClient: " + configId + ", url: " + url);
+                throw new ThumbnailGenerationException("No CrawlerClient: " + configId + ", url: " + CredentialUrlUtil.removeUserInfo(url));
             }
             String u = url;
             for (int i = 0; i < maxRedirectCount; i++) {
@@ -339,20 +341,23 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
                         continue;
                     }
                     if (StringUtil.isBlank(responseData.getUrl())) {
-                        throw new ThumbnailGenerationException(
-                                "Failed to process a thumbnail content: " + url + " (Response URL is empty)");
+                        throw new ThumbnailGenerationException("Failed to process a thumbnail content: "
+                                + CredentialUrlUtil.removeUserInfo(url) + " (Response URL is empty)");
                     }
                     return consumer.test(responseData);
                 } catch (final CrawlingAccessException e) {
                     if (logger.isDebugEnabled()) {
-                        throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
+                        throw new ThumbnailGenerationException(
+                                "Failed to process a thumbnail content: " + CredentialUrlUtil.removeUserInfo(url), e);
                     }
                     throw new ThumbnailGenerationException(e.getMessage());
                 } catch (final Exception e) {
-                    throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url, e);
+                    throw new ThumbnailGenerationException(
+                            "Failed to process a thumbnail content: " + CredentialUrlUtil.removeUserInfo(url), e);
                 }
             }
-            throw new ThumbnailGenerationException("Failed to process a thumbnail content: " + url + " (Redirect Loop)");
+            throw new ThumbnailGenerationException(
+                    "Failed to process a thumbnail content: " + CredentialUrlUtil.removeUserInfo(url) + " (Redirect Loop)");
         });
     }
 

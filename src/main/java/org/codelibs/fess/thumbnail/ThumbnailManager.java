@@ -47,6 +47,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.opensearch.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
@@ -382,7 +383,8 @@ public class ThumbnailManager {
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail generator is not found: {}", docMap != null ? docMap.get("url") : docMap);
+            final Object url = docMap != null ? docMap.get("url") : null;
+            logger.debug("Thumbnail generator is not found: {}", url instanceof final String s ? CredentialUrlUtil.removeUserInfo(s) : url);
         }
         return false;
     }

@@ -16,14 +16,28 @@
 package org.codelibs.fess.thumbnail.impl;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.client.CrawlerClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.entity.RequestData;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.helper.CrawlingConfigHelper;
+import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
+import org.codelibs.fess.opensearch.config.exentity.WebConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -536,6 +550,141 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
     public void test_getCommandSuffixList() {
         assertEquals(List.of(".bat", ".cmd", ".exe"), createCommandGenerator(null, true).getCommandSuffixList());
         assertEquals(List.of(""), createCommandGenerator(null, false).getCommandSuffixList());
+    }
+
+    @Test
+    public void test_isTarget_logWithoutUserInfo() {
+        generator = new TestThumbnailGenerator();
+        generator.setName("test");
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+        });
+        final LogCapturingAppender appender = LogCapturingAppender.attach(BaseThumbnailGenerator.class);
+        try {
+            final Map<String, Object> docMap = new HashMap<>();
+            docMap.put("thumbnail", "http://user:secret@example.com/img/a.png");
+            generator.isTarget(docMap);
+            final List<String> messages = appender.messagesAt(Level.DEBUG);
+            assertTrue(messages.toString(), messages.contains("[test] thumbnail: http://example.com/img/a.png"));
+            messages.forEach(m -> assertFalse(m, m.contains("secret")));
+        } finally {
+            appender.detach();
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_process_noCrawlerClient_logWithoutUserInfo() {
+        generator = new TestThumbnailGenerator();
+        registerThumbnailDocument("http://user:secret@example.com/img/a.png", new CrawlerClientFactory());
+        final LogCapturingAppender appender = LogCapturingAppender.attach(BaseThumbnailGenerator.class);
+        try {
+            assertFalse(generator.process("doc1", responseData -> true));
+            assertEquals(List.of("Generating Thumbnail: http://example.com/img/a.png"), appender.messagesAt(Level.INFO));
+            assertEquals(List.of("No CrawlerClient: W1, url: http://example.com/img/a.png"), appender.messagesAt(Level.DEBUG));
+            assertNoUserInfo(appender);
+        } finally {
+            appender.detach();
+            clearThumbnailDocument();
+        }
+    }
+
+    @Test
+    public void test_process_failedContent_exceptionWithoutUserInfo() {
+        generator = new TestThumbnailGenerator();
+        final CrawlerClientFactory clientFactory = new CrawlerClientFactory();
+        clientFactory.addClient("http:.*", new CrawlerClient() {
+            @Override
+            public void setInitParameterMap(final Map<String, Object> params) {
+                // nothing
+            }
+
+            @Override
+            public ResponseData execute(final RequestData data) {
+                // the URL actually requested keeps its userinfo
+                assertEquals("http://user:secret@example.com/img/a.png", data.getUrl());
+                throw new IllegalStateException("connection refused");
+            }
+        });
+        registerThumbnailDocument("http://user:secret@example.com/img/a.png", clientFactory);
+        final LogCapturingAppender appender = LogCapturingAppender.attach(BaseThumbnailGenerator.class);
+        try {
+            assertFalse(generator.process("doc1", responseData -> true));
+            final List<LogEvent> warnings = appender.eventsAt(Level.WARN);
+            assertEquals(warnings.toString(), 1, warnings.size());
+            assertEquals("Failed to process a thumbnail content: http://example.com/img/a.png", warnings.get(0).getThrown().getMessage());
+            assertEquals(List.of("Generating Thumbnail: http://example.com/img/a.png"), appender.messagesAt(Level.INFO));
+            assertNoUserInfo(appender);
+        } finally {
+            appender.detach();
+            clearThumbnailDocument();
+        }
+    }
+
+    private void assertNoUserInfo(final LogCapturingAppender appender) {
+        for (final LogEvent event : appender.events()) {
+            final String message = event.getMessage().getFormattedMessage();
+            assertFalse(message, message.contains("secret"));
+            if (event.getThrown() != null) {
+                assertFalse(event.getThrown().getMessage(), event.getThrown().getMessage().contains("secret"));
+            }
+        }
+    }
+
+    private void registerThumbnailDocument(final String thumbnailUrl, final CrawlerClientFactory clientFactory) {
+        clearThumbnailDocument();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+
+            @Override
+            public String getIndexFieldConfigId() {
+                return "config_id";
+            }
+        });
+        ComponentUtil.register(new SearchEngineClient(), "searchEngineClient");
+        ComponentUtil.register(new IndexingHelper() {
+            @Override
+            public Map<String, Object> getDocument(final SearchEngineClient searchEngineClient, final String id, final String[] fields) {
+                final Map<String, Object> doc = new HashMap<>();
+                doc.put("thumbnail", thumbnailUrl);
+                doc.put("config_id", "W1");
+                return doc;
+            }
+        }, "indexingHelper");
+        ComponentUtil.register(new CrawlingConfigHelper() {
+            @Override
+            public CrawlingConfig getCrawlingConfig(final String configId) {
+                return new WebConfig() {
+                    @Override
+                    public CrawlerClientFactory initializeClientFactory(final Supplier<CrawlerClientFactory> creator) {
+                        return clientFactory;
+                    }
+                };
+            }
+        }, "crawlingConfigHelper");
+    }
+
+    private void clearThumbnailDocument() {
+        // ComponentUtil caches these helpers, and the cache outlives ComponentUtil.register
+        clearCachedComponent("indexingHelper");
+        clearCachedComponent("crawlingConfigHelper");
+        ComponentUtil.setFessConfig(null);
+    }
+
+    private static void clearCachedComponent(final String name) {
+        try {
+            final Field field = ComponentUtil.class.getDeclaredField(name);
+            field.setAccessible(true);
+            field.set(null, null);
+        } catch (final ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private CommandGenerator createCommandGenerator(final File binDir, final boolean windows) {
