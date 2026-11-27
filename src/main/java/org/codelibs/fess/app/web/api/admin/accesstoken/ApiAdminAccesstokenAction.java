@@ -35,6 +35,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.opensearch.config.exentity.AccessToken;
 import org.codelibs.fess.util.ComponentUtil;
@@ -135,10 +136,12 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, accessTokenService.getAccessToken(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final AccessToken verified = verifyVersionNo(body.id, body.versionNo, accessTokenService.getAccessToken(body.id).orElse(null));
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
             try {
-                accessTokenService.store(entity);
+                accessTokenService.store(writeOnlyIfUnchangedSince(entity, verified));
+            } catch (final SettingChangedConcurrentlyException e) {
+                throwSettingChangedConcurrently(body.id, e);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

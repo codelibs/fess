@@ -27,6 +27,7 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.opensearch.user.exentity.Role;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
@@ -130,7 +131,7 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, roleService.getRole(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final Role verified = verifyVersionNo(body.id, body.versionNo, roleService.getRole(body.id).orElse(null));
         final Role entity = getRole(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
                 messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
@@ -138,7 +139,9 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
             return null;
         });
         try {
-            roleService.store(entity);
+            roleService.store(writeOnlyIfUnchangedSince(entity, verified));
+        } catch (final SettingChangedConcurrentlyException e) {
+            throwSettingChangedConcurrently(body.id, e);
         } catch (final Exception e) {
             logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

@@ -199,9 +199,12 @@ else. Reload it and try again." (HTTP 400, `status` 1) before anything is writte
 `keymatch`, `labeltype`, `pathmap`, `relatedcontent`, `relatedquery`, `reqheader`, `role`, `scheduler`,
 `webauth` and `webconfig`. Until 15.9 `version_no` was required but never compared (and the API returned `-1`
 for it), so a script that sent a constant has to send the `version_no` it has just read from
-`GET /api/admin/<name>/setting/{id}` (or the list) and read the setting again after a refusal. The admin screens
-of these settings do not compare it. The APIs that have no `version_no` (for example `general`, `theme`, `dict`)
-and `tagtype` (which has its own `seq_no` check) are unchanged.
+`GET /api/admin/<name>/setting/{id}` (or the list) and read the setting again after a refusal. The write is also
+refused with the same response when the setting is changed between the check and the write, so of several
+requests sent at the same time with the same `version_no` only one is applied. The admin screens of these settings
+do not compare it, but a save that collides with another change of the same setting at the same moment now shows
+the same message and writes nothing, instead of overwriting it. The APIs that have no `version_no` (for example
+`general`, `theme`, `dict`) and `tagtype` (which has its own `seq_no` check) are unchanged.
 
 **The `message` of a v2 API refusal is written in the language of the request.** A `400 invalid_request` for a
 search parameter (`start`, `num`, a facet size, a parameter that is too long or has too many values), a start

@@ -136,11 +136,10 @@ public class LabelTypeService extends FessAppService {
      * Store a label type.
      *
      * @param labelType The label type to store.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final LabelType labelType) {
-        labelTypeBhv.insertOrUpdate(labelType, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(labelType, labelTypeBhv::insertOrUpdate);
 
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         if (labelTypeHelper != null) {

@@ -15,11 +15,17 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.automaton.Operations;
 import org.apache.lucene.util.automaton.TooComplexToDeterminizeException;
+import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.lastaflute.core.message.UserMessages;
 
 /**
@@ -86,4 +92,103 @@ public abstract class FessAppService {
         return pattern;
     }
 
+    /**
+     * Writes a setting of the {@code config} index with {@code insertOrUpdate} and an immediate refresh. A setting
+     * that was read from the index is written only if the stored one is unchanged since that read: the sequence
+     * number and primary term the setting carries go into the request, and the index refuses the write otherwise.
+     * A new setting (one that was not read) is written without that condition.
+     *
+     * @param <E> the type of the setting
+     * @param entity the setting to write
+     * @param writer the {@code insertOrUpdate} of the behavior of the setting
+     * @throws SettingChangedConcurrentlyException if the stored setting was changed or deleted since it was read
+     */
+    protected <E extends org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity> void insertOrUpdateIfUnchanged(final E entity,
+            final BiConsumer<E, org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity.RequestOptionCall<IndexRequestBuilder>> writer) {
+        final org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity.DocMeta docMeta = entity.asDocMeta();
+        writeIfUnchanged(docMeta.id(), docMeta.seqNo(), docMeta.primaryTerm(), option -> writer.accept(entity, option::accept));
+    }
+
+    /**
+     * Writes a setting of the {@code user} index (a group or a role) like
+     * {@link #insertOrUpdateIfUnchanged(org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity, BiConsumer)}.
+     *
+     * @param <E> the type of the setting
+     * @param entity the setting to write
+     * @param writer the {@code insertOrUpdate} of the behavior of the setting
+     * @throws SettingChangedConcurrentlyException if the stored setting was changed or deleted since it was read
+     */
+    protected <E extends org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity> void insertOrUpdateIfUnchanged(final E entity,
+            final BiConsumer<E, org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity.RequestOptionCall<IndexRequestBuilder>> writer) {
+        final org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity.DocMeta docMeta = entity.asDocMeta();
+        writeIfUnchanged(docMeta.id(), docMeta.seqNo(), docMeta.primaryTerm(), option -> writer.accept(entity, option::accept));
+    }
+
+    /**
+     * Tells whether a document was read from the index, so that its sequence number and primary term are known.
+     *
+     * @param seqNo the sequence number of the read, or null
+     * @param primaryTerm the primary term of the read, or null
+     * @return true if both are known
+     */
+    protected static boolean hasReadVersion(final Long seqNo, final Long primaryTerm) {
+        return seqNo != null && seqNo.longValue() >= 0L && primaryTerm != null && primaryTerm.longValue() > 0L;
+    }
+
+    /**
+     * Runs a write with an immediate refresh and, when the sequence number and primary term of a read are known,
+     * on the condition that the document is unchanged since that read.
+     *
+     * @param id the ID of the document, for the message of the exception
+     * @param seqNo the sequence number of the read, or null
+     * @param primaryTerm the primary term of the read, or null
+     * @param write the write, which applies the options it is given to its request
+     * @throws SettingChangedConcurrentlyException if the index refused the write with a version conflict
+     */
+    private void writeIfUnchanged(final String id, final Long seqNo, final Long primaryTerm,
+            final Consumer<Consumer<IndexRequestBuilder>> write) {
+        final boolean versioned = hasReadVersion(seqNo, primaryTerm);
+        try {
+            write.accept(op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+                if (versioned) {
+                    op.setIfSeqNo(seqNo);
+                    op.setIfPrimaryTerm(primaryTerm);
+                }
+            });
+        } catch (final RuntimeException e) {
+            if (isVersionConflict(e)) {
+                throw new SettingChangedConcurrentlyException(
+                        "The setting was changed or deleted since it was read, so it was not written: id=" + id, e);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Tests whether the throwable, or one of its causes, is a version conflict of the search engine. The in-process
+     * client throws a {@code VersionConflictEngineException}; the HTTP client throws a generic exception whose message
+     * names the error type.
+     *
+     * @param t the throwable to inspect
+     * @return true if it is a version conflict
+     */
+    protected boolean isVersionConflict(final Throwable t) {
+        Throwable cur = t;
+        while (cur != null) {
+            if (cur.getClass().getName().endsWith("VersionConflictEngineException")) {
+                return true;
+            }
+            final String msg = cur.getMessage();
+            if (msg != null && msg.contains("version_conflict_engine_exception")) {
+                return true;
+            }
+            final Throwable next = cur.getCause();
+            if (next == cur) {
+                break;
+            }
+            cur = next;
+        }
+        return false;
+    }
 }

@@ -42,7 +42,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * The service for access token.
  */
-public class AccessTokenService {
+public class AccessTokenService extends FessAppService {
 
     /**
      * Default constructor.
@@ -95,10 +95,11 @@ public class AccessTokenService {
     /**
      * Store the access token.
      * @param accessToken The access token.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final AccessToken accessToken) {
 
-        accessTokenBhv.insertOrUpdate(accessToken, op -> op.setRefreshPolicy(Constants.TRUE));
+        insertOrUpdateIfUnchanged(accessToken, accessTokenBhv::insertOrUpdate);
 
     }
 

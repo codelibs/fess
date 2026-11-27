@@ -149,12 +149,11 @@ public class WebConfigService extends FessAppService {
      * Configuration parameters are encrypted before storage.
      *
      * @param webConfig The web configuration to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final WebConfig webConfig) {
         webConfig.setConfigParameter(ParameterUtil.encrypt(webConfig.getConfigParameter()));
-        webConfigBhv.insertOrUpdate(webConfig, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(webConfig, webConfigBhv::insertOrUpdate);
     }
 
     /**

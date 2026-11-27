@@ -87,12 +87,11 @@ public class PathMappingService extends FessAppService {
      * Stores a path mapping.
      *
      * @param pathMapping the path mapping to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final PathMapping pathMapping) {
 
-        pathMappingBhv.insertOrUpdate(pathMapping, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(pathMapping, pathMappingBhv::insertOrUpdate);
 
         ComponentUtil.getPathMappingHelper().init();
     }

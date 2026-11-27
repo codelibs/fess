@@ -150,12 +150,11 @@ public class DataConfigService extends FessAppService {
      *
      * @param dataConfig the data configuration to store
      * @throws IllegalArgumentException if dataConfig is null
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final DataConfig dataConfig) {
         dataConfig.setHandlerParameter(ParameterUtil.encrypt(dataConfig.getHandlerParameter()));
-        dataConfigBhv.insertOrUpdate(dataConfig, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(dataConfig, dataConfigBhv::insertOrUpdate);
 
     }
 

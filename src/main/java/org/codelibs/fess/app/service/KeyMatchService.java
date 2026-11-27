@@ -89,12 +89,11 @@ public class KeyMatchService extends FessAppService {
      * crawl finishes or the server restarts, and the change is invisible for up to ten minutes.
      *
      * @param keyMatch The key match to store.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final KeyMatch keyMatch) {
 
-        keyMatchBhv.insertOrUpdate(keyMatch, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(keyMatch, keyMatchBhv::insertOrUpdate);
         ComponentUtil.getKeyMatchHelper().update();
     }
 

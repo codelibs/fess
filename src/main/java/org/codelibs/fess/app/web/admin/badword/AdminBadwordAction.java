@@ -36,6 +36,7 @@ import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.DataImportException;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.BadWord;
@@ -346,6 +347,9 @@ public class AdminBadwordAction extends FessAdminAction {
                 badWordService.store(entity);
                 suggestHelper.storeAllBadWords(false);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final SettingChangedConcurrentlyException e) {
+                logger.info("The setting was changed by someone else: id={}, message={}", form.id, e.getMessage());
+                throwValidationError(messages -> messages.addErrorsSettingChangedConcurrently(GLOBAL), this::asEditHtml);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),

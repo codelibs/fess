@@ -111,12 +111,11 @@ public class DuplicateHostService extends FessAppService {
      *
      * @param duplicateHost the duplicate host configuration to store
      * @throws IllegalArgumentException if duplicateHost is null
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final DuplicateHost duplicateHost) {
 
-        duplicateHostBhv.insertOrUpdate(duplicateHost, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(duplicateHost, duplicateHostBhv::insertOrUpdate);
 
     }
 
