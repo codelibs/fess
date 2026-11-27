@@ -130,6 +130,14 @@ public class ApiAdminDataconfigActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_post_noBreakSpacePermissionsGetTheDefault() throws Exception {
+        // a no-break space is a space to the permission field, as an ASCII one is
+        createAction().post$setting(createBody("\u00a0\n\u2007 \u202f"));
+
+        assertEquals(List.of("R" + "guest"), List.of(storedPermissions()));
+    }
+
+    @Test
     public void test_post_permissionsOfTheCallerAreKept() throws Exception {
         createAction().post$setting(createBody("{role}sales"));
 

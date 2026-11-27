@@ -153,7 +153,8 @@ at the start and the end of an entry, and `<U+00A0>{role}name` or `(deny)<U+00A0
 same message as ` {role}name` or `(deny) {user}name`. Until now an entry that started or ended with a no-break
 space was saved with it and matched nobody, so `<U+00A0>(deny){user}name` had no effect. A
 configuration that was saved with an entry such as `<U+00A0>{role}name` is not changed, but cannot be saved again
-until the space is deleted.
+until the space is deleted. A `POST` of a crawl configuration through the admin API whose `permissions` holds only
+such spaces gets `{role}guest`, as a blank one does.
 
 **An admin user edit form that is out of date is refused.** The edit form of a user now carries the version of
 the stored user. If the user was changed after the form was shown (by another administrator, by the user, or

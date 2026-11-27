@@ -969,6 +969,17 @@ public class PermissionHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isBlank_noBreakSpace() {
+        assertTrue(permissionHelper.isBlank(null));
+        assertTrue(permissionHelper.isBlank(""));
+        assertTrue(permissionHelper.isBlank(" \r\n\t\u3000"));
+        assertTrue(permissionHelper.isBlank("\u00a0\n\u2007 \u202f"));
+        assertFalse(permissionHelper.isBlank("\u00a0guest"));
+        // an invisible character is not a space; validateEntries refuses it
+        assertFalse(permissionHelper.isBlank("\u200b"));
+    }
+
+    @Test
     public void test_validateEntries_noBreakSpace() {
         for (final String sp : NO_BREAK_SPACES) {
             final FessMessages lead = new FessMessages();

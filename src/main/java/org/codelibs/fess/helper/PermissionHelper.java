@@ -361,6 +361,18 @@ public class PermissionHelper {
                 && (lower.startsWith(userPrefix) || lower.startsWith(groupPrefix) || lower.startsWith(rolePrefix));
     }
 
+    /**
+     * Returns whether the permission entries hold nothing but spaces and line breaks, so that no entry is left once
+     * they are stripped. Unlike {@link StringUtil#isBlank(String)}, a no-break space (U+00A0, U+2007, U+202F) counts
+     * as a space, as it does when an entry is encoded or checked.
+     *
+     * @param permissionsText the permission entries, separated by line breaks (may be null)
+     * @return true if the text is null or has only spaces
+     */
+    public boolean isBlank(final String permissionsText) {
+        return permissionsText == null || stripSpaces(permissionsText).isEmpty();
+    }
+
     private boolean startsWithWhitespace(final String value) {
         return !value.isEmpty() && isSpace(value.codePointAt(0));
     }
