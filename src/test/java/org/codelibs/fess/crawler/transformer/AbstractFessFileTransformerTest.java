@@ -580,6 +580,12 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", " NONE "), null));
         assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "noarchive, noindex"), null));
         assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "max-image-preview:none, noindex"), null));
+        // directives separated by a space only, as FessXpathTransformer accepts them for HTML
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "noindex nofollow"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "nofollow noindex"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "noarchive, nofollow none"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "nofollow\t noindex"), null));
+        assertEquals("false", indexingTargetOf(Map.of("X-Robots-Tag", "  NOINDEX   NOFOLLOW  "), null));
     }
 
     @Test
@@ -591,12 +597,14 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "max-image-preview:none"), null));
         assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "max-snippet:-1, max-video-preview: none"), null));
         assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "unavailable_after: 25 Jun 2030 15:00:00 PST"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "nofollow noarchive"), null));
     }
 
     @Test
     public void test_generateData_xRobotsTagForAnotherBot_isIndexed() {
         assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "googlebot: noindex"), null));
         assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "otherbot: noindex, none"), null));
+        assertEquals("true", indexingTargetOf(Map.of("X-Robots-Tag", "otherbot: noindex nofollow"), null));
     }
 
     @Test

@@ -490,7 +490,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     /**
      * Check whether the response carries an X-Robots-Tag HTTP header with a noindex (or none) directive.
-     * The value is a comma-separated list of directives and each one is compared as a whole, so
+     * The value is a list of directives separated by commas or, as for the robots meta tag of an HTML page,
+     * by whitespace. A directive that takes a value after a colon is compared as a whole, so
      * {@code max-image-preview:none} is not a noindex. A value that starts with the name of a crawler
      * ({@code googlebot: noindex}) is a rule for that crawler and is ignored.
      * A document that is not HTML has no meta tag, so the header is its only way to ask not to be indexed.
@@ -513,11 +514,14 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             // "googlebot: noindex" is a rule for another crawler
             return false;
         }
-        for (final String directive : directives.split(",")) {
-            final String name = directive.trim();
-            if ("noindex".equals(name) || "none".equals(name)) {
-                logger.info("HEADER(robots=noindex): {}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
-                return true;
+        for (final String entry : directives.split(",")) {
+            final String directive = entry.trim();
+            // "max-image-preview:none" is one directive; "noindex nofollow" is accepted as two
+            for (final String name : directive.contains(":") ? new String[] { directive } : directive.split("\\s+")) {
+                if ("noindex".equals(name) || "none".equals(name)) {
+                    logger.info("HEADER(robots=noindex): {}", CredentialUrlUtil.removeUserInfo(responseData.getUrl()));
+                    return true;
+                }
             }
         }
         return false;
