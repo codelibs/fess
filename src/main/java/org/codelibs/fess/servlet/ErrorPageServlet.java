@@ -111,6 +111,7 @@ public class ErrorPageServlet extends HttpServlet {
                 // REQUEST dispatch; this page is written in place on an ERROR/FORWARD dispatch,
                 // so that filter never runs here and the header must be set explicitly.
                 response.setHeader("X-Content-Type-Options", "nosniff");
+                setRetryAfter(response, status);
                 if (resolveResponder().serveErrorPage(request, response, theme, status, displayCode, resolveDetailKey(request, status))) {
                     return;
                 }
@@ -306,6 +307,20 @@ public class ErrorPageServlet extends HttpServlet {
     }
 
     /**
+     * Tells a client of a {@code 503} when to try again, with the same {@code Retry-After} as a {@code 503} of the v2
+     * API: the search engine that could not be reached or was out of capacity may take the request shortly. A
+     * {@code Retry-After} that the failing request already set is kept.
+     *
+     * @param response the response to write to
+     * @param status the HTTP status that is sent
+     */
+    static void setRetryAfter(final HttpServletResponse response, final int status) {
+        if (status == HttpServletResponse.SC_SERVICE_UNAVAILABLE && !response.containsHeader("Retry-After")) {
+            response.setHeader("Retry-After", V2EnvelopeWriter.RETRY_AFTER_SECONDS);
+        }
+    }
+
+    /**
      * Writes a short, status-only response for a client that does not want the HTML page.
      *
      * @param response the response to write to
@@ -315,6 +330,7 @@ public class ErrorPageServlet extends HttpServlet {
     static void writeText(final HttpServletResponse response, final int status) throws IOException {
         final byte[] body = reasonText(status).getBytes(StandardCharsets.UTF_8);
         response.setStatus(status);
+        setRetryAfter(response, status);
         response.setContentType("text/plain; charset=UTF-8");
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Content-Type-Options", "nosniff");
@@ -343,6 +359,7 @@ public class ErrorPageServlet extends HttpServlet {
                 + "</h1>\n</body>\n</html>\n";
         final byte[] body = html.getBytes(StandardCharsets.UTF_8);
         response.setStatus(status);
+        setRetryAfter(response, status);
         response.setContentType("text/html; charset=UTF-8");
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Content-Type-Options", "nosniff");
