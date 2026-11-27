@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.base.FessBaseAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.BadWord;
@@ -39,6 +40,14 @@ public class ApiAdminBadwordActionTest extends UnitFessTestCase {
     private static final String ID = "badword1";
 
     private final List<BadWord> stored = new ArrayList<>();
+
+    /** The sequence number of the next read; every read sees a later one, as if the setting were written in between. */
+    private long nextSeqNo = 5L;
+
+    /** Whether the write is refused as the search engine refuses a write whose condition no longer holds. */
+    private boolean conflictOnStore;
+
+    private int suggestUpdates;
 
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
@@ -62,11 +71,16 @@ public class ApiAdminBadwordActionTest extends UnitFessTestCase {
                 badWord.setId(ID);
                 badWord.setSuggestWord("word");
                 badWord.setVersionNo(storedVersion);
+                badWord.asDocMeta().seqNo(nextSeqNo++).primaryTerm(1L);
                 return OptionalEntity.of(badWord);
             }
 
             @Override
             public void store(final BadWord badWord) {
+                if (conflictOnStore) {
+                    throw new SettingChangedConcurrentlyException("changed",
+                            new IllegalStateException("version_conflict_engine_exception"));
+                }
                 stored.add(badWord);
             }
         };
@@ -76,7 +90,7 @@ public class ApiAdminBadwordActionTest extends UnitFessTestCase {
         setField(action, ApiAdminBadwordAction.class, "suggestHelper", new SuggestHelper() {
             @Override
             public void storeAllBadWords(final boolean doCommit) {
-                // the suggest index is not what is under test
+                suggestUpdates++;
             }
         });
         return action;
@@ -123,5 +137,48 @@ public class ApiAdminBadwordActionTest extends UnitFessTestCase {
         action.put$setting(bodyOfVersion(3L));
 
         assertEquals(1, stored.size());
+    }
+
+    @Test
+    public void test_put_writeIsConditionalOnTheReadWhoseVersionWasChecked() throws Exception {
+        final ApiAdminBadwordAction action = createAction(4L);
+
+        action.put$setting(bodyOfVersion(4L));
+
+        // the version was checked on the first read (seqNo 5); the body is applied to a second one (seqNo 6), and a
+        // write conditional on the second read would let a change made between the two reads be overwritten
+        assertEquals(1, stored.size());
+        assertEquals(Long.valueOf(5L), stored.get(0).asDocMeta().seqNo());
+        assertEquals(Long.valueOf(1L), stored.get(0).asDocMeta().primaryTerm());
+    }
+
+    @Test
+    public void test_put_conflictOnTheWriteIsRefusedLikeAStaleVersion() throws Exception {
+        final ApiAdminBadwordAction action = createAction(4L);
+        conflictOnStore = true;
+
+        assertValidationError(() -> action.put$setting(bodyOfVersion(4L))).handle(data -> {
+            data.requiredMessageOf("_global", "errors.setting_changed_concurrently");
+        });
+        assertTrue(stored.isEmpty());
+        assertEquals(0, suggestUpdates);
+    }
+
+    @Test
+    public void test_put_missingSettingIsNotFound() throws Exception {
+        final ApiAdminBadwordAction action = createAction(4L);
+        final BadWordService service = new BadWordService() {
+            @Override
+            public OptionalEntity<BadWord> getBadWord(final String id) {
+                return OptionalEntity.empty();
+            }
+        };
+        ComponentUtil.register(service, BadWordService.class.getCanonicalName());
+        setField(action, ApiAdminBadwordAction.class, "badWordService", service);
+
+        assertValidationError(() -> action.put$setting(bodyOfVersion(4L))).handle(data -> {
+            data.requiredMessageOf("_global", "errors.crud_could_not_find_crud_table");
+        });
+        assertTrue(stored.isEmpty());
     }
 }

@@ -37,7 +37,7 @@ import jakarta.annotation.Resource;
 /**
  * Service class for managing roles.
  */
-public class RoleService {
+public class RoleService extends FessAppService {
 
     /**
      * The behavior for roles.
@@ -94,16 +94,20 @@ public class RoleService {
     }
 
     /**
-     * Stores a role.
+     * Stores a role in LDAP and the database.
+     * A role that was read is written to the index first, and only if the stored one is unchanged since that read,
+     * so that a refused write leaves LDAP untouched; a new role goes to LDAP first, as before.
      * @param role The role to store.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final Role role) {
-        ComponentUtil.getLdapManager().insert(role);
-
-        roleBhv.insertOrUpdate(role, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
-
+        if (hasReadVersion(role.asDocMeta().seqNo(), role.asDocMeta().primaryTerm())) {
+            insertOrUpdateIfUnchanged(role, roleBhv::insertOrUpdate);
+            ComponentUtil.getLdapManager().insert(role);
+        } else {
+            ComponentUtil.getLdapManager().insert(role);
+            insertOrUpdateIfUnchanged(role, roleBhv::insertOrUpdate);
+        }
     }
 
     /**

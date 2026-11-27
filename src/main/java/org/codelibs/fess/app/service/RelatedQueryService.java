@@ -96,10 +96,11 @@ public class RelatedQueryService extends FessAppService {
      * After storing, the related query helper is updated to refresh the cache.
      *
      * @param relatedQuery the RelatedQuery entity to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final RelatedQuery relatedQuery) {
 
-        relatedQueryBhv.insertOrUpdate(relatedQuery, op -> op.setRefreshPolicy(Constants.TRUE));
+        insertOrUpdateIfUnchanged(relatedQuery, relatedQueryBhv::insertOrUpdate);
         ComponentUtil.getRelatedQueryHelper().update();
     }
 

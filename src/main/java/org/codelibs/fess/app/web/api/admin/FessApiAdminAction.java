@@ -22,6 +22,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.FessApiAction;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.ActionResponse;
@@ -203,5 +204,96 @@ public abstract class FessApiAdminAction extends FessApiAction {
             }
             throwValidationErrorApi(messages -> messages.addErrorsSettingChangedConcurrently(GLOBAL));
         }
+    }
+
+    /**
+     * Refuses an update of a setting of the {@code config} index whose {@code version_no} is not the version of the
+     * stored setting, as {@link #verifyVersionNo(String, Number, Long)} does, and returns the read it was compared with.
+     * Pass that read to {@link #writeOnlyIfUnchangedSince(org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity,
+     * org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity)} so that the write is refused if the setting changes
+     * after this check.
+     *
+     * @param <E> the type of the setting
+     * @param id the ID of the setting to update
+     * @param requested the {@code version_no} the request carries
+     * @param stored the stored setting, or null if there is none
+     * @return the stored setting
+     */
+    protected <E extends org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity> E verifyVersionNo(final String id,
+            final Number requested, final E stored) {
+        if (stored == null) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+        }
+        verifyVersionNo(id, requested, stored.asDocMeta().version());
+        return stored;
+    }
+
+    /**
+     * Refuses an update of a setting of the {@code user} index (a group or a role) like
+     * {@link #verifyVersionNo(String, Number, org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity)}.
+     *
+     * @param <E> the type of the setting
+     * @param id the ID of the setting to update
+     * @param requested the {@code version_no} the request carries
+     * @param stored the stored setting, or null if there is none
+     * @return the stored setting
+     */
+    protected <E extends org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity> E verifyVersionNo(final String id,
+            final Number requested, final E stored) {
+        if (stored == null) {
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+        }
+        verifyVersionNo(id, requested, stored.asDocMeta().version());
+        return stored;
+    }
+
+    /**
+     * Makes the write of a setting conditional on the read its {@code version_no} was compared with: the setting is
+     * built from a later read, and takes the sequence number and primary term of the verified one, so that the service
+     * writes it only if the stored setting is unchanged since the check. A change made between the check and the write
+     * then refuses the write instead of being overwritten.
+     *
+     * @param <E> the type of the setting
+     * @param entity the setting to write
+     * @param verified the read returned by
+     *        {@link #verifyVersionNo(String, Number, org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity)}
+     * @return the setting to write
+     */
+    protected static <E extends org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity> E writeOnlyIfUnchangedSince(final E entity,
+            final org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity verified) {
+        entity.asDocMeta().seqNo(verified.asDocMeta().seqNo()).primaryTerm(verified.asDocMeta().primaryTerm());
+        return entity;
+    }
+
+    /**
+     * Makes the write of a setting of the {@code user} index (a group or a role) conditional on the read its
+     * {@code version_no} was compared with, like
+     * {@link #writeOnlyIfUnchangedSince(org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity,
+     * org.codelibs.fess.opensearch.config.allcommon.EsAbstractEntity)}.
+     *
+     * @param <E> the type of the setting
+     * @param entity the setting to write
+     * @param verified the read returned by
+     *        {@link #verifyVersionNo(String, Number, org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity)}
+     * @return the setting to write
+     */
+    protected static <E extends org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity> E writeOnlyIfUnchangedSince(final E entity,
+            final org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity verified) {
+        entity.asDocMeta().seqNo(verified.asDocMeta().seqNo()).primaryTerm(verified.asDocMeta().primaryTerm());
+        return entity;
+    }
+
+    /**
+     * Refuses an update whose write the search engine rejected because the setting was changed after its
+     * {@code version_no} was checked, with the same response as a stale {@code version_no}.
+     *
+     * @param id the ID of the setting, for the log
+     * @param e the exception of the refused write
+     */
+    protected void throwSettingChangedConcurrently(final String id, final SettingChangedConcurrentlyException e) {
+        if (logger.isInfoEnabled()) {
+            logger.info("The setting was changed after its version_no was checked: id={}, message={}", id, e.getMessage());
+        }
+        throwValidationErrorApi(messages -> messages.addErrorsSettingChangedConcurrently(GLOBAL));
     }
 }

@@ -33,6 +33,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.opensearch.config.exentity.RequestHeader;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
@@ -152,10 +153,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, reqHeaderService.getRequestHeader(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final RequestHeader verified = verifyVersionNo(body.id, body.versionNo, reqHeaderService.getRequestHeader(body.id).orElse(null));
         final RequestHeader reqHeader = getRequestHeader(body).map(entity -> {
             try {
-                reqHeaderService.store(entity);
+                reqHeaderService.store(writeOnlyIfUnchangedSince(entity, verified));
+            } catch (final SettingChangedConcurrentlyException e) {
+                throwSettingChangedConcurrently(body.id, e);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

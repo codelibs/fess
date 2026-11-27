@@ -47,7 +47,7 @@ import jakarta.annotation.Resource;
  * Service class for bad word management operations.
  * Provides CRUD operations and CSV import/export functionality for bad words.
  */
-public class BadWordService {
+public class BadWordService extends FessAppService {
 
     private static final String DELETE_PREFIX = "--";
 
@@ -104,10 +104,11 @@ public class BadWordService {
     /**
      * Stores (inserts or updates) a bad word.
      * @param badWord The bad word to store.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final BadWord badWord) {
 
-        badWordBhv.insertOrUpdate(badWord, op -> op.setRefreshPolicy(Constants.TRUE));
+        insertOrUpdateIfUnchanged(badWord, badWordBhv::insertOrUpdate);
 
     }
 

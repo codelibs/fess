@@ -35,7 +35,7 @@ import jakarta.annotation.Resource;
  * Provides CRUD operations for web authentication settings including
  * listing, retrieving, storing, and deleting authentication configurations.
  */
-public class WebAuthenticationService {
+public class WebAuthenticationService extends FessAppService {
 
     /**
      * Default constructor.
@@ -93,13 +93,12 @@ public class WebAuthenticationService {
      * The password and the parameters are encrypted before storage.
      *
      * @param webAuthentication The web authentication configuration to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final WebAuthentication webAuthentication) {
         webAuthentication.setParameters(ParameterUtil.encrypt(webAuthentication.getParameters()));
         webAuthentication.setPassword(ParameterUtil.encryptCredential(webAuthentication.getPassword()));
-        webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(webAuthentication, webAuthenticationBhv::insertOrUpdate);
 
     }
 

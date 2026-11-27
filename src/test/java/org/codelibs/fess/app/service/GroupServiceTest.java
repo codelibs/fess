@@ -19,10 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.codelibs.fesen.opensearch.action.index.IndexAction;
+import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
+import org.codelibs.fess.ldap.LdapManager;
+import org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.opensearch.user.cbean.GroupCB;
 import org.codelibs.fess.opensearch.user.exbhv.GroupBhv;
 import org.codelibs.fess.opensearch.user.exentity.Group;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.junit.jupiter.api.Test;
@@ -72,5 +78,69 @@ public class GroupServiceTest extends UnitFessTestCase {
         service.groupBhv = new StubBhv();
 
         assertTrue(service.getAvailableGroupList().isEmpty());
+    }
+
+    /** Records the LDAP and index writes of {@link GroupService#store(Group)} in order; the index write can conflict. */
+    private GroupService storingService(final List<String> calls, final boolean conflict) {
+        ComponentUtil.register(new LdapManager() {
+            @Override
+            public void insert(final Group group) {
+                calls.add("ldap");
+            }
+        }, "ldapManager");
+        final GroupService service = new GroupService();
+        service.groupBhv = new GroupBhv() {
+            @Override
+            public void insertOrUpdate(final Group entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                final IndexRequestBuilder builder = new IndexRequestBuilder(null, IndexAction.INSTANCE);
+                opLambda.callback(builder);
+                if (conflict) {
+                    throw new IllegalStateException("type=version_conflict_engine_exception");
+                }
+                calls.add("index:" + builder.request().ifSeqNo());
+            }
+        };
+        return service;
+    }
+
+    @Test
+    public void test_store_conflictOfAGroupThatWasReadLeavesLdapUntouched() {
+        final List<String> calls = new ArrayList<>();
+        final Group group = new Group();
+        group.setId("group1");
+        group.setName("group1");
+        group.asDocMeta().seqNo(3L).primaryTerm(1L);
+
+        try {
+            storingService(calls, true).store(group);
+            fail("a version conflict must be refused");
+        } catch (final SettingChangedConcurrentlyException e) {
+            // expected
+        }
+        assertTrue(calls.isEmpty());
+    }
+
+    @Test
+    public void test_store_groupThatWasReadIsWrittenToTheIndexBeforeLdap() {
+        final List<String> calls = new ArrayList<>();
+        final Group group = new Group();
+        group.setId("group1");
+        group.setName("group1");
+        group.asDocMeta().seqNo(3L).primaryTerm(1L);
+
+        storingService(calls, false).store(group);
+
+        assertEquals(List.of("index:3", "ldap"), calls);
+    }
+
+    @Test
+    public void test_store_newGroupGoesToLdapFirst() {
+        final List<String> calls = new ArrayList<>();
+        final Group group = new Group();
+        group.setName("group1");
+
+        storingService(calls, false).store(group);
+
+        assertEquals(List.of("ldap", "index:-2"), calls);
     }
 }

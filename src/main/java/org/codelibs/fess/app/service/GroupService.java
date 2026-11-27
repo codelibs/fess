@@ -40,7 +40,7 @@ import jakarta.annotation.Resource;
  * and user-group relationships. Handles group pagination, searching, and
  * maintaining data consistency between groups and associated users.
  */
-public class GroupService {
+public class GroupService extends FessAppService {
 
     /** Behavior class for group database operations */
     @Resource
@@ -100,16 +100,20 @@ public class GroupService {
     /**
      * Stores a group by inserting or updating it in both LDAP and the database.
      * Uses refresh policy to ensure immediate availability of the stored data.
+     * A group that was read is written to the index first, and only if the stored one is unchanged since that read,
+     * so that a refused write leaves LDAP untouched; a new group goes to LDAP first, as before.
      *
      * @param group the group entity to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final Group group) {
-        ComponentUtil.getLdapManager().insert(group);
-
-        groupBhv.insertOrUpdate(group, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
-
+        if (hasReadVersion(group.asDocMeta().seqNo(), group.asDocMeta().primaryTerm())) {
+            insertOrUpdateIfUnchanged(group, groupBhv::insertOrUpdate);
+            ComponentUtil.getLdapManager().insert(group);
+        } else {
+            ComponentUtil.getLdapManager().insert(group);
+            insertOrUpdateIfUnchanged(group, groupBhv::insertOrUpdate);
+        }
     }
 
     /**

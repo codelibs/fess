@@ -34,6 +34,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -157,13 +158,15 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
         final String[] storedPermissions =
                 keepPermissions ? fileConfigService.getFileConfig(body.id).map(FileConfig::getPermissions).orElse(null) : null;
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, fileConfigService.getFileConfig(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final FileConfig verified = verifyVersionNo(body.id, body.versionNo, fileConfigService.getFileConfig(body.id).orElse(null));
         final FileConfig fileConfig = getFileConfig(body).map(entity -> {
             if (keepPermissions) {
                 entity.setPermissions(storedPermissions);
             }
             try {
-                fileConfigService.store(entity);
+                fileConfigService.store(writeOnlyIfUnchangedSince(entity, verified));
+            } catch (final SettingChangedConcurrentlyException e) {
+                throwSettingChangedConcurrently(body.id, e);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

@@ -36,7 +36,7 @@ import jakarta.annotation.Resource;
 /**
  * Service class for managing scheduled jobs.
  */
-public class ScheduledJobService {
+public class ScheduledJobService extends FessAppService {
 
     /**
      * Constructor.
@@ -146,11 +146,10 @@ public class ScheduledJobService {
     /**
      * Stores a scheduled job.
      * @param scheduledJob The scheduled job to store.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final ScheduledJob scheduledJob) {
-        scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(scheduledJob, scheduledJobBhv::insertOrUpdate);
     }
 
     /**

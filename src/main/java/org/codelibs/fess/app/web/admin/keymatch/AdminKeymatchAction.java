@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.KeyMatchPager;
 import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.KeyMatch;
@@ -303,6 +304,9 @@ public class AdminKeymatchAction extends FessAdminAction {
             try {
                 keyMatchService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final SettingChangedConcurrentlyException e) {
+                logger.info("The setting was changed by someone else: id={}, message={}", form.id, e.getMessage());
+                throwValidationError(messages -> messages.addErrorsSettingChangedConcurrently(GLOBAL), this::asEditHtml);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),

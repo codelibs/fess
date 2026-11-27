@@ -81,10 +81,11 @@ public class BoostDocumentRuleService extends FessAppService {
     /**
      * Stores (inserts or updates) a boost document rule.
      * @param boostDocumentRule The boost document rule to store.
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final BoostDocumentRule boostDocumentRule) {
 
-        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> op.setRefreshPolicy(Constants.TRUE));
+        insertOrUpdateIfUnchanged(boostDocumentRule, boostDocumentRuleBhv::insertOrUpdate);
 
     }
 

@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.user.exentity.Group;
 import org.codelibs.fess.util.ComponentUtil;
@@ -298,6 +299,9 @@ public class AdminGroupAction extends FessAdminAction {
                 groupService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                 logger.info("Updated group: {}", entity.getName());
+            } catch (final SettingChangedConcurrentlyException e) {
+                logger.info("The setting was changed by someone else: id={}, message={}", form.id, e.getMessage());
+                throwValidationError(messages -> messages.addErrorsSettingChangedConcurrently(GLOBAL), this::asEditHtml);
             } catch (final Exception e) {
                 logger.warn("Failed to update group: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),

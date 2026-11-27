@@ -35,7 +35,7 @@ import jakarta.annotation.Resource;
  * This service provides operations for retrieving, storing, and deleting
  * file authentication settings used by the Fess search engine.
  */
-public class FileAuthenticationService {
+public class FileAuthenticationService extends FessAppService {
 
     /**
      * Default constructor for file authentication service.
@@ -94,13 +94,12 @@ public class FileAuthenticationService {
      * The password and the parameters are encrypted before storage for security.
      *
      * @param fileAuthentication the file authentication configuration to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final FileAuthentication fileAuthentication) {
         fileAuthentication.setParameters(ParameterUtil.encrypt(fileAuthentication.getParameters()));
         fileAuthentication.setPassword(ParameterUtil.encryptCredential(fileAuthentication.getPassword()));
-        fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(fileAuthentication, fileAuthenticationBhv::insertOrUpdate);
 
     }
 

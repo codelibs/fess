@@ -57,7 +57,7 @@ import jakarta.annotation.Resource;
  * Elevate words are used to boost the relevance of documents containing specific terms in search results.
  * This service provides CRUD operations, CSV import/export, and related functionality.
  */
-public class ElevateWordService {
+public class ElevateWordService extends FessAppService {
 
     /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(ElevateWordService.class);
@@ -139,14 +139,13 @@ public class ElevateWordService {
      * Stores (inserts or updates) an elevate word and manages its associated label type mappings.
      *
      * @param elevateWord the elevate word entity to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final ElevateWord elevateWord) {
         final boolean isNew = elevateWord.getId() == null;
         final String[] labelTypeIds = elevateWord.getLabelTypeIds();
 
-        elevateWordBhv.insertOrUpdate(elevateWord, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(elevateWord, elevateWordBhv::insertOrUpdate);
         final String elevateWordId = elevateWord.getId();
         if (labelTypeIds != null) {
             if (isNew) {

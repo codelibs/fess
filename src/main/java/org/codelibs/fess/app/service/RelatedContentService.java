@@ -95,10 +95,11 @@ public class RelatedContentService extends FessAppService {
      * After storing, updates the related content helper to refresh the cache.
      *
      * @param relatedContent the RelatedContent entity to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final RelatedContent relatedContent) {
 
-        relatedContentBhv.insertOrUpdate(relatedContent, op -> op.setRefreshPolicy(Constants.TRUE));
+        insertOrUpdateIfUnchanged(relatedContent, relatedContentBhv::insertOrUpdate);
         ComponentUtil.getRelatedContentHelper().update();
     }
 

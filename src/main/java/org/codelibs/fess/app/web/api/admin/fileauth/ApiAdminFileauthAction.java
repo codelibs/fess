@@ -34,6 +34,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.opensearch.config.exentity.FileAuthentication;
 import org.lastaflute.core.security.exception.CipherFailureException;
 import org.lastaflute.web.Execute;
@@ -154,10 +155,13 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         keepStoredPassword(body);
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, fileAuthService.getFileAuthentication(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final FileAuthentication verified =
+                verifyVersionNo(body.id, body.versionNo, fileAuthService.getFileAuthentication(body.id).orElse(null));
         final FileAuthentication fileAuth = getFileAuthentication(body).map(entity -> {
             try {
-                fileAuthService.store(entity);
+                fileAuthService.store(writeOnlyIfUnchangedSince(entity, verified));
+            } catch (final SettingChangedConcurrentlyException e) {
+                throwSettingChangedConcurrently(body.id, e);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));

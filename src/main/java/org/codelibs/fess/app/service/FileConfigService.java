@@ -148,12 +148,11 @@ public class FileConfigService extends FessAppService {
      * performs an insert or update operation based on whether the configuration exists.
      *
      * @param fileConfig the file configuration to be stored
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final FileConfig fileConfig) {
         fileConfig.setConfigParameter(ParameterUtil.encrypt(fileConfig.getConfigParameter()));
-        fileConfigBhv.insertOrUpdate(fileConfig, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(fileConfig, fileConfigBhv::insertOrUpdate);
     }
 
     /**

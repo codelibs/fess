@@ -28,6 +28,7 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.opensearch.user.exentity.Group;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.lastaflute.web.Execute;
@@ -137,7 +138,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
         validateApi(body, messages -> {});
         validateAttributes(body.attributes, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, groupService.getGroup(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final Group verified = verifyVersionNo(body.id, body.versionNo, groupService.getGroup(body.id).orElse(null));
         final Group entity = getGroup(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
                 messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, body.id);
@@ -145,7 +146,9 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
             return null;
         });
         try {
-            groupService.store(entity);
+            groupService.store(writeOnlyIfUnchangedSince(entity, verified));
+        } catch (final SettingChangedConcurrentlyException e) {
+            throwSettingChangedConcurrently(body.id, e);
         } catch (final Exception e) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }

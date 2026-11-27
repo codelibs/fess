@@ -35,7 +35,7 @@ import jakarta.annotation.Resource;
  * during web crawling to configure HTTP request behavior.
  *
  */
-public class RequestHeaderService {
+public class RequestHeaderService extends FessAppService {
 
     /**
      * Behavior for request header database operations.
@@ -94,12 +94,11 @@ public class RequestHeaderService {
      * This method performs either insert or update based on whether the request header already exists.
      *
      * @param requestHeader the request header configuration to store
+     * @throws org.codelibs.fess.exception.SettingChangedConcurrentlyException if it was read and the stored one was changed since
      */
     public void store(final RequestHeader requestHeader) {
 
-        requestHeaderBhv.insertOrUpdate(requestHeader, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        insertOrUpdateIfUnchanged(requestHeader, requestHeaderBhv::insertOrUpdate);
 
     }
 

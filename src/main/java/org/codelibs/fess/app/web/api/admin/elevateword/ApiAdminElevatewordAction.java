@@ -44,6 +44,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.exception.DataImportException;
+import org.codelibs.fess.exception.SettingChangedConcurrentlyException;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.opensearch.config.exentity.ElevateWord;
@@ -171,12 +172,14 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> ComponentUtil.getPermissionHelper().validateEntries(body.permissions, messages));
         body.crudMode = CrudMode.EDIT;
-        verifyVersionNo(body.id, body.versionNo, elevateWordService.getElevateWord(body.id).map(e -> e.getVersionNo()).orElse(null));
+        final ElevateWord verified = verifyVersionNo(body.id, body.versionNo, elevateWordService.getElevateWord(body.id).orElse(null));
         final ElevateWord elevateWord = getElevateWord(body).map(entity -> {
             try {
-                elevateWordService.store(entity);
+                elevateWordService.store(writeOnlyIfUnchangedSince(entity, verified));
                 suggestHelper.deleteAllElevateWord(false);
                 suggestHelper.storeAllElevateWords(false);
+            } catch (final SettingChangedConcurrentlyException e) {
+                throwSettingChangedConcurrently(body.id, e);
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
