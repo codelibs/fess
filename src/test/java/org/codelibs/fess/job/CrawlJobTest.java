@@ -28,7 +28,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -40,8 +42,10 @@ import org.codelibs.fess.opensearch.config.cbean.ScheduledJobCB;
 import org.codelibs.fess.opensearch.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.JobProcess;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.junit.jupiter.api.Test;
@@ -999,6 +1003,117 @@ public class CrawlJobTest extends UnitFessTestCase {
         }
 
         assertTrue(capturedCmdList.toString(), capturedCmdList.contains("-Dhttp.nonProxyHosts=localhost|127.*"));
+    }
+
+    // Test that the command written to the INFO log masks a secret given as a -D option, while the process gets it
+    @Test
+    public void test_executeCrawler_masksSecretOptionInLoggedCommand() throws Exception {
+        final List<String> startedCmdList = new ArrayList<>();
+        final File webappDir = Files.createTempDirectory("webapp").toFile();
+        webappDir.deleteOnExit();
+        final ServletContext servletContext = (ServletContext) Proxy.newProxyInstance(ServletContext.class.getClassLoader(),
+                new Class<?>[] { ServletContext.class }, (proxy, method,
+                        args) -> "getRealPath".equals(method.getName()) ? new File(webappDir, (String) args[0]).getAbsolutePath() : null);
+        crawlJob = new CrawlJob() {
+            @Override
+            protected ServletContext getServletContext() {
+                return servletContext;
+            }
+
+            @Override
+            protected void createSystemProperties(final List<String> cmdList, final File propFile) {
+                // the properties file is not needed in this test
+            }
+
+            @Override
+            protected void storeUnfinishedSession() {
+                // no crawling session in this test
+            }
+        };
+        crawlJob.sessionId("test");
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public File createTempFile(final String prefix, final String suffix) {
+                try {
+                    final File file = File.createTempFile(prefix, suffix);
+                    file.deleteOnExit();
+                    return file;
+                } catch (final IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }, "systemHelper");
+        ComponentUtil.register(new ProcessHelper() {
+            @Override
+            public synchronized JobProcess startProcess(final String sessionId, final List<String> cmdList,
+                    final Consumer<ProcessBuilder> pbCall) {
+                startedCmdList.addAll(cmdList);
+                throw new JobProcessingException("the process is not started in this test");
+            }
+
+            @Override
+            public synchronized int destroyProcess(final String sessionId) {
+                return -1;
+            }
+        }, "processHelper");
+        ComponentUtil.register(new ThumbnailManager() {
+            @Override
+            public String getThumbnailPathOption() {
+                return "-Dfess.thumbnail.path=thumbnails";
+            }
+        }, "thumbnailManager");
+        ComponentUtil.setFessConfig(new TestFessConfig() {
+            @Override
+            public String getJavaCommandPath() {
+                return "java";
+            }
+
+            @Override
+            public String getJobSystemPropertyFilterPattern() {
+                return null;
+            }
+
+            @Override
+            public String[] getJvmCrawlerOptionsAsArray() {
+                return new String[0];
+            }
+
+            @Override
+            public boolean isUseOwnTmpDir() {
+                return false;
+            }
+        });
+
+        final String secretName = "fess.system.storage.secretkey";
+        final String original = System.getProperty(secretName);
+        System.setProperty(secretName, "dummy-secret-value");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(CrawlJob.class.getName(), Level.INFO);
+        try {
+            crawlJob.executeCrawler();
+            fail("JobProcessingException expected");
+        } catch (final JobProcessingException e) {
+            // expected
+        } finally {
+            appender.detach();
+            if (original == null) {
+                System.clearProperty(secretName);
+            } else {
+                System.setProperty(secretName, original);
+            }
+        }
+
+        assertTrue(startedCmdList.toString(), startedCmdList.contains("-Dfess.system.storage.secretkey=dummy-secret-value"));
+        final List<String> optionLines = appender.eventsOnThisThreadAt(Level.INFO)
+                .stream()
+                .map(e -> e.getMessage().getFormattedMessage())
+                .filter(m -> m.startsWith("Crawler: \nDirectory="))
+                .toList();
+        assertEquals(optionLines.toString(), 1, optionLines.size());
+        final String line = optionLines.get(0);
+        assertTrue(line, line.contains("\nOptions=[java, "));
+        assertTrue(line, line.contains("-Dfess.system.storage.secretkey=********"));
+        assertFalse(line, line.contains("dummy-secret-value"));
+        assertTrue(line, line.contains("-Dfess.thumbnail.path=thumbnails"));
     }
 
     // Test configuration class extending FessConfig.SimpleImpl

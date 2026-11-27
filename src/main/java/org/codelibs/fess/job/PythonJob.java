@@ -159,7 +159,7 @@ public class PythonJob extends ExecJob {
             final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
             if (logger.isInfoEnabled()) {
-                logger.info("Python: \nDirectory={}\nOptions={}", baseDir, cmdList);
+                logger.info("Python: \nDirectory={}\nOptions={}", baseDir, maskCommandForLog(cmdList));
             }
 
             final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
