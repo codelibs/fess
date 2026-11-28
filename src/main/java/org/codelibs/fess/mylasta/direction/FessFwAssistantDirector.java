@@ -138,6 +138,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         } else if ("rsa".equalsIgnoreCase(cipherAlgorithm)) {
             inver = InvertibleCryptographer.createRsaCipher(cipherKey);
         } else {
+            checkAesCipherKeyLength(cipherKey);
             inver = InvertibleCryptographer.createAesCipher(cipherKey);
         }
 
@@ -172,6 +173,28 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
                     + "Set it to a key of 16, 24 or 32 characters, or run bin/fess-setup init before the first start to generate one.");
         }
         return cipherKey;
+    }
+
+    /**
+     * Checks that {@code app.cipher.key} has a length AES takes: 16, 24 or 32 bytes.
+     *
+     * <p>A key of another length let Fess start. The first encryption or decryption then failed with
+     * "Invalid AES key length", and the cryptographer of LastaFlute stayed half initialized, so every later
+     * one failed with a {@link NullPointerException} or "Cipher not initialized".</p>
+     *
+     * <p>The bytes are counted the way {@code InvertibleCryptographer#createSKey} of LastaFlute makes the
+     * key, with {@link String#getBytes()}.</p>
+     *
+     * @param cipherKey The cipher key, not empty.
+     * @throws FessConfigurationException If the key is not 16, 24 or 32 bytes long.
+     */
+    protected void checkAesCipherKeyLength(final String cipherKey) {
+        final int length = cipherKey.getBytes().length;
+        if (length != 16 && length != 24 && length != 32) {
+            throw new FessConfigurationException("app.cipher.key in fess_config.properties is " + length
+                    + " bytes long, so Fess cannot start: AES takes a key of 16, 24 or 32 bytes. "
+                    + "Set it to a key of 16, 24 or 32 ASCII characters: the earlier key, if stored values were encrypted with one.");
+        }
     }
 
     protected FessTimeResourceProvider createTimeResourceProvider() {

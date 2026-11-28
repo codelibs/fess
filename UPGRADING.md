@@ -44,6 +44,29 @@ variables it exports itself, write `export FESS_CONFIG_<KEY>=value` instead. Mak
 In a container, pass it with `-e` or
 `environment:`; `docker inspect` shows it to whoever can use the Docker socket, as it did for `SEARCH_ENGINE_PASSWORD`.
 
+**Fess refuses to start when `app.cipher.key` is not 16, 24 or 32 bytes long.** With `app.cipher.algorithm=aes` (the
+shipped value; any value other than `blowfish`, `des` and `rsa` also selects AES) the key is used as its bytes
+(`String#getBytes()`, UTF-8 by default on Java 21), and AES takes 16, 24 or 32 of them. Until 15.9 a key of another
+length let Fess start without a warning; the first encryption or decryption then failed with `Invalid AES key length`
+and every later one failed as well, so saving a web or file authentication with a password, for example, failed. Now
+the start stops with a message that names `app.cipher.key` and its length in bytes, as it already did for an empty
+key. The other algorithms are not checked.
+
+The key encrypts the passwords of web and file authentications; the parameters of web, file and data store
+configurations and of web and file authentications whose name matches `app.encrypt.property.pattern` (by default a
+name ending in `password`, `passphrase`, `key`, `token` or `secret`); and the LDAP admin password of the General
+settings. Such a stored value starts with `{cipher}` and cannot be read with another key. The key also makes the user
+code of a logged-in user, which the search logs and favorites record. If Fess 15.10 does not start for this reason:
+
+* Nothing was ever encrypted with a key of the wrong length, so every `{cipher}` value already stored was encrypted
+  with an earlier key. If the key was changed from a valid one, set that key again: the stored values become readable.
+* If there is no such key (it was lost, or Fess never ran with a valid one), set a new key of 16, 24 or 32 ASCII
+  characters, then set the `{cipher}` values listed above again. The edit screen of a web or file authentication shows
+  a password it cannot decrypt blank, with a message, and keeps it until one is entered. Under the new key a
+  logged-in user gets a new user code, so the favorites recorded under the earlier key are not shown to that user.
+* Do not pad or cut the old value to a valid length. That is a different key, and it reads nothing that an earlier
+  key stored.
+
 **A search theme no longer gets Bootstrap, Popper or Font Awesome from the web application root.**
 `css/bootstrap.min.css`, `css/font-awesome.min.css`, `css/fonts/`, `js/bootstrap.min.js` and `js/popper.min.js`
 are removed, so a change to one of them can no longer change every theme. The bundled `bootstrap` theme

@@ -91,6 +91,59 @@ public class FessFwAssistantDirectorTest extends UnitFessTestCase {
                 provider.providePrimaryInvertibleCryptographer().decrypt(provider.providePrimaryInvertibleCryptographer().encrypt("text")));
     }
 
+    @Test
+    public void test_createSecurityResourceProvider_aesCipherKeyOfWrongLengthStopsTheStart() {
+        // "aes" is the shipped algorithm; any value other than blowfish, des and rsa also uses AES
+        for (final String algorithm : new String[] { "aes", "AES", "unknown" }) {
+            for (final String key : new String[] { "Qz9", "fifteen-chars-k", "seventeen-chars-k", "nineteen-bytes-key!", "x".repeat(31),
+                    "x".repeat(33), "x".repeat(43), "x".repeat(64) }) {
+                final FessFwAssistantDirector director = newDirector(algorithm, key);
+                try {
+                    director.createSecurityResourceProvider();
+                    fail("a key of " + key.length() + " bytes should stop the start: " + algorithm);
+                } catch (final FessConfigurationException e) {
+                    assertTrue(e.getMessage(), e.getMessage().contains("app.cipher.key"));
+                    assertTrue(e.getMessage(), e.getMessage().contains(key.length() + " bytes"));
+                    assertFalse(e.getMessage(), e.getMessage().contains(key));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test_createSecurityResourceProvider_aesCipherKeyOfEachValidLength() {
+        for (final int length : new int[] { 16, 24, 32 }) {
+            final FessSecurityResourceProvider provider = newDirector("aes", "k".repeat(length)).createSecurityResourceProvider();
+            assertEquals("text", provider.providePrimaryInvertibleCryptographer()
+                    .decrypt(provider.providePrimaryInvertibleCryptographer().encrypt("text")));
+        }
+    }
+
+    @Test
+    public void test_createSecurityResourceProvider_aesCipherKeyLengthIsCountedInBytes() {
+        // LastaFlute makes the AES key from String#getBytes(), so the length that counts is the one of those bytes:
+        // 16 characters, one of them two bytes long in UTF-8 (the default charset since Java 18)
+        final String key = "\u00e9" + "x".repeat(15);
+        final int bytes = key.getBytes().length;
+        assertEquals(17, bytes);
+        try {
+            newDirector("aes", key).createSecurityResourceProvider();
+            fail("a key of 16 characters and 17 bytes should stop the start");
+        } catch (final FessConfigurationException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains(bytes + " bytes"));
+        }
+        // 8 characters, 16 bytes
+        final FessSecurityResourceProvider provider = newDirector("aes", "\u00e9".repeat(8)).createSecurityResourceProvider();
+        assertEquals("text",
+                provider.providePrimaryInvertibleCryptographer().decrypt(provider.providePrimaryInvertibleCryptographer().encrypt("text")));
+    }
+
+    @Test
+    public void test_createSecurityResourceProvider_otherAlgorithmsAreNotCheckedForTheAesLength() {
+        // Blowfish takes keys of other lengths, so the AES check must not apply to it
+        assertNotNull(newDirector("blowfish", "nineteen-bytes-key!").createSecurityResourceProvider());
+    }
+
     private FessFwAssistantDirector newDirector(final String algorithm, final String key) {
         final FessFwAssistantDirector director = new FessFwAssistantDirector();
         director.fessConfig = new FessConfig.SimpleImpl() {
