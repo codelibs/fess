@@ -177,7 +177,12 @@ public class User extends BsUser implements FessUser {
             sourceMap.put("roles", roles);
         }
         if (attributes != null) {
-            sourceMap.putAll(attributes);
+            // an attribute without a value is left out: a stored null breaks every read of the document
+            attributes.forEach((key, value) -> {
+                if (value != null) {
+                    sourceMap.put(key, value);
+                }
+            });
         }
         if (passwordChangedAt != null) {
             sourceMap.put(PASSWORD_CHANGED_AT, passwordChangedAt);

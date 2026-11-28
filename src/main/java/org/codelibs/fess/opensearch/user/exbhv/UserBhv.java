@@ -60,6 +60,8 @@ public class UserBhv extends BsUserBhv {
             result.setAttributes(source.entrySet()
                     .stream()
                     .filter(e -> isAttribute(e.getKey()))
+                    // a stored null (an attribute sent as null) is no value; Collectors.toMap cannot hold it
+                    .filter(e -> e.getValue() != null)
                     .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)));
             return result;
