@@ -83,6 +83,12 @@ public class V2EnvelopeWriter {
     private static final int MAX_CAUSE_DEPTH = 10;
 
     /**
+     * The message of the {@link IOException} that {@link java.net.HttpURLConnection} throws when the
+     * connection fails while the request is written ({@code sun.net.www.protocol.http.HttpURLConnection#writeRequests}).
+     */
+    private static final String REQUEST_WRITE_FAILURE_MESSAGE = "Error writing to server";
+
+    /**
      * Creates the v2 envelope writer. Registered as the DI component
      * {@code v2EnvelopeWriter} and obtained via
      * {@link org.codelibs.fess.util.ComponentUtil#getV2EnvelopeWriter()}.
@@ -379,6 +385,13 @@ public class V2EnvelopeWriter {
      * accepted and then reset is what a client sees while the engine restarts behind a port that stays
      * open, for example a port published by a container runtime or a load balancer without a backend.</p>
      *
+     * <p>When the reset hits while the request is being written, {@link java.net.HttpURLConnection} (the
+     * transport of the engine client) does not throw the {@link SocketException}: it writes through a
+     * {@link java.io.PrintStream}, which swallows it, and after one retry throws a plain
+     * {@link IOException} with the message "Error writing to server". Only that exception
+     * counts below a {@link CurlException}; other {@link IOException}s, such as a read or connect timeout
+     * or a TLS handshake that the peer ends, stay internal errors.</p>
+     *
      * @param cause the failure to classify, or {@code null}
      * @return {@code true} when the failure is the search engine being out of reach or out of capacity
      */
@@ -394,10 +407,22 @@ public class V2EnvelopeWriter {
             }
             if (t instanceof CurlException) {
                 inEngineRequest = true;
-            } else if (inEngineRequest && (t instanceof SocketException || t instanceof UnknownHostException)) {
+            } else if (inEngineRequest && (t instanceof SocketException || t instanceof UnknownHostException || isRequestWriteFailure(t))) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Tells whether a failure is the one {@link java.net.HttpURLConnection} throws when it cannot write the
+     * request to the connection: exactly an {@link IOException}, not a subclass, with the message
+     * "Error writing to server".
+     *
+     * @param t the failure to check
+     * @return {@code true} for the write failure of {@link java.net.HttpURLConnection}
+     */
+    private static boolean isRequestWriteFailure(final Throwable t) {
+        return t.getClass() == IOException.class && REQUEST_WRITE_FAILURE_MESSAGE.equals(t.getMessage());
     }
 }
