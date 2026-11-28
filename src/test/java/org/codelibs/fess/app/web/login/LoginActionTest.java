@@ -188,6 +188,7 @@ public class LoginActionTest extends UnitFessTestCase {
         form.password = "Abcdefg1234";
         form.confirmPassword = "Abcdefg1234";
 
+        mockTokenRequested(changeAction.getClass());
         assertValidationError(() -> changeAction.changePassword(form)).handle(data -> {
             data.requiredMessageOf("_global", "errors.no_user_for_changing_password");
         });
@@ -460,5 +461,159 @@ public class LoginActionTest extends UnitFessTestCase {
             assertEquals(Boolean.TRUE, data.getDataMap().get("passkeyLogin"));
             assertFalse(data.getDataMap().containsKey("passkeyRedirectPath"), bad);
         }
+    }
+
+    // ===================================================================================
+    //                                                          Token of the new-password page
+    //                                                          ==============================
+    private static final String OLD_PASSWORD_KEY = "LoginAction.invalidOldPassword";
+
+    private static FessUserBean localUser() {
+        final org.codelibs.fess.opensearch.user.exentity.User user = new org.codelibs.fess.opensearch.user.exentity.User();
+        user.setName("admin");
+        return new FessUserBean(user);
+    }
+
+    /** A login assist that finds the user for the password the session holds. */
+    private static class FindingAssist extends FessLoginAssist {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public org.dbflute.optional.OptionalEntity<FessUser> findLoginUser(
+                final org.lastaflute.web.login.credential.LoginCredential credential) {
+            return org.dbflute.optional.OptionalEntity.of(localUser().getFessUser());
+        }
+    }
+
+    private LoginAction tokenAction(final FessUserBean bean, final UserService userService, final java.util.List<FessUserBean> redirected)
+            throws Exception {
+        suppressBindingOf(FessLoginAssist.class);
+        suppressBindingOf(UserService.class);
+        suppressBindingOf(PasskeyService.class);
+        final LoginAction tokenAction = new LoginAction() {
+            {
+                fessConfig = ComponentUtil.getFessConfig();
+            }
+
+            @Override
+            protected OptionalThing<FessUserBean> getUserBean() {
+                return OptionalThing.of(bean);
+            }
+
+            @Override
+            protected org.lastaflute.web.response.HtmlResponse redirectByUser(final FessUserBean user) {
+                redirected.add(user);
+                return org.lastaflute.web.response.HtmlResponse.undefined();
+            }
+        };
+        inject(tokenAction);
+        final java.lang.reflect.Field assistField = org.codelibs.fess.app.web.base.FessBaseAction.class.getDeclaredField("fessLoginAssist");
+        assistField.setAccessible(true);
+        assistField.set(tokenAction, new FindingAssist());
+        final java.lang.reflect.Field activityField =
+                org.codelibs.fess.app.web.base.FessBaseAction.class.getDeclaredField("activityHelper");
+        activityField.setAccessible(true);
+        activityField.set(tokenAction, new org.codelibs.fess.helper.ActivityHelper() {
+            @Override
+            public void passwordChanged(final OptionalThing<FessUserBean> user, final String target) {
+                // nothing to record
+            }
+        });
+        final java.lang.reflect.Field serviceField = LoginAction.class.getDeclaredField("userService");
+        serviceField.setAccessible(true);
+        serviceField.set(tokenAction, userService);
+        final java.lang.reflect.Field sysField = org.codelibs.fess.app.web.base.FessBaseAction.class.getDeclaredField("systemHelper");
+        sysField.setAccessible(true);
+        final SystemHelper systemHelper = new SystemHelper();
+        sysField.set(tokenAction, systemHelper);
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(new PasswordHashHelper(), "passwordHashHelper");
+        getMockRequest().getSession(true).setAttribute(OLD_PASSWORD_KEY, "admin");
+        return tokenAction;
+    }
+
+    private static UserService recordingUserService(final java.util.List<String> changed) {
+        return new UserService() {
+            @Override
+            public void changePassword(final String username, final String password) {
+                changed.add(username);
+            }
+        };
+    }
+
+    private static PasswordForm passwordForm(final String password, final String confirmPassword) {
+        final PasswordForm form = new PasswordForm();
+        form.password = password;
+        form.confirmPassword = confirmPassword;
+        return form;
+    }
+
+    @Test
+    public void test_changePassword_withTheTokenChangesThePassword() throws Exception {
+        final java.util.List<String> changed = new java.util.ArrayList<>();
+        final java.util.List<FessUserBean> redirected = new java.util.ArrayList<>();
+        final LoginAction tokenAction = tokenAction(localUser(), recordingUserService(changed), redirected);
+
+        mockTokenRequested(tokenAction.getClass());
+        tokenAction.changePassword(passwordForm("Abcdefg1234", "Abcdefg1234"));
+
+        assertTokenVerified();
+        assertEquals(java.util.List.of("admin"), changed);
+        assertNull(getMockRequest().getSession(true).getAttribute(OLD_PASSWORD_KEY));
+        assertEquals(1, redirected.size());
+    }
+
+    /**
+     * A post without the transaction token of the new-password page is refused before anything is changed.
+     */
+    @Test
+    public void test_changePassword_withoutTheTokenIsRefused() throws Exception {
+        final java.util.List<String> changed = new java.util.ArrayList<>();
+        final LoginAction tokenAction = tokenAction(localUser(), recordingUserService(changed), new java.util.ArrayList<>());
+
+        assertException(org.lastaflute.web.token.exception.DoubleSubmittedRequestException.class,
+                () -> tokenAction.changePassword(passwordForm("Abcdefg1234", "Abcdefg1234")));
+
+        assertTrue(changed.isEmpty());
+        assertEquals("admin", getMockRequest().getSession(true).getAttribute(OLD_PASSWORD_KEY));
+    }
+
+    /** A form the page rejects is shown again with a fresh token, so the user can correct it and send it. */
+    @Test
+    public void test_changePassword_aRejectedFormShowsThePageWithAFreshToken() throws Exception {
+        final java.util.List<String> changed = new java.util.ArrayList<>();
+        final LoginAction tokenAction = tokenAction(localUser(), recordingUserService(changed), new java.util.ArrayList<>());
+
+        mockTokenRequested(tokenAction.getClass());
+        assertValidationError(() -> tokenAction.changePassword(passwordForm("Abcdefg1234", "Abcdefg9999"))).handle(data -> {
+            data.requiredMessageOf("_global", "errors.invalid_confirm_password");
+            final org.lastaflute.web.response.HtmlResponse response = (org.lastaflute.web.response.HtmlResponse) data.hookError();
+            assertEquals("/admin/login/newpassword.jsp", response.getRoutingPath());
+        });
+        assertTokenSaved(tokenAction.getClass());
+        assertTrue(changed.isEmpty());
+    }
+
+    /**
+     * LastaFlute refuses verifyToken() before validate() when the form of the execute method has validators
+     * (PasswordForm has): every change would end in a 500. The check needs the execute method of the request,
+     * which a request through the framework has, so it is registered here as the framework would.
+     */
+    @Test
+    public void test_changePassword_verifiesTheTokenAfterTheValidation() throws Exception {
+        final java.util.List<String> changed = new java.util.ArrayList<>();
+        final LoginAction tokenAction = tokenAction(localUser(), recordingUserService(changed), new java.util.ArrayList<>());
+        final org.lastaflute.web.ruts.config.ActionExecute execute = new org.dbflute.utflute.lastaflute.mock.MockRomanticActionCustomizer()
+                .createActionMapping(new org.lastaflute.di.core.meta.impl.ComponentDefImpl(LoginAction.class, "loginAction"))
+                .searchByMethodName("changePassword")
+                .get(0);
+        org.lastaflute.web.util.LaActionExecuteUtil.setActionExecute(execute);
+        assertTrue(execute.getFormMeta().get().isValidatorAnnotated());
+        mockTokenRequested(tokenAction.getClass());
+
+        tokenAction.changePassword(passwordForm("Abcdefg1234", "Abcdefg1234"));
+
+        assertTokenVerified();
+        assertEquals(java.util.List.of("admin"), changed);
     }
 }

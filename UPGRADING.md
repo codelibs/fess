@@ -293,6 +293,12 @@ fields of the crawl authentication screens and the SPNEGO pre-authentication pas
 A password that was saved from a screen with such spaces is stored without them, so its owner now has to type it
 without them at login; before, the form removed them.
 
+**The new-password form now carries a transaction token.** The page that a login with a password from
+`password.invalid.admin.passwords` leads to posts to `/login/changePassword`, which now refuses a post without the
+token of that page, the way the login form does. A browser is not affected. A script that posts the form must
+first read the token (`lastaflute.action.TRANSACTION_TOKEN`) from the page and send it back; `POST
+/api/v2/auth/password` is unchanged.
+
 **A login session of a local user ends when the roles or the groups of the user are changed.** Until 15.9 a session
 kept the roles and the groups it was opened with, so removing a role from a user (or deleting the role) did not take
 the permission away until the user logged in again. Now the session checks the stored user the way it checks a
