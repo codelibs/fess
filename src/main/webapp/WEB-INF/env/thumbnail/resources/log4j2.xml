@@ -31,6 +31,12 @@
 			<AppenderRef ref="AppFile" />
 			<AppenderRef ref="LogNotification" />
 		</Logger>
+		<!-- curl4j, the transport of the search engine client, writes every request and response body at DEBUG
+		     (the documents it stores and reads, with the user:password@ of a crawl URL); it stays at info whatever the log level is -->
+		<Logger name="org.codelibs.curl" additivity="false" level="info">
+			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
+		</Logger>
 		<Root level="${root.log.level}">
 			<AppenderRef ref="AppFile" />
 			<AppenderRef ref="LogNotification" />
