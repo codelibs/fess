@@ -95,6 +95,17 @@ public class LoginAction extends FessLoginAction {
         return asIndexPage(null).useForm(LoginForm.class);
     }
 
+    /**
+     * Shows the new-password page with a transaction token, which {@link #changePassword(PasswordForm)}
+     * verifies, as the login form does.
+     *
+     * @return the HTML response for the new-password page
+     */
+    private HtmlResponse asNewPasswordPage() {
+        saveToken();
+        return asHtml(path_AdminLogin_NewpasswordJsp).useForm(PasswordForm.class);
+    }
+
     private HtmlResponse asIndexPage(final LoginForm form) {
         if (form != null) {
             form.clearSecurityInfo();
@@ -175,7 +186,7 @@ public class LoginAction extends FessLoginAction {
                 return loginRedirect;
             }
             getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
-            return asHtml(path_AdminLogin_NewpasswordJsp);
+            return asNewPasswordPage();
         } catch (final LoginFailureException lfe) {
             if (logger.isInfoEnabled()) {
                 logger.info("Login failed for user: username={}, reason={}", LogUtil.sanitize(username),
@@ -274,8 +285,7 @@ public class LoginAction extends FessLoginAction {
     public HtmlResponse changePassword(final PasswordForm form) {
         final VaErrorHook toIndexPage = () -> {
             form.clearSecurityInfo();
-            return getUserBean().map(u -> asHtml(path_AdminLogin_NewpasswordJsp).useForm(PasswordForm.class))
-                    .orElseGet(() -> redirect(LoginAction.class));
+            return getUserBean().map(u -> asNewPasswordPage()).orElseGet(() -> redirect(LoginAction.class));
         };
         validatePasswordForm(form, toIndexPage);
         if (!getUserBean().isPresent()) {
@@ -298,6 +308,9 @@ public class LoginAction extends FessLoginAction {
 
     private void validatePasswordForm(final PasswordForm form, final VaErrorHook validationErrorLambda) {
         validate(form, messages -> {}, validationErrorLambda);
+        // After validate(), which LastaFlute requires of a form with validators, and before the old password is
+        // checked or anything changed. Its error hook shows the page with a fresh token.
+        verifyToken(validationErrorLambda::hook);
 
         if (!form.password.equals(form.confirmPassword)) {
             throwValidationError(messages -> {
