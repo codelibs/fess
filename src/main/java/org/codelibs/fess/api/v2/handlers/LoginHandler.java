@@ -289,8 +289,10 @@ public class LoginHandler {
         }
         if (!fessConfig.isValidAdminPassword(password)) {
             // Mirrors LoginAction.login(): a password on password.invalid.admin.passwords signs the
-            // user in and asks for a new one. The session is already live, so this is a prompt for
-            // the client, not an enforcement.
+            // user in and asks for a new one. The session of a local user can do nothing else until
+            // then (SearchApiV2Manager answers password_change_required); a directory user only gets
+            // the prompt, since the password it signed in with is not the one Fess stores.
+            assist.requirePasswordChangeIfListed(password);
             payload.put("password_change_required", true);
         }
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);

@@ -47,6 +47,15 @@ public class LogoutAction extends FessSearchAction {
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Logging out is how a session that must change its password first is left without changing it.
+     *
+     * @return true
+     */
+    @Override
+    protected boolean isAvailableBeforePasswordChange() {
+        return true;
+    }
 
     // ===================================================================================
     //                                                                      Search Execute

@@ -63,6 +63,22 @@ describe("get", () => {
     await expect(api.get("/x")).rejects.toMatchObject({ name: "ApiError", code: "E", httpStatus: 400 });
   });
 
+  it("tells the page when the session must change its password first", async () => {
+    const seen = vi.fn();
+    document.addEventListener("fess:auth:password-change-required", seen);
+    try {
+      installFetch(async () => jsonResponse({ response: { status: 1, error: { code: "password_change_required", message: "m" } } }, { status: 403 }));
+      await expect(api.get("/search")).rejects.toMatchObject({ code: "password_change_required", httpStatus: 403 });
+      expect(seen).toHaveBeenCalledTimes(1);
+      // any other refusal is left to the caller
+      installFetch(async () => jsonResponse({ response: { status: 1, error: { code: "forbidden", message: "m" } } }, { status: 403 }));
+      await expect(api.post("/favorites", {})).rejects.toMatchObject({ code: "forbidden" });
+      expect(seen).toHaveBeenCalledTimes(1);
+    } finally {
+      document.removeEventListener("fess:auth:password-change-required", seen);
+    }
+  });
+
   it("throws ApiError(PROTOCOL) when the envelope is missing", async () => {
     installFetch(async () => jsonResponse({ nope: true }));
     await expect(api.get("/x")).rejects.toMatchObject({ code: "PROTOCOL" });

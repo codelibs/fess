@@ -48,6 +48,8 @@ public class V2ErrorCodeTest {
         expectedStatus.put(V2ErrorCode.AUTH_REQUIRED, new int[] { 401 });
         expectedCode.put(V2ErrorCode.FORBIDDEN, "forbidden");
         expectedStatus.put(V2ErrorCode.FORBIDDEN, new int[] { 403 });
+        expectedCode.put(V2ErrorCode.PASSWORD_CHANGE_REQUIRED, "password_change_required");
+        expectedStatus.put(V2ErrorCode.PASSWORD_CHANGE_REQUIRED, new int[] { 403 });
         expectedCode.put(V2ErrorCode.NOT_FOUND, "not_found");
         expectedStatus.put(V2ErrorCode.NOT_FOUND, new int[] { 404 });
         expectedCode.put(V2ErrorCode.CONFLICT, "conflict");

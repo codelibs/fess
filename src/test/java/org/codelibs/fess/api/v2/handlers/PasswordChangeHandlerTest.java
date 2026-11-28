@@ -425,6 +425,52 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_success_liftsTheRequiredPasswordChange() throws Exception {
+        // The session ends below the change, but only on a best-effort basis: the mark is lifted first.
+        final int[] accepted = { 0 };
+        final StubFessLoginAssist stub = new StubFessLoginAssist("alice", "secret-current") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void acceptRequiredPasswordChange() {
+                accepted[0]++;
+            }
+        }.asLocalUser();
+        ComponentUtil.register(stub, "fessLoginAssist");
+        ComponentUtil.setFessLoginAssist(stub);
+        final StubUserService stubSvc = new StubUserService(new boolean[1]);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accepted[0]);
+
+            // a refused change leaves it
+            final CapturingResponse refused = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"wrong\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    refused);
+            org.junit.jupiter.api.Assertions.assertEquals(401, refused.status, refused.body());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accepted[0]);
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void passwordChange_rejectsMismatch_whenAuthenticated() throws Exception {
         // T-3 / MJ-29: an authenticated caller whose new_password != confirm_password
         // must receive 400/invalid_request. This test exercises the mismatch gate for

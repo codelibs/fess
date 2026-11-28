@@ -19,6 +19,10 @@ let pendingPasswordChange = null;
 // before the user can change it. Sent when the step ends (change done, or the modal closed).
 let pendingLoginAnnounce = null;
 
+// True while a password_change_required answer is being turned into a new login (see
+// onPasswordChangeRequired); the other requests of the page answer the same at the same time.
+let passwordChangeLogout = false;
+
 /** Tell the page a login finished (fess:auth:login). */
 function announceLogin(user) {
   pendingLoginAnnounce = null;
@@ -573,7 +577,36 @@ export async function isSessionEnded(err) {
   }
 }
 
+/**
+ * The server refused a request with password_change_required: the session was opened with a password
+ * that must be changed, and serves nothing else until then. The new-password step of the login modal
+ * needs the password the session was opened with, which this page holds only between the login and
+ * the change (a reload, or closing the modal, forgets it). Without it the session is ended and the
+ * login modal asks for a login, which leads to the new-password step again, as the login page does.
+ */
+export async function onPasswordChangeRequired() {
+  // The new-password step is on screen: the change is what it asks for.
+  if (pendingPasswordChange || passwordChangeLogout) return;
+  passwordChangeLogout = true;
+  try {
+    let logoutEnv = null;
+    try { logoutEnv = await api.post("/auth/logout", {}); } catch { /* the session may be gone already */ }
+    await rotateCsrf(logoutEnv);
+    setLoggedOut();
+    document.dispatchEvent(new CustomEvent("fess:auth:logout"));
+    promptLogin();
+    const err = document.getElementById("login-error");
+    if (err) {
+      err.textContent = t("auth.password_change_required");
+      err.classList.remove("d-none");
+    }
+  } finally {
+    passwordChangeLogout = false;
+  }
+}
+
 export function attach() {
+  document.addEventListener("fess:auth:password-change-required", onPasswordChangeRequired);
   // D.3: If login_link feature is disabled, immediately hide the login button
   // so it never flashes visible before probeMe() settles.
   if (!isLoginLinkEnabled()) {

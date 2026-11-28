@@ -349,6 +349,12 @@ public class PasswordChangeHandler {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password changePassword");
             return;
         }
+        // The session ends below, but that is best effort: whatever survives of it must not stay held back.
+        try {
+            assist.acceptRequiredPasswordChange();
+        } catch (final RuntimeException e) {
+            logger.debug("/api/v2/auth/password: could not lift the required password change for userId={}", userId, e);
+        }
         ComponentUtil.getActivityHelper().passwordChanged(userBean, userId);
         // C-3: successful change resets the per-user bucket so any earlier failed attempts
         // in the same window are forgiven — mirrors LoginHandler's MJ-5 reset.

@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.login;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,16 +84,52 @@ public class LoginAction extends FessLoginAction {
      * one {@link #redirectByUser} gives a user who has just logged in: it is a page the user's roles
      * can open, so it does not send the user back here.</p>
      *
+     * <p>A session that must change its password first is sent here from every other page, and is
+     * asked for the new password. The change is checked with the password typed at the login, which
+     * only the session of this node holds (the session store never writes it); without it the session
+     * ends, and the user logs in again to reach the change.</p>
+     *
      * @return the HTML response for the login page, or the redirect for a signed-in user
      */
     @Execute
     public HtmlResponse index() {
-        getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
         final OptionalThing<FessUserBean> user = getUserBean();
+        if (user.isPresent() && user.get().isPasswordChangeRequired()) {
+            if (hasOldPassword()) {
+                return asNewPasswordPage();
+            }
+            fessLoginAssist.logout();
+            return asIndexPage(null).useForm(LoginForm.class);
+        }
+        getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
         if (user.isPresent()) {
             return redirectByUser(user.get());
         }
         return asIndexPage(null).useForm(LoginForm.class);
+    }
+
+    /**
+     * Every page of this action is open to a session that must change its password first: it is
+     * where the password is changed, or where the user logs in again.
+     *
+     * @return true
+     */
+    @Override
+    protected boolean isAvailableBeforePasswordChange() {
+        return true;
+    }
+
+    /**
+     * Shows the new-password page with a transaction token, which {@link #changePassword(PasswordForm)}
+     * verifies, as the login form does.
+     */
+    private HtmlResponse asNewPasswordPage() {
+        saveToken();
+        return asHtml(path_AdminLogin_NewpasswordJsp).useForm(PasswordForm.class);
+    }
+
+    private boolean hasOldPassword() {
+        return getSession().map(session -> session.getAttribute(INVALID_OLD_PASSWORD) != null).orElse(false);
     }
 
     private HtmlResponse asIndexPage(final LoginForm form) {
@@ -175,7 +212,9 @@ public class LoginAction extends FessLoginAction {
                 return loginRedirect;
             }
             getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
-            return asHtml(path_AdminLogin_NewpasswordJsp);
+            // A local user can do nothing else until the password is changed (see FessBaseAction#godHandPrologue).
+            fessLoginAssist.requirePasswordChangeIfListed(password);
+            return asNewPasswordPage();
         } catch (final LoginFailureException lfe) {
             if (logger.isInfoEnabled()) {
                 logger.info("Login failed for user: username={}, reason={}", LogUtil.sanitize(username),
@@ -267,6 +306,11 @@ public class LoginAction extends FessLoginAction {
     /**
      * Handles password change for the current user.
      *
+     * <p>When the authentication chain changes the password only in LDAP ({@code ldap.admin.enabled} without
+     * {@code ldap.admin.sync-password}), the stored hash and the {@code passwordChangedAt} of the session stay
+     * as they were, so a session that must change its password keeps the mark and the next page ends it. The
+     * user signs in again with the new password, which LDAP checks, and that session is not marked.</p>
+     *
      * @param form the password form containing new password and confirmation
      * @return the HTML response after password change attempt
      */
@@ -274,17 +318,26 @@ public class LoginAction extends FessLoginAction {
     public HtmlResponse changePassword(final PasswordForm form) {
         final VaErrorHook toIndexPage = () -> {
             form.clearSecurityInfo();
-            return getUserBean().map(u -> asHtml(path_AdminLogin_NewpasswordJsp).useForm(PasswordForm.class))
-                    .orElseGet(() -> redirect(LoginAction.class));
+            return getUserBean().map(u -> asNewPasswordPage()).orElseGet(() -> redirect(LoginAction.class));
         };
+        if (getUserBean().map(FessUserBean::isPasswordChangeRequired).orElse(false) && !hasOldPassword()) {
+            // The form cannot be completed without the password typed at the login: index() ends the session.
+            return redirect(LoginAction.class);
+        }
         validatePasswordForm(form, toIndexPage);
         if (!getUserBean().isPresent()) {
             logger.warn("User session not found during password change - potential session timeout or security issue");
             return redirect(LoginAction.class);
         }
         final String username = getUserBean().get().getUserId();
+        final Long changedAt = getUserBean().get().getPasswordChangedAt();
         try {
             userService.changePassword(username, form.password);
+            // An authentication chain may leave the stored password as it is (LDAP without
+            // ldap.admin.sync-password); only a stored one moves the change time of the session.
+            if (!Objects.equals(changedAt, getUserBean().map(FessUserBean::getPasswordChangedAt).orElse(null))) {
+                fessLoginAssist.acceptRequiredPasswordChange();
+            }
             activityHelper.passwordChanged(getUserBean(), username);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
         } catch (final Exception e) {
@@ -298,6 +351,9 @@ public class LoginAction extends FessLoginAction {
 
     private void validatePasswordForm(final PasswordForm form, final VaErrorHook validationErrorLambda) {
         validate(form, messages -> {}, validationErrorLambda);
+        // After validate(), which LastaFlute requires of a form with validators, and before the old password is
+        // checked or anything changed. Its error hook shows the page with a fresh token.
+        verifyToken(validationErrorLambda::hook);
 
         if (!form.password.equals(form.confirmPassword)) {
             throwValidationError(messages -> {

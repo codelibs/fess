@@ -3,6 +3,29 @@
 Notes for moving an existing Fess installation to a newer release. For moving to Fess from another
 search system, see [MIGRATION.md](MIGRATION.md).
 
+## Upgrading to 15.11
+
+**A login with a password listed in `password.invalid.admin.passwords` (the default `admin` of the `admin` user)
+can only change the password until it is changed.** Until 15.10 such a login was asked for a new password but
+was already signed in, so every other page, the admin screens and `/api/v2` worked without the change. Now the
+login session of a local user opened with such a password, by the login page or `POST /api/v2/auth/login`, is
+sent to the new-password page from the admin screens and the other server-rendered pages, and `/api/v2` answers it
+`403 password_change_required` except for `/auth/password`, `/auth/me`, `/auth/login`, `/auth/logout`, the passkey
+login, `/ui/config` and `/health`. Changing the password (the new-password page or `POST /api/v2/auth/password`)
+lifts it. The bundled theme asks for the change when it gets that answer. A login of an LDAP or SSO user is not
+affected, and an empty `password.invalid.admin.passwords` turns the check off, as before.
+
+A script that logs in with the default password and then uses the session must change the password first, or the
+installation must start with another password: run `bin/fess-setup init`, or set `index.user.initial_password`
+(for example with the environment variable `FESS_CONFIG_INDEX_USER_INITIAL_PASSWORD`) before the first start,
+which creates the `admin` user. Calls of the admin API with an access token are not affected.
+
+Login sessions stay across the upgrade, including those in the OpenSearch session store
+(`FESS_SESSION_STORE=opensearch`), and nodes of both versions share them. A session opened before the upgrade
+with such a password is not held. While nodes of both versions run, a 15.10 node does not hold such a session
+either, and a session it has stored is no longer held. Change the password of such an account after the
+upgrade.
+
 ## Upgrading to 15.10
 
 **The admin console no longer ships Bootstrap, AdminLTE, jQuery, Popper, moment.js, the date/time pickers or

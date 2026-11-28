@@ -596,6 +596,43 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
         });
     }
 
+    /**
+     * Marks the login session that has just been opened as one that may do nothing but change the password,
+     * when the password it was opened with is on {@code password.invalid.admin.passwords}.
+     *
+     * <p>Only the session of a local user is marked: the password of a directory or identity provider user
+     * is not the one Fess stores, so changing the stored one would not change the password that was used.
+     * The login forms check the credentials of a local user and a directory user alike, so the user the
+     * session holds decides.</p>
+     *
+     * @param password the password the session was just opened with
+     * @return true if the session was marked
+     */
+    public boolean requirePasswordChangeIfListed(final String password) {
+        if (ComponentUtil.getFessConfig().isValidAdminPassword(password)) {
+            return false;
+        }
+        return getSessionUserBeanUnchecked().map(userBean -> {
+            if (!(userBean.getFessUser() instanceof User)) {
+                return false;
+            }
+            userBean.setPasswordChangeRequired(true);
+            saveSessionUserBean(userBean);
+            return true;
+        }).orElse(false);
+    }
+
+    /**
+     * Lifts the mark of {@link #requirePasswordChangeIfListed(String)} from the login session of the
+     * request, once that session has changed the password.
+     */
+    public void acceptRequiredPasswordChange() {
+        getSessionUserBeanUnchecked().filter(FessUserBean::isPasswordChangeRequired).ifPresent(userBean -> {
+            userBean.setPasswordChangeRequired(false);
+            saveSessionUserBean(userBean);
+        });
+    }
+
     // -----------------------------------------------------
     //                                            Permission
     //                                            ----------

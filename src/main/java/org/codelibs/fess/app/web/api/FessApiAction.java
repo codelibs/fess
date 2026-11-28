@@ -102,6 +102,17 @@ public abstract class FessApiAction extends FessBaseAction {
     }
 
     /**
+     * An API action is authorized by its access token, not by the login session, so a session that must
+     * change its password first does not hold it back.
+     *
+     * @return true
+     */
+    @Override
+    protected boolean isAvailableBeforePasswordChange() {
+        return true;
+    }
+
+    /**
      * Called when {@link #isAccessAllowed()} rejects a request, before the HTTP 401 is answered.
      * Does nothing by default; an API that keeps an audit trail of rejected calls overrides it.
      *

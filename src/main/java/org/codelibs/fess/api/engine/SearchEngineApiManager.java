@@ -103,7 +103,10 @@ public class SearchEngineApiManager extends BaseApiManager {
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         final RequestManager requestManager = ComponentUtil.getRequestManager();
-        if (!requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE)) {
+        // A session that must change its password first reaches nothing of the administration (see FessBaseAction#godHandPrologue).
+        if (!requestManager.findUserBean(FessUserBean.class)
+                .map(user -> user.hasRoles(acceptedRoles) && !user.isPasswordChangeRequired())
+                .orElse(Boolean.FALSE)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access: " + request.getServletPath());
             return;
         }
