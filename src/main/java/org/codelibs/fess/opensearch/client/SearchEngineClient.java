@@ -228,6 +228,9 @@ public class SearchEngineClient implements Client {
 
     private static final String USER_INDEX_PREFIX = "fess_user";
 
+    /** The name of the user that {@code fess_user.user/user.bulk} creates with {@code index.user.initial_password}. */
+    protected static final String ADMIN_USER_NAME = "admin";
+
     private static final String CONFIG_INDEX_PREFIX = "fess_config";
 
     /** OpenSearch client for executing operations */
@@ -450,6 +453,87 @@ public class SearchEngineClient implements Client {
                 logger.warn("Invalid index config name: configName={}", configName);
             }
         });
+
+        // after the loop: on a first start the admin user exists only once the user index has been created and loaded
+        reportListedAdminPassword(fessConfig);
+    }
+
+    /**
+     * Warns when the {@code admin} user still has a password that
+     * {@code password.invalid.admin.passwords} lists, such as the shipped {@code admin}. Only the
+     * webapp process checks, once when it starts.
+     *
+     * <p>The stored hash is checked, not {@code index.user.initial_password}: that value is read
+     * only when the user index is created, and the password may have been changed since. The name is the one
+     * {@code fess_user.user/user.bulk} creates the user with, not {@code authentication.admin.users},
+     * which grants admin rights to whatever names it lists. Each listed password costs one hash
+     * verification (BCrypt by default), which is why this runs at start-up and not per request.
+     * The login screen asks for a new password only once someone signs in with a listed one, so
+     * an installation nobody has signed in to yet would otherwise give no sign of it.</p>
+     *
+     * <p>Only warns, and a failure to read the user is logged and does not stop the start. The
+     * password is not logged.</p>
+     *
+     * @param fessConfig the Fess configuration
+     * @return true if the warning was written
+     */
+    protected boolean reportListedAdminPassword(final FessConfig fessConfig) {
+        // The crawler, thumbnail, suggest and chunk processes open this client too, and would repeat the check on every run.
+        if (!isWebappProcess()) {
+            return false;
+        }
+        final boolean matched;
+        try {
+            final List<String> listed = split(fessConfig.getPasswordInvalidAdminPasswords(), "\n")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).toList());
+            if (listed.isEmpty()) {
+                return false;
+            }
+            final String stored = getStoredUserPassword(fessConfig, ADMIN_USER_NAME);
+            if (StringUtil.isEmpty(stored)) {
+                return false;
+            }
+            final PasswordHashHelper passwordHashHelper = ComponentUtil.getPasswordHashHelper();
+            matched = listed.stream().anyMatch(password -> passwordHashHelper.matches(password, stored));
+        } catch (final RuntimeException e) {
+            logger.warn("Could not check the password of the {} user against password.invalid.admin.passwords.", ADMIN_USER_NAME, e);
+            return false;
+        }
+        if (!matched) {
+            return false;
+        }
+        logger.warn(
+                "The {} user still has a password listed in password.invalid.admin.passwords. Sign in as {} and set a new"
+                        + " password when asked, or change it from another admin account on the Users page. For a new installation, set"
+                        + " index.user.initial_password in fess_config.properties (bin/fess-setup init does) before the first start.",
+                ADMIN_USER_NAME, ADMIN_USER_NAME);
+        return true;
+    }
+
+    /**
+     * Returns the stored password hash of a user.
+     *
+     * <p>The user index is loaded by a bulk request without a refresh, so the index is refreshed
+     * first: on a first start the admin user would not be found yet otherwise.</p>
+     *
+     * @param fessConfig the Fess configuration
+     * @param name the user name
+     * @return the stored hash, or {@code null} if there is no such user
+     */
+    protected String getStoredUserPassword(final FessConfig fessConfig, final String name) {
+        final String index = fessConfig.getIndexUserIndex() + ".user";
+        client.admin().indices().prepareRefresh(index).execute().actionGet(fessConfig.getIndexIndicesTimeout());
+        final SearchResponse response = client.prepareSearch(index)
+                .setQuery(QueryBuilders.termQuery("name", name))
+                .setFetchSource(new String[] { "password" }, null)
+                .setSize(1)
+                .execute()
+                .actionGet(fessConfig.getIndexSearchTimeout());
+        final SearchHit[] hits = response.getHits().getHits();
+        if (hits.length == 0) {
+            return null;
+        }
+        return hits[0].getSourceAsMap().get("password") instanceof final String password ? password : null;
     }
 
     /**
