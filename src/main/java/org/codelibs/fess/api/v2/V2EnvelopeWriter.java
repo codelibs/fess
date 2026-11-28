@@ -301,7 +301,10 @@ public class V2EnvelopeWriter {
      * reintroducing it. The same goes for a search engine that cannot be reached or refuses the
      * request for lack of capacity: that is neither the caller's fault nor an unexpected failure of
      * ours, so it is answered {@code 503 service_unavailable} with {@code Retry-After}, as
-     * {@code /api/v2/search} and {@code /api/v2/health} do.</p>
+     * {@code /api/v2/health} does. {@code /api/v2/search} answers a capacity refusal the same way,
+     * but never sees an unreachable engine as a failure: the main searcher's failure becomes an
+     * empty result marked {@code partial} ({@code RankFusionProcessor#createDegradedResponseList}),
+     * which is answered {@code 200}.</p>
      *
      * @param res the HTTP response to write to
      * @param cause the cause to log (may be null; only logged, never written to wire)
