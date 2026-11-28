@@ -772,6 +772,12 @@ public class SearchEngineClientEngineTypeTest extends UnitFessTestCase {
         public void addMapping(final String index, final String docType, final String indexName) {
             calls.add("addMapping:" + index + "/" + docType);
         }
+
+        @Override
+        protected boolean reportListedAdminPassword(final FessConfig fessConfig) {
+            calls.add("reportListedAdminPassword");
+            return false;
+        }
     }
 
     /** Runs {@code open()}, which publishes the engine address as a system property: put it back as it was. */
@@ -796,10 +802,11 @@ public class SearchEngineClientEngineTypeTest extends UnitFessTestCase {
         openKeepingTheAddressProperty(client);
 
         // the plugin check needs the engine to answer, so it comes after the status and version checks,
-        // and it must come before an index is created from definitions that rely on the plugins
+        // and it must come before an index is created from definitions that rely on the plugins; the admin
+        // password is checked last, once the user index and its admin user exist
         assertEquals(List.of("warnDeprecatedSearchEngineType", "warnUnknownSearchEngineType", "warnIgnoredIndexOverrides",
                 "createHttpClient", "waitForYellowStatus", "verifyEngineVersion", "checkEnginePlugins", "setUpDocumentIndex:fess",
-                "addMapping:fess/doc"), client.calls);
+                "addMapping:fess/doc", "reportListedAdminPassword"), client.calls);
     }
 
     @Test

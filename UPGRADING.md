@@ -3,6 +3,12 @@
 Notes for moving an existing Fess installation to a newer release. For moving to Fess from another
 search system, see [MIGRATION.md](MIGRATION.md).
 
+## Upgrading to 15.11
+
+**Fess warns at start while the `admin` user still has a password that `password.invalid.admin.passwords` lists**
+(the shipped `admin`, for one). To clear it, sign in as `admin` and set a new password when asked, or change it
+from another admin account on the Users page; nothing else changes.
+
 ## Upgrading to 15.10
 
 **The admin console no longer ships Bootstrap, AdminLTE, jQuery, Popper, moment.js, the date/time pickers or
