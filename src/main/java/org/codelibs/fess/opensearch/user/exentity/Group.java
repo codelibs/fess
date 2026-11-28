@@ -65,7 +65,12 @@ public class Group extends BsGroup {
             sourceMap.put("name", name);
         }
         if (attributes != null) {
-            sourceMap.putAll(attributes);
+            // an attribute without a value is left out: a stored null breaks every read of the document
+            attributes.forEach((key, value) -> {
+                if (value != null) {
+                    sourceMap.put(key, value);
+                }
+            });
         }
         return sourceMap;
     }
