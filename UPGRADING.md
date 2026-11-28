@@ -130,6 +130,22 @@ on the System Info > Search page of the admin console if needed. To index such d
 robots meta tag and the header of HTML pages) or `config.ignore.robots.tags=true` in the "Config Parameters" of
 one crawl configuration.
 
+**The `last_modified` of an `smb://` document is now the later of the file's last write time and its change time.**
+Until 15.9 the SMB client took the last write time alone; since 15.10 (fess-crawler#254) it takes whichever of the two
+times the server reports is later, for the HEAD request of a differential crawl and for the fetch alike, and the
+document is indexed with that time (`last_modified` and `timestamp`). The `smb1://` client is unchanged.
+
+* With Samba (measured with 4.23), the change time is the inode change time (ctime) of the file. A file whose ctime is
+  later than its modification time, for example one copied or restored with its original timestamps, or one whose
+  mode or owner was changed with `chmod` or `chown`, is now indexed with the ctime as its `last_modified`.
+* On Windows (NTFS), a change of the metadata alone, such as the ACL or the attributes (a backup tool that clears the
+  archive attribute), moves the change time, and now moves `last_modified` too.
+
+With "Check Last Modified" on in the General settings (the default), a differential crawl fetches a file again when the
+time of the HEAD response is later than the indexed `last_modified`. **The first differential crawl after the upgrade
+therefore fetches again every such file indexed by 15.9 or earlier** (its indexed time is the last write time), and
+indexes it with the later time; later crawls skip it until one of the two times moves again.
+
 **The static files of a theme are revalidated instead of being cached for a day.** Until 15.9 the files under
 `/themes/<name>/` were sent with `Cache-Control: public, max-age=86400`, so a browser kept the scripts and
 stylesheets of the version it had loaded for up to 24 hours after an upgrade. They are now sent with
