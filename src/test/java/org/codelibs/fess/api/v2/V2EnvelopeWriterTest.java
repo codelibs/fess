@@ -438,6 +438,22 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_writeInternalError_answersAConnectionResetWhileTheRequestIsWrittenWith503() throws Exception {
+        // HttpURLConnection writes the request through a PrintStream, which swallows the SocketException of a
+        // reset connection; after one retry it throws a plain IOException with no cause.
+        final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
+        final Throwable cause = new org.codelibs.curl.CurlException("Failed to access to http://10.0.0.1:9200/fess_user.user/_search",
+                new org.codelibs.curl.CurlException("Failed to access the response.", new java.io.IOException("Error writing to server")));
+        final CapturingResponse res = new CapturingResponse();
+        new V2EnvelopeWriter().writeInternalError(res, cause, noopLogger, "/api/v2/auth/login POST");
+        final String body = res.body();
+        assertEquals(body, 503, res.status);
+        assertEquals("5", res.headers.get("Retry-After"));
+        assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+        assertFalse(body.contains("10.0.0.1"), "the engine address stays out of the response: " + body);
+    }
+
+    @Test
     public void test_writeInternalError_keepsOtherFailuresAs500() throws Exception {
         final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
         final Throwable[] causes = {
@@ -447,6 +463,15 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
                 new RuntimeException("llm", new java.net.SocketException("Connection reset")),
                 // a read timeout is not a reset connection: a slow engine stays a 500
                 new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketTimeoutException("Read timed out")),
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.SocketTimeoutException("Connect timed out")),
+                // a TLS handshake that the peer ends without a socket failure
+                new org.codelibs.curl.CurlException("Failed to access",
+                        new javax.net.ssl.SSLHandshakeException("Remote host terminated the handshake",
+                                new java.io.EOFException("SSL peer shut down incorrectly"))),
+                // only the write failure of HttpURLConnection counts among the plain IOExceptions of the engine client
+                new org.codelibs.curl.CurlException("Failed to access the response.", new java.io.IOException("Premature EOF")),
+                new org.codelibs.curl.CurlException("Failed to access the response.", new java.io.EOFException("Error writing to server")),
+                new java.io.IOException("Error writing to server"),
                 // the engine answered, and the answer is about the request
                 new org.codelibs.fesen.opensearch.OpenSearchStatusException("bad",
                         org.codelibs.fesen.opensearch.core.rest.RestStatus.BAD_REQUEST, null),
