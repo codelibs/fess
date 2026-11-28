@@ -34,6 +34,12 @@ public enum V2ErrorCode {
     /** The caller is authenticated but not permitted to perform the action. */
     FORBIDDEN("forbidden", 403),
 
+    /**
+     * The login session may do nothing but change its password: it was opened with a password on
+     * {@code password.invalid.admin.passwords}.
+     */
+    PASSWORD_CHANGE_REQUIRED("password_change_required", 403),
+
     /** The requested resource or endpoint does not exist. */
     NOT_FOUND("not_found", 404),
 

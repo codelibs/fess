@@ -49,6 +49,7 @@ import {
   toPasskeyRequestOptions,
   toPasskeyCreationOptions,
   passkeyCredentialToJson,
+  onPasswordChangeRequired,
 } from "../../../../main/webapp/themes/bootstrap/assets/auth.js";
 import { resetDom } from "../../helpers/dom.js";
 import { installFetch, jsonResponse } from "../../helpers/net.js";
@@ -1097,6 +1098,50 @@ describe("attach — forced password change", () => {
     document.getElementById("login-modal").dispatchEvent(new Event("show.bs.modal"));
     expect(document.getElementById("login-password").value).toBe("");
     expect(document.getElementById("password-change-new")).toBeNull();
+  });
+
+  it("leaves the new-password step alone when a request is refused with password_change_required", async () => {
+    api.post.mockResolvedValueOnce({ user: ADMIN, csrf_token: "A", password_change_required: true });
+    submit("login-form");
+    await flush();
+    api.post.mockClear();
+
+    document.dispatchEvent(new CustomEvent("fess:auth:password-change-required"));
+    await flush();
+
+    expect(api.post).not.toHaveBeenCalled();
+    expect(isShown("password-change-step")).toBe(true);
+    expect(getCurrentUser()).toEqual(ADMIN);
+  });
+
+  it("ends a session that must change its password and asks for a login when the password is not known", async () => {
+    // A reload, or closing the modal, forgets the password the session was opened with, and the
+    // change needs it: logging in again leads to the new-password step.
+    api.post.mockResolvedValueOnce({ user: ADMIN, csrf_token: "A", password_change_required: true });
+    submit("login-form");
+    await flush();
+    document.getElementById("login-modal").dispatchEvent(new Event("hidden.bs.modal"));
+    const logouts = vi.fn();
+    document.addEventListener("fess:auth:logout", logouts);
+    api.post.mockReset();
+    api.post.mockResolvedValueOnce({ csrf_token: "L" });
+    bootstrap.Modal.getOrCreateInstance.mockClear();
+
+    try {
+      await onPasswordChangeRequired();
+    } finally {
+      document.removeEventListener("fess:auth:logout", logouts);
+    }
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+    expect(api.post).toHaveBeenCalledWith("/auth/logout", {});
+    expect(api.setCsrfToken).toHaveBeenLastCalledWith("L");
+    expect(getCurrentUser()).toBeNull();
+    expect(logouts).toHaveBeenCalledTimes(1);
+    expect(bootstrap.Modal.getOrCreateInstance).toHaveBeenCalledWith(document.getElementById("login-modal"));
+    expect(isShown("login-step")).toBe(true);
+    expect(isShown("login-error")).toBe(true);
+    expect(document.getElementById("login-error").textContent).toBe("auth.password_change_required");
   });
 });
 

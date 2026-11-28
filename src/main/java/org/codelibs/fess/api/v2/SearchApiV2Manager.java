@@ -302,6 +302,13 @@ public class SearchApiV2Manager extends BaseApiManager {
         if (ComponentUtil.getV2LoginRequirement().requiresLogin(sub) && isLoginRequiredForAnonymous(sub, request, response)) {
             return;
         }
+        // Layer 4: a session opened with a password on password.invalid.admin.passwords may only
+        // change it. What stays open is what an anonymous caller reaches under login.required (so the
+        // client can still log in again or out) and the password change itself.
+        if (ComponentUtil.getV2LoginRequirement().requiresLogin(sub) && !"/auth/password".equals(sub)
+                && isPasswordChangeRequired(sub, request, response)) {
+            return;
+        }
 
         try {
             // Path components that vary (docId) are matched before the static switch so the
@@ -512,6 +519,40 @@ public class SearchApiV2Manager extends BaseApiManager {
             }
         }
         ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.AUTH_REQUIRED, "login required");
+        return true;
+    }
+
+    /**
+     * Refuses the request of a login session that must change its password first (see
+     * {@link FessUserBean#isPasswordChangeRequired()}) with {@code 403 password_change_required}.
+     *
+     * <p>As in {@link #isLoginRequiredForAnonymous}, a failure to resolve the caller is an internal
+     * error, not a pass: the session could be one that is held back.</p>
+     *
+     * @param sub the v2 sub-path
+     * @param request the incoming request; one without a session has no login to hold back
+     * @param response the response to write the error envelope to
+     * @return {@code true} when an error envelope was written and dispatch must stop
+     * @throws IOException if the error envelope cannot be written
+     */
+    protected boolean isPasswordChangeRequired(final String sub, final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException {
+        if (request.getSession(false) == null) {
+            return false;
+        }
+        final boolean required;
+        try {
+            required = ComponentUtil.getFessLoginAssist().getSavedUserBean().map(FessUserBean::isPasswordChangeRequired).orElse(false);
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2{}: could not resolve the current user", sub, e);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2" + sub);
+            return true;
+        }
+        if (!required) {
+            return false;
+        }
+        ComponentUtil.getV2EnvelopeWriter()
+                .writeError(response, V2ErrorCode.PASSWORD_CHANGE_REQUIRED, "the password must be changed before this session can be used");
         return true;
     }
 

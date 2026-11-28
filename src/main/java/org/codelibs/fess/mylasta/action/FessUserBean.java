@@ -60,6 +60,12 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
      */
     private Long userCheckTime;
 
+    /**
+     * Whether this login session may do nothing but change the password: a local user logged in with a
+     * password on {@code password.invalid.admin.passwords}. Cleared when the session changes the password.
+     */
+    private boolean passwordChangeRequired;
+
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
@@ -153,6 +159,20 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
     public void setUserCheckTime(final Long userCheckTime) {
         this.userCheckTime = userCheckTime;
+    }
+
+    /**
+     * Tells whether this login session may do nothing but change the password.
+     *
+     * @return true until the password the session was opened with, which is on
+     *         {@code password.invalid.admin.passwords}, is changed
+     */
+    public boolean isPasswordChangeRequired() {
+        return passwordChangeRequired;
+    }
+
+    public void setPasswordChangeRequired(final boolean passwordChangeRequired) {
+        this.passwordChangeRequired = passwordChangeRequired;
     }
 
     public static FessUserBean empty() {

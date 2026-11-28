@@ -24,6 +24,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -136,18 +137,40 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
      * This method refreshes the user information if a user is logged in
      * and delegates to the view helper's action hook.
      *
+     * <p>A login session that must change its password first (see
+     * {@link FessUserBean#isPasswordChangeRequired()}) is sent to the login page, which asks for the new
+     * password, unless {@link #isAvailableBeforePasswordChange()} lets this action through.</p>
+     *
      * @param runtime the action runtime context
      * @return the action response, or null to continue with normal processing
      */
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
-        fessLoginAssist.getSavedUserBean().ifPresent(u -> {
+        final OptionalThing<FessUserBean> userBean = fessLoginAssist.getSavedUserBean();
+        userBean.ifPresent(u -> {
             final boolean result = u.getFessUser().refresh();
             if (logger.isDebugEnabled()) {
                 logger.debug("Refreshed user info: result={}", result);
             }
         });
+        if (userBean.map(FessUserBean::isPasswordChangeRequired).orElse(false) && !isAvailableBeforePasswordChange()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("The password must be changed first: userId={}, path={}", userBean.get().getUserId(),
+                        runtime.getRequestPath());
+            }
+            return redirect(LoginAction.class);
+        }
         return viewHelper.getActionHook().godHandPrologue(runtime, super::godHandPrologue);
+    }
+
+    /**
+     * Tells whether this action serves a login session that must change its password first. Only the
+     * actions that lead to the change, or out of the session, do.
+     *
+     * @return true if the action is served to such a session; false by default
+     */
+    protected boolean isAvailableBeforePasswordChange() {
+        return false;
     }
 
     /**

@@ -577,6 +577,80 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
+    // a session opened with a password on password.invalid.admin.passwords
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_requirePasswordChange_marksTheSessionOfALocalUserWithAListedPassword() {
+        assist.session = assist.createUserBean(localUser("admin", 500L));
+
+        assertTrue(assist.requirePasswordChangeIfListed("admin"));
+
+        assertTrue(assist.session.isPasswordChangeRequired());
+        // stored again, so that the session store learns of it
+        assertEquals(1, assist.saved.get());
+    }
+
+    @Test
+    public void test_requirePasswordChange_leavesAPasswordThatIsNotListed() {
+        assist.session = assist.createUserBean(localUser("admin", 500L));
+
+        assertFalse(assist.requirePasswordChangeIfListed("Secret-1234"));
+
+        assertFalse(assist.session.isPasswordChangeRequired());
+        assertEquals(0, assist.saved.get());
+    }
+
+    @Test
+    public void test_requirePasswordChange_isOffWhenNothingIsListed() {
+        config.invalidAdminPasswords = "";
+        assist.session = assist.createUserBean(localUser("admin", 500L));
+
+        assertFalse(assist.requirePasswordChangeIfListed("admin"));
+
+        assertFalse(assist.session.isPasswordChangeRequired());
+    }
+
+    @Test
+    public void test_requirePasswordChange_leavesADirectoryOrSsoUser() {
+        // the password the user logged in with is not the one Fess stores, so the change would not change it
+        assist.session = assist.createUserBean(new LdapUser(new Hashtable<>(), "admin"));
+        assertFalse(assist.requirePasswordChangeIfListed("admin"));
+        assertFalse(assist.session.isPasswordChangeRequired());
+
+        assist.session = assist.createUserBean(new SsoUser("admin"));
+        assertFalse(assist.requirePasswordChangeIfListed("admin"));
+        assertFalse(assist.session.isPasswordChangeRequired());
+        assertEquals(0, assist.saved.get());
+    }
+
+    @Test
+    public void test_requirePasswordChange_withoutASession() {
+        assertFalse(assist.requirePasswordChangeIfListed("admin"));
+    }
+
+    @Test
+    public void test_acceptRequiredPasswordChange_liftsTheMark() {
+        assist.session = assist.createUserBean(localUser("admin", 500L));
+        assist.session.setPasswordChangeRequired(true);
+
+        assist.acceptRequiredPasswordChange();
+
+        assertFalse(assist.session.isPasswordChangeRequired());
+        assertEquals(1, assist.saved.get());
+    }
+
+    @Test
+    public void test_acceptRequiredPasswordChange_leavesAnUnmarkedSession() {
+        assist.session = assist.createUserBean(localUser("admin", 500L));
+
+        assist.acceptRequiredPasswordChange();
+
+        assertFalse(assist.session.isPasswordChangeRequired());
+        assertEquals(0, assist.saved.get());
+    }
+
+    // ---------------------------------------------------------------------
     // Fakes
     // ---------------------------------------------------------------------
 
@@ -698,6 +772,13 @@ public class FessLoginAssistPasswordChangeTest extends UnitFessTestCase {
         private static final long serialVersionUID = 1L;
 
         int interval = 10;
+
+        String invalidAdminPasswords = "admin";
+
+        @Override
+        public String getPasswordInvalidAdminPasswords() {
+            return invalidAdminPasswords;
+        }
 
         @Override
         public Integer getPasswordChangedCheckIntervalAsInteger() {

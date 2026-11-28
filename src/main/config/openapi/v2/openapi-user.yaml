@@ -13,7 +13,8 @@ info:
     `error` object with stable `code` (snake_case) and a human-readable
     `message` (English; clients should localize on `code`). The default HTTP
     status code matches the envelope's `error.code` (e.g. `invalid_request`
-    → 400, `auth_required` → 401, `forbidden` → 403, `not_found` → 404,
+    → 400, `auth_required` → 401, `forbidden` → 403,
+    `password_change_required` → 403, `not_found` → 404,
     `method_not_allowed` → 405, `not_acceptable` → 406, `payload_too_large`
     → 413, `unsupported_media_type` → 415, `rate_limited` → 429,
     `internal_error` → 500, `service_unavailable` → 503).
@@ -57,6 +58,15 @@ info:
     `401 auth_required` on this ground, and the individual `401` responses
     documented below apply only to the endpoints that require a user
     regardless of the setting.
+
+    **Password change before use.** A login of a local user with a password
+    listed in `password.invalid.admin.passwords` (the default `admin`) may only
+    change that password. Until `POST /auth/password` succeeds, every endpoint
+    answers `403 password_change_required`, except the ones that stay
+    reachable before login (listed above) and `POST /auth/password` itself.
+    An empty `password.invalid.admin.passwords` turns this off. A directory
+    (LDAP) login with such a password only gets the `password_change_required`
+    flag of `POST /auth/login`.
 
     `/chat/stream` emits Server-Sent Events (`text/event-stream`).
     `/documents/all` emits NDJSON (`application/x-ndjson`); each line is a
@@ -1889,6 +1899,7 @@ components:
                         - invalid_request
                         - auth_required
                         - forbidden
+                        - password_change_required
                         - not_found
                         - method_not_allowed
                         - not_acceptable
@@ -2661,7 +2672,9 @@ components:
                   description: |-
                     Present when the password is listed in
                     `password.invalid.admin.passwords`. The user is signed in;
-                    the client should ask for a new password.
+                    the client should ask for a new password. For a local
+                    user the session can do nothing else until it is changed:
+                    the other endpoints answer `403 password_change_required`.
 
     LogoutResponse:
       type: object

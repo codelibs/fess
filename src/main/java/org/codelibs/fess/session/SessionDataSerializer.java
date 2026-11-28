@@ -117,7 +117,11 @@ public class SessionDataSerializer {
 
     /**
      * The number of the layout of the bytes written. Increase it when the layout or a serializer below
-     * changes in a way that older bytes cannot be read.
+     * changes in a way that older bytes cannot be read. A field added at the end of what the serializer of an
+     * attribute's own value writes does not need it: each attribute is read from its own bytes, a reader that does
+     * not know the field leaves it unread, and a reader that knows it finds it missing in older bytes (see
+     * {@link FessUserBeanSerializer}). This does not hold for a serializer of a value inside another one, such as
+     * the user inside {@link FessUserBean}, since the fields of the outer value follow it.
      */
     protected static final int FORMAT_NUMBER = 1;
 
@@ -1054,6 +1058,10 @@ public class SessionDataSerializer {
     /**
      * Writes the login of a user: the {@link FessUser} and what the session remembers of it. The permissions
      * are not written for a local user, they are derived from the roles and groups.
+     *
+     * <p>Whether the password must be changed first is written last. A session written without it, by 15.10,
+     * is read as one that need not, and a 15.10 node leaves it unread, so the nodes of both versions share
+     * sessions. A 15.10 node writes the session back without it.</p>
      */
     protected static class FessUserBeanSerializer extends Serializer<FessUserBean> {
 
@@ -1073,6 +1081,7 @@ public class SessionDataSerializer {
             output.writeString(bean.getLastestSyncCheckTime().map(LocalDateTime::toString).orElse(null));
             output.writeString(bean.getUserLocale().map(Locale::toLanguageTag).orElse(null));
             output.writeString(bean.getUserTimeZone().map(TimeZone::getID).orElse(null));
+            output.writeBoolean(bean.isPasswordChangeRequired());
         }
 
         @Override
@@ -1093,6 +1102,8 @@ public class SessionDataSerializer {
             if (timeZone != null) {
                 bean.manageUserTimeZone(TimeZone.getTimeZone(timeZone));
             }
+            // added in 15.11 after the other fields, so the session a 15.10 node stored is read, without it
+            bean.setPasswordChangeRequired(!input.end() && input.readBoolean());
             return bean;
         }
     }

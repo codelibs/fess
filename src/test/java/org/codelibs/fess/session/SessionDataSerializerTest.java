@@ -256,6 +256,7 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
         assertEquals(List.of("group1"), Arrays.asList(user.getGroupNames()));
         assertEquals("sales", user.getAttributes().get("department"));
         assertEquals(Long.valueOf(1234L), user.getPasswordChangedAt());
+        assertFalse(restored.isPasswordChangeRequired());
 
         // the credentials are not in the bytes; the user name that is, which proves the search works
         assertTrue(contains(bytes, "alice"));
@@ -536,6 +537,50 @@ public class SessionDataSerializerTest extends UnitFessTestCase {
 
         assertNull(other.fromBytes(bytes));
         assertEquals("v", serializer.fromBytes(bytes).get("k"));
+    }
+
+    @Test
+    public void test_roundTrip_userBean_passwordChangeRequired() {
+        final FessUserBean bean = new FessUserBean(newUser());
+        bean.setPasswordChangeRequired(true);
+
+        final FessUserBean restored = (FessUserBean) roundTrip("u", bean).get("u");
+
+        assertTrue(restored.isPasswordChangeRequired());
+        assertEquals("alice", restored.getUserId());
+    }
+
+    @Test
+    public void test_userBean_writtenWithoutTheMark_isRead() {
+        // the layout 15.10 writes: the same fields without the mark, which is read as false, so the sessions
+        // stored before the upgrade stay
+        final Kryo kryo = hostileKryo();
+        final Consumer<Output> oldFields = o -> {
+            kryo.writeClassAndObject(o, newUser());
+            o.writeBoolean(false); // passwordChangedAt
+            o.writeBoolean(false); // loginTime
+            o.writeBoolean(false); // userCheckTime
+            o.writeString(null);
+            o.writeString(null);
+            o.writeString(null);
+        };
+        final Map<String, byte[]> blobs = new LinkedHashMap<>();
+        blobs.put("old", blob(FessUserBean.class, oldFields));
+        blobs.put("new", blob(FessUserBean.class, oldFields.andThen(o -> o.writeBoolean(true))));
+
+        final Map<String, Object> restored = serializer.fromBytes(container(blobs));
+
+        assertEquals("alice", ((FessUserBean) restored.get("old")).getUserId());
+        assertFalse(((FessUserBean) restored.get("old")).isPasswordChangeRequired());
+        assertEquals("alice", ((FessUserBean) restored.get("new")).getUserId());
+        assertTrue(((FessUserBean) restored.get("new")).isPasswordChangeRequired());
+    }
+
+    @Test
+    public void test_formatNumber_staysTheOneOf1510() {
+        // a new number would drop every stored session at the upgrade, and keep the nodes of 15.10 and 15.11
+        // from sharing sessions
+        assertEquals(1, SessionDataSerializer.FORMAT_NUMBER);
     }
 
     @Test

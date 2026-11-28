@@ -1347,6 +1347,42 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void login_blacklistedPasswordHoldsBackTheSessionOfALocalUser() throws Exception {
+        final StubLoginAssist assist = new StubLoginAssist("admin", false) {
+            @Override
+            public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+                final org.codelibs.fess.opensearch.user.exentity.User user = new org.codelibs.fess.opensearch.user.exentity.User();
+                user.setName("admin");
+                bindUser(user);
+            }
+        };
+        ComponentUtil.setFessLoginAssist(assist);
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"admin\",\"password\":\"admin\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"password_change_required\":true"), res.body());
+        assertTrue(assist.getSavedUserBean().get().isPasswordChangeRequired());
+    }
+
+    @Test
+    public void login_blacklistedPasswordOnlyPromptsAUserThatIsNotLocal() throws Exception {
+        // a directory or other user: the password it signed in with is not the one Fess stores
+        final StubLoginAssist assist = new StubLoginAssist("alice", false);
+        ComponentUtil.setFessLoginAssist(assist);
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"admin\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"password_change_required\":true"), res.body());
+        assertFalse(assist.getSavedUserBean().get().isPasswordChangeRequired());
+    }
+
+    @Test
     public void login_acceptedPasswordDoesNotAskForAPasswordChange() throws Exception {
         ComponentUtil.setFessLoginAssist(new StubLoginAssist("alice", false));
         ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
@@ -1673,6 +1709,16 @@ public class LoginHandlerTest extends UnitFessTestCase {
         @Override
         public OptionalThing<FessUserBean> getSavedUserBean() {
             return bound == null ? OptionalThing.empty() : OptionalThing.of(bound);
+        }
+
+        @Override
+        protected OptionalThing<FessUserBean> getSessionUserBeanUnchecked() {
+            return getSavedUserBean();
+        }
+
+        @Override
+        protected void saveSessionUserBean(final FessUserBean userBean) {
+            // the bean is the field
         }
 
         @Override

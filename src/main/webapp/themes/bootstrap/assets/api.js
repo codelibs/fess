@@ -42,9 +42,20 @@ async function unwrap(resp) {
   if (!env) throw new ApiError("PROTOCOL", "Missing response envelope", resp.status);
   if (env.status !== 0) {
     const err = env.error || {};
+    notifyPasswordChangeRequired(err.code);
     throw new ApiError(err.code || "UNKNOWN", err.message || "Unknown error", resp.status, err.details);
   }
   return env;
+}
+
+/**
+ * The session was opened with a password that must be changed, and the server serves it nothing else
+ * until then: tell auth.js (fess:auth:password-change-required), which asks for the change.
+ */
+function notifyPasswordChangeRequired(code) {
+  if (code === "password_change_required") {
+    document.dispatchEvent(new CustomEvent("fess:auth:password-change-required"));
+  }
 }
 
 function qs(params) {
@@ -228,6 +239,7 @@ export function sseStream(path, body, onEvent, onError) {
           details = env.error.details;
         }
       } catch { /* ignore parse failure */ }
+      notifyPasswordChangeRequired(code);
       if (onError) onError(new ApiError(code, message, resp.status, details));
       return;
     }
