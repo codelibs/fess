@@ -2,8 +2,6 @@
 
 Thank you for your interest in contributing to Fess. This document explains how to get help, report problems, and send changes.
 
-By participating in this project, you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
-
 ## Asking Questions
 
 - Documentation: [fess.codelibs.org](https://fess.codelibs.org/)
